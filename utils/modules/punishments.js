@@ -1,28 +1,13 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { active, setup } = require('./mongodb-schemas')
-const reminders = require('./modules/reminders')
-const polls = require('./modules/polls')
-const reactionRoles = require('./modules/reaction-roles')
-
-const auditLogs = require('./logs/audit-logs')
-const botLogs = require('./logs/bot-logs')
+const { active, setup } = require('../mongodb-schemas')
 
 /**
- * Handler function for every module.
+ * This module manages expired punishments.
  * @param {CommandoClient} client
- **/
+ */
 module.exports = (client) => {
-    polls(client)
-    reactionRoles(client)
-    reminders(client)
-
-    auditLogs(client)
-    botLogs(client)
-
-    // Active Moderations
-    /** This function looks up on every registered moderation to check if any of them expired. */
-    async function checkForMods() {
+    async function checkPunishments() {
         const query = { duration: { $lte: Date.now() } }
         const mods = await active.find(query)
 
@@ -58,7 +43,8 @@ module.exports = (client) => {
         }
 
         await active.deleteMany(query)
-        setTimeout(checkForMods, 1000)
+        setTimeout(checkPunishments, 5 * 1000)
     }
-    checkForMods()
+
+    checkPunishments()
 }

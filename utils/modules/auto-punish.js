@@ -1,12 +1,12 @@
 const { CommandoClient } = require('discord.js-commando')
-const { ms } = require('./custom-ms')
-const { isMod, mute, kick, tempban, ban, moduleStatus } = require('./functions')
-const { moderations, modules } = require('./mongodb-schemas')
+const { ms } = require('../custom-ms')
+const { isMod, mute, kick, tempban, ban, moduleStatus } = require('../functions')
+const { moderations, modules } = require('../mongodb-schemas')
 
 /**
- * This function performs automatic punishments according to the amount of warnings a member has
+ * This module manages automatic punishments, related to the warns of the user.
  * @param {CommandoClient} client
- **/
+ */
 module.exports = (client) => {
     async function checkWarns() {
         const warns = await moderations.find({ type: 'warn' })

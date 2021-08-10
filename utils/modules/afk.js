@@ -1,11 +1,11 @@
 const { MessageEmbed } = require('discord.js')
-const { afk } = require('./mongodb-schemas')
-const { basicEmbed, fetchPartial } = require('./functions')
+const { afk } = require('../mongodb-schemas')
+const { basicEmbed, fetchPartial } = require('../functions')
 const { CommandoClient, CommandoMessage } = require('discord.js-commando')
-const { toNow } = require('./custom-ms')
+const { toNow } = require('../custom-ms')
 
 /**
- * This function handles `!afk`'s timeouts and mentions.
+ * This module manages `!afk`'s timeouts and mentions.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
@@ -25,7 +25,7 @@ module.exports = (client) => {
 
         message.say(basicEmbed('green', '', `Welcome back ${author.toString()}, I removed your AFK status.`))
             .then(msg =>
-                msg.delete({ timeout: 10000 }).catch(() => null)
+                msg.delete({ timeout: 10 * 1000 }).catch(() => null)
             )
     })
 

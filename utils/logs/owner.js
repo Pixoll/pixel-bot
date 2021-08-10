@@ -3,7 +3,7 @@ const { MessageEmbed } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('discord.js-commando')
 
 /**
- * This function handles all of the main bot logs.
+ * Handles all of the owner logs.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {

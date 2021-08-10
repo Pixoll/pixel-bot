@@ -7,9 +7,8 @@ const { reminders } = require('../mongodb-schemas')
 /**
  * This module manages reminders.
  * @param {CommandoClient} client
- **/
+ */
 module.exports = (client) => {
-    /** Sends the reminders that expired. */
     async function sendReminders() {
         const query = { remindAt: { $lte: Date.now() } }
         const data = await reminders.find(query)
@@ -37,7 +36,7 @@ module.exports = (client) => {
         }
 
         await reminders.deleteMany(query)
-        setTimeout(sendReminders, 1000)
+        setTimeout(sendReminders, 1 * 1000)
     }
 
     sendReminders()

@@ -5,9 +5,8 @@ const { polls } = require('../mongodb-schemas')
 /**
  * This module manages polls.
  * @param {CommandoClient} client
- **/
+ */
 module.exports = (client) => {
-    /** Ends all expired polls. */
     async function endPolls() {
         const query = { endsAt: { $lte: Date.now() } }
         const pollsData = await polls.find(query)
@@ -55,7 +54,7 @@ module.exports = (client) => {
         }
 
         await polls.deleteMany(query)
-        setTimeout(endPolls, 5000)
+        setTimeout(endPolls, 5 * 1000)
     }
 
     endPolls()

@@ -1,9 +1,12 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus } = require('./functions')
-const { welcome, modules } = require('./mongodb-schemas')
+const { moduleStatus } = require('../functions')
+const { welcome, modules } = require('../mongodb-schemas')
 
-/** @param {CommandoClient} client */
+/**
+ * This module manages welcome messages.
+ * @param {CommandoClient} client
+ */
 module.exports = (client) => {
     client.on('guildMemberAdd', async ({ guild, user }) => {
         const status = await moduleStatus(modules, guild, 'welcome')

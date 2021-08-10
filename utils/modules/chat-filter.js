@@ -1,13 +1,13 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { ms } = require('./custom-ms')
-const { isMod, validURL, docID } = require('./functions')
-const { moderations, active, setup, modules } = require('./mongodb-schemas')
+const { ms } = require('../custom-ms')
+const { isMod, validURL, docID } = require('../functions')
+const { moderations, active, setup, modules } = require('../mongodb-schemas')
 
 /**
- * This function filters the chat, maintaining it clear and moderating it for you.
+ * This module manages the chat filter.
  * @param {CommandoClient} client
- **/
+ */
 module.exports = (client) => {
     client.on('message', async message => {
         if (!message.guild || message.author.bot || isMod(message.member)) return

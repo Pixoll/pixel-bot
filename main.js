@@ -8,11 +8,7 @@ const path = require('path')
 require('dotenv').config()
 
 // Modules handler
-const handler = require('./utils/handler')
-const AFK = require('./utils/afk')
-const autoPunish = require('./utils/auto-punish')
-const chatFilter = require('./utils/chat-filter')
-const welcome = require('./utils/welcome')
+const eventsHandler = require('./utils/events-handler')
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -47,7 +43,7 @@ client.on('ready', async () => {
 
     await mongo().then(console.log('Connected to MongoDB!'))
 
-    AFK(client), autoPunish(client), chatFilter(client), handler(client), welcome(client)
+    eventsHandler(client)
 
     await owner.send('Debug message: Bot is online.')
 })

@@ -1,5 +1,5 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, GuildMember, User, Role, Emoji, GuildEmoji, PermissionResolvable } = require('discord.js')
+const { MessageEmbed, GuildMember, User, Role, Emoji, GuildEmoji, PermissionResolvable, TextChannel } = require('discord.js')
 const { CommandoClient, CommandoGuild, Command, CommandoMessage } = require('discord.js-commando')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { ms } = require('./custom-ms')
@@ -35,6 +35,18 @@ async function fetchPartial(object) {
     const check = subModule ? data?.[module]?.[subModule] : data?.[module]
     const status = typeof check === 'boolean' && !check
     return !status
+}
+
+/**
+ * Gets the audit-logs channel
+ * @param {*} db The database to look into
+ * @param {CommandoGuild} guild The guild to look into
+ */
+ async function getLogsChannel(db, guild) {
+    const data = await db.findOne({ guild: guild.id })
+    /** @type {TextChannel} */
+    const channel = guild.channels.cache.get(data?.logsChannel)
+    return channel
 }
 
 /**
@@ -696,6 +708,7 @@ exports.generateEmbed = generateEmbed
 exports.getDateDiff = getDateDiff
 exports.getDayDiff = getDayDiff
 exports.getKeyPerms = getKeyPerms
+exports.getLogsChannel = getLogsChannel
 exports.isMod = isMod
 exports.kick = kick
 exports.moduleStatus = moduleStatus

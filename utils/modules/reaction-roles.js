@@ -6,9 +6,8 @@ const { reactionRoles } = require('../mongodb-schemas')
 /**
  * This module manages reaction roles.
  * @param {CommandoClient} client
- **/
+ */
 module.exports = (client) => {
-    /** Looks up for missing data and deletes it. */
     async function getReactionRoles() {
         const rRoles = await reactionRoles.find({})
         if (rRoles.length === 0) return
