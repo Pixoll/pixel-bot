@@ -145,9 +145,11 @@ function toNow(earlier, showIn) {
     return `${returnString + Math.round(duration / 365)} years`
 }
 
-exports.ms = ms
-exports.Duration = Duration
-exports.toNow = toNow
+module.exports = {
+    Duration,
+    ms,
+    toNow
+}
 
 /**
  * Parses the string into milliseconds

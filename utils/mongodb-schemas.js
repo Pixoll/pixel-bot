@@ -17,6 +17,19 @@ const afk = model('afk', Schema({
     status: String
 }, { timestamps: true }), 'afk')
 
+const disabled = model('disabled', Schema({
+    guild: String,
+    commands: Array,
+    groups: Array
+}), 'disabled')
+
+const faq = model('faq', Schema({
+    list: [{
+        question: String,
+        answer: String
+    }]
+}), 'faq')
+
 const moderations = model('moderations', Schema({
     _id: String,
     type: String,
@@ -27,68 +40,12 @@ const moderations = model('moderations', Schema({
     duration: String
 }, { timestamps: true }))
 
-const reminders = model('reminders', Schema({
-    user: String,
-    reminder: String,
-    remindAt: Number,
-    link: String,
-    message: String,
-    channel: String
-}, { timestamps: true }))
-
-const prefixes = model('prefixes', Schema({
-    global: Boolean,
+const mcIP = model('mc-ips', Schema({
     guild: String,
-    prefix: String
+    type: String,
+    ip: String,
+    port: Number
 }))
-
-const roles = model('roles', Schema({
-    guild: String,
-    user: String,
-    roles: Array
-}))
-
-const polls = model('polls', Schema({
-    guild: String,
-    channel: String,
-    message: String,
-    emojis: Array,
-    duration: String,
-    endsAt: Number
-}))
-
-const reactionRoles = model('reaction-roles', Schema({
-    guild: String,
-    channel: String,
-    message: String,
-    roles: Array,
-    emojis: Array
-}))
-
-const todo = model('todo-list', Schema({
-    user: String,
-    list: Array
-}), 'todo-list')
-
-const rules = model('rules', Schema({
-    guild: String,
-    rules: Array
-}))
-
-const setup = model('setup', Schema({
-    guild: String,
-    logsChannel: String,
-    memberRole: String,
-    botRole: String,
-    mutedRole: String,
-    lockChannels: Array
-}), 'setup')
-
-const disabled = model('disabled', Schema({
-    guild: String,
-    commands: Array,
-    groups: Array
-}), 'disabled')
 
 const modules = model('modules', Schema({
     guild: String,
@@ -109,12 +66,62 @@ const modules = model('modules', Schema({
     }
 }))
 
-const mcIP = model('mc-ips', Schema({
+const prefixes = model('prefixes', Schema({
+    global: Boolean,
     guild: String,
-    type: String,
-    ip: String,
-    port: Number
+    prefix: String
 }))
+
+const polls = model('polls', Schema({
+    guild: String,
+    channel: String,
+    message: String,
+    emojis: Array,
+    duration: String,
+    endsAt: Number
+}))
+
+const reactionRoles = model('reaction-roles', Schema({
+    guild: String,
+    channel: String,
+    message: String,
+    roles: Array,
+    emojis: Array
+}))
+
+const reminders = model('reminders', Schema({
+    user: String,
+    reminder: String,
+    remindAt: Number,
+    link: String,
+    message: String,
+    channel: String
+}, { timestamps: true }))
+
+const rules = model('rules', Schema({
+    guild: String,
+    rules: Array
+}))
+
+const setup = model('setup', Schema({
+    guild: String,
+    logsChannel: String,
+    memberRole: String,
+    botRole: String,
+    mutedRole: String,
+    lockChannels: Array
+}), 'setup')
+
+const stickyRoles = model('sticky-roles', Schema({
+    guild: String,
+    user: String,
+    roles: Array
+}))
+
+const todo = model('todo-list', Schema({
+    user: String,
+    list: Array
+}), 'todo-list')
 
 const welcome = model('welcome', Schema({
     guild: String,
@@ -123,26 +130,21 @@ const welcome = model('welcome', Schema({
     message: String
 }), 'welcome')
 
-const faq = model('faq', Schema({
-    list: [{
-        question: String,
-        answer: String
-    }]
-}), 'faq')
-
-exports.active = active
-exports.afk = afk
-exports.moderations = moderations
-exports.reminders = reminders
-exports.prefixes = prefixes
-exports.roles = roles
-exports.polls = polls
-exports.reactionRoles = reactionRoles
-exports.todo = todo
-exports.rules = rules
-exports.setup = setup
-exports.disabled = disabled
-exports.modules = modules
-exports.mcIP = mcIP
-exports.welcome = welcome
-exports.faq = faq
+module.exports = {
+    active,
+    afk,
+    disabled,
+    faq,
+    mcIP,
+    moderations,
+    modules,
+    prefixes,
+    polls,
+    reactionRoles,
+    reminders,
+    rules,
+    setup,
+    stickyRoles,
+    todo,
+    welcome
+}

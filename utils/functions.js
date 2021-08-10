@@ -692,33 +692,35 @@ function commandInfo(client, guild, command) {
     return embed
 }
 
-exports.arrayEquals = arrayEquals
-exports.arrayEqualsIgnoreOrder = arrayEqualsIgnoreOrder
-exports.ban = ban
-exports.basicEmbed = basicEmbed
-exports.capitalize = capitalize
-exports.commandInfo = commandInfo
-exports.customEmoji = customEmoji
-exports.difference = difference
-exports.docID = docID
-exports.fetchPartial = fetchPartial
-exports.findCommonElement = findCommonElement
-exports.formatDate = formatDate
-exports.formatPerm = formatPerm
-exports.formatTime = formatTime
-exports.generateEmbed = generateEmbed
-exports.getDateDiff = getDateDiff
-exports.getDayDiff = getDayDiff
-exports.getKeyPerms = getKeyPerms
-exports.getLogsChannel = getLogsChannel
-exports.isMod = isMod
-exports.kick = kick
-exports.moduleStatus = moduleStatus
-exports.mute = mute
-exports.pagedEmbed = pagedEmbed
-exports.pluralize = pluralize
-exports.remDiscFormat = remDiscFormat
-exports.sleep = sleep
-exports.sliceDots = sliceDots
-exports.tempban = tempban
-exports.validURL = validURL
+module.exports = {
+    arrayEquals,
+    arrayEqualsIgnoreOrder,
+    ban,
+    basicEmbed,
+    capitalize,
+    commandInfo,
+    customEmoji,
+    difference,
+    docID,
+    fetchPartial,
+    findCommonElement,
+    formatDate,
+    formatPerm,
+    formatTime,
+    generateEmbed,
+    getDateDiff,
+    getDayDiff,
+    getKeyPerms,
+    getLogsChannel,
+    isMod,
+    kick,
+    moduleStatus,
+    mute,
+    pagedEmbed,
+    pluralize,
+    remDiscFormat,
+    sleep,
+    sliceDots,
+    tempban,
+    validURL
+}

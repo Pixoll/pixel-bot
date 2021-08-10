@@ -3,7 +3,7 @@ const { MessageEmbed, GuildMember } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { ms } = require('../custom-ms')
 const { ban, moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
-const { roles: rolesDocs, setup, modules } = require('../mongodb-schemas')
+const { setup, modules } = require('../mongodb-schemas')
 
 /**
  * Handles all of the member logs.
@@ -12,9 +12,7 @@ const { roles: rolesDocs, setup, modules } = require('../mongodb-schemas')
 module.exports = (client) => {
     client.on('guildMemberAdd', async _member => {
         /** @type {GuildMember} */
-        const member = await fetchPartial(_member)
-
-        const { guild, user, roles } = member
+        const { guild, user } = await fetchPartial(_member)
 
         const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
         if (!status) return
@@ -42,23 +40,12 @@ module.exports = (client) => {
 
             return await ban(guild, client, user, 'Account is too young, possible raid threat.')
         }
-
-        const data = await setup.findOne({ guild: guild.id })
-
-        if (data?.memberRole && !user.bot) roles.add(data.memberRole)
-        if (data?.botRole && user.bot) roles.add(data.botRole)
-
-        const rolesData = await rolesDocs.findOne({ guild: guild.id, user: id })
-        if (!rolesData) return
-
-        for (const role of rolesData.roles) roles.add(role)
     })
 
     client.on('guildMemberRemove', async _member => {
         /** @type {GuildMember} */
-        const member = await fetchPartial(_member)
+        const { guild, user, roles, id } = await fetchPartial(_member)
 
-        const { guild, user, roles, id } = member
         if (!guild.available || id === client.user.id) return
 
         const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
@@ -102,22 +89,6 @@ module.exports = (client) => {
 
             logsChannel.send(kick)
         }
-
-        const data = await setup.findOne({ guild: guild.id })
-        const rolesData = await rolesDocs.findOne({ guild: guild.id, user: id })
-
-        const rolesArray = roles.cache.map(({ id }) => id).filter(id =>
-            id !== guild.id && ![data?.memberRole, data?.botRole].includes(id)
-        )
-
-        const doc = {
-            guild: guild.id,
-            user: id,
-            roles: rolesArray
-        }
-
-        if (!rolesData) await new rolesDocs(doc).save()
-        else await rolesData.updateOne({ roles: rolesArray })
     })
 
     client.on('guildMemberUpdate', async (_oldMember, _newMember) => {

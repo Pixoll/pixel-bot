@@ -23,6 +23,10 @@ const owner = require('./logs/owner')
 const roles = require('./logs/roles')
 const voice = require('./logs/voice')
 
+// Database
+const guildsData = require('./database/guilds')
+const membersData = require('./database/members')
+
 /**
  * Handler function for every module.
  * @param {CommandoClient} client
@@ -50,4 +54,8 @@ module.exports = (client) => {
     owner(client)
     roles(client)
     voice(client)
+
+    // Database
+    guildsData(client)
+    membersData(client)
 }

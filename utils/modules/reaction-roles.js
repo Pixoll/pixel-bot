@@ -29,8 +29,8 @@ module.exports = (client) => {
 
             /** @type {Message} */
             const message = await channel.messages.fetch(data.message, false, true).catch(() => null)
-            const reactions = message.reactions.cache
-            const commonEmojis = !!findCommonElement(reactions.map(({ emoji }) => emoji.id || emoji.name), data.emojis)
+            const reactions = message?.reactions.cache
+            const commonEmojis = !!findCommonElement(reactions?.map(({ emoji }) => emoji.id || emoji.name), data.emojis)
 
             if (!message || reactions.size === 0 || !commonEmojis) {
                 await data.deleteOne()
