@@ -12,7 +12,7 @@ module.exports = (client) => {
     client.on('inviteCreate', async invite => {
         const { guild, inviter, maxUses, expiresAt, temporary, channel } = invite
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'server')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'invites')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)
@@ -38,7 +38,7 @@ module.exports = (client) => {
     client.on('inviteDelete', async invite => {
         const { guild, channel } = invite
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'server')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'invites')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)
@@ -64,7 +64,7 @@ module.exports = (client) => {
         const { guild, author, isCommand, content, channel, url } = message
         if (!guild || author.bot || isCommand) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'misc')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'invites')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)

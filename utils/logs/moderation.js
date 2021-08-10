@@ -15,7 +15,7 @@ module.exports = (client) => {
         /** @type {User} */
         const user = await fetchPartial(_user)
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'moderation')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)
@@ -47,7 +47,7 @@ module.exports = (client) => {
         /** @type {User} */
         const user = await fetchPartial(_user)
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'moderation')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)

@@ -18,7 +18,7 @@ module.exports = (client) => {
 
         if (!guild || author.bot || !isCommand || command?.hidden || !isModCommand) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'misc')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'commands')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)

@@ -13,7 +13,7 @@ module.exports = class modules extends Command {
             description: stripIndent`
                 With this command you can toggle the different modules on and off.
                 These are the available modules: \`auto-mod\`, \`chat-filter\` \`welcome\`, \`audit-logs\` and \`all\`.
-                \`audit-logs\` has the sub-modules: \`channels\`, \`emojis\`, \`members\`, \`server\`, \`messages\`, \`roles\`, \`misc\` and \`all\`
+                \`audit-logs\` has the sub-modules: \`channels\`, \`commands\`, \`emojis\`, \`invites\`, \`members\`, \`messages\`, \`moderation\`, \`roles\`, \`server\`, \`voice\` and \`all\`
             `,
             format: stripIndent`
                 modules <module> - Toggle one or all modules.
@@ -56,7 +56,7 @@ module.exports = class modules extends Command {
 
         const data = await modulesDocs.findOne({ guild: guild.id })
         const { autoMod, chatFilter, welcome, auditLogs } = data || {}
-        const { channels, emojis, members, server, messages, roles, misc } = auditLogs || {}
+        const { channels, commands, emojis, invites, members, messages, moderation, roles, server, voice } = auditLogs || {}
 
         const isEnabled = module => module === false ? 'Disabled' : 'Enabled'
         const toggle = module => typeof module === 'undefined' ? false : !module
@@ -71,14 +71,18 @@ module.exports = class modules extends Command {
                     **>** **Welcome messages:** ${isEnabled(welcome)}
                     **>** **Audit logs:**
                     \u2800 ⤷ **Channels:** ${isEnabled(channels)}
+                    \u2800 ⤷ **Commands:** ${isEnabled(commands)}
                     \u2800 ⤷ **Emojis:** ${isEnabled(emojis)}
+                    \u2800 ⤷ **Invites:** ${isEnabled(invites)}
                     \u2800 ⤷ **Members:** ${isEnabled(members)}
-                    \u2800 ⤷ **Server:** ${isEnabled(server)}
                     \u2800 ⤷ **Messages:** ${isEnabled(messages)}
+                    \u2800 ⤷ **Moderation:** ${isEnabled(moderation)}
                     \u2800 ⤷ **Roles:** ${isEnabled(roles)}
-                    \u2800 ⤷ **Miscellaneous:** ${isEnabled(misc)}
+                    \u2800 ⤷ **Server:** ${isEnabled(server)}
+                    \u2800 ⤷ **Voice:** ${isEnabled(voice)}
                 `)
                 .setTimestamp()
+
             return message.say(disabled)
         }
 
@@ -90,12 +94,15 @@ module.exports = class modules extends Command {
                 welcome: toggle(welcome),
                 auditLogs: {
                     channels: toggle(channels),
+                    commands: toggle(commands),
                     emojis: toggle(emojis),
+                    invites: toggle(invites),
                     members: toggle(members),
-                    server: toggle(server),
                     messages: toggle(messages),
+                    moderation: toggle(moderation),
+                    server: toggle(server),
                     roles: toggle(roles),
-                    misc: toggle(misc)
+                    voice: toggle(voice)
                 }
             }
 
@@ -112,12 +119,15 @@ module.exports = class modules extends Command {
             welcome,
             auditLogs: {
                 channels,
+                commands,
                 emojis,
+                invites,
                 members,
-                server,
                 messages,
+                moderation,
+                server,
                 roles,
-                misc
+                voice
             }
         }
 

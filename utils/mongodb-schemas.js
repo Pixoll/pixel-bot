@@ -97,12 +97,15 @@ const modules = model('modules', Schema({
     welcome: Boolean,
     auditLogs: {
         channels: Boolean,
+        commands: Boolean,
         emojis: Boolean,
+        invites: Boolean,
         members: Boolean,
-        server: Boolean,
         messages: Boolean,
+        moderation: Boolean,
         roles: Boolean,
-        misc: Boolean
+        server: Boolean,
+        voice: Boolean
     }
 }))
 

@@ -11,7 +11,7 @@ module.exports = (client) => {
     client.on('voiceStateUpdate', async (oldState, newState) => {
         const { guild, member, id } = oldState
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'voice')
         if (!status) return
 
         const logsChannel = await getLogsChannel(setup, guild)
