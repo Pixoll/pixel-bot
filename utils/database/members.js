@@ -28,7 +28,7 @@ module.exports = (client) => {
         const { guild, id, roles } = await fetchPartial(_member)
 
         const data = await setup.findOne({ guild: guild.id })
-        const rolesData = await rolesDocs.findOne({ guild: guild.id, user: id })
+        const rolesData = await stickyRoles.findOne({ guild: guild.id, user: id })
 
         const rolesArray = roles.cache.filter(async ({ id, position }) => {
             const first = id !== guild.id
@@ -46,7 +46,7 @@ module.exports = (client) => {
             roles: rolesArray
         }
 
-        if (!rolesData) await new rolesDocs(doc).save()
+        if (!rolesData) await new stickyRoles(doc).save()
         else await rolesData.updateOne({ roles: rolesArray })
     })
 }
