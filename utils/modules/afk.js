@@ -12,7 +12,7 @@ module.exports = (client) => {
     client.on('message', async _message => {
         /** @type {CommandoMessage} */
         const message = await fetchPartial(_message)
-        
+
         const { guild, author, isCommand, command } = message
 
         if (!guild || author.bot) return

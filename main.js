@@ -77,11 +77,6 @@ client.once('ready', async () => {
     console.log('Disabled saved commands & groups')
 })
 
-client.on('message', message => {
-    if (!client.isOwner(message.author)) return
-    console.log(e)
-})
-
 // Command block handling
 client.on('commandBlock',
     /**
