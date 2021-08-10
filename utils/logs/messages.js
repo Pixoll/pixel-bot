@@ -46,16 +46,19 @@ module.exports = (client) => {
             `**${member.displayName}** pinned [**a message**](${url}) to this channel.` :
             _content
 
+        const authorData = author ? `**>** **Author:** ${author.toString()} ${author.tag}` : 'Couldn\'t fetch author.'
+        const authorID = author ? `Author ID: ${author.id}` : ''
+
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Deleted message', author.displayAvatarURL({ dynamic: true }))
+            .setAuthor('Deleted message', author?.displayAvatarURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Author:** ${author.toString()} ${author.tag}
+                ${authorData}
                 **>** **Channel:** ${channel.toString()} ${channel.name}
             `)
             .setFooter(stripIndent`
-                Author ID: ${author.id}
                 Message ID: ${id}
+                ${authorID}
             `)
             .setTimestamp()
 

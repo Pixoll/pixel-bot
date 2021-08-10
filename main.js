@@ -3,12 +3,10 @@ const { MessageEmbed } = require('discord.js')
 const { customEmoji, basicEmbed, formatPerm, sliceDots } = require('./utils/functions')
 const { prefixes, disabled } = require('./utils/mongodb-schemas')
 const { stripIndent } = require('common-tags')
+const eventsHandler = require('./utils/events-handler')
 const mongo = require('./mongo')
 const path = require('path')
 require('dotenv').config()
-
-// Modules handler
-const eventsHandler = require('./utils/events-handler')
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -37,7 +35,6 @@ client.registry
     .registerCommandsIn(path.join(__dirname, '/commands'))
 
 client.on('ready', async () => {
-    const owner = client.owners[0]
     const { username, tag } = client.user
     console.log(`${username} is online! => Logged in as ${tag}!`)
 
@@ -45,7 +42,7 @@ client.on('ready', async () => {
 
     eventsHandler(client)
 
-    await owner.send('Debug message: Bot is online.')
+    await client.owners[0].send('Debug message: Bot is online.')
 })
 
 // Mongo DB data loader
@@ -78,6 +75,11 @@ client.once('ready', async () => {
         }
     }
     console.log('Disabled saved commands & groups')
+})
+
+client.on('message', message => {
+    if (!client.isOwner(message.author)) return
+    console.log(e)
 })
 
 // Command block handling
@@ -119,8 +121,9 @@ client.on('commandBlock',
  * @param {CommandoMessage} message the message
  */
 function ownerErrorHandler(error, type, command, message) {
-    const stack = error.stack?.substr(error.message.length + 1)
-    const _stack = sliceDots(stack, 1024)
+    const lentgh = error.name.length + error.message.length + 3
+    const stack = error.stack?.substr(lentgh)
+    const _stack = sliceDots(stack, 1018)
 
     const messageLink = message ? `Please go to [this message](${message.url}) for more information.` : ''
     const whatCommand = command ? ` at '${command.name}' command` : ''

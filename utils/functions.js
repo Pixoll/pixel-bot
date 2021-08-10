@@ -207,9 +207,11 @@ function remDiscFormat(str) {
  * @param {string} string The string to slice
  * @param {number} length The length of the sliced string
  */
-function sliceDots(string = '', length) {
+function sliceDots(string, length) {
+    if (!string) return
+
     const og = string
-    const sliced = string?.slice(0, length - 3)
+    const sliced = string.slice(0, length - 3)
     const dots = og.length > sliced.length ? '...' : ''
 
     return sliced + dots
