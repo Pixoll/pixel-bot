@@ -10,9 +10,7 @@ const { stickyRoles, setup } = require('../mongodb-schemas')
 module.exports = (client) => {
     client.on('guildMemberAdd', async _member => {
         /** @type {GuildMember} */
-        const member = await fetchPartial(_member)
-
-        const { guild, user, roles } = member
+        const { guild, user, roles, id } = await fetchPartial(_member)
 
         const data = await setup.findOne({ guild: guild.id })
 
