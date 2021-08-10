@@ -10,10 +10,8 @@ require('dotenv').config()
 // Modules handler
 const handler = require('./utils/handler')
 const AFK = require('./utils/afk')
-const auditLogs = require('./utils/audit-logs')
 const autoPunish = require('./utils/auto-punish')
 const chatFilter = require('./utils/chat-filter')
-const botLogs = require('./utils/bot-logs')
 const welcome = require('./utils/welcome')
 
 const client = new CommandoClient({

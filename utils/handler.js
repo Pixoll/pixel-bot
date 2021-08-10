@@ -5,6 +5,9 @@ const reminders = require('./modules/reminders')
 const polls = require('./modules/polls')
 const reactionRoles = require('./modules/reaction-roles')
 
+const auditLogs = require('./logs/audit-logs')
+const botLogs = require('./logs/bot-logs')
+
 /**
  * Handler function for every module.
  * @param {CommandoClient} client
@@ -13,6 +16,9 @@ module.exports = (client) => {
     polls(client)
     reactionRoles(client)
     reminders(client)
+
+    auditLogs(client)
+    botLogs(client)
 
     // Active Moderations
     /** This function looks up on every registered moderation to check if any of them expired. */

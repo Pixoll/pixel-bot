@@ -1,9 +1,9 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel, GuildMember, Role, TextChannel, PermissionOverwrites, Invite, Message, User } = require('discord.js')
 const { CommandoClient, CommandoMessage, CommandoGuild } = require('discord.js-commando')
-const { ms } = require('./custom-ms')
-const { difference, capitalize, arrayEqualsIgnoreOrder, formatDate, ban, sliceDots, formatPerm, customEmoji, remDiscFormat, moduleStatus, pluralize, getKeyPerms, validURL, fetchPartial } = require('./functions')
-const { roles: rolesDocs, setup, modules } = require('./mongodb-schemas')
+const { ms } = require('../custom-ms')
+const { difference, capitalize, arrayEqualsIgnoreOrder, formatDate, ban, sliceDots, formatPerm, customEmoji, remDiscFormat, moduleStatus, pluralize, getKeyPerms, validURL, fetchPartial } = require('../functions')
+const { roles: rolesDocs, setup, modules } = require('../mongodb-schemas')
 
 /**
  * Gets the audit-logs channel
