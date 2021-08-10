@@ -15,13 +15,13 @@ const chatFilter = require('./utils/chat-filter')
 const welcome = require('./utils/welcome')
 
 const client = new CommandoClient({
-    commandPrefix: '!!',
+    commandPrefix: '!',
     owner: '667937325002784768',
     invite: 'https://discord.gg/Pc9pAHf3GU',
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     presence: {
         activity: {
-            name: 'for !!help',
+            name: 'for !help',
             type: 'WATCHING'
         }
     }
