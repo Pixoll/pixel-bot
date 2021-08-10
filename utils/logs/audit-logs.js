@@ -204,6 +204,7 @@ module.exports = (client) => {
         }
         if (type1 !== type2) embed.addField('Topic', `${capitalize(type1)} ➜ ${capitalize(type2)}`)
 
+        var checked
         if (permissions1.size !== permissions2.size) {
             const action = permissions1.size > permissions2.size ? 'Removed' : 'Added'
 
@@ -220,13 +221,14 @@ module.exports = (client) => {
             const name = remDiscFormat(target.name || target.user.tag)
 
             embed.addField(`${action} permissions`, `**>** **${capitalize(diff.type)}:** ${mention} ${name}`)
+
+            checked = true
         }
 
-        var checked
         for (const [, perms1] of permissions1) {
             const perms2 = permissions2.get(perms1.id)
             if (perms1.deny.bitfield === perms2?.deny.bitfield && perms1.allow.bitfield === perms2?.allow.bitfield) continue
-            if (checked) continue
+            if (checked) break
 
             /** @type {Role|GuildMember} */
             const target = guild[perms1.type + 's'].cache.get(perms1.id)

@@ -47,7 +47,7 @@ client.on('ready', async () => {
 
     await mongo().then(console.log('Connected to MongoDB!'))
 
-    AFK(client), auditLogs(client), autoPunish(client), chatFilter(client), botLogs(client), handler(client), welcome(client)
+    AFK(client), autoPunish(client), chatFilter(client), handler(client), welcome(client)
 
     await owner.send('Debug message: Bot is online.')
 })
