@@ -30,6 +30,7 @@ module.exports = (client) => {
     client.on('messageDelete', async _message => {
         /** @type {Message} */
         const message = await fetchPartial(_message)
+        if (!message.author) return
 
         const { guild, author, content, attachments, member, type, url, channel, id } = message
         if (!guild || author?.bot) return
@@ -46,19 +47,16 @@ module.exports = (client) => {
             `**${member.displayName}** pinned [**a message**](${url}) to this channel.` :
             _content
 
-        const authorData = author ? `**>** **Author:** ${author.toString()} ${author.tag}` : 'Couldn\'t fetch author.'
-        const authorID = author ? `Author ID: ${author.id}` : ''
-
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted message', author?.displayAvatarURL({ dynamic: true }))
             .setDescription(stripIndent`
-                ${authorData}
+                **>** **Author:** ${author.toString()} ${author.tag}
                 **>** **Channel:** ${channel.toString()} ${channel.name}
             `)
             .setFooter(stripIndent`
+                Author ID: ${author.id}
                 Message ID: ${id}
-                ${authorID}
             `)
             .setTimestamp()
 
