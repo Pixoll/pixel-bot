@@ -16,13 +16,7 @@ module.exports = class bans extends Command {
             `,
             clientPermissions: ['BAN_MEMBERS', 'MANAGE_MESSAGES'],
             userPermissions: ['BAN_MEMBERS'],
-            guildOnly: true,
-            args: [{
-                key: 'user',
-                prompt: 'What is the user you want to check a ban for?',
-                type: 'string',
-                default: ''
-            }]
+            guildOnly: true
         })
     }
 
@@ -31,10 +25,8 @@ module.exports = class bans extends Command {
 
     /**
      * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.user The user to look a ban for
      */
-    async run(message, { user }) {
+    async run(message) {
         const { guild } = message
 
         // gets all the bans in the server
@@ -54,23 +46,6 @@ module.exports = class bans extends Command {
             if (tagA > tagB) return 1
             return 0
         })
-
-        if (user) {
-            const matches = bansList.filter(({ tag, id }) => tag.toLowerCase().includes(user.toLowerCase()) || id === user).slice(0, 30)
-            if (matches.length === 0) return message.say(basicEmbed('red', 'cross', 'That user does not exist or is not banned.'))
-            if (matches.length > 1) return message.say(basicEmbed('red', 'cross', `Multiple ban cases found, please be more specific:`, matches.map(({ tag }) => `"${tag}"`).join(', ')))
-
-            const banCase = matches.shift()
-
-            const banEmbed = new MessageEmbed()
-                .setColor('#4c9f4c')
-                .setAuthor(`${guild.name}'s bans`, guild.iconURL({ dynamic: true }))
-                .addField(`Ban for ${banCase.tag}`, `**Reason:** ${banCase.reason}`)
-                .setFooter(`User ID: ${banCase.id}`)
-                .setTimestamp()
-
-            return message.say(banEmbed)
-        }
 
         // creates and sends a paged embed with the bans
         generateEmbed(message, bansList, {

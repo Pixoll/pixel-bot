@@ -57,7 +57,7 @@ module.exports = (client) => {
         const unbanLog = unbanLogs.entries.first()
         if (!unbanLog || unbanLog.action !== 'MEMBER_BAN_REMOVE') return
 
-        const { executor, reason } = banLog
+        const { executor, reason } = unbanLog
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
