@@ -308,8 +308,8 @@ function arrayEqualsIgnoreOrder(first, second) {
  * @returns {boolean}
  */
 function findCommonElement(first, second) {
-    for (var i = 0; i < first.length; i++) {
-        for (var j = 0; j < second.length; j++) {
+    for (var i = 0; i < first?.length; i++) {
+        for (var j = 0; j < second?.length; j++) {
             if (first[i] === second[j]) return true
         }
     }
