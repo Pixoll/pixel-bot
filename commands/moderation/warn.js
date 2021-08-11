@@ -45,6 +45,10 @@ module.exports = class warn extends Command {
     async run(message, { member, reason }) {
         const { guild, author } = message
         const { user } = member
+        const botID = this.client.user.id
+
+        if (member.id === botID) return message.say(basicEmbed('red', 'cross', 'You can\'t make me warn myself.'))
+        if (member.id === author.id) return message.say(basicEmbed('red', 'cross', 'You can\'t warn yourself.'))
 
         await member.send(basicEmbed('gold', '', `You have been warned on ${guild.name}`, stripIndent`
             **Reason:** ${reason}

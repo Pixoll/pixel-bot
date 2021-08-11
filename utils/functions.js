@@ -1,5 +1,5 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, GuildMember, User, Role, Emoji, GuildEmoji, PermissionResolvable, TextChannel, GuildChannel } = require('discord.js')
+const { MessageEmbed, GuildMember, User, Role, Emoji, GuildEmoji, PermissionResolvable, TextChannel, GuildChannel, Message } = require('discord.js')
 const { CommandoClient, CommandoGuild, Command, CommandoMessage } = require('discord.js-commando')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { ms } = require('./custom-ms')
@@ -539,11 +539,11 @@ function docID() {
  * @param {number} data.number The number of chunks of data to be displayed in one page.
  * @param {number} data.total The total chunks of data.
  * @param {(start: number) => Promise<MessageEmbed>} template The embed template to use.
- * @param {array} extra Extra data for the embed template. Has to be provided in order
- * @returns {MessageEmbed}
+ * @param {array} extra Extra data for the embed template.
+ * @param {Promise<Message>}
  */
 async function pagedEmbed(message, data, template, ...extra) {
-    message.say(await template(0, ...extra)).then(async msg => {
+    await message.say(await template(0, ...extra)).then(async msg => {
         if (data.total <= data.number) return
 
         // reacts with the navigation arrows
@@ -580,6 +580,7 @@ async function pagedEmbed(message, data, template, ...extra) {
         })
 
         collector.on('end', async reactions => {
+            if (!message.guild) return
             await msg.reactions.removeAll()
         })
     })
