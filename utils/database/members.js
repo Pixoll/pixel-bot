@@ -12,6 +12,8 @@ module.exports = (client) => {
         /** @type {GuildMember} */
         const { guild, user, roles, id } = await fetchPartial(_member)
 
+        if (id === client.user.id) return
+
         const data = await setup.findOne({ guild: guild.id })
 
         if (data?.memberRole && !user.bot) roles.add(data.memberRole).catch(() => null)
@@ -26,6 +28,8 @@ module.exports = (client) => {
     client.on('guildMemberRemove', async _member => {
         /** @type {GuildMember} */
         const { guild, id, roles } = await fetchPartial(_member)
+
+        if (id === client.user.id) return
 
         const data = await setup.findOne({ guild: guild.id })
         const rolesData = await stickyRoles.findOne({ guild: guild.id, user: id })

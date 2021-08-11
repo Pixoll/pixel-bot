@@ -11,7 +11,8 @@
     "lodash": "^4.17.21",
     "minecraft-server-util": "^3.5.2",
     "mongoose": "^5.12.14",
-    "require-all": "^3.0.0"
+    "require-all": "^3.0.0",
+    "why-is-node-running": "^2.2.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,7 +1,6 @@
 const { CommandoClient, CommandoMessage, Command } = require('discord.js-commando')
 const { MessageEmbed } = require('discord.js')
 const { customEmoji, basicEmbed, formatPerm, sliceDots } = require('./utils/functions')
-const { prefixes, disabled } = require('./utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 const eventsHandler = require('./utils/events-handler')
 const mongo = require('./utils/mongo/mongo')

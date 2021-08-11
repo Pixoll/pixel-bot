@@ -102,6 +102,7 @@ module.exports = (client) => {
                 `)
                 .setFooter(`Server ID: ${invGuild.id}`)
                 .setTimestamp()
+
             logsChannel.send(embed)
         }
     })

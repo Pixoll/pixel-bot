@@ -32,6 +32,8 @@ module.exports = class clean extends Command {
         if (!msg.author.bot) return await message.say(basicEmbed('red', 'cross', 'That message was not sent by the bot.'))
 
         await msg.delete()
-        await message.say(basicEmbed('green', 'check', 'Message deleted.'))
+        await message.say(basicEmbed('green', 'check', 'Message deleted.')).then(msg =>
+            msg.delete({ timeout: 5 * 1000 }).catch(() => null)
+        )
     }
 }
