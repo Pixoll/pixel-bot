@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus, fetchPartial } = require('../functions')
+const { moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
 const { setup, modules } = require('../mongo/schemas')
 
 /**
