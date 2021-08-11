@@ -4,6 +4,12 @@ const { Command, CommandoMessage } = require('discord.js-commando')
 const { basicEmbed } = require('../../utils/functions')
 const { modules: modulesDocs } = require('../../utils/mongo/schemas')
 
+const format = val => val.replace(/[A-Z]/g, '-$&').toLocaleLowerCase()
+
+const Obj = modulesDocs.schema.obj
+const Modules = [...Object.keys(Obj).slice(1), 'all'].map(format)
+const AuditLogs = [...Object.keys(Obj.auditLogs), 'all']
+
 module.exports = class modules extends Command {
     constructor(client) {
         super(client, {
@@ -28,14 +34,14 @@ module.exports = class modules extends Command {
                     key: 'module',
                     prompt: 'What module do you want to toggle?',
                     type: 'string',
-                    oneOf: ['auto-mod', 'chat-filter', 'welcome', 'audit-logs', 'all'],
+                    oneOf: Modules,
                     default: ''
                 },
                 {
                     key: 'subModule',
                     prompt: 'What sub-module of the audit logs do you want to toggle?',
                     type: 'string',
-                    oneOf: ['channels', 'commands', 'emojis', 'invites', 'members', 'messages', 'moderation', 'roles', 'server', 'voice', 'all'],
+                    oneOf: AuditLogs,
                     default: ''
                 }
             ]

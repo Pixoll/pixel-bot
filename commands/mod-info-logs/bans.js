@@ -48,13 +48,13 @@ module.exports = class bans extends Command {
         })
 
         // creates and sends a paged embed with the bans
-        generateEmbed(message, bansList, {
+        await generateEmbed(message, bansList, {
             authorName: `${guild.name}'s bans`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Ban for',
             boldText: true,
             hasObjects: true,
-            keyTitle: { name: 'tag' },
+            keyTitle: { suffix: 'tag' },
             keysExclude: ['tag', 'id']
         })
     }

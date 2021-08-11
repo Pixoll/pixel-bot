@@ -40,7 +40,7 @@ const moderations = model('moderations', Schema({
     duration: String
 }, { timestamps: true }))
 
-const mcIP = model('mc-ips', Schema({
+const mcIp = model('mc-ips', Schema({
     guild: String,
     type: String,
     ip: String,
@@ -135,7 +135,7 @@ module.exports = {
     afk,
     disabled,
     faq,
-    mcIP,
+    mcIp,
     moderations,
     modules,
     prefixes,

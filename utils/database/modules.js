@@ -10,7 +10,7 @@ module.exports = async (client) => {
     const Disabled = await disabled.find({})
 
     for (const data of Disabled) {
-        const guild = client.guilds.cache.get(data.guild)
+        const guild = await client.guilds.fetch(data.guild, false, true).catch(() => null)
 
         if (!guild) {
             await data.deleteOne()

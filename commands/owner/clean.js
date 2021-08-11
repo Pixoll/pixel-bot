@@ -10,7 +10,6 @@ module.exports = class clean extends Command {
             description: 'Delete a message in your DMs with the bot.',
             format: 'clean [msg]',
             examples: ['clean 12345678912345678'],
-            throttling: { usages: 1, duration: 3 },
             ownerOnly: true,
             args: [{
                 key: 'msg',

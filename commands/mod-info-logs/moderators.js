@@ -29,19 +29,19 @@ module.exports = class moderators extends Command {
             const rolesList = roles.cache.filter(role => isMod(role)).map(r => r).sort((a, b) => b.position - a.position)
             return {
                 tag: user.tag,
-                roles: rolesList,
-                list: rolesList.join(', ')
+                roles: [...rolesList || 'None'],
+                list: rolesList.join(', ') || 'None'
             }
-        }).sort((a, b) => b.roles[0].position - a.roles[0].position)
+        }).sort((a, b) => b.roles[0]?.position - a.roles[0]?.position)
 
-        generateEmbed(message, modsList, {
+        await generateEmbed(message, modsList, {
             number: 10,
             authorName: `${guild.name}'s moderators`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Roles of moderator',
             hasObjects: true,
             boldText: true,
-            keyTitle: { name: 'tag' },
+            keyTitle: { suffix: 'tag' },
             keysExclude: ['tag', 'roles']
         })
     }

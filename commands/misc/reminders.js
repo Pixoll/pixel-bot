@@ -24,14 +24,14 @@ module.exports = class reminders extends Command {
         if (!data || data.length === 0) return message.say(basicEmbed('blue', 'info', 'You have no active reminders.'))
 
         // creates and sends a paged embed with the reminders
-        generateEmbed(message, data, {
+        await generateEmbed(message, data, {
             authorName: `${message.author.username}'s reminders`,
             authorIconURL: message.author.displayAvatarURL({ dynamic: true }),
             title: 'Reminder set at',
             hasObjects: true,
             boldText: true,
-            keyTitle: { name: 'remindAt', isDate: true },
+            keyTitle: { suffix: 'remindAt', isDate: true },
             keys: ['reminder']
-        }, true)
+        })
     }
 }

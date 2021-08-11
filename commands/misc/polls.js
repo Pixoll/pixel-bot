@@ -26,7 +26,7 @@ module.exports = class polls extends Command {
         const pollsData = await pollsDocs.find({ guild: message.guild.id })
         if (!pollsData || pollsData.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no active polls.'))
 
-        generateEmbed(message, pollsData, {
+        await generateEmbed(message, pollsData, {
             number: 5,
             authorName: `${guild.name}'s polls`,
             authorIconURL: guild.iconURL({ dynamic: true }),
@@ -34,6 +34,6 @@ module.exports = class polls extends Command {
             hasObjects: true,
             boldText: true,
             keys: ['channel', 'duration', 'endsAt']
-        }, true)
+        })
     }
 }

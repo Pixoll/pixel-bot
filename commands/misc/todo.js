@@ -58,7 +58,7 @@ module.exports = class todo extends Command {
             if (!TODO || todoList.length === 0) return message.say(basicEmbed('blue', 'info', 'Your to-do list empty.'))
 
             // creates and returns the paged embed containing the to-do list
-            return generateEmbed(message, todoList, {
+            return await generateEmbed(message, todoList, {
                 number: 5,
                 authorName: `${author.username}'s to-do list`,
                 authorIconURL: author.displayAvatarURL({ dynamic: true }),

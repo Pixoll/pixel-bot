@@ -31,14 +31,14 @@ module.exports = class guilds extends Command {
         }))
 
         // creates and sends a paged embed with the bans
-        generateEmbed(message, guildsList, {
+        await generateEmbed(message, guildsList, {
             number: 6,
             authorName: `${this.client.user.username}'s guilds`,
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             title: 'Name:',
             boldText: true,
             hasObjects: true,
-            keyTitle: { name: 'name' },
+            keyTitle: { suffix: 'name' },
             keysExclude: ['name']
         })
     }

@@ -41,20 +41,21 @@ module.exports = class modlogs extends Command {
     async run(message, { user }) {
         const { guild } = message
 
-        const query = user ? { guild: guild.id, user: user.id } : { guild: guild.id }
+        const query = user ? { guild: guild.id, mod: user.id } : { guild: guild.id }
         const modLogs = await moderations.find(query)
         if (modLogs.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no moderation logs.'))
 
         const avatarURL = user ? user.displayAvatarURL({ dynamic: true }) : guild.iconURL({ dynamic: true })
 
-        generateEmbed(message, modLogs, {
+        await generateEmbed(message, modLogs, {
             authorName: `${user?.username || guild.name}'s moderation logs`,
             authorIconURL: avatarURL,
-            title: 'ID:',
+            title: ' | ID:',
             hasObjects: true,
             boldText: true,
-            keysExclude: ['__v', 'updatedAt', 'guild', '_id', user ? 'mod' : null],
+            keyTitle: { prefix: 'type' },
+            keysExclude: ['__v', 'updatedAt', 'type', 'guild', '_id', user ? 'mod' : null],
             useDocID: true
-        }, true)
+        })
     }
 }

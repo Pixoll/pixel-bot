@@ -2,8 +2,8 @@ const { Command, CommandoMessage } = require('discord.js-commando')
 const { MessageEmbed, MessageAttachment } = require('discord.js')
 const { status: java, statusBedrock: bedrock } = require('minecraft-server-util')
 const { remDiscFormat, basicEmbed } = require('../../utils/functions')
-const { mcIP } = require('../../utils/mongo/schemas')
-const { stripIndent, oneLine } = require('common-tags')
+const { mcIp } = require('../../utils/mongo/schemas')
+const { stripIndent } = require('common-tags')
 
 /**
  * makes sure the port is a valid value
@@ -144,7 +144,7 @@ module.exports = class mcstatus extends Command {
      */
     async run(message, { subCommand, serverIP, serverPort }) {
         // tries to get a saved server in the server where the command is used
-        const document = await mcIP.findOne({ guild: message.guild.id })
+        const document = await mcIp.findOne({ guild: message.guild.id })
 
         if (!subCommand) {
             if (!document) return message.say(basicEmbed('red', 'cross', 'You haven\'t saved a Minecraft server yet.'))
@@ -181,7 +181,7 @@ module.exports = class mcstatus extends Command {
             }
 
             // updates the saved server
-            if (!document) await new mcIP(newDoc).save()
+            if (!document) await new mcIp(newDoc).save()
             else await document.updateOne(newDoc)
 
             return message.say(basicEmbed('green', 'check', 'The Minecraft server address has been saved.', stripIndent`

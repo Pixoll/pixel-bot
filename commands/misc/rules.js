@@ -27,7 +27,7 @@ module.exports = class rules extends Command {
         if (!rules || rules.length === 0) return message.say(basicEmbed('blue', 'info', 'The are no saved rules for this server.'))
 
         // creates and sends the paged embed containing the rules
-        generateEmbed(message, rules, {
+        await generateEmbed(message, rules, {
             number: 5,
             authorName: `${message.guild.name}'s rules`,
             authorIconURL: message.guild.iconURL({ dynamic: true }),

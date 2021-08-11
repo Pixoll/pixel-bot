@@ -12,7 +12,7 @@ module.exports = async (client) => {
         if (data.global) client.commandPrefix = data.prefix
 
         else {
-            const guild = await client.guilds.fetch(data.guild, false, true)
+            const guild = await client.guilds.fetch(data.guild, false, true).catch(() => null)
 
             if (!guild) {
                 await data.deleteOne()

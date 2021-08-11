@@ -1,5 +1,5 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, GuildMember, User, Role, Emoji, GuildEmoji, PermissionResolvable, TextChannel } = require('discord.js')
+const { MessageEmbed, GuildMember, User, Role, Emoji, GuildEmoji, PermissionResolvable, TextChannel, GuildChannel } = require('discord.js')
 const { CommandoClient, CommandoGuild, Command, CommandoMessage } = require('discord.js-commando')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { ms } = require('./custom-ms')
@@ -30,7 +30,7 @@ async function fetchPartial(object) {
  * @param {string} module The module to check
  * @param {string} [subModule] The sub-module to check
  */
- async function moduleStatus(db, guild, module, subModule) {
+async function moduleStatus(db, guild, module, subModule) {
     const data = await db.findOne({ guild: guild.id })
     const check = subModule ? data?.[module]?.[subModule] : data?.[module]
     const status = typeof check === 'boolean' && !check
@@ -42,7 +42,7 @@ async function fetchPartial(object) {
  * @param {*} db The database to look into
  * @param {CommandoGuild} guild The guild to look into
  */
- async function getLogsChannel(db, guild) {
+async function getLogsChannel(db, guild) {
     const data = await db.findOne({ guild: guild.id })
     /** @type {TextChannel} */
     const channel = guild.channels.cache.get(data?.logsChannel)
@@ -538,38 +538,49 @@ function docID() {
  * @param {object} data The number of pages the embed should have.
  * @param {number} data.number The number of chunks of data to be displayed in one page.
  * @param {number} data.total The total chunks of data.
- * @param {() => MessageEmbed} template The embed template to use.
+ * @param {(start: number) => Promise<MessageEmbed>} template The embed template to use.
  * @param {array} extra Extra data for the embed template. Has to be provided in order
  * @returns {MessageEmbed}
  */
-function pagedEmbed(message, data, template, ...extra) {
-    message.say(template(0, ...extra)).then(msg => {
+async function pagedEmbed(message, data, template, ...extra) {
+    message.say(await template(0, ...extra)).then(async msg => {
         if (data.total <= data.number) return
 
         // reacts with the navigation arrows
-        if (!message.guild) msg.react('⬅️')
-        msg.react('➡️')
+        await msg.react('⬅️')
+        await msg.react('➡️')
 
         // creates a collector for the reactions
         const collector = msg.createReactionCollector((reaction, user) => {
             return ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id
         }, { time: 60000 })
+
         var index = 0
 
-        collector.on('collect', async ({ emoji }) => {
-            if (message.guild) await msg.reactions.removeAll()
+        collector.on('collect', async reaction => {
+            if (message.guild) {
+                const react = msg.reactions.resolve(reaction)
+                await react.users.remove(message.author).catch(() => null)
+            }
 
             // goes down a page if the reaction is ⬅️, and up in the opposite case
-            if (emoji.name === '⬅️') index -= data.number
-            else index += data.number
+            if (reaction.emoji.name === '⬅️') {
+                if (index === 0) return
+                index -= data.number
+            }
+            else {
+                if (index + data.number >= data.total) return
+                index += data.number
+            }
+
+            await msg.edit(basicEmbed('gold', 'loading', 'Loading data...'))
 
             // edits the message with the new page
-            msg.edit(template(index, ...extra))
+            await msg.edit(await template(index, ...extra))
+        })
 
-            if (!message.guild) return
-
-            if (index > 0) await msg.react('⬅️')
-            if (index + data.number < data.total) msg.react('➡️')
+        collector.on('end', async reactions => {
+            await msg.reactions.removeAll()
         })
     })
 }
@@ -587,23 +598,23 @@ function pagedEmbed(message, data, template, ...extra) {
  * @param {boolean} [data.useDescription] Whether to use `setDescription()` or not
  * @param {boolean} [data.inLine] Whether the data should be displayed inline in the embed
  * @param {boolean} [data.hasObjects] Whether `array` contains objects inside or not
- * @param {boolean} [data.boldText] Whether to use bold text for the properties or not, effect visible only if `data.hasObjects` is `true`
  * @param {object} [data.keyTitle] A custom key data to use from the nested objects on the title
- * @param {string} [data.keyTitle.name] The name of the key
+ * @param {string} [data.keyTitle.suffix] The name of the key to use as a suffix
+ * @param {string} [data.keyTitle.prefix] The name of the key to use as a prefix
  * @param {boolean} [data.keyTitle.isDate] Whether `data.keyTitle.name` is a date or not
  * @param {string[]} [data.keys] The properties to display in the embed. If empty I will use every property
  * @param {string[]} [data.keysExclude] The properties to exclude on the embed. If empty I will use `data.keys` or every property
  * @param {string} [data.useDocID] Whether to use the document's ID on each data chunk
- * @param {boolean} [isDoc] Whether the provided the data comes from a MongoDB document or not
- * @returns {MessageEmbed}
  */
-function generateEmbed(message, array, data, isDoc) {
-    const { number = 6, color = '#4c9f4c', authorName, authorIconURL, useDescription, title = '', inLine, hasObjects, boldText, keyTitle, keys, keysExclude = [], useDocID } = data
+async function generateEmbed(message, array, data) {
+    const { number = 6, color = '#4c9f4c', authorName, authorIconURL, useDescription, title = '', inLine, hasObjects, keyTitle, keys, keysExclude = [], useDocID } = data
 
     if (array.length === 0) throw new Error('array cannot be empty')
     if (!authorName) throw new Error('authorName cannot be undefined or empty')
 
-    function createEmbed(start) {
+    const msg = await message.say(basicEmbed('gold', 'loading', 'Loading data...'))
+
+    async function createEmbed(start) {
         const pages = Math.trunc(array.length / number) + ((array.length / number) % 1 === 0 ? 0 : 1)
         const current = array.slice(start, start + number)
 
@@ -615,24 +626,52 @@ function generateEmbed(message, array, data, isDoc) {
 
         if (useDescription) return embed.setDescription(current)
 
-        function bold(str) { return `**${str}**` }
-        function code(str) { return `\`${str}\`` }
+        const { users, channels } = message.client
 
-        current.forEach((item, i) => {
-            const objKeys = hasObjects ? Object.keys(isDoc ? item._doc : item).filter(key => (keys ? keys.includes(key) : key) && (!keysExclude.includes(key))) : null
-            embed.addField(
-                `${title} ${useDocID && isDoc ? item._doc._id : keyTitle ? (keyTitle.isDate ? formatDate(item[keyTitle.name]) : item[keyTitle.name]) : start + i + 1}`,
-                objKeys ? objKeys.map(key =>
-                    objKeys.length > 1 ? `**>** ${boldText ? bold(capitalize(isDoc ? key.replace('createdAt', 'date') : key)) : capitalize(isDoc ? key.replace('createdAt', 'date') : key)}: ${isDoc ? (key === 'type' ? (boldText ? capitalize(item[key]) : code(capitalize(item[key]))) : ['mod', 'user'].includes(key) ? `<@${item[key]}>` : key === 'createdAt' ? (boldText ? formatDate(item[key]) : code(formatDate(item[key]))) : key === 'channel' ? `<#${item[key]}>` : key === 'duration' && Number(item[key]) ? (boldText ? ms(item[key], { long: true }) : code(ms(item[key], { long: true }))) : key === 'timeout' ? `\`${formatDate(item[key])} (in ${getDateDiff(item[key]).slice(0, 2).join(' and ').toLowerCase()})\`` : (boldText ? item[key] : code(item[key]))) : typeof (item[key]) === 'object' ? item[key] : (boldText ? item[key] : code(item[key]))}` : typeof (item[key]) === 'object' ? item[key] : (boldText ? item[key] : code(item[key]))
-                ).join('\n') : item,
-                inLine
-            )
-        })
+        var index = 0
+        for (const item of current) {
+            const objFilter = key => (keys ? keys.includes(key) : key) && !keysExclude.includes(key)
+            const objKeys = hasObjects ? Object.keys(item._doc || item).filter(objFilter) : null
+
+            const docID = useDocID ? item._doc._id : ''
+            const suffix = capitalize(item[keyTitle?.prefix] || '')
+            const prefix = docID || formatDate(item[keyTitle?.suffix] / 1) || item[keyTitle?.suffix] || start + index + 1
+
+            const value = []
+            for (const key of objKeys) {
+                if (objKeys.length === 1) {
+                    value.push(item[key])
+                    break
+                }
+
+                const propName = capitalize(key.replace('createdAt', 'date'))
+
+                /** @type {User} */
+                const user = ['mod', 'user'].includes(key) ? await users.fetch(item[key], false, true).catch(() => null) : ''
+                const userString = user ? `${user.toString()} ${user.tag}` : ''
+
+                /** @type {GuildChannel} */
+                const channel = key === 'channel' ? await channels.fetch(item[key], false, true).catch(() => null) : ''
+                const channelString = channel ? `${channel.toString()} ${channel.name}` : ''
+
+                const created = key === 'createdAt' ? formatDate(item[key]) : ''
+                const duration = key === 'duration' && Number(item[key]) ? ms(item[key], { long: true, length: 2, showAnd: true }) : ''
+                const endsAt = key === 'endsAt' ? `\`${formatDate(item[key])} (in ${getDateDiff(item[key]).slice(0, 2).join(' and ').toLowerCase()})\`` : ''
+
+                const docData = userString || channelString || created || duration || endsAt || item[key]
+
+                value.push(`**>** **${propName}:** ${docData}`)
+            }
+
+            embed.addField(`${suffix} ${title} ${prefix}`, value || item, inLine)
+            index++
+        }
 
         return embed
     }
 
-    pagedEmbed(message, { number, total: array.length }, createEmbed)
+    await pagedEmbed(message, { number, total: array.length }, createEmbed)
+    await msg.delete().catch(() => null)
 }
 
 /**

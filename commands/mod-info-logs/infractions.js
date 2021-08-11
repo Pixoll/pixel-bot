@@ -36,14 +36,15 @@ module.exports = class infractions extends Command {
         const mods = await moderations.find({ guild: message.guild.id, user: user.id })
         if (mods.length < 1) return message.say(basicEmbed('blue', 'info', 'That user has no infractions.'))
 
-        generateEmbed(message, mods, {
+        await generateEmbed(message, mods, {
             authorName: `${user.username}'s infractions`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
-            title: 'ID:',
+            title: ' |  ID:',
             hasObjects: true,
             boldText: true,
-            keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'user'],
+            keyTitle: { prefix: 'type' },
+            keysExclude: ['__v', 'updatedAt', 'type', 'guild', '_id', 'user'],
             useDocID: true
-        }, true)
+        })
     }
 }

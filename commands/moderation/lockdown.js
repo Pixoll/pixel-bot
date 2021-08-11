@@ -97,7 +97,7 @@ module.exports = class lockdown extends Command {
         if (channelsData.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no lockdown channels, please use the `add` sub-command to add some.'))
 
         if (subCommand === 'channels') {
-            return generateEmbed(message, channelsData, {
+            return await generateEmbed(message, channelsData, {
                 number: 20,
                 authorName: `${guild.name}'s lockdown channels`,
                 authorIconURL: guild.iconURL({ dynamic: true }),

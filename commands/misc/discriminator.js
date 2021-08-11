@@ -31,12 +31,12 @@ module.exports = class discriminator extends Command {
      * @param {object} args The arguments
      * @param {number} args.discriminator The discriminator to filter displayed members
      */
-    run(message, { discriminator: discrim }) {
+     async run(message, { discriminator: discrim }) {
         // looks for members matching 'discrim' and returns if found none
         const match = message.guild.members.cache.filter(({ user: { discriminator } }) => parseInt(discriminator) === discrim).map(member => member)
         if (match.length === 0) return message.say(basicEmbed('red', 'cross', 'I couldn\'t find any members.'))
 
-        generateEmbed(message, match, {
+        await generateEmbed(message, match, {
             number: 20,
             color: 'random',
             authorName: 'Matched members',

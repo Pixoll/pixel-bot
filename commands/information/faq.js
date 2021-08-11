@@ -57,14 +57,14 @@ module.exports = class faq extends Command {
             }
 
             // creates and returns the paged embed containing the FAQ list
-            return generateEmbed(message, faqList, {
+            return await generateEmbed(message, faqList, {
                 number: 5,
                 authorName: 'Frequently asked questions',
                 authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
                 hasObjects: true,
                 keys: ['answer'],
                 boldText: true,
-                keyTitle: { name: 'question' }
+                keyTitle: { suffix: 'question' }
             }, true)
         }
 

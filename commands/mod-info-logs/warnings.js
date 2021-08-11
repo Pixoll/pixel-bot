@@ -48,7 +48,7 @@ module.exports = class warnings extends Command {
 
         const avatarURL = user ? user.displayAvatarURL({ dynamic: true }) : guild.iconURL({ dynamic: true })
 
-        generateEmbed(message, warns, {
+        await generateEmbed(message, warns, {
             authorName: `${user?.username || guild.name}'s warnings`,
             authorIconURL: avatarURL,
             title: 'ID:',
@@ -56,6 +56,6 @@ module.exports = class warnings extends Command {
             boldText: true,
             keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'type', user ? 'user' : null],
             useDocID: true
-        }, true)
+        })
     }
 }

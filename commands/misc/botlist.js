@@ -17,11 +17,11 @@ module.exports = class botlist extends Command {
     onError() { return }
 
     /** @param {CommandoMessage} message */
-    run(message) {
+    async run(message) {
         // gets a list of the bots in the server
         const botList = message.guild.members.cache.filter(({ user: { bot } }) => bot).map(bot => bot)
 
-        generateEmbed(message, botList, {
+        await generateEmbed(message, botList, {
             number: 20,
             color: 'random',
             authorName: 'Bot list',

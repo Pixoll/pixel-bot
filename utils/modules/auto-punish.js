@@ -12,7 +12,7 @@ module.exports = (client) => {
         const warns = await moderations.find({ type: 'warn' })
 
         for (const warn of warns) {
-            const guild = await client.guilds.fetch(warn.guild, false, true)
+            const guild = await client.guilds.fetch(warn.guild, false, true).catch(() => null)
             if (!guild) continue
 
             const status = await moduleStatus(modules, guild, 'autoMod')

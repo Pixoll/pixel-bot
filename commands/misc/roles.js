@@ -35,7 +35,7 @@ module.exports = class roles extends Command {
      * @param {object} args The arguments
      * @param {GuildMember} args.member The member to get the roles from
      */
-    run(message, { member }) {
+     async run(message, { member }) {
         const { guild } = message
         const rolesCache = member.roles?.cache.filter(({ id }) => id !== message.guild.id) || guild.roles.cache.filter(({ id }) => id !== message.guild.id)
         const name = member.user?.username || guild.name
@@ -43,7 +43,7 @@ module.exports = class roles extends Command {
 
         const roles = !!rolesCache.size ? rolesCache.map(role => role).sort((a, b) => b.position - a.position) : ['This member has no roles.']
 
-        generateEmbed(message, roles, {
+        await generateEmbed(message, roles, {
             number: 20,
             authorName: `${name}'s roles`,
             authorIconURL: avatar,

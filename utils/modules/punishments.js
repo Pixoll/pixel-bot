@@ -12,7 +12,7 @@ module.exports = (client) => {
         const mods = await active.find(query)
 
         for (const mod of mods) {
-            const guild = client.guilds.cache.get(mod.guild)
+            const guild = await client.guilds.fetch(mod.guild, false, true).catch(() => null)
             if (!guild) continue
 
             const user = await client.users.fetch(mod.user, false, true).catch(() => null)

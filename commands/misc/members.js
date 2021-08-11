@@ -35,7 +35,7 @@ module.exports = class members extends Command {
         // gets the members in the role
         const memebrs = role.members.map(member => member)
 
-        generateEmbed(message, memebrs, {
+        await generateEmbed(message, memebrs, {
             number: 20,
             authorName: `Members in ${role.name}`,
             authorIconURL: message.guild.iconURL({ dynamic: true }),

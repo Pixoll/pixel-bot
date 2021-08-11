@@ -32,12 +32,12 @@ module.exports = class invites extends Command {
             code: code
         })).sort((a, b) => b.uses - a.uses)
 
-        generateEmbed(message, invitesList, {
+        await generateEmbed(message, invitesList, {
             authorName: `${guild.name}'s invites`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             hasObjects: true,
             boldText: true,
-            keyTitle: { name: 'link' },
+            keyTitle: { suffix: 'link' },
             keysExclude: ['link']
         })
     }

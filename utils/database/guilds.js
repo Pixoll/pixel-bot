@@ -1,5 +1,5 @@
 const { CommandoClient } = require('discord.js-commando')
-const { active, afk, disabled, mcIP, modules, prefixes, polls, reactionRoles, rules, setup, stickyRoles, welcome } = require('../mongo/schemas')
+const { active, afk, disabled, mcIp, modules, prefixes, polls, reactionRoles, rules, setup, stickyRoles, welcome } = require('../mongo/schemas')
 
 /**
  * Handles database behaviour in guild events.
@@ -36,7 +36,7 @@ module.exports = (client) => {
             const Active = await active.find({})
             const Afk = await afk.find({})
             const Disabled = await disabled.find({})
-            const McIP = await mcIP.find({})
+            const McIp = await mcIp.find({})
             const Modules = await modules.find({})
             const Prefix = await prefixes.find({})
             const Polls = await polls.find({})
@@ -49,7 +49,7 @@ module.exports = (client) => {
             const notActive = Active.filter(filter)
             const notAfk = Afk.filter(filter)
             const notDisabled = Disabled.filter(filter)
-            const notMcIP = McIP.filter(filter)
+            const notMcIp = McIp.filter(filter)
             const notModules = Modules.filter(filter)
             const notPrefix = Prefix.filter(({ guild, global }) => !guilds.includes(guild) && !global)
             const notPolls = Polls.filter(filter)
@@ -62,7 +62,7 @@ module.exports = (client) => {
             for (const doc of notActive) await doc.deleteOne()
             for (const doc of notAfk) await doc.deleteOne()
             for (const doc of notDisabled) await doc.deleteOne()
-            for (const doc of notMcIP) await doc.deleteOne()
+            for (const doc of notMcIp) await doc.deleteOne()
             for (const doc of notModules) await doc.deleteOne()
             for (const doc of notPrefix) await doc.deleteOne()
             for (const doc of notPolls) await doc.deleteOne()
