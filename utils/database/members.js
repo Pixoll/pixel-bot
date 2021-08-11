@@ -1,7 +1,7 @@
 const { GuildMember } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { fetchPartial } = require('../functions')
-const { stickyRoles, setup } = require('../mongodb-schemas')
+const { stickyRoles, setup } = require('../mongo/schemas')
 
 /**
  * Handles database behaviour in member events.

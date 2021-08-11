@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { Duration, toNow } = require('../../utils/custom-ms')
 const { basicEmbed, formatTime, customEmoji } = require('../../utils/functions')
-const { reminders } = require('../../utils/mongodb-schemas')
+const { reminders } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 module.exports = class reminder extends Command {

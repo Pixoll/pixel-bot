@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { MessageEmbed, User } = require('discord.js')
 const { cmdInfo, basicEmbed } = require('../../utils/functions')
-const { active } = require('../../utils/mongodb-schemas')
+const { active } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 module.exports = class unban extends Command {

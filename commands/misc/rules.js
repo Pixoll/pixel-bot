@@ -1,5 +1,5 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { rules: rulesDocs } = require('../../utils/mongodb-schemas')
+const { rules: rulesDocs } = require('../../utils/mongo/schemas')
 const { generateEmbed, basicEmbed } = require('../../utils/functions')
 
 module.exports = class rules extends Command {

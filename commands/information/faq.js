@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { generateEmbed, basicEmbed } = require('../../utils/functions')
-const { faq: faqDocs } = require('../../utils/mongodb-schemas')
+const { faq: faqDocs } = require('../../utils/mongo/schemas')
 
 module.exports = class faq extends Command {
     constructor(client) {

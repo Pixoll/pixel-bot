@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed, Invite } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('discord.js-commando')
 const { formatDate, moduleStatus, validURL, fetchPartial, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongodb-schemas')
+const { setup, modules } = require('../mongo/schemas')
 
 /**
  * Handles all of the invite logs.

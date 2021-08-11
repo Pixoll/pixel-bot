@@ -1,5 +1,5 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { polls: pollsDocs } = require('../../utils/mongodb-schemas')
+const { polls: pollsDocs } = require('../../utils/mongo/schemas')
 const { generateEmbed, basicEmbed } = require('../../utils/functions')
 
 module.exports = class polls extends Command {

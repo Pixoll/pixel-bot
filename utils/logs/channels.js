@@ -3,7 +3,7 @@ const { MessageEmbed, GuildChannel, GuildMember, Role, PermissionOverwrites } = 
 const { CommandoClient } = require('discord.js-commando')
 const { ms } = require('../custom-ms')
 const { difference, capitalize, sliceDots, formatPerm, customEmoji, remDiscFormat, moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongodb-schemas')
+const { setup, modules } = require('../mongo/schemas')
 
 /**
  * Formats the PermissionOverwrites into an array of string

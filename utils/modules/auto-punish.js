@@ -1,7 +1,7 @@
 const { CommandoClient } = require('discord.js-commando')
 const { ms } = require('../custom-ms')
 const { isMod, mute, kick, tempban, ban, moduleStatus } = require('../functions')
-const { moderations, modules } = require('../mongodb-schemas')
+const { moderations, modules } = require('../mongo/schemas')
 
 /**
  * This module manages automatic punishments, related to the warns of the user.

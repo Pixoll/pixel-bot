@@ -2,7 +2,7 @@ const { Command, CommandoMessage } = require('discord.js-commando')
 const { MessageEmbed, MessageAttachment } = require('discord.js')
 const { status: java, statusBedrock: bedrock } = require('minecraft-server-util')
 const { remDiscFormat, basicEmbed } = require('../../utils/functions')
-const { mcIP } = require('../../utils/mongodb-schemas')
+const { mcIP } = require('../../utils/mongo/schemas')
 const { stripIndent, oneLine } = require('common-tags')
 
 /**

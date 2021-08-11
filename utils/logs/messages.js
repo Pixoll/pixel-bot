@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed, Message } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { sliceDots, moduleStatus, pluralize, fetchPartial, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongodb-schemas')
+const { setup, modules } = require('../mongo/schemas')
 
 /**
  * Fixes the size of the attachment, putting it on it's most compact version

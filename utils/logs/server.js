@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { capitalize, arrayEqualsIgnoreOrder, formatPerm, moduleStatus, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongodb-schemas')
+const { setup, modules } = require('../mongo/schemas')
 
 /**
  * Compares and returns the difference between the set of permissions

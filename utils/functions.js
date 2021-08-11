@@ -4,7 +4,7 @@ const { CommandoClient, CommandoGuild, Command, CommandoMessage } = require('dis
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { ms } = require('./custom-ms')
 const { version } = require('../package.json')
-const { moderations, active } = require('./mongodb-schemas')
+const { moderations, active } = require('./mongo/schemas')
 
 /**
  * Pauses the command's execution

@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { active, setup } = require('../mongodb-schemas')
+const { active, setup } = require('../mongo/schemas')
 
 /**
  * This module manages expired punishments.
@@ -15,7 +15,7 @@ module.exports = (client) => {
             const guild = client.guilds.cache.get(mod.guild)
             if (!guild) continue
 
-            const user = await client.users.fetch(mod.user, true, true).catch(() => null)
+            const user = await client.users.fetch(mod.user, false, true).catch(() => null)
             if (!user) continue
             const member = guild.members.cache.get(user.id)
 

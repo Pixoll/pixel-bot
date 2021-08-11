@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { Role, GuildMember } = require('discord.js')
 const { ms } = require('../../utils/custom-ms')
-const { active } = require('../../utils/mongodb-schemas')
+const { active } = require('../../utils/mongo/schemas')
 const { basicEmbed, docID, isMod } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 

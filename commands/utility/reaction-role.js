@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { MessageEmbed, TextChannel, Role } = require('discord.js')
-const { formatDate, basicEmbed } = require('../../utils/functions')
-const { reactionRoles } = require('../../utils/mongodb-schemas')
+const { TextChannel, Role, NewsChannel } = require('discord.js')
+const { basicEmbed } = require('../../utils/functions')
+const { reactionRoles } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 /**
@@ -14,9 +14,10 @@ async function getMessage(msg, message) {
     const channels = message.guild.channels.cache
 
     const target = message.parseArgs().split(/ +/)[1]
+    /** @type {TextChannel|NewsChannel} */
     const channel = channels.get(target.replace(/[^0-9]/g, '')) || channels.find(({ name }) => name === target.toLowerCase())
 
-    const reactionMessage = await channel.messages.fetch(msg).catch(() => null)
+    const reactionMessage = await channel.messages.fetch(msg, false, true).catch(() => null)
     return reactionMessage
 }
 

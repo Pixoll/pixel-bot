@@ -2,7 +2,7 @@ const { Command, CommandoMessage } = require('discord.js-commando')
 const { GuildMember } = require('discord.js')
 const { ms } = require('../../utils/custom-ms')
 const { isMod, docID, basicEmbed, formatTime } = require('../../utils/functions')
-const { moderations, active, setup } = require('../../utils/mongodb-schemas')
+const { moderations, active, setup } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 module.exports = class mute extends Command {

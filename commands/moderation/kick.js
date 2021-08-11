@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { GuildMember } = require('discord.js')
 const { isMod, docID, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongodb-schemas')
+const { moderations } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 module.exports = class kick extends Command {

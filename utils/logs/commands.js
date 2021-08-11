@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('discord.js-commando')
 const { sliceDots, moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongodb-schemas')
+const { setup, modules } = require('../mongo/schemas')
 
 /**
  * Handles all of the command logs.

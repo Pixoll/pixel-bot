@@ -1,6 +1,6 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { basicEmbed } = require('../../utils/functions')
-const { afk: afkDocs } = require('../../utils/mongodb-schemas')
+const { afk: afkDocs } = require('../../utils/mongo/schemas')
 const { stripIndent, oneLine } = require('common-tags')
 
 module.exports = class afk extends Command {

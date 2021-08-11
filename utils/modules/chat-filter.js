@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { ms } = require('../custom-ms')
 const { isMod, validURL, docID } = require('../functions')
-const { moderations, active, setup, modules } = require('../mongodb-schemas')
+const { moderations, active, setup, modules } = require('../mongo/schemas')
 
 /**
  * This module manages the chat filter.
@@ -82,7 +82,7 @@ module.exports = (client) => {
         const toggled = await modules.findOne({ guild: message.guild.id })
         if (toggled && typeof (toggled.chatFilter) === 'boolean' && !toggled.chatFilter) return
 
-        message.channel.messages.fetch().then(async messages => {
+        message.channel.messages.fetch({}, false, true).then(async messages => {
             const filtered = messages.filter(msg => msg.author === message.author && (new Date() - new Date(msg.createdTimestamp)) < 5000)
             if (filtered.size < 5) return
 

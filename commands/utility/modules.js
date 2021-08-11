@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { basicEmbed } = require('../../utils/functions')
-const { modules: modulesDocs } = require('../../utils/mongodb-schemas')
+const { modules: modulesDocs } = require('../../utils/mongo/schemas')
 
 module.exports = class modules extends Command {
     constructor(client) {

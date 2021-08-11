@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { afk } = require('../mongodb-schemas')
+const { afk } = require('../mongo/schemas')
 const { basicEmbed, fetchPartial } = require('../functions')
 const { CommandoClient, CommandoMessage } = require('discord.js-commando')
 const { toNow } = require('../custom-ms')

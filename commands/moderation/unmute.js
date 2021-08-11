@@ -1,6 +1,6 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { GuildMember } = require('discord.js')
-const { active } = require('../../utils/mongodb-schemas')
+const { active } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 module.exports = class unmute extends Command {

@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { formatDate, capitalize, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongodb-schemas')
+const { moderations } = require('../../utils/mongo/schemas')
 
 module.exports = class modlog extends Command {
     constructor(client) {
@@ -61,8 +61,8 @@ module.exports = class modlog extends Command {
             return message.say(basicEmbed('green', 'check', `Deleted moderation log with ID \`${modlogID}\``))
         }
 
-        const user = await this.client.users.fetch(modLog.user, true, true)
-        const moderator = await this.client.users.fetch(modLog.mod, true, true)
+        const user = await this.client.users.fetch(modLog.user, false, true)
+        const moderator = await this.client.users.fetch(modLog.mod, false, true)
         const duration = modLog.duration ? `**>** **Duration:** ${modLog.duration}` : ''
 
         const modlogInfo = new MessageEmbed()

@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { basicEmbed } = require('../../utils/functions')
-const { welcome: welcomeDocs } = require('../../utils/mongodb-schemas')
+const { welcome: welcomeDocs } = require('../../utils/mongo/schemas')
 
 module.exports = class welcome extends Command {
     constructor(client) {
@@ -41,7 +41,7 @@ module.exports = class welcome extends Command {
                     validate: (channel, message) => {
                         const arg = message.parseArgs().split(/ +/).shift().toLowerCase()
                         if (arg === 'dms') return true
-                        
+
                         const channels = message.guild.channels.cache
                         const match = channels.filter(({ type, name, id }) =>
                             type === 'text' && (

@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { MessageEmbed, User } = require('discord.js')
 const { generateEmbed, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongodb-schemas')
+const { moderations } = require('../../utils/mongo/schemas')
 
 module.exports = class infractions extends Command {
     constructor(client) {

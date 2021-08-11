@@ -1,7 +1,7 @@
 const { MessageEmbed, GuildChannel } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { isMod } = require('../../utils/functions')
-const { setup: setupData } = require('../../utils/mongodb-schemas')
+const { setup: setupData } = require('../../utils/mongo/schemas')
 
 module.exports = class setup extends Command {
     constructor(client) {

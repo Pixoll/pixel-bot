@@ -26,6 +26,8 @@ const voice = require('./logs/voice')
 // Database
 const guildsData = require('./database/guilds')
 const membersData = require('./database/members')
+const modulesData = require('./database/modules')
+const prefixesData = require('./database/prefixes')
 
 /**
  * Handler function for every module.
@@ -58,4 +60,6 @@ module.exports = (client) => {
     // Database
     guildsData(client)
     membersData(client)
+    modulesData(client)
+    prefixesData(client)
 }

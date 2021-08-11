@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { MessageEmbed, TextChannel } = require('discord.js')
 const { ms } = require('../../utils/custom-ms')
-const { polls } = require('../../utils/mongodb-schemas')
+const { polls } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { formatTime, basicEmbed } = require('../../utils/functions')
 
@@ -167,7 +167,7 @@ module.exports = class poll extends Command {
         if (!pollData) return message.say(basicEmbed('red', 'cross', 'I couldn\'t find the poll you were looking for.'))
 
         const pollChannel = channels.get(pollData.channel)
-        const msg = await pollChannel?.messages.fetch(pollData.message, true, true)
+        const msg = await pollChannel?.messages.fetch(pollData.message, false, true)
         if (!msg) return message.say(basicEmbed('red', 'cross', 'That poll or the channel were it was, was deleted.'))
 
         const reactions = msg.reactions.cache.map(r => r).filter(({ emoji }) => pollData.emojis.includes(emoji.id || emoji.name))

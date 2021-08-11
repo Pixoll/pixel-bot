@@ -1,6 +1,6 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongodb-schemas')
+const { moderations } = require('../../utils/mongo/schemas')
 
 module.exports = class delwarn extends Command {
     constructor(client) {

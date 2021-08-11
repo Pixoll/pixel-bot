@@ -1,10 +1,10 @@
 const { CommandoClient, CommandoMessage, Command } = require('discord.js-commando')
 const { MessageEmbed } = require('discord.js')
 const { customEmoji, basicEmbed, formatPerm, sliceDots } = require('./utils/functions')
-const { prefixes, disabled } = require('./utils/mongodb-schemas')
+const { prefixes, disabled } = require('./utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 const eventsHandler = require('./utils/events-handler')
-const mongo = require('./mongo')
+const mongo = require('./utils/mongo/mongo')
 const path = require('path')
 require('dotenv').config()
 
@@ -43,38 +43,6 @@ client.on('ready', async () => {
     eventsHandler(client)
 
     await client.owners[0].send('Debug message: Bot is online.')
-})
-
-// Mongo DB data loader
-client.once('ready', async () => {
-    const allPrefixes = await prefixes.find({})
-    for (const prefixData of allPrefixes) {
-        if (prefixData.global) client.commandPrefix = prefixData.prefix
-        else {
-            const guild = client.guilds.cache.get(prefixData.guild)
-            if (!guild) await prefixData.deleteOne()
-            else guild.commandPrefix = prefixData.prefix
-        }
-    }
-    console.log('Applied all saved prefixes')
-
-    const allDisabled = await disabled.find({})
-    for (const data of allDisabled) {
-        const guild = client.guilds.cache.get(data.guild)
-        if (!guild) await data.deleteOne()
-        else {
-            const { commands, groups } = client.registry
-            for (var command of data.commands) {
-                command = commands.find(cmd => cmd.name === command)
-                if (command) command.setEnabledIn(guild, false)
-            }
-            for (var group of data.groups) {
-                group = groups.find(gr => gr.id === group)
-                if (group) group.setEnabledIn(guild, false)
-            }
-        }
-    }
-    console.log('Disabled saved commands & groups')
 })
 
 // Command block handling

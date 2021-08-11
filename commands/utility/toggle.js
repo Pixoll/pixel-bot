@@ -1,6 +1,6 @@
 const { Command, CommandoMessage, CommandGroup } = require('discord.js-commando')
 const { basicEmbed } = require('../../utils/functions')
-const { disabled } = require('../../utils/mongodb-schemas')
+const { disabled } = require('../../utils/mongo/schemas')
 
 module.exports = class toggle extends Command {
     constructor(client) {

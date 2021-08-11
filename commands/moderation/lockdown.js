@@ -1,5 +1,5 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { setup } = require('../../utils/mongodb-schemas')
+const { setup } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { basicEmbed, generateEmbed } = require('../../utils/functions')
 

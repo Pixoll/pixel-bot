@@ -1,6 +1,6 @@
 const { MessageEmbed, NewsChannel, TextChannel, Message, Guild } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { polls } = require('../mongodb-schemas')
+const { polls } = require('../mongo/schemas')
 
 /**
  * This module manages polls.
@@ -14,7 +14,7 @@ module.exports = (client) => {
         for (const poll of pollsData) {
             // ref
             /** @type {Guild} */
-            const guild = await client.guilds.fetch(poll.guild).catch(() => null)
+            const guild = await client.guilds.fetch(poll.guild, false, true).catch(() => null)
             if (!guild) continue
 
             /** @type {NewsChannel|TextChannel} */

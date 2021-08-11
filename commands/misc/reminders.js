@@ -1,5 +1,5 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { reminders: remindersDocs } = require('../../utils/mongodb-schemas')
+const { reminders: remindersDocs } = require('../../utils/mongo/schemas')
 const { generateEmbed, basicEmbed } = require('../../utils/functions')
 
 module.exports = class reminders extends Command {

@@ -1,7 +1,7 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { MessageEmbed, User } = require('discord.js')
 const { getDayDiff, capitalize } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongodb-schemas')
+const { moderations } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 /**

@@ -1,7 +1,7 @@
 const { User } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { docID, isMod, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongodb-schemas')
+const { moderations } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 
 module.exports = class ban extends Command {
