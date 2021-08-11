@@ -38,7 +38,7 @@ module.exports = class bancheck extends Command {
         if (banLog) {
             const reason = banLog.reason?.replace(/%20/g, ' ') || 'No reason given.'
 
-            return message.say(basicEmbed('blue', 'info', `${user.tag} is already banned.`, `**Reason:** ${reason}`))
+            return message.say(basicEmbed('blue', 'info', `${user.tag} is already banned`, `**Reason:** ${reason}`))
         }
 
         message.say(basicEmbed('blue', 'info', `${user.tag} is not banned`))

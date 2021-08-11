@@ -35,7 +35,7 @@ module.exports = class modules extends Command {
                     key: 'subModule',
                     prompt: 'What sub-module of the audit logs do you want to toggle?',
                     type: 'string',
-                    oneOf: ['channels', 'emojis', 'members', 'server', 'messages', 'roles', 'misc', 'all'],
+                    oneOf: ['channels', 'commands', 'emojis', 'invites', 'members', 'messages', 'moderation', 'roles', 'server', 'voice', 'all'],
                     default: ''
                 }
             ]
