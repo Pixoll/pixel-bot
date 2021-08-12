@@ -84,7 +84,7 @@ module.exports = class diagnose extends Command {
                 },
                 {
                     name: 'Guarded',
-                    value: target.guarded ? 'No' : 'Yes',
+                    value: target.guarded ? 'Yes' : 'No',
                     inline: true
                 }
             )

@@ -31,7 +31,8 @@ module.exports = class rules extends Command {
             number: 5,
             authorName: `${message.guild.name}'s rules`,
             authorIconURL: message.guild.iconURL({ dynamic: true }),
-            title: 'Rule'
+            title: 'Rule',
+            hasObjects: false
         })
     }
 }

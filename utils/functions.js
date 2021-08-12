@@ -371,9 +371,9 @@ async function ban(guild, bot, user, reason = 'No reason given.') {
         You have been **banned** from **${guildName}**
         **Reason:** ${reason}
         **Moderator:** ${bot.tag} - Auto-moderation system
-    `).catch(console.error)
+    `).catch(() => null)
 
-    await members.ban(user, { days: 7, reason: reason }).catch(console.error)
+    await members.ban(user, { days: 7, reason: reason }).catch(() => null)
 
     const doc = {
         _id: docID(),
@@ -413,10 +413,10 @@ async function tempban(guild, bot, user, time, reason = 'No reason given.') {
             **Moderator:** ${bot.tag} - Auto-moderation system
             
             Feel free to join back when your ban expires: ${invite.toString()}
-        `).catch(console.error)
+        `).catch(() => null)
     }
 
-    await members.ban(user, { days: 7, reason: reason }).catch(console.error)
+    await members.ban(user, { days: 7, reason: reason }).catch(() => null)
 
     const doc1 = {
         _id: docID(),
@@ -461,10 +461,10 @@ async function kick(guild, bot, member, reason = 'No reason given.') {
             
             Feel free to join back: ${invite.toString()}
             *This invite will expire in 1 week.*
-        `).catch(console.error)
+        `).catch(() => null)
     }
 
-    await member.kick(reason).catch(console.error)
+    await member.kick(reason).catch(() => null)
 
     const doc = {
         _id: docID(),
@@ -499,9 +499,9 @@ async function mute(guild, bot, member, role, time, reason = 'No reason given.')
         You have been **muted** on **${guildName}** for **${duration}**
         **Reason:** ${reason}
         **Moderator:** ${bot.tag} - Auto-moderation system
-    `).catch(console.error)
+    `).catch(() => null)
 
-    await member.roles.add(role).catch(console.error)
+    await member.roles.add(role).catch(() => null)
 
     const doc1 = {
         _id: docID(),
@@ -543,7 +543,9 @@ function docID() {
  * @param {Promise<Message>}
  */
 async function pagedEmbed(message, data, template, ...extra) {
-    await message.say(await template(0, ...extra)).then(async msg => {
+    const Msg = await message.say(basicEmbed('gold', 'loading', 'Loading data...'))
+
+    await Msg.edit(await template(0, ...extra)).then(async msg => {
         if (data.total <= data.number) return
 
         // reacts with the navigation arrows
@@ -581,7 +583,7 @@ async function pagedEmbed(message, data, template, ...extra) {
 
         collector.on('end', async reactions => {
             if (!message.guild) return
-            await msg.reactions.removeAll()
+            await msg.reactions.removeAll().catch(() => null)
         })
     })
 }
@@ -594,7 +596,7 @@ async function pagedEmbed(message, data, template, ...extra) {
  * @param {number} [data.number] The number of chunks to display per page
  * @param {string} [data.color] The color of the embed
  * @param {string} data.authorName The name of the author
- * @param {string} data.authorIconURL The icon URL of the author
+ * @param {string} [data.authorIconURL] The icon URL of the author
  * @param {string} [data.title] The title of each section in the embed
  * @param {boolean} [data.useDescription] Whether to use `setDescription()` or not
  * @param {boolean} [data.inLine] Whether the data should be displayed inline in the embed
@@ -602,18 +604,15 @@ async function pagedEmbed(message, data, template, ...extra) {
  * @param {object} [data.keyTitle] A custom key data to use from the nested objects on the title
  * @param {string} [data.keyTitle.suffix] The name of the key to use as a suffix
  * @param {string} [data.keyTitle.prefix] The name of the key to use as a prefix
- * @param {boolean} [data.keyTitle.isDate] Whether `data.keyTitle.name` is a date or not
  * @param {string[]} [data.keys] The properties to display in the embed. If empty I will use every property
  * @param {string[]} [data.keysExclude] The properties to exclude on the embed. If empty I will use `data.keys` or every property
  * @param {string} [data.useDocID] Whether to use the document's ID on each data chunk
  */
 async function generateEmbed(message, array, data) {
-    const { number = 6, color = '#4c9f4c', authorName, authorIconURL, useDescription, title = '', inLine, hasObjects, keyTitle, keys, keysExclude = [], useDocID } = data
+    const { number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription, title = 'Item', inLine, hasObjects = true, keyTitle, keys, keysExclude = [], useDocID } = data
 
     if (array.length === 0) throw new Error('array cannot be empty')
     if (!authorName) throw new Error('authorName cannot be undefined or empty')
-
-    const msg = await message.say(basicEmbed('gold', 'loading', 'Loading data...'))
 
     async function createEmbed(start) {
         const pages = Math.trunc(array.length / number) + ((array.length / number) % 1 === 0 ? 0 : 1)
@@ -621,7 +620,7 @@ async function generateEmbed(message, array, data) {
 
         const embed = new MessageEmbed()
             .setColor(color.toUpperCase())
-            .setAuthor(authorName, authorIconURL || null)
+            .setAuthor(authorName, authorIconURL)
             .setTimestamp()
         if (pages > 1) embed.setFooter(`Page ${start / number + 1} of ${pages}`)
 
@@ -632,7 +631,7 @@ async function generateEmbed(message, array, data) {
         var index = 0
         for (const item of current) {
             const objFilter = key => (keys ? keys.includes(key) : key) && !keysExclude.includes(key)
-            const objKeys = hasObjects ? Object.keys(item._doc || item).filter(objFilter) : null
+            const objKeys = hasObjects ? Object.keys(item._doc || item).filter(objFilter) : []
 
             const docID = useDocID ? item._doc._id : ''
             const suffix = capitalize(item[keyTitle?.prefix] || '')
@@ -648,11 +647,17 @@ async function generateEmbed(message, array, data) {
                 const propName = capitalize(key.replace('createdAt', 'date'))
 
                 /** @type {User} */
-                const user = ['mod', 'user'].includes(key) ? await users.fetch(item[key], false, true).catch(() => null) : ''
+                const user = ['mod', 'user'].includes(key) ?
+                    users.cache.get(item[key]) ||
+                    await users.fetch(item[key], false, true).catch(() => null)
+                    : ''
                 const userString = user ? `${user.toString()} ${user.tag}` : ''
 
                 /** @type {GuildChannel} */
-                const channel = key === 'channel' ? await channels.fetch(item[key], false, true).catch(() => null) : ''
+                const channel = key === 'channel' ?
+                    channels.cache.get(item[key]) ||
+                    await channels.fetch(item[key], false, true).catch(() => null) :
+                    ''
                 const channelString = channel ? `${channel.toString()} ${channel.name}` : ''
 
                 const created = key === 'createdAt' ? formatDate(item[key]) : ''
@@ -664,7 +669,7 @@ async function generateEmbed(message, array, data) {
                 value.push(`**>** **${propName}:** ${docData}`)
             }
 
-            embed.addField(`${suffix} ${title} ${prefix}`, value || item, inLine)
+            embed.addField(`${suffix} ${title} ${prefix}`, value.length !== 0 ? value : item, inLine)
             index++
         }
 
@@ -672,7 +677,6 @@ async function generateEmbed(message, array, data) {
     }
 
     await pagedEmbed(message, { number, total: array.length }, createEmbed)
-    await msg.delete().catch(() => null)
 }
 
 /**

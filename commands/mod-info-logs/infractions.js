@@ -40,8 +40,6 @@ module.exports = class infractions extends Command {
             authorName: `${user.username}'s infractions`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             title: ' |  ID:',
-            hasObjects: true,
-            boldText: true,
             keyTitle: { prefix: 'type' },
             keysExclude: ['__v', 'updatedAt', 'type', 'guild', '_id', 'user'],
             useDocID: true

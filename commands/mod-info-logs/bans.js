@@ -30,7 +30,7 @@ module.exports = class bans extends Command {
         const { guild } = message
 
         // gets all the bans in the server
-        const bans = await guild.fetchBans()
+        const bans = await guild.fetchBans().catch(() => null)
         if (!bans || bans.size === 0) return message.say(basicEmbed('blue', 'info', 'There are no bans in this server.'))
 
         const bansList = bans.map(({ user, reason }) => ({
@@ -52,8 +52,6 @@ module.exports = class bans extends Command {
             authorName: `${guild.name}'s bans`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Ban for',
-            boldText: true,
-            hasObjects: true,
             keyTitle: { suffix: 'tag' },
             keysExclude: ['tag', 'id']
         })

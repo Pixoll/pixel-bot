@@ -52,8 +52,6 @@ module.exports = class warnings extends Command {
             authorName: `${user?.username || guild.name}'s warnings`,
             authorIconURL: avatarURL,
             title: 'ID:',
-            hasObjects: true,
-            boldText: true,
             keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'type', user ? 'user' : null],
             useDocID: true
         })

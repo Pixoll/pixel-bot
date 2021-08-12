@@ -32,7 +32,7 @@ module.exports = (client) => {
                 return srt.replace(/!|1|¡/g, 'i').replace(/0/g, 'o').replace(/\W/g, ' ')
             }
 
-            if (replaceNonLetters(message.content.toLowerCase()).includes(word)) message.delete().then(reason.push('Swearing')).catch(console.error), deleted = true
+            if (replaceNonLetters(message.content.toLowerCase()).includes(word)) message.delete().then(reason.push('Swearing')).catch(() => null), deleted = true
         })
 
         /** @param {Number} number  @param {Number} total */
@@ -42,17 +42,17 @@ module.exports = (client) => {
 
         if (percentage(message.content.replace(/[^A-Z]/g, '').length, message.content.length) > 70 && message.content.length > 10) {
             reason.push('Abuse of capitals')
-            if (!deleted) message.delete().catch(console.error), deleted = true
+            if (!deleted) message.delete().catch(() => null), deleted = true
         }
 
         if (message.mentions.users.size > 5) {
             reason.push('Mass mention')
-            if (!deleted) message.delete().catch(console.error), deleted = true
+            if (!deleted) message.delete().catch(() => null), deleted = true
         }
 
         if (/%CC%/g.test(encodeURIComponent(message.content))) {
             reason.push('Usage of zalgo')
-            if (!deleted) message.delete().catch(console.error), deleted = true
+            if (!deleted) message.delete().catch(() => null), deleted = true
         }
 
         if (reason.length > 0) {
@@ -60,8 +60,8 @@ module.exports = (client) => {
                 .setColor('#43B581')
                 .setDescription(`**<:check:802617654396715029> ${message.author} has been warned\nReason${reason.length > 1 ? 's' : ''}:** ${reason.join(' - ')}`)
 
-            message.member.send(`You have been **warned** on **${message.guild.name}\nReason${reason.length > 1 ? 's' : ''}:** ${reason.join(' - ')}\n**Moderator:** ${client.user} - Auto-moderation system`).catch(console.error)
-            message.say(warned).then(msg => msg.delete({ timeout: 30000 }).catch(console.error))
+            message.member.send(`You have been **warned** on **${message.guild.name}\nReason${reason.length > 1 ? 's' : ''}:** ${reason.join(' - ')}\n**Moderator:** ${client.user} - Auto-moderation system`).catch(() => null)
+            message.say(warned).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
 
             await new moderations({
                 _id: docID(),
@@ -103,8 +103,8 @@ module.exports = (client) => {
                 .setColor('#43B581')
                 .setDescription(`**<:check:802617654396715029> ${message.member} has been muted for 1 minute\nReason:** Spam detection`)
 
-            message.member.send(`You have been **muted** on **${message.guild.name}** for **1 minute\nReason:** Spam detection\n**Moderator:** ${client.user} - Auto-moderation system`).catch(console.error)
-            message.say(muted).then(msg => msg.delete({ timeout: 30000 }).catch(console.error))
+            message.member.send(`You have been **muted** on **${message.guild.name}** for **1 minute\nReason:** Spam detection\n**Moderator:** ${client.user} - Auto-moderation system`).catch(() => null)
+            message.say(muted).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
 
             await new moderations({
                 _id: docID(),
@@ -134,7 +134,7 @@ module.exports = (client) => {
         message.content.split(' ').forEach(async link => {
             if (deleted || !validURL(link) || !link.includes('discord') || link.match(/\.(jpeg|jpg|gif|png|webp|tiff|mp4|mov|mp3|avi|flv|wmv|svg|m4a|flac|wav|wma|ogg)$/)) return
 
-            const invite = await client.fetchInvite(link).catch(console.error)
+            const invite = await client.fetchInvite(link).catch(() => null)
             if (!invite) return
             if (invite.guild.id === message.guild.id) return
 
@@ -142,8 +142,8 @@ module.exports = (client) => {
                 .setColor('#43B581')
                 .setDescription(`**<:check:802617654396715029> ${message.author} has been warned\nReason:** Posted an invite`)
 
-            message.member.send(`You have been **warned** on **${message.guild.name}\nReason:** Posted an invite\n**Moderator:** ${client.user} - Auto-moderation system`).catch(console.error)
-            message.say(warned).then(msg => msg.delete({ timeout: 30000 }).catch(console.error))
+            message.member.send(`You have been **warned** on **${message.guild.name}\nReason:** Posted an invite\n**Moderator:** ${client.user} - Auto-moderation system`).catch(() => null)
+            message.say(warned).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
 
             await new moderations({
                 _id: docID(),

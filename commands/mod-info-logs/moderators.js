@@ -39,8 +39,6 @@ module.exports = class moderators extends Command {
             authorName: `${guild.name}'s moderators`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Roles of moderator',
-            hasObjects: true,
-            boldText: true,
             keyTitle: { suffix: 'tag' },
             keysExclude: ['tag', 'roles']
         })

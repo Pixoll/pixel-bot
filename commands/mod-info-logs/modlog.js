@@ -61,8 +61,10 @@ module.exports = class modlog extends Command {
             return message.say(basicEmbed('green', 'check', `Deleted moderation log with ID \`${modlogID}\``))
         }
 
-        const user = await this.client.users.fetch(modLog.user, false, true)
-        const moderator = await this.client.users.fetch(modLog.mod, false, true)
+        const { users } = this.client
+
+        const user = users.cache.get(modLog.user) || await users.fetch(modLog.user, false, true).catch(() => null)
+        const moderator = users.cache.get(modLog.mod) || await users.fetch(modLog.mod, false, true).catch(() => null)
         const duration = modLog.duration ? `**>** **Duration:** ${modLog.duration}` : ''
 
         const modlogInfo = new MessageEmbed()

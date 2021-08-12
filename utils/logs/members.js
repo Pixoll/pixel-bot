@@ -69,7 +69,7 @@ module.exports = (client) => {
 
         logsChannel.send(embed)
 
-        const kickLogs = await guild.fetchAuditLogs({ limit: 1 })
+        const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
         const kickLog = kickLogs.entries.first()
 
         if (kickLog && kickLog.action === 'MEMBER_KICK') {

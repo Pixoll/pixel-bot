@@ -1,4 +1,5 @@
-const { CommandoClient } = require('discord.js-commando')
+const { User } = require('discord.js')
+const { CommandoClient, CommandoGuild } = require('discord.js-commando')
 const { ms } = require('../custom-ms')
 const { isMod, mute, kick, tempban, ban, moduleStatus } = require('../functions')
 const { moderations, modules } = require('../mongo/schemas')
@@ -10,18 +11,22 @@ const { moderations, modules } = require('../mongo/schemas')
 module.exports = (client) => {
     async function checkWarns() {
         const warns = await moderations.find({ type: 'warn' })
+        const { guilds, users } = client
 
         for (const warn of warns) {
-            const guild = await client.guilds.fetch(warn.guild, false, true).catch(() => null)
+            /** @type {CommandoGuild} */
+            const guild = guilds.cache.get(warn.guild) || await guilds.fetch(warn.guild, false, true).catch(() => null)
             if (!guild) continue
 
             const status = await moduleStatus(modules, guild, 'autoMod')
             if (!status) return
 
-            const user = await client.users.fetch(warn.user, false, true)
+            /** @type {User} */
+            const user = users.cache.get(warn.user) || await users.fetch(warn.user, false, true).catch(() => null)
             if (!user) continue
 
-            const member = await guild.members.fetch(user.id)
+            const { members } = guild
+            const member = members.cache.get(user.id) || await members.fetch(user.id).catch(() => null)
 
             const invites = await moderations.find({ type: 'warn', guild: guild.id, user: user.id, reason: 'Posted an invite' })
             if (invites.length > 2) { // Ban

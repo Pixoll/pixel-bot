@@ -26,26 +26,7 @@ module.exports = class tempban extends Command {
                 {
                     key: 'user',
                     prompt: 'What user do you want to ban?',
-                    type: 'user',
-                    /** @param {User} user @param {CommandoMessage} message */
-                    validate: async (user, message) => {
-                        if (user.id === this.client.user.id) return false
-                        if (user.id === message.author.id) return false
-                        const isBanned = await message.guild.fetchBan(user).catch(() => undefined)
-                        if (isBanned) return false
-                        const member = message.guild.members.cache.get(user.id)
-                        if (member) {
-                            if (!member.bannable) return false
-                            if (isMod(member)) return false
-                        }
-                        return true
-                    },
-                    error: stripIndent`
-                        I cannot soft-ban that user. Possible reasons:
-                        - The user ID is the same as yours or the bot.
-                        - That user is already banned.
-                        - Because of role hierarchy, server ownership or because they're a mod/admin.
-                    `
+                    type: 'user'
                 },
                 {
                     key: 'duration',

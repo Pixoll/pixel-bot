@@ -10,11 +10,11 @@ module.exports = (client) => {
     async function endPolls() {
         const query = { endsAt: { $lte: Date.now() } }
         const pollsData = await polls.find(query)
+        const { guilds } = client
 
         for (const poll of pollsData) {
-            // ref
             /** @type {Guild} */
-            const guild = await client.guilds.fetch(poll.guild, false, true).catch(() => null)
+            const guild = guilds.cache.get(data.guild) || await guilds.fetch(poll.guild, false, true).catch(() => null)
             if (!guild) continue
 
             /** @type {NewsChannel|TextChannel} */

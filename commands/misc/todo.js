@@ -62,7 +62,8 @@ module.exports = class todo extends Command {
                 number: 5,
                 authorName: `${author.username}'s to-do list`,
                 authorIconURL: author.displayAvatarURL({ dynamic: true }),
-                title: 'Item'
+                title: 'Item',
+                hasObjects: false
             })
         }
 

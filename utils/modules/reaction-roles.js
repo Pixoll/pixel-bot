@@ -1,5 +1,5 @@
-const { Guild, TextChannel, NewsChannel, Message, MessageReaction, User, Role, GuildMember } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
+const { TextChannel, NewsChannel, Message, MessageReaction, User, Role, GuildMember } = require('discord.js')
+const { CommandoClient, CommandoGuild } = require('discord.js-commando')
 const { findCommonElement, fetchPartial } = require('../functions')
 const { reactionRoles } = require('../mongo/schemas')
 
@@ -11,10 +11,11 @@ module.exports = (client) => {
     async function getReactionRoles() {
         const rRoles = await reactionRoles.find({})
         if (rRoles.length === 0) return
+        const { guilds } = client
 
         for (const data of rRoles) {
-            /** @type {Guild} */
-            const guild = await client.guilds.fetch(data.guild, false, true).catch(() => null)
+            /** @type {CommandoGuild} */
+            const guild = guilds.cache.get(data.guild) || await guilds.fetch(data.guild, false, true).catch(() => null)
             if (!guild) {
                 await data.deleteOne()
                 continue
@@ -47,6 +48,7 @@ module.exports = (client) => {
         /** @type {MessageReaction} */
         const { message, emoji } = await fetchPartial(_reaction)
         const { guild } = message
+        const { roles, members } = guild
         const reaction = emoji.id || emoji.name
 
         /** @type {User} */
@@ -64,9 +66,9 @@ module.exports = (client) => {
             const i = data.emojis.indexOf(reaction)
 
             /** @type {Role} */
-            const role = await guild.roles.fetch(data.roles[i], false, true).catch(() => null)
+            const role = roles.cache.get(data.roles[i]) || await roles.fetch(data.roles[i], false, true).catch(() => null)
             /** @type {GuildMember} */
-            const member = await guild.members.fetch(id).catch(() => null)
+            const member = members.cache.get(id) || await members.fetch(id).catch(() => null)
             if (!member || !role) continue
 
             member.roles.add(role).catch(() => null)
@@ -77,6 +79,7 @@ module.exports = (client) => {
         /** @type {MessageReaction} */
         const { message, emoji } = await fetchPartial(_reaction)
         const { guild } = message
+        const { roles, members } = guild
         const reaction = emoji.id || emoji.name
 
         /** @type {User} */
@@ -94,9 +97,9 @@ module.exports = (client) => {
             const i = data.emojis.indexOf(reaction)
 
             /** @type {Role} */
-            const role = await guild.roles.fetch(data.roles[i], false, true).catch(() => null)
+            const role = roles.cache.get(data.roles[i]) || await roles.fetch(data.roles[i], false, true).catch(() => null)
             /** @type {GuildMember} */
-            const member = await guild.members.fetch(id).catch(() => null)
+            const member = members.cache.get(id) || await members.fetch(id).catch(() => null)
             if (!member || !role) continue
 
             member.roles.remove(role).catch(() => null)

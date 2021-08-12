@@ -31,8 +31,6 @@ module.exports = class polls extends Command {
             authorName: `${guild.name}'s polls`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Poll',
-            hasObjects: true,
-            boldText: true,
             keys: ['channel', 'duration', 'endsAt']
         })
     }

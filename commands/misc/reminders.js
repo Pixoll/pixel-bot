@@ -28,9 +28,7 @@ module.exports = class reminders extends Command {
             authorName: `${message.author.username}'s reminders`,
             authorIconURL: message.author.displayAvatarURL({ dynamic: true }),
             title: 'Reminder set at',
-            hasObjects: true,
-            boldText: true,
-            keyTitle: { suffix: 'remindAt', isDate: true },
+            keyTitle: { suffix: 'remindAt' },
             keys: ['reminder']
         })
     }

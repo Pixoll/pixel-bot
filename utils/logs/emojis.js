@@ -18,7 +18,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
-        const author = await emoji.fetchAuthor()
+        const author = await emoji.fetchAuthor().catch(() => null)
 
         const embed = new MessageEmbed()
             .setColor('GREEN')

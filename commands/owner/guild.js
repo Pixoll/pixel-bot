@@ -57,8 +57,8 @@ module.exports = class guild extends Command {
         }
 
         if (subCommand.toLowerCase() === 'invite') {
-            const invites = await guild.fetchInvites()
-            const invite = invites.first() || await channel.createInvite({ maxUses: 1 })
+            const invites = await guild.fetchInvites().catch(() => null)
+            const invite = invites?.first() || await channel.createInvite({ maxUses: 1 })
 
             return message.say(basicEmbed('#4c9f4c', '', `You can join **${guild.name}** using [this link](${invite.toString()}).`))
         }

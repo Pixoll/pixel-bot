@@ -51,8 +51,6 @@ module.exports = class modlogs extends Command {
             authorName: `${user?.username || guild.name}'s moderation logs`,
             authorIconURL: avatarURL,
             title: ' | ID:',
-            hasObjects: true,
-            boldText: true,
             keyTitle: { prefix: 'type' },
             keysExclude: ['__v', 'updatedAt', 'type', 'guild', '_id', user ? 'mod' : null],
             useDocID: true

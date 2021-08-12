@@ -61,9 +61,7 @@ module.exports = class faq extends Command {
                 number: 5,
                 authorName: 'Frequently asked questions',
                 authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
-                hasObjects: true,
                 keys: ['answer'],
-                boldText: true,
                 keyTitle: { suffix: 'question' }
             }, true)
         }

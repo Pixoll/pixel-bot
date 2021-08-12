@@ -21,7 +21,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
-        const banLogs = await guild.fetchAuditLogs({ limit: 1 })
+        const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
         const banLog = banLogs.entries.first()
         if (!banLog || banLog.action !== 'MEMBER_BAN_ADD') return
 
@@ -53,7 +53,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
-        const unbanLogs = await guild.fetchAuditLogs({ limit: 1 })
+        const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
         const unbanLog = unbanLogs.entries.first()
         if (!unbanLog || unbanLog.action !== 'MEMBER_BAN_REMOVE') return
 

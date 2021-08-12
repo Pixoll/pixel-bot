@@ -101,7 +101,7 @@ module.exports = class purge extends Command {
      */
     async run(message, { subCommand, filter, number }) {
         // gets the last 100 messages
-        const fetch = await message.channel.messages.fetch({ limit: 100, before: message.id }, false, true)
+        const fetch = await message.channel.messages.fetch({ limit: 100, before: message.id }, false, true).catch(() => null)
         const messages = fetch.filter(({ pinned }) => !pinned).map(msg => msg)
 
         if (typeof subCommand === 'number') {

@@ -70,7 +70,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
-        const invites = await guild.fetchInvites()
+        const invites = await guild.fetchInvites().catch(() => null)
 
         for (const link of content.split(/ +/)) {
             const isLink = validURL(link)

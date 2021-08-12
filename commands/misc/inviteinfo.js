@@ -22,11 +22,11 @@ module.exports = class inviteinfo extends Command {
                 type: 'string',
                 /** @param {string} invite */
                 validate: async (invite) => {
-                    return await this.client.fetchInvite(invite.split('/').pop()).catch(() => undefined)
+                    return await this.client.fetchInvite(invite.split('/').pop()).catch(() => null)
                 },
                 /** @param {string} invite */
                 parse: async (invite) => {
-                    return await this.client.fetchInvite(invite.split('/').pop())
+                    return await this.client.fetchInvite(invite.split('/').pop()).catch(() => null)
                 },
                 error: 'That invite does not exist. Please type a valid one.'
             }]

@@ -36,8 +36,6 @@ module.exports = class guilds extends Command {
             authorName: `${this.client.user.username}'s guilds`,
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             title: 'Name:',
-            boldText: true,
-            hasObjects: true,
             keyTitle: { suffix: 'name' },
             keysExclude: ['name']
         })

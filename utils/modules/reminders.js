@@ -12,13 +12,15 @@ module.exports = (client) => {
     async function sendReminders() {
         const query = { remindAt: { $lte: Date.now() } }
         const data = await reminders.find(query)
+        const { users, channels } = client
 
         for (const reminder of data) {
-            const user = await client.users.fetch(reminder.user, false, true)
+            /** @type {User} */
+            const user = users.cache.get(reminder.user) || await users.fetch(reminder.user, false, true).catch(() => null)
             if (!user) continue
 
             /** @type {TextChannel|NewsChannel|DMChannel} */
-            const channel = await client.channels.fetch(reminder.channel, false, true)
+            const channel = channels.resolve(reminder.channel)
             if (!channel) continue
 
             const time = Date.now() - reminder.createdAt

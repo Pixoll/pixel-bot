@@ -1,4 +1,4 @@
-const { CommandoClient } = require('discord.js-commando')
+const { CommandoClient, CommandoGuild } = require('discord.js-commando')
 const { prefixes } = require('../mongo/schemas')
 
 /**
@@ -7,12 +7,14 @@ const { prefixes } = require('../mongo/schemas')
  */
 module.exports = async (client) => {
     const Prefixes = await prefixes.find({})
+    const { guilds } = client
 
     for (const data of Prefixes) {
         if (data.global) client.commandPrefix = data.prefix
 
         else {
-            const guild = await client.guilds.fetch(data.guild, false, true).catch(() => null)
+            /** @type {CommandoGuild} */
+            const guild = guilds.cache.get(data.guild) || await guilds.fetch(data.guild, false, true).catch(() => null)
 
             if (!guild) {
                 await data.deleteOne()

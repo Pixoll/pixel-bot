@@ -21,7 +21,7 @@ module.exports = class invites extends Command {
         const { guild } = message
 
         // gets all the invites in the server
-        const invites = await guild.fetchInvites()
+        const invites = await guild.fetchInvites().catch(() => null)
         if (invites.size === 0) return message.say(basicEmbed('blue', 'info', 'There are no invites in this server.'))
 
         const invitesList = invites.map(({ uses, inviter, channel, url, code }) => ({
@@ -35,8 +35,6 @@ module.exports = class invites extends Command {
         await generateEmbed(message, invitesList, {
             authorName: `${guild.name}'s invites`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            hasObjects: true,
-            boldText: true,
             keyTitle: { suffix: 'link' },
             keysExclude: ['link']
         })

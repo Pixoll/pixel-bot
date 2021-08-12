@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
+const { CommandoClient, CommandoGuild } = require('discord.js-commando')
 const { active, setup } = require('../mongo/schemas')
 
 /**
@@ -10,12 +10,14 @@ module.exports = (client) => {
     async function checkPunishments() {
         const query = { duration: { $lte: Date.now() } }
         const mods = await active.find(query)
+        const { guilds, users } = client
 
         for (const mod of mods) {
-            const guild = await client.guilds.fetch(mod.guild, false, true).catch(() => null)
+            /** @type {CommandoGuild} */
+            const guild = guilds.cache.get(data.guild) || await guilds.fetch(mod.guild, false, true).catch(() => null)
             if (!guild) continue
 
-            const user = await client.users.fetch(mod.user, false, true).catch(() => null)
+            const user = users.cache.get(mod.user) || await users.fetch(mod.user, false, true).catch(() => null)
             if (!user) continue
             const member = guild.members.cache.get(user.id)
 
