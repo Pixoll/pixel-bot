@@ -1,5 +1,5 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, User } = require('discord.js')
+const { MessageEmbed, User, GuildAuditLogs } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
 const { setup, modules } = require('../mongo/schemas')
@@ -21,19 +21,20 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
+        /** @type {GuildAuditLogs} */
         const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
         const banLog = banLogs.entries.first()
-        if (!banLog || banLog.action !== 'MEMBER_BAN_ADD') return
 
-        const { executor, reason } = banLog
+        const { executor, reason } = banLog || {}
+        const moderator = executor ? `${executor.toString()} ${executor.tag}` : 'Couldn\'t fetch moderator.'
 
         const embed = new MessageEmbed()
-            .setColor('RED')
+            .setColor('GOLD')
             .setAuthor('Banned user', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 **>** **User:** ${user.toString()} ${user.tag}
-                **>** **Moderator:** ${executor.toString()} ${executor.tag}
+                **>** **Moderator:** ${moderator}
                 **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
             .setImage('https://media.giphy.com/media/fe4dDMD2cAU5RfEaCU/giphy.gif')
@@ -53,19 +54,20 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
+        /** @type {GuildAuditLogs} */
         const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
         const unbanLog = unbanLogs.entries.first()
-        if (!unbanLog || unbanLog.action !== 'MEMBER_BAN_REMOVE') return
 
-        const { executor, reason } = unbanLog
+        const { executor, reason } = unbanLog || {}
+        const moderator = executor ? `${executor.toString()} ${executor.tag}` : 'Couldn\'t fetch moderator.'
 
         const embed = new MessageEmbed()
-            .setColor('BLUE')
+            .setColor('GOLD')
             .setAuthor('Unbanned user', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 **>** **User:** ${user.toString()} ${user.tag}
-                **>** **Moderator:** ${executor.toString()} ${executor.tag}
+                **>** **Moderator:** ${moderator}
                 **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
             .setFooter(`User ID: ${user.id}`)
