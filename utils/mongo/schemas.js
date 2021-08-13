@@ -23,11 +23,13 @@ const disabled = model('disabled', Schema({
     groups: Array
 }), 'disabled')
 
+const errors = model('errors', Schema({
+
+}))
+
 const faq = model('faq', Schema({
-    list: [{
-        question: String,
-        answer: String
-    }]
+    question: String,
+    answer: String
 }), 'faq')
 
 const moderations = model('moderations', Schema({

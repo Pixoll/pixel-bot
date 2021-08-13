@@ -609,7 +609,7 @@ async function pagedEmbed(message, data, template, ...extra) {
  * @param {string} [data.useDocID] Whether to use the document's ID on each data chunk
  */
 async function generateEmbed(message, array, data) {
-    const { number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription, title = 'Item', inLine, hasObjects = true, keyTitle, keys, keysExclude = [], useDocID } = data
+    const { number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription, title = '', inLine, hasObjects = true, keyTitle, keys, keysExclude = [], useDocID } = data
 
     if (array.length === 0) throw new Error('array cannot be empty')
     if (!authorName) throw new Error('authorName cannot be undefined or empty')

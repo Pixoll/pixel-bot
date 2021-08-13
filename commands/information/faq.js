@@ -48,16 +48,15 @@ module.exports = class faq extends Command {
         const { author, channel } = message
 
         // gets the FAQ document from mongodb
-        const FAQ = await faqDocs.findOne({})
-        const faqList = FAQ ? Array(...FAQ.list) : undefined
+        const FAQ = await faqDocs.find({})
 
         if (!subCommand) {
-            if (!faqList || faqList.length === 0) {
+            if (FAQ.length === 0) {
                 return message.say(basicEmbed('blue', 'info', 'The FAQ list is empty.'))
             }
 
             // creates and returns the paged embed containing the FAQ list
-            return await generateEmbed(message, faqList, {
+            return await generateEmbed(message, FAQ, {
                 number: 5,
                 authorName: 'Frequently asked questions',
                 authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
@@ -95,13 +94,13 @@ module.exports = class faq extends Command {
                     return answered = true, collector.stop()
                 }
 
-                // checks if the question is over 256 characters and if the answer is over 1024 characters
-                if (counter === 1 && content.length > 256) {
-                    message.say(basicEmbed('red', 'cross', 'Make sure the question is not longer than 256 characters.'))
+                // checks if the question is over 128 characters and if the answer is over 512 characters
+                if (counter === 1 && content.length > 128) {
+                    message.say(basicEmbed('red', 'cross', 'Make sure the question is not longer than 128 characters.'))
                     return answered = true, collector.stop()
                 }
-                if (counter === 2 && content.length > 1024) {
-                    message.say(basicEmbed('red', 'cross', 'Make sure the answer is not longer than 1024 characters.'))
+                if (counter === 2 && content.length > 512) {
+                    message.say(basicEmbed('red', 'cross', 'Make sure the answer is not longer than 512 characters.'))
                     return answered = true, collector.stop()
                 }
 
@@ -118,13 +117,10 @@ module.exports = class faq extends Command {
                 const [question, answer] = collected.map(({ content }) => content)
 
                 // creates the new document that will be saved into the FAQ list
-                const newDoc = {
-                    list: { question, answer }
-                }
+                const newDoc = { question, answer }
 
                 // adds the new item to the FAQ list
-                if (!FAQ) await new faqDocs(newDoc).save()
-                else await FAQ.updateOne({ $push: newDoc })
+                await new faqDocs(newDoc).save()
 
                 message.say(basicEmbed('green', 'check', 'The new question has been added to the FAQ list.'))
             })
@@ -134,12 +130,12 @@ module.exports = class faq extends Command {
 
         if (!item) return message.say(basicEmbed('red', 'cross', 'Please specify the number of item you want to remove from the FAQ list.'))
 
-        if (!faqList || faqList.length === 0) return message.say(basicEmbed('blue', 'info', 'The FAQ list is empty.'))
+        if (!FAQ || FAQ.length === 0) return message.say(basicEmbed('blue', 'info', 'The FAQ list is empty.'))
 
-        if (item <= 0 || item > faqList.length) return message.say(basicEmbed('red', 'cross', 'That\'s not a valid item number inside the FAQ list.'))
+        if (item <= 0 || item > FAQ.length) return message.say(basicEmbed('red', 'cross', 'That\'s not a valid item number inside the FAQ list.'))
 
         // removes the item from the FAQ list
-        await FAQ.updateOne({ $pull: { list: faqList[--item] } })
+        await FAQ[--item].deleteOne()
 
         message.say(basicEmbed('green', 'check', `Removed item \`${++item}\` from the FAQ list.`))
     }
