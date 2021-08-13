@@ -33,7 +33,13 @@ const prefixesData = require('./database/prefixes')
  * Handler function for every module.
  * @param {CommandoClient} client
  */
-module.exports = (client) => {
+module.exports = async (client) => {
+    // Database
+    await modulesData(client)
+    await prefixesData(client)
+    guildsData(client)
+    membersData(client)
+
     // Modules
     afk(client)
     autoPunish(client)
@@ -56,10 +62,4 @@ module.exports = (client) => {
     owner(client)
     roles(client)
     voice(client)
-
-    // Database
-    guildsData(client)
-    membersData(client)
-    modulesData(client)
-    prefixesData(client)
 }

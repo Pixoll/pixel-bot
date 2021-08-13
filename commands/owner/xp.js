@@ -11,6 +11,7 @@ module.exports = class xp extends Command {
             description: 'Gets the xp.',
             format: 'xp [message]',
             ownerOnly: true,
+            hidden: true,
             args: [{
                 key: 'msg',
                 prompt: 'What is the message to get the XP from?',

@@ -1,10 +1,11 @@
 const { CommandoClient, CommandoMessage, Command } = require('discord.js-commando')
 const { MessageEmbed } = require('discord.js')
-const { customEmoji, basicEmbed, formatPerm, sliceDots } = require('./utils/functions')
+const { customEmoji, basicEmbed, formatPerm, sliceDots, docID } = require('./utils/functions')
 const { stripIndent } = require('common-tags')
 const eventsHandler = require('./utils/events-handler')
 const mongo = require('./utils/mongo/mongo')
 const path = require('path')
+const { errors } = require('./utils/mongo/schemas')
 require('dotenv').config()
 
 const client = new CommandoClient({
@@ -39,7 +40,7 @@ client.on('ready', async () => {
 
     await mongo().then(console.log('Connected to MongoDB!'))
 
-    eventsHandler(client)
+    await eventsHandler(client)
 
     await client.owners[0].send('Debug message: Bot is online.')
 })
@@ -79,13 +80,17 @@ client.on('commandBlock',
  * sends the error message to the bot owner
  * @param {Error} error the error
  * @param {string} type the type of error
- * @param {Command} message the command
+ * @param {Command} command the command
  * @param {CommandoMessage} message the message
  */
-function ownerErrorHandler(error, type, command, message) {
+async function ownerErrorHandler(error, type, command, message) {
     const lentgh = error.name.length + error.message.length + 3
     const stack = error.stack?.substr(lentgh)
-    const _stack = sliceDots(stack, 1018)
+
+    const files = stack.match(/\(([^)]+)\)/g)
+        .map(str => `> ${str}`.replace(/[()]/g, ''))
+        .filter(str => !str.includes('node_modules') && !str.includes('internal'))
+        .join('\n')
 
     const messageLink = message ? `Please go to [this message](${message.url}) for more information.` : ''
     const whatCommand = command ? ` at '${command.name}' command` : ''
@@ -97,9 +102,20 @@ function ownerErrorHandler(error, type, command, message) {
             ${customEmoji('cross')} **An unexpected error happened**
             ${messageLink}
         `)
-        .addField(error.name + whatCommand + ': ' + error.message, '```' + _stack + '```')
+        .addField(error.name + whatCommand + ': ' + error.message, '```' + files + '```')
 
     client.owners[0]?.send(toOwner)
+
+    const doc = {
+        _id: docID(),
+        type: type,
+        name: error.name,
+        message: error.message,
+        command: command.name,
+        files: '```' + files + '```'
+    }
+
+    await new errors(doc).save()
 
     console.log(error.name + whatCommand + ':', error.message)
     console.log(stack)

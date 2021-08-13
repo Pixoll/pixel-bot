@@ -10,6 +10,7 @@ module.exports = class test extends Command {
             memberName: 'test',
             description: 'Testing command.',
             ownerOnly: true,
+            hidden: true,
             args: [{
                 key: 'argument',
                 prompt: 'The argument.',

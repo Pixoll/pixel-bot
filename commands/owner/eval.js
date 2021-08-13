@@ -20,6 +20,7 @@ module.exports = class EvalCommand extends Command {
 			details: 'Only the bot owner(s) may use this command.',
 			format: 'eval [script]',
 			ownerOnly: true,
+			hidden: true,
 			args: [{
 				key: 'script',
 				prompt: 'What code would you like to evaluate?',

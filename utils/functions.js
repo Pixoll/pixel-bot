@@ -633,7 +633,7 @@ async function generateEmbed(message, array, data) {
             const objFilter = key => (keys ? keys.includes(key) : key) && !keysExclude.includes(key)
             const objKeys = hasObjects ? Object.keys(item._doc || item).filter(objFilter) : []
 
-            const docID = useDocID ? item._doc._id : ''
+            const docID = useDocID ? item._doc?._id || item._id : ''
             const suffix = capitalize(item[keyTitle?.prefix] || '')
             const prefix = docID || formatDate(item[keyTitle?.suffix] / 1) || item[keyTitle?.suffix] || start + index + 1
 

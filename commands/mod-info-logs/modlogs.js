@@ -50,7 +50,7 @@ module.exports = class modlogs extends Command {
         await generateEmbed(message, modLogs, {
             authorName: `${user?.username || guild.name}'s moderation logs`,
             authorIconURL: avatarURL,
-            title: ' | ID:',
+            title: ' |  ID:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['__v', 'updatedAt', 'type', 'guild', '_id', user ? 'mod' : null],
             useDocID: true

@@ -24,8 +24,13 @@ const disabled = model('disabled', Schema({
 }), 'disabled')
 
 const errors = model('errors', Schema({
-
-}))
+    _id: String,
+    type: String,
+    name: String,
+    message: String,
+    command: String,
+    files: String,
+}, { timestamps: true }))
 
 const faq = model('faq', Schema({
     question: String,
@@ -136,6 +141,7 @@ module.exports = {
     active,
     afk,
     disabled,
+    errors,
     faq,
     mcIp,
     moderations,

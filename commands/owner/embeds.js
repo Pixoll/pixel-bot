@@ -14,7 +14,8 @@ module.exports = class embeds extends Command {
             group: 'owner',
             memberName: 'embeds',
             description: 'Spams all the colors of the embeds.',
-            ownerOnly: true
+            ownerOnly: true,
+            hidden: true
         })
     }
 
