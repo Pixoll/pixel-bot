@@ -48,11 +48,9 @@ client.on('ready', async () => {
 // Command block handling
 client.on('commandBlock',
     /**
-     * @param {CommandoMessage} message
-     * @param {string} reason
-     * @param {object} data
-     * @param {number} data.remaining
-     * @param {string[]} data.missing
+     * @param {object} [data]
+     * @param {number} [data.remaining]
+     * @param {string[]} [data.missing]
      */
     (message, reason, data) => {
         const { name, userPermissions } = message.command
@@ -76,6 +74,34 @@ client.on('commandBlock',
     }
 )
 
+// Command error handling
+client.on('commandError', async (command, error, message) => {
+    const { tag } = client.owners[0]
+    const { invite } = client.options
+
+    const reply = new MessageEmbed()
+        .setColor('RED')
+        .setDescription(stripIndent`
+            ${customEmoji('cross')} **An unexpected error happened**
+            Please contact ${tag} or join the [support server](${invite}).
+        `)
+        .addField(error.name, '```' + error.message + '```')
+
+    await message.say(reply)
+
+    ownerErrorHandler(error, 'Command error', command, message)
+})
+
+process.on('unhandledRejection', error => ownerErrorHandler(error, 'Unhandled rejection'))
+process.on('uncaughtException', error => ownerErrorHandler(error, 'Uncaught exception'))
+process.on('uncaughtExceptionMonitor', error => ownerErrorHandler(error, 'Uncaught exception monitor'))
+process.on('warning', error => ownerErrorHandler(error, 'Process warning'))
+client.on('error', error => ownerErrorHandler(error, 'Client error'))
+
+client.on('warn', warn => console.log(false, warn))
+
+client.login()
+
 /**
  * sends the error message to the bot owner
  * @param {Error} error the error
@@ -89,7 +115,7 @@ async function ownerErrorHandler(error, type, command, message) {
 
     const files = stack.match(/\(([^)]+)\)/g)
         .map(str => `> ${str}`.replace(/[()]/g, ''))
-        .filter(str => !str.includes('node_modules') && !str.includes('internal'))
+        .filter(str => !str.includes('node_modules') && !str.includes('internal') && !str.includes('anonymous'))
         .join('\n')
 
     const messageLink = message ? `Please go to [this message](${message.url}) for more information.` : ''
@@ -120,31 +146,3 @@ async function ownerErrorHandler(error, type, command, message) {
     console.log(error.name + whatCommand + ':', error.message)
     console.log(stack)
 }
-
-// Command error handling
-client.on('commandError', async (command, error, message) => {
-    const { tag } = client.owners[0]
-    const { invite } = client.options
-
-    const reply = new MessageEmbed()
-        .setColor('RED')
-        .setDescription(stripIndent`
-            ${customEmoji('cross')} **An unexpected error happened**
-            Please contact ${tag} or join the [support server](${invite}).
-        `)
-        .addField(error.name, '```' + error.message + '```')
-
-    await message.say(reply)
-
-    ownerErrorHandler(error, 'Command error', command, message)
-})
-
-process.on('unhandledRejection', error => ownerErrorHandler(error, 'Unhandled rejection'))
-process.on('uncaughtException', error => ownerErrorHandler(error, 'Uncaught exception'))
-process.on('uncaughtExceptionMonitor', error => ownerErrorHandler(error, 'Uncaught exception monitor'))
-process.on('warning', error => ownerErrorHandler(error, 'Process warning'))
-client.on('error', error => ownerErrorHandler(error, 'Client error'))
-
-client.on('warn', warn => console.log(false, warn))
-
-client.login()
