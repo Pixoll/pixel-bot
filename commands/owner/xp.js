@@ -36,9 +36,10 @@ module.exports = class xp extends Command {
         const tasksList = []
         for (const row of table) {
             const [,, val, ...task] = row.split(' ')
-            if (!val || val === '/') continue
+            const last = task.pop()
+            if (!val || val === '/' || last === '/') continue
 
-            const _xp = Number(task.pop())
+            const _xp = Number(last)
             XP += _xp
 
             tasksList.push({
