@@ -1,6 +1,5 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { ms } = require('../../utils/custom-ms')
-const { pluralize } = require('../../utils/functions')
 
 module.exports = class xp extends Command {
     constructor(client) {
@@ -33,55 +32,67 @@ module.exports = class xp extends Command {
         const table = msg.content.replace(/ +/g, ' ').split('\n').slice(4)
 
         var XP = 0
-        const tasksList = []
+        const tasks = []
         for (const row of table) {
-            const [,, val, ...task] = row.split(' ')
-            const last = task.pop()
+            const [, , val, ..._task] = row.split(' ')
+            const last = _task.pop()
+
             if (!val || val === '/' || last === '/') continue
 
-            const _xp = Number(last)
-            XP += _xp
+            XP += Number(last)
 
-            tasksList.push({
-                val: Number(val.slice(0, -1)),
-                task: task.join(' ')
-            })
+            var task = _task.join(' ').toLowerCase()
+            while (task.endsWith('/')) task = task.split(' ').slice(0, -2).join(' ')
+
+            if (task === 'meeting') task = 'meetings'
+            if (task.endsWith('event')) task = 'events'
+
+            const match = tasks.find(target => target.task === task)
+            const index = tasks.indexOf(match)
+
+            /** @type {number} */
+            const amount = (Number(val.slice(0, -1)) || 1) + (match?.amount || 0)
+
+            const newTask = { amount, task }
+
+            if (!match) tasks.push(newTask)
+            else tasks.splice(index, 1, newTask)
         }
 
         if (!XP) return message.reply('you got no XP. :c')
 
-        const tasks = []
-        for (const { task } of tasksList) {
-            const match = tasks.find(arr => arr.task === task)
-            if (match) continue
+        const command = tasks
+            .sort((a, b) => {
+                var taskA = a.task.toUpperCase()
+                var taskB = b.task.toUpperCase()
 
-            const matches = tasksList.filter(target => target.task === task)
-            const plural = pluralize(task, matches.length, false)
+                if (taskA < taskB) return -1
+                if (taskA > taskB) return 1
+                return 0
+            })
+            .map(({ amount, task }) => {
+                const _suffix = () => {
+                    const str = task.toLowerCase()
+                    if (str.includes('work') || str === 'events') return 'h'
+                    return 'x'
+                }
 
-            var amount = 0
-            for (const { val } of matches) amount += val
+                const suffix = _suffix()
+                const val = amount + suffix
 
-            tasks.push({ amount, task, plural })
-        }
+                if (suffix === 'x') return `- ${val} ${task}`
 
-        const command = tasks.map(({ amount, plural }) => {
-            const _suffix = () => {
-                const str = plural.toLowerCase()
-                if (str.includes('work') || str.includes('event') || str.includes('meeting')) return 'h'
-                return 'x'
-            }
+                const time = ms(ms(val)).replace(', ', '')
+                return `- ${time} ${task}`
+            }).join('\n')
 
-            if (!amount) return plural
+        await message.delete()
 
-            const suffix = _suffix()
-            const val = amount + suffix
+        const m = await message.say(`${week}\n\`\`\`!xp ${XP}\n${command}\`\`\``)
+        await m.pin()
 
-            if (suffix === 'x') return `${val} ${plural}`
-
-            const time = ms(ms(val)).replace(', ', '')
-            return `${time} ${plural}`
-        }).join(', ')
-
-        message.say(`${week} \`!xp ${XP} ${command}\``).then(msg => msg.pin())
+        const msgs = await message.channel.messages.fetch({ after: m.id }, false, true)
+        const target = msgs.filter(({ reference }) => reference.messageID === m.id).first()
+        await target.delete()
     }
 }
