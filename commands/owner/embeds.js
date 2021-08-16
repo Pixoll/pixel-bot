@@ -1,10 +1,18 @@
 const { MessageEmbed } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
+const { formatPerm } = require('../../utils/functions')
 
 const colors = [
-    'DEFAULT', 'WHITE', 'AQUA', 'GREEN', 'BLUE', 'YELLOW', 'PURPLE', 'LUMINOUS_VIVID_PINK', 'GOLD', 'ORANGE', 'RED', 'GREY',
-    'DARKER_GREY', 'NAVY', 'DARK_AQUA', 'DARK_GREEN', 'DARK_BLUE', 'DARK_PURPLE', 'DARK_VIVID_PINK', 'DARK_GOLD', 'DARK_ORANGE',
-    'DARK_RED', 'DARK_GREY', 'LIGHT_GREY', 'DARK_NAVY', 'BLURPLE', 'GREYPLE', 'DARK_BUT_NOT_BLACK', 'NOT_QUITE_BLACK', 'RANDOM'
+    'default',              'white',                'aqua',
+    'green',                'blue',                 'yellow',
+    'purple',               'luminous_vivid_pink',  'gold',
+    'orange',               'red',                  'grey',
+    'darker_grey',          'navy',                 'dark_aqua',
+    'dark_green',           'dark_blue',            'dark_purple',
+    'dark_vivid_pink',      'dark_gold',            'dark_orange',
+    'dark_red',             'dark_grey',            'light_grey',
+    'dark_navy',            'blurple',              'greyple',
+    'dark_but_not_black',   'not_quite_black',      'random'
 ]
 
 module.exports = class embeds extends Command {
@@ -15,7 +23,14 @@ module.exports = class embeds extends Command {
             memberName: 'embeds',
             description: 'Spams all the colors of the embeds.',
             ownerOnly: true,
-            hidden: true
+            hidden: true,
+            args: [{
+                key: 'color',
+                prompt: 'The color of the embed.',
+                type: 'string',
+                oneOf: colors,
+                default: ''
+            }]
         })
     }
 
@@ -24,14 +39,20 @@ module.exports = class embeds extends Command {
 
     /**
      * @param {CommandoMessage} message The message
+     * @param {object} args The arguments
+     * @param {string} args.color The color of the embed
      */
-    async run(message) {
-        for (const color of colors) {
-            const embed = new MessageEmbed()
-                .setColor(color)
-                .setDescription(color)
+    async run(message, { color }) {
+        const embed = /** @param {string} Color */ Color =>
+            new MessageEmbed()
+                .setColor(Color.toUpperCase())
+                .setDescription(formatPerm(Color))
 
-            await message.say(embed)
+        if (color) message.say(embed(color))
+        else {
+            for (const _color of colors) {
+                await message.say(embed(_color))
+            }
         }
     }
 }
