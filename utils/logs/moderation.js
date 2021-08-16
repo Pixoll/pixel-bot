@@ -8,23 +8,26 @@ const { setup, modules } = require('../mongo/schemas')
  * Handles all of the moderation logs.
  * @param {CommandoClient} client
  */
-module.exports = (client) => {client.on('guildMemberRemove', async _member => {
-    /** @type {GuildMember} */
-    const { guild, user, id } = await fetchPartial(_member)
+module.exports = (client) => {
+    client.on('guildMemberRemove', async _member => {
+        /** @type {GuildMember} */
+        const { guild, user, id } = await fetchPartial(_member)
 
-    if (!guild.available || id === client.user.id) return
+        if (!guild.available || id === client.user.id) return
 
-    const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
-    if (!status) return
+        const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
+        if (!status) return
 
-    const logsChannel = await getLogsChannel(setup, guild)
-    if (!logsChannel) return
+        const logsChannel = await getLogsChannel(setup, guild)
+        if (!logsChannel) return
 
-    const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-    const kickLog = kickLogs.entries.first()
+        /** @type {GuildAuditLogs} */
+        const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
+        const kickLog = kickLogs.entries.first()
+        if (!kickLog || kickLog.action !== 'MEMBER_KICK') return
 
-    if (kickLog?.action === 'MEMBER_KICK') {
-        const { executor, reason } = kickLog
+        const { executor, reason, target } = kickLog
+        if (target.id !== user.id) return
 
         const kick = new MessageEmbed()
             .setColor('ORANGE')
@@ -39,8 +42,7 @@ module.exports = (client) => {client.on('guildMemberRemove', async _member => {
             .setTimestamp()
 
         logsChannel.send(kick)
-    }
-})
+    })
 
     client.on('guildBanAdd', async (guild, _user) => {
         if (!guild.available) return

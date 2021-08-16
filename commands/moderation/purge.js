@@ -1,7 +1,8 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { User } = require('discord.js')
+const { User, Collection, Message } = require('discord.js')
 const { validURL, basicEmbed } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
+const { ms } = require('../../utils/custom-ms')
 
 /**
  * filters the messages according to the specfied filter
@@ -35,6 +36,18 @@ async function bulkDelete(message, messages) {
     await message.delete().catch(() => null)
     const bulk = await message.channel.bulkDelete(messages)
     return message.say(basicEmbed('green', 'check', `Deleted ${bulk.size} messages.`)).then(msg => msg.delete({ timeout: 5000 }).catch(() => null))
+}
+
+/**
+ * filters the fetched messages
+ * @param {Message} msg the message to filter
+ */
+function msgFilter(msg) {
+    const isPinned = msg.pinned
+    const ageStr = ms(Date.now() - msg.createdTimestamp)
+    const isOver14 = ms(ageStr) >= ms('14d')
+
+    return !isPinned && !isOver14
 }
 
 module.exports = class purge extends Command {
@@ -101,8 +114,9 @@ module.exports = class purge extends Command {
      */
     async run(message, { subCommand, filter, number }) {
         // gets the last 100 messages
+        /** @type {Collection<string, Message>} */
         const fetch = await message.channel.messages.fetch({ limit: 100, before: message.id }, false, true).catch(() => null)
-        const messages = fetch.filter(({ pinned }) => !pinned).map(msg => msg)
+        const messages = fetch.filter(msgFilter).map(msg => msg)
 
         if (typeof subCommand === 'number') {
             if (subCommand < 1 || subCommand > 100) return message.say(basicEmbed('red', 'cross', 'Please enter a number from 1 to 100.'))
