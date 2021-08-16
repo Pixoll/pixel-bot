@@ -23,8 +23,6 @@ module.exports = (client) => {client.on('guildMemberRemove', async _member => {
     const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
     const kickLog = kickLogs.entries.first()
 
-    console.log(kickLog?.action)
-
     if (kickLog?.action === 'MEMBER_KICK') {
         const { executor, reason } = kickLog
 
