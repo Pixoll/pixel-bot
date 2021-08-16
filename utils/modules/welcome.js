@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, TextChannel } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { moduleStatus } = require('../functions')
 const { welcome, modules } = require('../mongo/schemas')
@@ -33,9 +33,13 @@ module.exports = (client) => {
         }
 
         if (!data.channel && !data.message) return
+
+        /** @type {TextChannel} */
         const channel = guild.channels.resolve(data.channel)
         if (!channel) return
 
-        channel.send(format(data.message)).catch(() => null)
+        channel.send(format(data.message))
+            .then(msg => msg.suppressEmbeds().catch(() => null))
+            .catch(() => null)
     })
 }
