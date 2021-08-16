@@ -1,5 +1,5 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, User, GuildAuditLogs } = require('discord.js')
+const { MessageEmbed, User, GuildAuditLogs, GuildMember } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
 const { moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
 const { setup, modules } = require('../mongo/schemas')
@@ -8,7 +8,42 @@ const { setup, modules } = require('../mongo/schemas')
  * Handles all of the moderation logs.
  * @param {CommandoClient} client
  */
-module.exports = (client) => {
+module.exports = (client) => {client.on('guildMemberRemove', async _member => {
+    /** @type {GuildMember} */
+    const { guild, user, id } = await fetchPartial(_member)
+
+    if (!guild.available || id === client.user.id) return
+
+    const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
+    if (!status) return
+
+    const logsChannel = await getLogsChannel(setup, guild)
+    if (!logsChannel) return
+
+    const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
+    const kickLog = kickLogs.entries.first()
+
+    console.log(kickLog?.action)
+
+    if (kickLog?.action === 'MEMBER_KICK') {
+        const { executor, reason } = kickLog
+
+        const kick = new MessageEmbed()
+            .setColor('ORANGE')
+            .setAuthor('Kicked user', user.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
+            .setDescription(stripIndent`
+                **>** **User:** ${user.toString()} ${user.tag}
+                **>** **Moderator:** ${executor.toString()} ${executor.tag}
+                **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
+            `)
+            .setFooter(`User ID: ${id}`)
+            .setTimestamp()
+
+        logsChannel.send(kick)
+    }
+})
+
     client.on('guildBanAdd', async (guild, _user) => {
         if (!guild.available) return
 

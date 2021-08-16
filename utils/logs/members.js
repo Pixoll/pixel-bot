@@ -68,27 +68,6 @@ module.exports = (client) => {
             .setTimestamp()
 
         logsChannel.send(embed)
-
-        const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-        const kickLog = kickLogs.entries.first()
-
-        if (kickLog && kickLog.action === 'MEMBER_KICK') {
-            const { executor, reason } = kickLog
-
-            const kick = new MessageEmbed()
-                .setColor('ORANGE')
-                .setAuthor('Kicked user', user.displayAvatarURL({ dynamic: true }))
-                .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
-                .setDescription(stripIndent`
-                    **>** **User:** ${user.toString()} ${user.tag}
-                    **>** **Moderator:** ${executor.toString()} ${executor.tag}
-                    **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
-                `)
-                .setFooter(`User ID: ${id}`)
-                .setTimestamp()
-
-            logsChannel.send(kick)
-        }
     })
 
     client.on('guildMemberUpdate', async (_oldMember, _newMember) => {
