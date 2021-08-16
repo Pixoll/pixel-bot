@@ -110,11 +110,19 @@ client.login()
  * @param {CommandoMessage} message the message
  */
 async function ownerErrorHandler(error, type, command, message) {
+    console.error(error)
+
     const lentgh = error.name.length + error.message.length + 3
     const stack = error.stack?.substr(lentgh)
+    const root = '/' + __dirname.split(/[\\/]/g).pop()
 
-    const files = stack.match(/\(([^)]+)\)/g)
-        .map(str => `> ${str}`.replace(/[()]/g, ''))
+    const files = stack.match(/at ([\w\.]+) \(([^)]+)\)/g)
+        .map(str => `> ${str}`
+            .replace(/[()]/g, '')
+            .replace(__dirname, root)
+            .replace(/ (C|\/)/g, ' in$&')
+            .replace(/([\\]+)/g, '/')
+        )
         .filter(str => !str.includes('node_modules') && !str.includes('internal') && !str.includes('anonymous'))
         .join('\n')
 
@@ -137,12 +145,9 @@ async function ownerErrorHandler(error, type, command, message) {
         type: type,
         name: error.name,
         message: error.message,
-        command: command.name,
+        command: command?.name,
         files: '```' + files + '```'
     }
 
     await new errors(doc).save()
-
-    console.log(error.name + whatCommand + ':', error.message)
-    console.log(stack)
 }

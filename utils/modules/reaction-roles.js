@@ -48,13 +48,13 @@ module.exports = (client) => {
         /** @type {MessageReaction} */
         const { message, emoji } = await fetchPartial(_reaction)
         const { guild } = message
-        const { roles, members } = guild
         const reaction = emoji.id || emoji.name
 
         /** @type {User} */
         const { bot, id } = await fetchPartial(_user)
 
         if (bot || !guild) return
+        const { roles, members } = guild
 
         const rRoles = await reactionRoles.find({})
         if (rRoles.length === 0) return
