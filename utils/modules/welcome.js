@@ -33,7 +33,7 @@ module.exports = (client) => {
         }
 
         if (!data.channel && !data.message) return
-        const channel = guild.channels.cache.filter(ch => ch.type === 'text').find(ch => ch.id === data.channel)
+        const channel = guild.channels.resolve(data.channel)
         if (!channel) return
 
         channel.send(format(data.message)).catch(() => null)
