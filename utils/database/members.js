@@ -40,7 +40,7 @@ module.exports = (client) => {
             const first = id !== guild.id
             const second = ![data?.memberRole, data?.botRole].includes(id)
 
-            const botMember = members.cache.get(botID) || await members.fetch(botID).catch(() => null)
+            const botMember = await members.fetch({ user: botID, cache: false }).catch(() => null)
             const third = position < botMember.roles.highest.position
 
             return first && second && third

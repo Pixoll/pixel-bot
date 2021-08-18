@@ -14,7 +14,7 @@ module.exports = (client) => {
 
         for (const poll of pollsData) {
             /** @type {Guild} */
-            const guild = guilds.cache.get(data.guild) || await guilds.fetch(poll.guild, false, true).catch(() => null)
+            const guild = await guilds.fetch(poll.guild, false).catch(() => null)
             if (!guild) continue
 
             /** @type {NewsChannel|TextChannel} */
@@ -22,7 +22,7 @@ module.exports = (client) => {
             if (!channel) continue
 
             /** @type {Message} */
-            const message = await channel.messages.fetch(poll.message, false, true).catch(() => null)
+            const message = await channel.messages.fetch(poll.message, false).catch(() => null)
             if (!message) continue
 
             const reactions = message.reactions.cache.map(r => r).filter(({ emoji }) => poll.emojis.includes(emoji.id || emoji.name))

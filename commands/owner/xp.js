@@ -91,7 +91,7 @@ module.exports = class xp extends Command {
         const m = await message.say(`${week}\n\`\`\`!xp ${XP}\n${command}\`\`\``)
         await m.pin()
 
-        const msgs = await message.channel.messages.fetch({ after: m.id }, false, true)
+        const msgs = await message.channel.messages.fetch({ after: m.id }, false)
         const target = msgs.filter(({ reference }) => reference.messageID === m.id).first()
         await target.delete()
     }

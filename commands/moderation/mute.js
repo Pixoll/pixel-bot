@@ -65,7 +65,9 @@ module.exports = class mute extends Command {
         const { user } = member
         const isOwner = guild.ownerID === author.id
         const botID = this.client.user.id
-        const roles = guild.roles.cache
+
+        const _roles = await guild.roles.fetch()
+        const roles = _roles.cache
 
         const data = await setup.findOne({ guild: guild.id })
         if (!data || !data.mutedRole) return message.say(basicEmbed('red', 'cross', 'No mute role found in this server, please use the `setup` command before using this.'))

@@ -63,8 +63,8 @@ module.exports = class modlog extends Command {
 
         const { users } = this.client
 
-        const user = users.cache.get(modLog.user) || await users.fetch(modLog.user, false, true).catch(() => null)
-        const moderator = users.cache.get(modLog.mod) || await users.fetch(modLog.mod, false, true).catch(() => null)
+        const user = await users.fetch(modLog.user, false).catch(() => null)
+        const moderator = await users.fetch(modLog.mod, false).catch(() => null)
         const duration = modLog.duration ? `**>** **Duration:** ${modLog.duration}` : ''
 
         const modlogInfo = new MessageEmbed()

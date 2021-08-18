@@ -1,4 +1,4 @@
-const { User } = require('discord.js')
+const { User, GuildMember } = require('discord.js')
 const { Command, CommandoMessage } = require('discord.js-commando')
 const { docID, isMod, basicEmbed } = require('../../utils/functions')
 const { moderations } = require('../../utils/mongo/schemas')
@@ -60,7 +60,8 @@ module.exports = class ban extends Command {
         const isBanned = await message.guild.fetchBan(user).catch(() => null)
         if (isBanned) return message.say(basicEmbed('red', 'cross', 'That user is already banned.'))
 
-        const member = message.guild.members.cache.get(user.id)
+        /** @type {GuildMember} */
+        const member = await message.guild.members.fetch({ user: user.id, cache: false }).catch(() => null)
         if (member) {
             if (!member?.bannable) return message.say(basicEmbed('red', 'cross', `Unable to ban ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
             if (!isOwner && isMod(member)) return message.say(basicEmbed('red', 'cross', 'That user is a mod/admin, you can\'t ban them.'))

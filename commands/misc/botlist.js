@@ -19,7 +19,8 @@ module.exports = class botlist extends Command {
     /** @param {CommandoMessage} message */
     async run(message) {
         // gets a list of the bots in the server
-        const botList = message.guild.members.cache.filter(({ user: { bot } }) => bot).map(bot => bot)
+        const members = await message.guild.members.fetch()
+        const botList = members.filter(({ user: { bot } }) => bot).map(bot => bot)
 
         await generateEmbed(message, botList, {
             number: 20,

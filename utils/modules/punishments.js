@@ -14,10 +14,10 @@ module.exports = (client) => {
 
         for (const mod of mods) {
             /** @type {CommandoGuild} */
-            const guild = guilds.cache.get(data.guild) || await guilds.fetch(mod.guild, false, true).catch(() => null)
+            const guild = await guilds.fetch(mod.guild, false).catch(() => null)
             if (!guild) continue
 
-            const user = users.cache.get(mod.user) || await users.fetch(mod.user, false, true).catch(() => null)
+            const user = await users.fetch(mod.user, false).catch(() => null)
             if (!user) continue
             const member = guild.members.cache.get(user.id)
 

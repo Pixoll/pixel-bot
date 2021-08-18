@@ -12,7 +12,7 @@ module.exports = async (client) => {
 
     for (const data of Disabled) {
         /** @type {CommandoGuild} */
-        const guild = guilds.cache.get(data.guild) || await guilds.fetch(data.guild, false, true).catch(() => null)
+        const guild = await guilds.fetch(data.guild, false).catch(() => null)
 
         if (!guild) {
             await data.deleteOne()

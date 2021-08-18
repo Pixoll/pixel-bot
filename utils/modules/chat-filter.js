@@ -82,7 +82,7 @@ module.exports = (client) => {
         const toggled = await modules.findOne({ guild: message.guild.id })
         if (toggled && typeof (toggled.chatFilter) === 'boolean' && !toggled.chatFilter) return
 
-        message.channel.messages.fetch({}, false, true).then(async messages => {
+        message.channel.messages.fetch({}, false).then(async messages => {
             const filtered = messages.filter(msg => msg.author === message.author && (new Date() - new Date(msg.createdTimestamp)) < 5000)
             if (filtered.size < 5) return
 

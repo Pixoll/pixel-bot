@@ -16,7 +16,7 @@ module.exports = (client) => {
 
         for (const reminder of data) {
             /** @type {User} */
-            const user = users.cache.get(reminder.user) || await users.fetch(reminder.user, false, true).catch(() => null)
+            const user = await users.fetch(reminder.user, false).catch(() => null)
             if (!user) continue
 
             /** @type {TextChannel|NewsChannel|DMChannel} */

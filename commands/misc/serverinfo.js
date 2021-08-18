@@ -1,5 +1,5 @@
 const { Command, CommandoMessage, CommandoGuild } = require('discord.js-commando')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, RoleManager } = require('discord.js')
 const { stripIndent } = require('common-tags')
 
 const ownerCrown = '<a:owner_crown:806558872440930425>'
@@ -27,6 +27,8 @@ function getServerInfo(guild) {
     const text = channels.cache.filter(({ type }) => type === 'text').size
     const voice = channels.cache.filter(({ type }) => type === 'voice').size
 
+    const _roles = await roles.fetch()
+
     const serverInfo = new MessageEmbed()
         .setColor('RANDOM')
         .setAuthor(name, guild.iconURL({ dynamic: true }))
@@ -48,7 +50,7 @@ function getServerInfo(guild) {
                         **>** **Server Boost Level:** ${premiumTier}${boostLevel(premiumTier)}
                         **>** **Server Boosts:** ${premiumSubscriptionCount} ${boost}
                         **>** **Members:** ${memberCount}
-                        **>** **Roles:** ${roles.cache.size}
+                        **>** **Roles:** ${_roles.cache.size}
                     `,
                 inline: true
             }

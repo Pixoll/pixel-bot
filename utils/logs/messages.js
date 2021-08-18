@@ -101,14 +101,13 @@ module.exports = (client) => {
         logsChannel.send(embed)
     })
 
-    client.on('messageUpdate', async (_oldMessage, _newMessage) => {
-        /** @type {Message} */
-        const oldMessage = await fetchPartial(_oldMessage)
+    client.on('messageUpdate', async (oldMessage, _newMessage) => {
         /** @type {Message} */
         const newMessage = await fetchPartial(_newMessage)
 
-        const { guild, channel, author, content: content1, url, id } = oldMessage
-        const { content: content2 } = newMessage
+        const { content: content1 } = oldMessage
+        const { guild, channel, author, content: content2, url, id } = newMessage
+
         if (!guild || author.bot || content1 === content2) return
 
         const status = await moduleStatus(modules, guild, 'auditLogs', 'messages')
@@ -117,7 +116,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(setup, guild)
         if (!logsChannel) return
 
-        const oldContent = sliceDots(content1, 1024)
+        const oldContent = content1 !== null ? sliceDots(content1, 1024) || '`Empty`' : '`Couldn\'t fetch message content.`'
         const newContent = sliceDots(content2, 1024)
 
         const embed = new MessageEmbed()
@@ -129,8 +128,8 @@ module.exports = (client) => {
                 **>** **Channel:** ${channel.toString()} ${channel.name}
             `)
             .addFields(
-                { name: 'Before', value: oldContent || '`Empty`' },
-                { name: 'After', value: newContent || '`Empty`' }
+                { name: 'Before', value: oldContent },
+                { name: 'After', value: newContent }
             )
             .setFooter(`Message ID: ${id}`)
             .setTimestamp()

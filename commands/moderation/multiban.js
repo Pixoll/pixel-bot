@@ -8,29 +8,33 @@ const { stripIndent } = require('common-tags')
  * gets all the users separated by commas
  * @param {string} string the string containing the users
  * @param {CommandoMessage} message the command message
- * @returns {GuildMember[]}
  */
-function getMembers(string, message) {
+async function getMembers(string, message) {
     const isOwner = message.guild.ownerID === message.author.id
     const botID = message.client.user.id
-    const highestBot = message.guild.members.cache.get(botID).roles.highest.position
     const array = string.toLowerCase().split(/\s*,\s*/)
 
     const membersList = []
     for (const str of array) {
-        const member = message.guild.members.cache.get(str.replace(/[^0-9]/g, '')) || message.guild.members.cache.find(({ user }) => user.username.toLowerCase() === str || user.tag.toLowerCase() === str)
+        const memberByID = await message.guild.members.fetch({ user: str.replace(/[^0-9]/g, ''), cache: false }).catch(() => null)
+        const memberByQuery = !memberByID ? await message.guild.members.fetch({ query: str, limit: 1 }).catch(() => null) : null
+
+        /** @type {GuildMember} */
+        const member = memberByID || memberByQuery.first()
+
         if (member) membersList.push(member)
     }
 
     /** @param {GuildMember} member */
-    function filter(member) {
+    const filter = member => {
         if (member.user.id !== botID && member.user.id !== message.author.id) {
             if (!member.bannable) return false
             if (isOwner) return true
             return !isMod(member)
         }
     }
-    return membersList.filter(member => filter(member))
+
+    return membersList.filter(filter)
 }
 
 module.exports = class multiban extends Command {
@@ -51,10 +55,8 @@ module.exports = class multiban extends Command {
                 key: 'members',
                 prompt: 'What members do you want to ban?',
                 type: 'string',
-                /** @param {string} string @param {CommandoMessage} message */
-                parse: (string, message) => getMembers(string, message),
-                /** @param {string} string @param {CommandoMessage} message */
-                validate: (string, message) => getMembers(string, message).length >= 1,
+                parse: async (string, message) => await getMembers(string, message),
+                validate: async (string, message) => await getMembers(string, message).length >= 1,
                 error: 'I couldn\'t find any of the members you specified. Please check the role hierarchy and server ownership.'
             }]
         })

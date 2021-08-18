@@ -35,13 +35,20 @@ module.exports = class roles extends Command {
      * @param {object} args The arguments
      * @param {GuildMember} args.member The member to get the roles from
      */
-     async run(message, { member }) {
+    async run(message, { member }) {
         const { guild } = message
-        const rolesCache = member.roles?.cache.filter(({ id }) => id !== message.guild.id) || guild.roles.cache.filter(({ id }) => id !== message.guild.id)
+
+        const filter = ({ id }) => id !== message.guild.id
+        const memberRoles = member.roles?.cache.filter(filter)
+        const guildRoles = !memberRoles ? await guild.roles.fetch() : null
+
+        const rolesCache = memberRoles || guildRoles?.cache
+        if (!rolesCache) return message.say(basicEmbed('red', 'cross', 'There was an error trying to get the roles of the server.'))
+
         const name = member.user?.username || guild.name
         const avatar = member.user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        const roles = !!rolesCache.size ? rolesCache.map(role => role).sort((a, b) => b.position - a.position) : ['This member has no roles.']
+        const roles = !!rolesCache?.size ? rolesCache.map(role => role).sort((a, b) => b.position - a.position) : ['This member has no roles.']
 
         await generateEmbed(message, roles, {
             number: 20,

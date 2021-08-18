@@ -17,6 +17,7 @@ module.exports = class discriminator extends Command {
                 key: 'discriminator',
                 prompt: 'What discriminator do you want to look for?',
                 type: 'integer',
+                parse: discrim => discrim.padStart(4, '0').slice(-4),
                 min: 1,
                 max: 9999
             }]
@@ -31,9 +32,11 @@ module.exports = class discriminator extends Command {
      * @param {object} args The arguments
      * @param {number} args.discriminator The discriminator to filter displayed members
      */
-     async run(message, { discriminator: discrim }) {
-        // looks for members matching 'discrim' and returns if found none
-        const match = message.guild.members.cache.filter(({ user: { discriminator } }) => parseInt(discriminator) === discrim).map(member => member)
+     async run(message, { discriminator }) {
+        // looks for members matching 'discriminator' and returns if found none
+        const members = await message.guild.members.fetch()
+        const match = members?.filter(({ user }) => user.discriminator === discriminator).map(member => member)
+
         if (match.length === 0) return message.say(basicEmbed('red', 'cross', 'I couldn\'t find any members.'))
 
         await generateEmbed(message, match, {

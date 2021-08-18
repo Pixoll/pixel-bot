@@ -22,7 +22,8 @@ module.exports = class moderators extends Command {
     async run(message) {
         const { guild } = message
 
-        const moderators = guild.members.cache.filter(member => isMod(member) && !member.user.bot)
+        const members = await message.guild.members.fetch()
+        const moderators = members.filter(member => isMod(member) && !member.user.bot)
         if (moderators.size === 0) return message.say(basicEmbed('blue', 'info', 'There are no moderators.'))
 
         const modsList = moderators.map(({ user, roles }) => {

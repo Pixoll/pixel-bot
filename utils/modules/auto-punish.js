@@ -15,18 +15,18 @@ module.exports = (client) => {
 
         for (const warn of warns) {
             /** @type {CommandoGuild} */
-            const guild = guilds.cache.get(warn.guild) || await guilds.fetch(warn.guild, false, true).catch(() => null)
+            const guild = await guilds.fetch(warn.guild, false).catch(() => null)
             if (!guild) continue
 
             const status = await moduleStatus(modules, guild, 'autoMod')
             if (!status) return
 
             /** @type {User} */
-            const user = users.cache.get(warn.user) || await users.fetch(warn.user, false, true).catch(() => null)
+            const user = await users.fetch(warn.user, false).catch(() => null)
             if (!user) continue
 
             const { members } = guild
-            const member = members.cache.get(user.id) || await members.fetch(user.id).catch(() => null)
+            const member = await members.fetch({ user: user.id, cache: false }).catch(() => null)
 
             const invites = await moderations.find({ type: 'warn', guild: guild.id, user: user.id, reason: 'Posted an invite' })
             if (invites.length > 2) { // Ban

@@ -89,7 +89,7 @@ client.on('commandError', async (command, error, message) => {
 
     await message.say(reply)
 
-    ownerErrorHandler(error, 'Command error', command, message)
+    await ownerErrorHandler(error, 'Command error', command, message)
 })
 
 process.on('unhandledRejection', error => ownerErrorHandler(error, 'Unhandled rejection'))

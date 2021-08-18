@@ -7,10 +7,10 @@ const { stripIndent } = require('common-tags')
  * creates an embed with the user's info
  * @param {CommandoGuild} guild the server
  * @param {User} user the user
- * @returns {MessageEmbed}
  */
-function userInfo(guild, user) {
-    const member = guild?.members.cache.get(user.id)
+async function userInfo(guild, user) {
+    /** @type {GuildMember} */
+    const member = await guild?.members.fetch({ user: user.id, cache: false }).catch(() => null)
 
     const permissions = getKeyPerms(member)
 
@@ -80,7 +80,9 @@ module.exports = class whois extends Command {
      * @param {User} args.user The user to get information from
      */
     async run(message, { user }) {
-        if (!user) message.say(userInfo(message.guild, message.author))
-        else message.say(userInfo(message.guild, user))
+        const target = user || message.author
+        const info = await userInfo(message.guild, target)
+
+        await message.say(info)
     }
 }

@@ -17,7 +17,7 @@ async function getMessage(msg, message) {
     /** @type {TextChannel|NewsChannel} */
     const channel = channels.get(target.replace(/[^0-9]/g, '')) || channels.find(({ name }) => name === target.toLowerCase())
 
-    const reactionMessage = await channel.messages.fetch(msg, false, true).catch(() => null)
+    const reactionMessage = await channel.messages.fetch(msg, false).catch(() => null)
     return reactionMessage
 }
 

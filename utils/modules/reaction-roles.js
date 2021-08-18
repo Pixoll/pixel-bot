@@ -15,7 +15,7 @@ module.exports = (client) => {
 
         for (const data of rRoles) {
             /** @type {CommandoGuild} */
-            const guild = guilds.cache.get(data.guild) || await guilds.fetch(data.guild, false, true).catch(() => null)
+            const guild = await guilds.fetch(data.guild, false).catch(() => null)
             if (!guild) {
                 await data.deleteOne()
                 continue
@@ -29,7 +29,7 @@ module.exports = (client) => {
             }
 
             /** @type {Message} */
-            const message = await channel.messages.fetch(data.message, false, true).catch(() => null)
+            const message = await channel.messages.fetch(data.message, false).catch(() => null)
             const reactions = message?.reactions.cache
             const commonEmojis = !!findCommonElement(reactions?.map(({ emoji }) => emoji.id || emoji.name), data.emojis)
 
@@ -66,9 +66,9 @@ module.exports = (client) => {
             const i = data.emojis.indexOf(reaction)
 
             /** @type {Role} */
-            const role = roles.cache.get(data.roles[i]) || await roles.fetch(data.roles[i], false, true).catch(() => null)
+            const role = await roles.fetch(data.roles[i], false).catch(() => null)
             /** @type {GuildMember} */
-            const member = members.cache.get(id) || await members.fetch(id).catch(() => null)
+            const member = await members.fetch({ user: id, cache: false }).catch(() => null)
             if (!member || !role) continue
 
             member.roles.add(role).catch(() => null)
@@ -97,9 +97,9 @@ module.exports = (client) => {
             const i = data.emojis.indexOf(reaction)
 
             /** @type {Role} */
-            const role = roles.cache.get(data.roles[i]) || await roles.fetch(data.roles[i], false, true).catch(() => null)
+            const role = await roles.fetch(data.roles[i], false).catch(() => null)
             /** @type {GuildMember} */
-            const member = members.cache.get(id) || await members.fetch(id).catch(() => null)
+            const member = await members.fetch({ user: id, cache: false }).catch(() => null)
             if (!member || !role) continue
 
             member.roles.remove(role).catch(() => null)

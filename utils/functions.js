@@ -19,7 +19,7 @@ function sleep(s) {
  * @param {*} object The partial object
  */
 async function fetchPartial(object) {
-    if (object.partial) return await object.fetch(true).catch(() => object)
+    if (object.partial) return await object.fetch().catch(() => object)
     return object
 }
 
@@ -649,14 +649,14 @@ async function generateEmbed(message, array, data) {
                 /** @type {User} */
                 const user = ['mod', 'user'].includes(key) ?
                     users.cache.get(item[key]) ||
-                    await users.fetch(item[key], false, true).catch(() => null)
+                    await users.fetch(item[key], false).catch(() => null)
                     : ''
                 const userString = user ? `${user.toString()} ${user.tag}` : ''
 
                 /** @type {GuildChannel} */
                 const channel = key === 'channel' ?
                     channels.cache.get(item[key]) ||
-                    await channels.fetch(item[key], false, true).catch(() => null) :
+                    await channels.fetch(item[key], false).catch(() => null) :
                     ''
                 const channelString = channel ? `${channel.toString()} ${channel.name}` : ''
 
