@@ -20,7 +20,7 @@ function boostLevel(tier) {
  * gets information about a guild
  * @param {CommandoGuild} guild the guild to get info from
  */
-function getServerInfo(guild) {
+async function getServerInfo(guild) {
     const { name, owner, channels, premiumTier, premiumSubscriptionCount, memberCount, roles, id, createdTimestamp } = guild
 
     const categories = channels.cache.filter(({ type }) => type === 'category').size
@@ -78,8 +78,10 @@ module.exports = class serverinfo extends Command {
      * @param {CommandoMessage} message
      * @param {CommandoGuild} guild
      */
-    run(message, guild) {
+    async run(message, guild) {
         const server = message.guild || guild
-        message.say(getServerInfo(server))
+        const info = await getServerInfo(server)
+
+        await message.say(info)
     }
 }
