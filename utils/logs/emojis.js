@@ -69,7 +69,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated emoji', guild.iconURL({ dynamic: true }))
-            .setDescription('Name', `${oldEmoji.name} ➜ ${newEmoji.name}`)
+            .addField('Name', `${oldEmoji.name} ➜ ${newEmoji.name}`)
             .setThumbnail(url)
             .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
