@@ -8,6 +8,8 @@ const path = require('path')
 const { errors } = require('./utils/mongo/schemas')
 require('dotenv').config()
 
+// Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
+
 const client = new CommandoClient({
     commandPrefix: '!',
     owner: '667937325002784768',
@@ -114,16 +116,15 @@ async function ownerErrorHandler(error, type, command, message) {
 
     const lentgh = error.name.length + error.message.length + 3
     const stack = error.stack?.substr(lentgh)
-    const root = '/' + __dirname.split(/[\\/]/g).pop()
+    const root = __dirname.split(/[\\/]/g).pop()
 
-    const files = stack.match(/at ([\w\.]+) \(([^)]+)\)/g)
+    const files = stack.split('\n')
+        .filter(str => !str.includes('node_modules') && !str.includes('(internal') && !str.includes('(<anonymous>)') && str.includes(root))
         .map(str => `> ${str}`
-            .replace(/[()]/g, '')
-            .replace(__dirname, root)
-            .replace(/ (C|\/)/g, ' in$&')
+            .replace('at ', '')
+            .replace(__dirname, '/' + root)
             .replace(/([\\]+)/g, '/')
         )
-        .filter(str => !str.includes('node_modules') && !str.includes('internal') && !str.includes('anonymous'))
         .join('\n')
 
     const messageLink = message ? `Please go to [this message](${message.url}) for more information.` : ''
