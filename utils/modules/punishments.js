@@ -41,7 +41,7 @@ module.exports = (client) => {
                 .setFooter(`User ID: ${user.id}`)
                 .setTimestamp()
 
-            logsChannel.send(embed)
+            logsChannel.send(embed).catch(() => null)
         }
 
         await active.deleteMany(query)

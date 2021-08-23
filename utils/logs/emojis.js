@@ -31,7 +31,7 @@ module.exports = (client) => {
             .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('emojiDelete', async emoji => {
@@ -54,7 +54,7 @@ module.exports = (client) => {
             .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('emojiUpdate', async (oldEmoji, newEmoji) => {
@@ -74,6 +74,6 @@ module.exports = (client) => {
             .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 }

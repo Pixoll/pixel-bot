@@ -84,7 +84,7 @@ module.exports = (client) => {
                 **>** **After:** ${imageLink(newGuild.iconURL(imgOptions))}
             `).setThumbnail(oldGuild.iconURL(imgOptions))
 
-            logsChannel.send(imagesEmbed)
+            logsChannel.send(imagesEmbed).catch(() => null)
         }
 
         if (owner1 !== owner2) embed.addField('Owner', `${owner1.toString()} ➜ ${owner2.toString()}`)
@@ -107,7 +107,7 @@ module.exports = (client) => {
                 `
             }]).setThumbnail(oldGuild.bannerURL(imgOptions))
 
-            logsChannel.send(imagesEmbed)
+            logsChannel.send(imagesEmbed).catch(() => null)
         }
 
         if (splash1 !== splash2) {
@@ -118,7 +118,7 @@ module.exports = (client) => {
                 `
             }]).setThumbnail(oldGuild.splashURL(imgOptions))
 
-            logsChannel.send(imagesEmbed)
+            logsChannel.send(imagesEmbed).catch(() => null)
         }
 
         if (url1 !== url2) embed.addField('Vanity URL code', `${url1 || 'None'} ➜ ${url2 || 'None'}`)
@@ -164,7 +164,7 @@ module.exports = (client) => {
                 `
             }]).setThumbnail(oldGuild.discoverySplashURL(imgOptions))
 
-            logsChannel.send(imagesEmbed)
+            logsChannel.send(imagesEmbed).catch(() => null)
         }
 
         if (updateChan1 !== updateChan2) embed.addField('Public updates channel', `${updateChan1?.toString() || 'None'} ➜ ${updateChan2?.toString() || 'None'}`)
@@ -173,6 +173,6 @@ module.exports = (client) => {
 
         if (language1 !== language2) embed.addField('Preferred language', `${language1} ➜ ${language2}`)
 
-        if (embed.fields.length !== 0 || embed.description) logsChannel.send(embed)
+        if (embed.fields.length !== 0 || embed.description) logsChannel.send(embed).catch(() => null)
     })
 }

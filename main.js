@@ -115,17 +115,19 @@ async function ownerErrorHandler(error, type, command, message) {
     console.error(error)
 
     const lentgh = error.name.length + error.message.length + 3
-    const stack = error.stack?.substr(lentgh)
+    const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
     const root = __dirname.split(/[\\/]/g).pop()
 
-    const files = stack.split('\n')
-        .filter(str => !str.includes('node_modules') && !str.includes('(internal') && !str.includes('(<anonymous>)') && str.includes(root))
-        .map(str => `> ${str}`
-            .replace('at ', '')
-            .replace(__dirname, '/' + root)
+    const files = stack.filter(str =>
+        !str.includes('node_modules') &&
+        !str.includes('(internal') &&
+        !str.includes('(<anonymous>)') &&
+        str.includes(root)
+    ).map(str =>
+        '>' + str.replace('at ', '')
+            .replace(__dirname, root)
             .replace(/([\\]+)/g, '/')
-        )
-        .join('\n')
+    ).join('\n')
 
     const messageLink = message ? `Please go to [this message](${message.url}) for more information.` : ''
     const whatCommand = command ? ` at '${command.name}' command` : ''

@@ -41,7 +41,7 @@ module.exports = (client) => {
             .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(kick)
+        logsChannel.send(kick).catch(() => null)
     })
 
     client.on('guildBanAdd', async (guild, _user) => {
@@ -76,7 +76,7 @@ module.exports = (client) => {
             .setFooter(`User ID: ${user.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('guildBanRemove', async (guild, _user) => {
@@ -108,6 +108,6 @@ module.exports = (client) => {
             .setFooter(`User ID: ${user.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 }

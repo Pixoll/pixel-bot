@@ -32,7 +32,7 @@ module.exports = (client) => {
             .setFooter(`Inviter ID: ${inviter.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('inviteDelete', async invite => {
@@ -54,7 +54,7 @@ module.exports = (client) => {
             .setFooter(`Channel ID: ${channel.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('message', async _message => {
@@ -103,7 +103,7 @@ module.exports = (client) => {
                 .setFooter(`Server ID: ${invGuild.id}`)
                 .setTimestamp()
 
-            logsChannel.send(embed)
+            logsChannel.send(embed).catch(() => null)
         }
     })
 }

@@ -44,6 +44,6 @@ module.exports = (client) => {
             if (deaf1 !== deaf2) embed.addField('Server deaf', deaf1 ? 'Yes ➜ No' : 'No ➜ Yes')
         }
 
-        if (embed.fields.length !== 0) logsChannel.send(embed)
+        if (embed.fields.length !== 0) logsChannel.send(embed).catch(() => null)
     })
 }

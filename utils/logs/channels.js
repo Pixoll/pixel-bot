@@ -60,7 +60,7 @@ module.exports = (client) => {
             .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('channelDelete', async _channel => {
@@ -88,7 +88,7 @@ module.exports = (client) => {
             .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('channelPinsUpdate', async _channel => {
@@ -111,7 +111,7 @@ module.exports = (client) => {
             .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('channelUpdate', async (_oldChannel, _newChannel) => {
@@ -218,6 +218,6 @@ module.exports = (client) => {
             checked = true
         }
 
-        if (embed.fields.length > 0) logsChannel.send(embed)
+        if (embed.fields.length > 0) logsChannel.send(embed).catch(() => null)
     })
 }

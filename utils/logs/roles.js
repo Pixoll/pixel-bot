@@ -56,7 +56,7 @@ module.exports = (client) => {
             .setFooter(`Role ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('roleDelete', async role => {
@@ -84,7 +84,7 @@ module.exports = (client) => {
             .setFooter(`Role ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('roleUpdate', async (oldRole, newRole) => {
@@ -125,6 +125,6 @@ module.exports = (client) => {
 
         if (removed.length !== 0) embed.addField(`${customEmoji('cross', false)} Denied permissions`, removed.join(', '))
 
-        if (embed.fields.length > 0) logsChannel.send(embed)
+        if (embed.fields.length > 0) logsChannel.send(embed).catch(() => null)
     })
 }

@@ -41,6 +41,6 @@ module.exports = (client) => {
             `)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 }

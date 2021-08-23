@@ -32,7 +32,7 @@ module.exports = (client) => {
             .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
 
         if (Date.now() - createdTimestamp < ms('3d')) {
             const autoMod = await moduleStatus(modules, guild, 'auditLogs', 'autoMod')
@@ -67,7 +67,7 @@ module.exports = (client) => {
             .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('guildMemberUpdate', async (_oldMember, _newMember) => {
@@ -104,6 +104,6 @@ module.exports = (client) => {
             embed.addField(`${action} role`, `${role.toString()} ${role.name}`)
         }
 
-        if (embed.fields.length !== 0) logsChannel.send(embed)
+        if (embed.fields.length !== 0) logsChannel.send(embed).catch(() => null)
     })
 }

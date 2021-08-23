@@ -75,7 +75,7 @@ module.exports = (client) => {
             embed.addField('Attachments', atts.join('\n'))
         }
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('messageDeleteBulk', async messages => {
@@ -98,7 +98,7 @@ module.exports = (client) => {
             .setFooter(`Channel ID: ${channel.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 
     client.on('messageUpdate', async (oldMessage, _newMessage) => {
@@ -134,6 +134,6 @@ module.exports = (client) => {
             .setFooter(`Message ID: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed)
+        logsChannel.send(embed).catch(() => null)
     })
 }
