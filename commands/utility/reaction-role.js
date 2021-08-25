@@ -3,6 +3,7 @@ const { TextChannel, Role, NewsChannel } = require('discord.js')
 const { basicEmbed } = require('../../utils/functions')
 const { reactionRoles } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
+const emojiRegex = require('emoji-regex/RGI_Emoji')()
 
 /**
  * looks for a message inside the provided channel
@@ -39,15 +40,14 @@ function getRoles(string, message) {
         if (role) rolesList.push(role)
     }
 
-    /** @param {number} position */
-    function filter(position) {
+    /** @param {Role} role */
+    const filter = ({ position }) => {
         if (isOwner) return position < highestBot
         return position < highestMember && position < highestBot
     }
-    return rolesList.filter(({ position }) => filter(position))
-}
 
-const emojiRegex = /[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\u{200d}]*/ug
+    return rolesList.filter(filter).map(({ id }) => id)
+}
 
 /**
  * looks for valid emojis in the provided string
@@ -55,13 +55,17 @@ const emojiRegex = /[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u
  * @param {string[]} emojis all the available GuildEmojis
  * @returns {string[]}
  */
-function findEmojis(string, emojis) {
-    return string.split(/ +/).map(str => {
-        const guildEmoji = emojis.find(emoji => emoji === str.substr(-19, 18))
+function findEmojis(string, emojis = []) {
+    const gEmojis = string.match(/<a:.+?:\d+>|<:.+?:\d+>/g) || []
+    const sEmojis = string.match(emojiRegex) || []
 
-        if (!guildEmoji && !str.replace(emojiRegex, '')) return str
-        return guildEmoji
-    }).filter(e => e)
+    const found = [...sEmojis]
+    gEmojis.forEach(emoji => {
+        const match = emojis.find(e => e === emoji.replace(/[^0-9]/g, ''))
+        if (match) found.push(match)
+    })
+
+    return found
 }
 
 module.exports = class reactionrole extends Command {
@@ -125,7 +129,6 @@ module.exports = class reactionrole extends Command {
      */
     async run(message, { subCommand, channel, msg }) {
         const { guild, author } = message
-        const channels = guild.channels.cache
         const allEmojis = this.client.emojis.cache.map(({ id }) => id)
 
         const data = await reactionRoles.findOne({ guild: guild.id, channel: channel.id, message: msg.id })
@@ -153,11 +156,13 @@ module.exports = class reactionrole extends Command {
                     return answered = true, collector.stop()
                 }
 
-                const roles = getRoles(content, message).map(({ name }) => name)
+                if (counter === 1) {
+                    const roles = getRoles(content, message)
 
-                if (counter === 1 && roles.length === 0) {
-                    message.say(basicEmbed('red', 'cross', 'Make sure the roles you sent can be given to other users.'))
-                    return answered = true, collector.stop()
+                    if (roles.length === 0) {
+                        message.say(basicEmbed('red', 'cross', 'Make sure the roles you sent can be given to other users.'))
+                        return answered = true, collector.stop()
+                    }
                 }
 
                 // sends the next question
@@ -171,8 +176,10 @@ module.exports = class reactionrole extends Command {
                 }
 
                 const [roleString, emojiString] = collected.map(({ content }) => content)
-                const roles = getRoles(roleString, message).map(({ id }) => id)
+                const roles = getRoles(roleString, message)
                 const emojis = findEmojis(emojiString, allEmojis)
+
+                console.log(roles, emojis)
 
                 if (emojis.length !== roles.length) return message.say(basicEmbed('red', 'cross', 'Make sure you send the same amount of emojis as the roles.'))
 
