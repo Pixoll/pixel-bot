@@ -179,8 +179,6 @@ module.exports = class reactionrole extends Command {
                 const roles = getRoles(roleString, message)
                 const emojis = findEmojis(emojiString, allEmojis)
 
-                console.log(roles, emojis)
-
                 if (emojis.length !== roles.length) return message.say(basicEmbed('red', 'cross', 'Make sure you send the same amount of emojis as the roles.'))
 
                 for (const emoji of emojis) await msg.react(emoji)

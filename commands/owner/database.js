@@ -43,8 +43,6 @@ module.exports = class database extends Command {
     async run(message, { collection }) {
         const data = await Database[deFormat(collection)].find({})
 
-        console.log(data)
-
         const array = Array(...data).map(({ _doc: val }) => {
             delete val._id
             delete val.__v
