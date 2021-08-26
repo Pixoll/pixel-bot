@@ -1,26 +1,9 @@
 const { Command, CommandoMessage } = require('discord.js-commando')
-const { TextChannel, Role, NewsChannel } = require('discord.js')
+const { TextChannel, Role, NewsChannel, Message } = require('discord.js')
 const { basicEmbed } = require('../../utils/functions')
 const { reactionRoles } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
 const emojiRegex = require('emoji-regex/RGI_Emoji')()
-
-/**
- * looks for a message inside the provided channel
- * @param {string} msg the message to look for
- * @param {CommandoMessage} message the command message
- * @returns {Promise<CommandoMessage>}
- */
-async function getMessage(msg, message) {
-    const channels = message.guild.channels.cache
-
-    const target = message.parseArgs().split(/ +/)[1]
-    /** @type {TextChannel|NewsChannel} */
-    const channel = channels.get(target.replace(/[^0-9]/g, '')) || channels.find(({ name }) => name === target.toLowerCase())
-
-    const reactionMessage = await channel.messages.fetch(msg, false).catch(() => null)
-    return reactionMessage
-}
 
 /**
  * gets all the roles separated by commas
@@ -104,14 +87,9 @@ module.exports = class reactionrole extends Command {
                     type: 'text-channel'
                 },
                 {
-                    key: 'msg',
+                    key: 'messageId',
                     prompt: 'On what message do you want to create or remove the reaction roles?',
-                    type: 'string',
-                    /** @param {string} msg @param {CommandoMessage} message */
-                    parse: async (msg, message) => await getMessage(msg, message),
-                    /** @param {string} msg @param {CommandoMessage} message */
-                    validate: async (msg, message) => await getMessage(msg, message),
-                    error: 'You provided an invalid message. Please try again.'
+                    type: 'string'
                 }
             ]
         })
@@ -125,9 +103,13 @@ module.exports = class reactionrole extends Command {
      * @param {object} args The arguments
      * @param {string} args.subCommand The sub-command to use
      * @param {TextChannel} args.channel The text channel of the reaction messages
-     * @param {CommandoMessage} args.msg The message of the reaction messages
+     * @param {string} args.messageId The message of the reaction messages
      */
-    async run(message, { subCommand, channel, msg }) {
+    async run(message, { subCommand, channel, messageId }) {
+        /** @type {Message} */
+        const msg = await channel.messages.fetch(messageId).catch(() => null)
+        if (!msg) return message.say(basicEmbed('red', 'cross', 'That message doesn\'t exist.'))
+
         const { guild, author } = message
         const allEmojis = this.client.emojis.cache.map(({ id }) => id)
 
