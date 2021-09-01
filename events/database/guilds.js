@@ -1,5 +1,5 @@
 const { CommandoClient } = require('discord.js-commando')
-const { active, afk, disabled, mcIp, modules, prefixes, polls, reactionRoles, rules, setup, stickyRoles, welcome } = require('../mongo/schemas')
+const { active, afk, disabled, mcIp, modules, prefixes, polls, reactionRoles, rules, setup, stickyRoles, welcome } = require('../../utils/mongo/schemas')
 
 /**
  * Handles database behaviour in guild events.

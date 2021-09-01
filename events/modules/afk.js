@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const { afk } = require('../mongo/schemas')
-const { basicEmbed, fetchPartial } = require('../functions')
+const { afk } = require('../../utils/mongo/schemas')
+const { basicEmbed, fetchPartial } = require('../../utils/functions')
 const { CommandoClient, CommandoMessage } = require('discord.js-commando')
-const { toNow } = require('../custom-ms')
+const { toNow } = require('../../utils/custom-ms')
 
 /**
  * This module manages `!afk`'s timeouts and mentions.

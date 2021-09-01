@@ -1,8 +1,8 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User, GuildAuditLogs, GuildMember } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongo/schemas')
+const { moduleStatus, fetchPartial, getLogsChannel } = require('../../utils/functions')
+const { setup, modules } = require('../../utils/mongo/schemas')
 
 /**
  * Handles all of the moderation logs.

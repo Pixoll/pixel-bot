@@ -1,6 +1,6 @@
 const { MessageEmbed, NewsChannel, TextChannel, Message, Guild } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { polls } = require('../mongo/schemas')
+const { polls } = require('../../utils/mongo/schemas')
 
 /**
  * This module manages polls.

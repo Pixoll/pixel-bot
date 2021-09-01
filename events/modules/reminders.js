@@ -1,8 +1,8 @@
 const { MessageEmbed, MessageReaction, User, TextChannel, DMChannel, NewsChannel } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { ms } = require('../custom-ms')
-const { fetchPartial, basicEmbed } = require('../functions')
-const { reminders } = require('../mongo/schemas')
+const { ms } = require('../../utils/custom-ms')
+const { fetchPartial, basicEmbed } = require('../../utils/functions')
+const { reminders } = require('../../utils/mongo/schemas')
 
 /**
  * This module manages reminders.

@@ -1,5 +1,5 @@
 const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { prefixes } = require('../mongo/schemas')
+const { prefixes } = require('../../utils/mongo/schemas')
 
 /**
  * Applies all saved prefixes in all servers.

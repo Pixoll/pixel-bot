@@ -1,7 +1,7 @@
 const { MessageEmbed, TextChannel } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus } = require('../functions')
-const { welcome, modules } = require('../mongo/schemas')
+const { moduleStatus } = require('../../utils/functions')
+const { welcome, modules } = require('../../utils/mongo/schemas')
 
 /**
  * This module manages welcome messages.

@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { ms } = require('../custom-ms')
-const { isMod, validURL, docID } = require('../functions')
-const { moderations, active, setup, modules } = require('../mongo/schemas')
+const { ms } = require('../../utils/custom-ms')
+const { isMod, validURL, docID } = require('../../utils/functions')
+const { moderations, active, setup, modules } = require('../../utils/mongo/schemas')
 
 /**
  * This module manages the chat filter.

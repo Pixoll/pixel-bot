@@ -1,9 +1,9 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { ms } = require('../custom-ms')
-const { difference, capitalize, sliceDots, formatPerm, customEmoji, remDiscFormat, moduleStatus, fetchPartial, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongo/schemas')
+const { ms } = require('../../utils/custom-ms')
+const { difference, capitalize, sliceDots, formatPerm, customEmoji, remDiscFormat, moduleStatus, fetchPartial, getLogsChannel } = require('../../utils/functions')
+const { setup, modules } = require('../../utils/mongo/schemas')
 
 /**
  * Formats the PermissionOverwrites into an array of string

@@ -1,8 +1,8 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus, getLogsChannel } = require('../functions')
-const { setup, modules } = require('../mongo/schemas')
+const { moduleStatus, getLogsChannel } = require('../../utils/functions')
+const { setup, modules } = require('../../utils/mongo/schemas')
 
 /**
  * Handles all of the emoji logs.

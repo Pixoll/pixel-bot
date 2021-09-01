@@ -1,7 +1,7 @@
 const { TextChannel, NewsChannel, Message, MessageReaction, User, Role, GuildMember } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { findCommonElement, fetchPartial } = require('../functions')
-const { reactionRoles } = require('../mongo/schemas')
+const { findCommonElement, fetchPartial } = require('../../utils/functions')
+const { reactionRoles } = require('../../utils/mongo/schemas')
 
 /**
  * This module manages reaction roles.

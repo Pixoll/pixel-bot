@@ -1,5 +1,5 @@
 const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { disabled } = require('../mongo/schemas')
+const { disabled } = require('../../utils/mongo/schemas')
 
 /**
  * Disables all saved modules in all servers.

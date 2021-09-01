@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { active, setup } = require('../mongo/schemas')
+const { active, setup } = require('../../utils/mongo/schemas')
 
 /**
  * This module manages expired punishments.
