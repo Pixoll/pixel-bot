@@ -57,8 +57,8 @@ const mcIp = model('mc-ips', Schema({
 
 const modules = model('modules', Schema({
     guild: String,
-    autoMod: Boolean,
-    chatFilter: Boolean,
+    // autoMod: Boolean,
+    // chatFilter: Boolean,
     welcome: Boolean,
     auditLogs: {
         channels: Boolean,

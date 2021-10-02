@@ -13,8 +13,8 @@ function patchData(data) {
     const _patch = b => b === false ? 'Disabled' : 'Enabled'
 
     const patch = {
-        autoMod: _patch(data?.autoMod),
-        chatFilter: _patch(data?.chatFilter),
+        // autoMod: _patch(data?.autoMod),
+        // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
         auditLogs: {
             channels: _patch(data?.auditLogs?.channels),
@@ -58,15 +58,16 @@ module.exports = class ModulesCommand extends Command {
 
         const data = await modules.findOne({ guild: guildId })
         const patch = patchData(data)
-        const { auditLogs, autoMod, chatFilter, welcome } = patch
+        const { auditLogs, /* autoMod, chatFilter, */ welcome } = patch
         const { channels, commands, emojis, invites, members, messages, moderation, roles, server, voice } = auditLogs
+        
+        // **>** **Automatic moderation:** ${autoMod}
+        // **>** **Chat filter:** ${chatFilter}
 
         const disabled = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Automatic moderation:** ${autoMod}
-                **>** **Chat filter:** ${chatFilter}
                 **>** **Welcome messages:** ${welcome}
                 **>** **Audit logs:**
                 \u2800 ⤷ **Channels:** ${channels}

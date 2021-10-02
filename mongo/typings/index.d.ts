@@ -61,8 +61,8 @@ export interface McIpSchema extends BaseSchema {
 
 export interface ModuleSchema extends BaseSchema {
     guild: string
-    autoMod: boolean
-    chatFilter: boolean
+    // autoMod: boolean
+    // chatFilter: boolean
     welcome: boolean
     auditLogs: {
         channels: boolean

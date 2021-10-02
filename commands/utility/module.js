@@ -20,8 +20,8 @@ function patchData(data) {
     const _patch = b => b === false ? false : true
 
     const patch = {
-        autoMod: _patch(data?.autoMod),
-        chatFilter: _patch(data?.chatFilter),
+        // autoMod: _patch(data?.autoMod),
+        // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
         auditLogs: {
             channels: _patch(data?.auditLogs?.channels),
@@ -56,7 +56,7 @@ module.exports = class ModuleCommand extends Command {
                 modules toggle [module] <sub-module> - Toggle a module or sub-module on/off.
             `,
             examples: [
-                'modules diagnose auto-mod',
+                'modules diagnose welcome',
                 'modules toggle audit-logs channels'
             ],
             userPermissions: ['ADMINISTRATOR'],
