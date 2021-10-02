@@ -1,155 +1,151 @@
-const { Command, CommandoMessage, CommandoClient } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
 const { MessageEmbed } = require('discord.js')
-const { commandInfo, basicEmbed, pagedEmbed } = require('../../utils/functions')
+const { commandInfo, basicEmbed, pagedEmbed } = require('../../utils')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
+const { CommandoMessage, Command: CommandType } = require('../../command-handler/typings')
 
-/**
- * this function creates a paged embed.
- * the first page includes a list of all the commands.
- * the second page includes relevant information of how to use the bot.
- * @param {Number} page the page of the embed
- * @param {CommandoClient} client the client
- * @param {String} prefix the command prefix
- * @param {CommandoMessage} message the message
- */
-function helpEmbed(page, { registry, user, owners }, prefix, message) {
-    // gets the server where the command was executed, if available
-    const { guild } = message
-    const { groups } = registry
-
-    /**
-     * filters the commands to be displayed in the first page of the embed
-     * @param {Command} cmd a command
-     */
-    function filter(cmd) {
-        // checks if the user can use the command
-        const canBeUsed = cmd.hasPermission(message)
-        const userHasPerms = typeof canBeUsed === 'boolean' ? canBeUsed : false
-
-        // checks if the command is executed in a DM, if so, check if the command is 'guildOnly'
-        const guildOnly = !guild ? !cmd.guildOnly : true
-
-        return !cmd.hidden && userHasPerms && guildOnly
-    }
-
-    // gets a list of the commands inside their groups 
-    const commands = groups.map(({ commands }) => commands.filter(cmd => filter(cmd))).filter(group => group.size > 0)
-
-    // constructs data that will be used later in this embed
-    const ownersList = owners.map(({ tag }) => tag).join(', ')
-
-    // creates the template for the paged embed
-    const embed = new MessageEmbed()
-        .setColor('#4c9f4c')
-        .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
-        .setFooter(`Page ${++page} of 2 | Version: ${version} | Developers: ${ownersList}`, user.displayAvatarURL({ dynamic: true }))
-
-    // creates the first page of the embed
-    if (page === 1) {
-        embed.setTitle('Commands list')
-            .setDescription(stripIndent`
-                To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`
-                You can also mention me to use a command, for example: \`@${user.tag} help\`
-                To view detailed information about a specific command, type: \`${prefix}help <command>\`
-            `)
-
-        // fills the embed with fields containing each group's commands
-        for (const group of commands) {
-            const groupName = group.first().group.name
-            // creates a list of all the commands inside the group
-            const commandList = group.map(({ name }) => `\`${name}\``).sort().join(', ')
-
-            embed.addField(`${groupName}`, commandList)
-        }
-    }
-
-    // creates the second page of the embed
-    if (page === 2) embed.setTitle('Commands usage')
-        .setDescription(stripIndent`
-            ${oneLine`
-                Some commands will have their arguments surrounded by different types of paranthesis or even
-                include vertical bars inside them. The meaning of each one of these is listed below.
-            `}
-
-            **>** **Square paranthesis** \`[]\`: This argument is required.
-            **>** **Arrow parenthesis** \`<>\`: This argument is optional.
-            **>** **Vertical bar** \`|\`: This means \`or\`.
-        `)
-        .addField('Time formatting', stripIndent`
-            ${oneLine`
-                Other commands will require the use of special formatting for time. It can either a number representing
-                the amount of seconds, or a number followed by a letter (it\'s not case sensitive). The number can have
-                decimals if you need them to. This are the letters that I support and their meanings:
-            `}
-
-            **>** **Letter** \`s\`: seconds
-            **>** **Letter** \`m\`: minutes
-            **>** **Letter** \`h\`: hours
-            **>** **Letter** \`d\`: days
-            **>** **Letter** \`y\`: years
-
-            ${oneLine`
-                An example of this would be \`3d\`, which means \`3 days\`.
-                Another one would be \`1.5y\`, which means \`1 year and a half\`.
-            `}
-        `)
-
-    return embed
-}
-
-module.exports = class help extends Command {
+/** A command that can be run in a client */
+module.exports = class HelpCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'help',
             aliases: ['commands'],
             group: 'info',
-            memberName: 'help',
             description: 'Displays all the commands you have access to, or information about a single command.',
-            details: stripIndent`
-                If \`command\` is not specified, it will send an embed with all of the commands that you have access to.
-                \`command\` can be either a command's name or alias.
-            `,
+            details: '`command` can be either a command\'s name or alias.',
             format: 'help <command>',
             examples: ['help ban'],
             guarded: true,
             throttling: { usages: 1, duration: 3 },
             args: [{
-                key: 'command',
+                key: 'cmd',
+                label: 'command',
                 prompt: 'What command do you want to get information about?',
                 type: 'command',
-                default: '',
+                required: false
             }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {Command} args.command The command to get information from
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {CommandType} args.cmd The command to get information from
      */
-    async run(message, { command }) {
-        // gets data that will be used later
-        const { guild } = message
-        const { client } = this
-        const prefix = guild ? guild.commandPrefix : client.commandPrefix
+    async run(message, { cmd }) {
+        const { guild, client } = message
+        const prefix = guild?.prefix || client.prefix
 
-        // sends an embed with all the information if no command is specified
-        if (!command) {
-            return pagedEmbed(message, { number: 1, total: 2 }, helpEmbed, client, prefix, message)
+        if (!cmd) {
+            /**
+             * Creates a paged embed with a list of all the commands and relevant information of how to use the bot.
+             * @param {number} page the page of the embed
+             */
+            function helpEmbed(page) {
+                const { registry, user, owners } = client
+                const { groups } = registry
+
+                /**
+                 * Filters the commands the user has permissions to
+                 * @param {CommandType} cmd The command to filter
+                 */
+                function filterCmd(cmd) {
+                    const hasPermission = cmd.hasPermission(message)
+                    const hasPerms = typeof hasPermission === 'boolean' ? hasPermission : false
+                    const guildOnly = !guild ? !cmd.guildOnly : true
+                    const dmOnly = guild ? !cmd.dmOnly : true
+
+                    return !cmd.hidden && cmd.isEnabledIn(guild) && hasPerms && guildOnly && dmOnly
+                }
+
+                const commands = groups.map(g => g.commands.filter(filterCmd)).filter(g => g.size > 0)
+                const owner = owners[0].tag
+
+                const embed = new MessageEmbed()
+                    .setColor('#4c9f4c')
+                    .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
+                    .setFooter(
+                        `Page ${++page} of 2 | Version: ${version} | Developer: ${owner}`,
+                        user.displayAvatarURL({ dynamic: true })
+                    )
+
+                if (page === 1) {
+                    embed.setTitle('Commands list')
+                        .setDescription(stripIndent`
+                            To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`
+                            You can also mention me to use a command, for example: \`@${user.tag} help\`
+                            To view detailed information about a specific command, type: \`${prefix}help <command>\`
+                        `)
+
+                    for (const group of commands) {
+                        const { name } = group.first().group
+                        const commandList = group.map(c => `\`${c.name}\``).sort().join(', ')
+
+                        embed.addField(name, commandList)
+                    }
+                }
+
+                if (page === 2) {
+                    embed.setTitle('Commands usage')
+                        .setDescription(stripIndent`
+                            ${oneLine`
+                                Some commands will have their arguments surrounded by different types
+                                of paranthesis or even include vertical bars inside them. The meaning
+                                of each one of these is listed below.
+                            `}
+
+                            **>** **Square paranthesis** \`[]\`: This argument is required.
+                            **>** **Arrow parenthesis** \`<>\`: This argument is optional.
+                            **>** **Vertical bar** \`|\`: This means \`or\`.
+                        `)
+                        .addField('Time formatting', stripIndent`
+                            ${oneLine`
+                                Other commands will require the use of special formatting for time.
+                                It can either a number representing the amount of seconds, or a number
+                                followed by a letter (it\'s not case sensitive). The number can have
+                                decimals if you need them to. This are the letters that I support and
+                                their meanings:
+                            `}
+
+                            **>** **Letter** \`ms\`: milliseconds
+                            **>** **Letter** \`s\`: seconds
+                            **>** **Letter** \`m\`: minutes
+                            **>** **Letter** \`h\`: hours
+                            **>** **Letter** \`d\`: days
+                            **>** **Letter** \`w\`: weeks
+                            **>** **Letter** \`mth\`: months
+                            **>** **Letter** \`y\`: years
+
+                            ${oneLine`
+                                An example of this would be \`3d\`, which means \`3 days\`.
+                                Another one would be \`1.5y\`, which means \`1 year and a half\`.
+                                This also works: \`1d12h\`, which means \`1 day and 12 hours\`.
+                            `}
+                        `)
+                }
+
+                return embed
+            }
+
+            return await pagedEmbed(message, { number: 1, total: 2 }, helpEmbed)
         }
 
-        const { hidden, guildOnly } = command
+        if (cmd.hidden) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That command is hidden.'
+            }))
+        }
 
-        if (hidden) return message.say(basicEmbed('red', 'cross', 'That command is hidden.'))
-        // if it's guild only and used in DMs
-        if (!guild && guildOnly) return command.onBlock(message, 'guildOnly')
-        // if user doens't have permission
-        if (!command.hasPermission(message)) return command.onBlock(message, 'permission')
+        const hasPermission = cmd.hasPermission(message)
+        if (hasPermission === false || hasPermission instanceof Array) {
+            if (!hasPermission) {
+                return await cmd.onBlock(message, 'ownerOnly')
+            }
+            return await cmd.onBlock(message, 'userPermissions', { missing: hasPermission })
+        }
 
-        message.say(commandInfo(client, guild, command))
+        await message.replyEmbed(commandInfo(cmd, guild))
     }
 }

@@ -1,43 +1,44 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { Role } = require('discord.js')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
+const { generateEmbed, basicEmbed, pluralize, roleDetails } = require('../../utils')
 
-module.exports = class members extends Command {
+/** A command that can be run in a client */
+module.exports = class MembersCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'members',
             group: 'misc',
-            memberName: 'members',
             description: 'Displays a list of members in a role.',
-            details: '`role` can be either a role\'s name, mention or ID. It\'s not case sensitive.',
+            details: roleDetails(),
             format: 'members [role]',
             examples: ['members Staff'],
+            guildOnly: true,
             args: [{
                 key: 'role',
-                prompt: 'The role you want to get the members from.',
+                prompt: 'What role do you want to get the members from?',
                 type: 'role'
-            }],
-            guildOnly: true
+            }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {Role} args.role The role to get the members from
      */
     async run(message, { role }) {
-        if (!role) return message.say(basicEmbed('red', 'cross', 'That role does not exist.'))
+        const members = role.members.map(m => `${m.toString()} ${m.user.tag}`)
+        if (members.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: `The \`${role.name}\` role has no members.`
+            }))
+        }
 
-        // gets the members in the role
-        const memebrs = role.members.map(member => member)
-
-        await generateEmbed(message, memebrs, {
+        await generateEmbed(message, members, {
             number: 20,
-            authorName: `Members in ${role.name}`,
+            authorName: `There's ${pluralize('member', members.length)} in ${role.name}`,
             authorIconURL: message.guild.iconURL({ dynamic: true }),
             useDescription: true
         })

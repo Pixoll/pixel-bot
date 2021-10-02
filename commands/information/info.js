@@ -1,64 +1,48 @@
-const { Command, version: commandoVersion, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
 const { version } = require('../../package.json')
-const { ms } = require('../../utils/custom-ms')
+const { myMs } = require('../../utils')
 const { MessageEmbed } = require('discord.js')
 const { stripIndent } = require('common-tags')
+const { CommandoMessage } = require('../../command-handler/typings')
 
-// the memory usage
-const usedMemory = Math.round(process.memoryUsage().heapUsed / (10 ** 4)) / 100 // used memory in MB
-const maxMemory = Math.round(process.memoryUsage().rss / (10 ** 4)) / 100 // max memory in MB
-
-module.exports = class info extends Command {
+/** A command that can be run in a client */
+module.exports = class InfoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'info',
-            aliases: ['about'],
             group: 'info',
-            memberName: 'info',
-            description: 'Displays detailed information about the bot, such as the version, statistics, and the support server link.',
-            guarded: true,
-            throttling: { usages: 1, duration: 3 }
+            description: 'Displays some information about the bot.',
+            guarded: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
     async run(message) {
-        // gets data that will be used later
-        const { user: bot, users, guilds, owners } = this.client
-        const uptime = Math.trunc(process.uptime() * 1000)
-        const options = { long: true, length: 2, showMs: false }
+        const { user, users, guilds, owners, options, botInvite, uptime: _uptime } = this.client
+
+        const uptime = myMs(_uptime, { long: true, length: 2, showMs: false })
+
+        const commandoLink = 'https://discord.js.org/#/docs/commando/master/general/welcome'
 
         const info = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${bot.username}'s information`, bot.displayAvatarURL({ dynamic: true }))
-            .setDescription(`**>** Join the support server with [this link](https://discord.gg/Pc9pAHf3GU)`)
-            .addFields(
-                {
-                    name: 'info',
-                    value: stripIndent`
-                        **>** **Version:** v${version}
-                        **>** **System:** Node.js ${process.version}
-                        **>** **Library:** discord.js-commando v${commandoVersion}
-                        **>** **Creator:** ${owners[0].tag}
-                    `,
-                    inline: true
-                },
-                {
-                    name: 'Statistics',
-                    value: stripIndent`
-                        **>** **Memory usage:** ${usedMemory}/${maxMemory} MB
-                        **>** **Users:** ${users.cache.filter(({ bot }) => !bot).size}
-                        **>** **Servers:** ${guilds.cache.size}
-                    `,
-                    inline: true
-                }
-            )
-            .setFooter(`Uptime: ${ms(uptime, options)}`)
+            .setAuthor(`${user.username}'s information`, user.displayAvatarURL({ dynamic: true }))
+            .setDescription(stripIndent`
+                Join the support server with [this link](${options.serverInvite}).
+                Invite the bot with [this link](${botInvite}).
+
+                **>** **Version:** ${version}
+                **>** **Library:** [discord.js-commando](${commandoLink})
+                **>** **Creator:** ${owners[0].tag}
+                **>** **Servers:** ${guilds.cache.size}
+                **>** **Users:** ${users.cache.filter(u => !u.bot).size}
+            `)
+            .setFooter(`Uptime: ${uptime}`)
             .setTimestamp()
 
-        message.say(info)
+        await message.replyEmbed(info)
     }
 }

@@ -1,27 +1,30 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { setup } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { setup } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { basicEmbed, generateEmbed } = require('../../utils/functions')
+const { basicEmbed, generateEmbed, pluralize, getArgument, channelDetails } = require('../../utils')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { SetupSchema } = require('../../mongo/typings')
+const { TextChannel } = require('discord.js')
 
-module.exports = class lockdown extends Command {
+/** A command that can be run in a client */
+module.exports = class LockdownCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'lockdown',
             group: 'mod',
-            memberName: 'lockdown',
             description: 'Lock every text channel that was specified when using the `setup` command',
-            details: stripIndent`
-                \`reason\` is sent when the channels get locked.
-                \`reason\` will default to "We'll be back shortly" or "Thanks for waiting" if it's not specified.
-            `,
+            details: channelDetails('text-channels', true),
             format: stripIndent`
-                lockdown start <reason> - Start the lockdown.
-                lockdown end <reason> - End the lockdown.
+                lockdown start - Start the lockdown.
+                lockdown end - End the lockdown.
                 lockdown channels - Display the lockdown channels.
-                lockdown add [channels] - Add lockdown channels, separated by spaces (max. 30 at once).
-                lockdown remove [channels] - Remove lockdown channels, separated by spaces (max. 30 at once).
+                lockdown add [text-channels] - Add lockdown channels (max. 30 at once).
+                lockdown remove [text-channels] - Remove lockdown channels (max. 30 at once).
             `,
-            examples: ['lockdown start We\'ll be back shortly.', 'lockdown end', 'lockdown add #chat commands 850477653252243466'],
+            examples: [
+                'lockdown add #chat commands 850477653252243466',
+                'lockdown remove #commands 800224125444292608',
+            ],
             clientPermissions: ['MANAGE_CHANNELS'],
             userPermissions: ['ADMINISTRATOR'],
             throttling: { usages: 1, duration: 3 },
@@ -29,107 +32,261 @@ module.exports = class lockdown extends Command {
             args: [
                 {
                     key: 'subCommand',
+                    label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: ['start', 'end', 'channels', 'add', 'remove']
                 },
                 {
-                    key: 'reasonChannels',
-                    prompt: 'What is the reason of the lockdown? Or what channels do you want to add or remove? (max. of 30 at a time)',
+                    key: 'channels',
+                    prompt: 'What channels do you want to add or remove? (max. 30 at once)',
                     type: 'string',
-                    default: ''
+                    validate: async (val, msg, arg) => {
+                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
+                        if (!['add', 'remove'].includes(sc)) return true
+                        const type = msg.client.registry.types.get('text-channel')
+                        const array = val.split(/ +/).slice(0, 30)
+                        const valid = []
+                        for (const str of array) {
+                            valid.push(await type.validate(str, msg, arg))
+                        }
+                        const wrong = valid.filter(b => b !== true)
+                        return wrong[0] === undefined
+                    },
+                    parse: async (val, msg) => {
+                        const type = msg.client.registry.types.get('text-channel')
+                        const array = val.split(/ +/).slice(0, 30)
+                        const valid = []
+                        for (const str of array) {
+                            valid.push(await type.parse(str, msg))
+                        }
+                        return valid
+                    },
+                    required: false,
+                    error: 'At least one of the channels you specified was invalid, please try again.'
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.subCommand The sub-command
-     * @param {string} args.reasonChannels The reason of the lockdown, or the channels to add/remove
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'start'|'end'|'channels'|'add'|'remove'} args.subCommand The sub-command
+     * @param {string} args.channels The reason of the lockdown, or the channels to add/remove
      */
-    async run(message, { subCommand, reasonChannels }) {
-        const { guild } = message
-        const channelsCache = guild.channels.cache
-        const everyone = message.guild.roles.everyone
+    async run(message, { subCommand, channels }) {
+        const { guild, guildId } = message
+        const _channels = guild.channels.cache
         subCommand = subCommand.toLowerCase()
 
-        const data = await setup.findOne({ guild: guild.id })
-        if (!data) return message.say(basicEmbed('blue', 'info', 'There\'s no data of this server, please use the `setup` command before using this.'))
+        /** @type {SetupSchema} */
+        const data = await setup.findOne({ guild: guildId })
 
-        const channelsData = []
-        for (const channelID of Array(...data.lockChannels)) {
-            const channel = channelsCache.get(channelID)
-            if (!channel) continue
-            channelsData.push(channel)
+        const savedChannels = []
+        if (data) {
+            for (const channelId of Array(...data.lockChannels)) {
+                /** @type {TextChannel} */
+                const channel = _channels.get(channelId)
+                if (!channel) continue
+                savedChannels.push(channel)
+            }
         }
 
-        if (['add', 'remove'].includes(subCommand)) {
-            if (!reasonChannels) return message.say(basicEmbed('red', 'cross', 'Please specify which channels would you like to add/remove.'))
+        switch (subCommand) {
+            case 'start':
+                return await this.start(message, savedChannels)
+            case 'end':
+                return await this.end(message, savedChannels)
+            case 'channels':
+                return await this.channels(message, savedChannels)
+            case 'add':
+                return await this.add(message, data, savedChannels.map(c => c.id), channels)
+            case 'remove':
+                return await this.remove(message, data, savedChannels.map(c => c.id), channels)
+        }
+    }
 
-            const array = reasonChannels.split(/ +/)
-            const channels = []
-            for (const item of array) {
-                const channel = channelsCache.get(item.replace(/[^0-9]/g, '')) || channelsCache.find(({ name }) => name === item.toLowerCase())
-                if (!channel || channel.type !== 'text') continue
-                channels.push(channel)
-            }
-
-            if (subCommand === 'add') {
-                const channelsList = channels.filter(channel => !channelsData.includes(channel) && !channel.permissionOverwrites.get(guild.id)?.deny.has('SEND_MESSAGES'))
-                if (channelsList.length === 0) return message.say(basicEmbed('red', 'cross', 'The channels you specified are not valid.'))
-
-                await data.updateOne({ $push: { lockChannels: { $each: channelsList.map(({ id }) => id) } } })
-                return message.say(basicEmbed('green', 'check', 'Added the following lockdown channels:', channelsList.join(', ')))
-            }
-
-            const channelsList = channels.filter(channel => channelsData.includes(channel))
-            if (channelsList.length === 0) return message.say(basicEmbed('red', 'cross', 'The channels you specified are not valid.'))
-
-            await data.updateOne({ $pull: { lockChannels: { $in: channelsList.map(({ id }) => id) } } })
-            return message.say(basicEmbed('green', 'check', 'Removed the following lockdown channels:', channelsList.join(', ')))
+    /**
+     * The `start` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {TextChannel[]} savedChannels The saved lockdown channels of the server
+     */
+    async start(message, savedChannels) {
+        if (savedChannels.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info',
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+            }))
         }
 
-        if (channelsData.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no lockdown channels, please use the `add` sub-command to add some.'))
+        const { guild, guildId } = message
+        const { everyone } = guild.roles
 
-        if (subCommand === 'channels') {
-            return await generateEmbed(message, channelsData, {
-                number: 20,
-                authorName: `${guild.name}'s lockdown channels`,
-                authorIconURL: guild.iconURL({ dynamic: true }),
-                useDescription: true
+        let amount = 0
+        for (const channel of savedChannels) {
+            const permsManager = channel.permissionOverwrites
+            const perms = permsManager.cache.get(guildId)
+            if (perms?.deny.has('SEND_MESSAGES')) continue
+
+            await permsManager.edit(everyone, { SEND_MESSAGES: false }, { reason: 'Lockdown started.', type: 0 })
+            await channel.send({
+                embeds: [basicEmbed({
+                    emoji: '\\🔒', fieldName: 'This channel has been locked',
+                    fieldValue: 'A lockdown has been started.'
+                })]
             })
-        }
-
-        var amount = 0
-        for (const channel of channelsData) {
-            const perms = channel.permissionOverwrites.get(guild.id)
-
-            if (subCommand === 'start') {
-                if (perms?.deny.has('SEND_MESSAGES')) continue
-
-                const reason = reasonChannels || 'We\'ll be back shortly.'
-                await channel.updateOverwrite(everyone, { SEND_MESSAGES: false }, reason)
-                await channel.send(basicEmbed('#4c9f4c', '\\🔒', 'This channel has been locked', reason))
-                amount++
-                continue
-            }
-
-            if (!perms?.deny.has('SEND_MESSAGES')) continue
-
-            const reason = reasonChannels || 'Thanks for waiting.'
-            await channel.updateOverwrite(everyone, { SEND_MESSAGES: null }, reason)
-            await channel.send(basicEmbed('#4c9f4c', '\\🔓', 'This channel has been unlocked', reason))
             amount++
         }
 
-        if (!amount) return message.say(basicEmbed('red', 'cross', 'No changes were made.'))
+        if (amount === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', description: 'No changes were made.'
+            }))
+        }
 
-        if (subCommand === 'start') message.say(basicEmbed('green', 'check', `Locked ${amount} channels.`))
-        else message.say(basicEmbed('green', 'check', `Unocked ${amount} channels.`))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            description: `Locked ${amount}/${savedChannels.length} lockdown channels.`
+        }))
+    }
+
+    /**
+     * The `end` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {TextChannel[]} savedChannels The saved lockdown channels of the server
+     */
+    async end(message, savedChannels) {
+        if (savedChannels.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info',
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+            }))
+        }
+
+        const { guild, guildId } = message
+        const { everyone } = guild.roles
+
+        let amount = 0
+        for (const channel of savedChannels) {
+            const permsManager = channel.permissionOverwrites
+            const perms = permsManager.cache.get(guildId)
+            if (!perms?.deny.has('SEND_MESSAGES')) continue
+
+            await permsManager.edit(everyone, { SEND_MESSAGES: null }, { reason: 'Lockdown ended.', type: 0 })
+            await channel.send({
+                embeds: [basicEmbed({
+                    emoji: '\\🔓', fieldName: 'This channel has been unlocked',
+                    fieldValue: 'The lockdown has ended.'
+                })]
+            })
+            amount++
+        }
+
+        if (amount === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', description: 'No changes were made.'
+            }))
+        }
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            description: `Unocked ${amount}/${savedChannels.length} lockdown channels.`
+        }))
+    }
+
+    /**
+     * The `channels` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {TextChannel[]} channelsData The channels data for the server
+     */
+    async channels(message, channelsData) {
+        if (channelsData.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info',
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+            }))
+        }
+
+        await generateEmbed(message, channelsData, {
+            number: 20,
+            authorName: `There's ${pluralize('lockdown channel', channelsData.length)}`,
+            authorIconURL: message.guild.iconURL({ dynamic: true }),
+            useDescription: true
+        })
+    }
+
+    /**
+     * The `add` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {SetupSchema} data The setup data
+     * @param {string[]} savedChannels The ids of the saved channels of the server
+     * @param {TextChannel[]} channels The lockdown channels to add
+     */
+    async add(message, data, savedChannels, channels) {
+        if (!channels) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            channels = value
+        }
+
+        const channelsList = channels.filter(c => !savedChannels.includes(c.id))
+        if (channelsList.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'The channels you specified have already been added.'
+            }))
+        }
+
+        if (!data) await new setup({
+            guild: message.guildId,
+            lockChannels: channelsList.map(c => c.id)
+        }).save()
+        else await data.updateOne({
+            $push: { lockChannels: { $each: channelsList.map(c => c.id) } }
+        })
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: 'The following lockdown channels have been added:', fieldValue: channelsList.join(', ')
+        }))
+    }
+
+    /**
+     * The `remove` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {SetupSchema} data The setup data
+     * @param {string[]} savedChannels The ids of the saved channels of the server
+     * @param {TextChannel[]} channels The lockdown channels to remove
+     */
+    async remove(message, data, savedChannels, channels) {
+        if (savedChannels.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info',
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+            }))
+        }
+
+        if (!channels) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            channels = value
+        }
+
+        const channelsList = channels.filter(c => savedChannels.includes(c.id))
+        if (channelsList.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'The channels you specified have not been added.'
+            }))
+        }
+
+        await data.updateOne({
+            $pull: { lockChannels: { $in: channelsList.map(c => c.id) } }
+        })
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: 'The following lockdown channels have been removed:', fieldValue: channelsList.join(', ')
+        }))
     }
 }

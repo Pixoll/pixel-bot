@@ -1,16 +1,19 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, Role } = require('discord.js')
-const { getKeyPerms } = require('../../utils/functions')
+const { getKeyPerms, roleDetails } = require('../../utils')
 const { stripIndent } = require('common-tags')
 
-module.exports = class roleinfo extends Command {
+/** A command that can be run in a client */
+module.exports = class RoleInfoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'roleinfo',
             group: 'misc',
-            memberName: 'roleinfo',
-            description: 'Displays multiple information about a role, such as color, position, members and key permissions (if any).',
-            details: '`role` can be either a role\'s name, mention or ID. It\'s not case sensitive.',
+            description:
+                'Displays multiple information about a role, such as color, position, members and key permissions (if any).'
+            ,
+            details: roleDetails(),
             format: 'roleinfo [role]',
             examples: ['roleinfo Staff'],
             guildOnly: true,
@@ -22,36 +25,34 @@ module.exports = class roleinfo extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {Role} args.role The role to get information about
      */
-    run(message, { role }) {
+    async run(message, { role }) {
         const { hexColor, id, name, hoist, position, mentionable, members, createdTimestamp } = role
-        const color = hexColor === '#000000' ? '' : hexColor
+        const color = hexColor === '#000000' ? null : hexColor
         const permissions = getKeyPerms(role)
 
         const roleInfo = new MessageEmbed()
             .setColor(color || '#4c9f4c')
-            .setThumbnail(`https://www.colorhexa.com/${color.replace('#', '')}.png`)
-            .setTitle(`Information about the ${name} role`).
+            .setThumbnail(`https://www.colorhexa.com/${(color || '#4c9f4c').replace('#', '')}.png`)
+            .setAuthor(`Information for role: ${name}`).
             setDescription(stripIndent`
-                **>** **Mention:** \\${role.toString()}
+                **>** **Mention:** \`${role.toString()}\`
                 **>** **Color:** ${color || 'None'}
                 **>** **Hoisted:** ${hoist ? 'Yes' : 'No'}
                 **>** **Mentionable:** ${mentionable ? 'Yes' : 'No'}
                 **>** **Position:** ${position}
                 **>** **Members:** ${members.size}
             `)
-            .setFooter(`Role ID: ${id} | Role Created`)
+            .setFooter(`Role id: ${id} | Created at`)
             .setTimestamp(createdTimestamp)
 
         if (permissions !== 'None') roleInfo.addField('Key Permissions', permissions)
 
-        message.say(roleInfo)
+        await message.replyEmbed(roleInfo)
     }
 }

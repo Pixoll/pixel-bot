@@ -1,171 +1,87 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed } = require('../../utils/functions')
-const { modules: modulesDocs } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { modules } = require('../../mongo/schemas')
+const { ModuleSchema } = require('../../mongo/typings')
 
-const format = val => val.replace(/[A-Z]/g, '-$&').toLocaleLowerCase()
+/**
+ * Patches the data of a {@link ModuleSchema}
+ * @param {ModuleSchema} data The data to patch
+ */
+function patchData(data) {
+    const _patch = b => b === false ? 'Disabled' : 'Enabled'
 
-const Obj = modulesDocs.schema.obj
-const Modules = [...Object.keys(Obj).slice(1), 'all'].map(format)
-const AuditLogs = [...Object.keys(Obj.auditLogs), 'all']
+    const patch = {
+        autoMod: _patch(data?.autoMod),
+        chatFilter: _patch(data?.chatFilter),
+        welcome: _patch(data?.welcome),
+        auditLogs: {
+            channels: _patch(data?.auditLogs?.channels),
+            commands: _patch(data?.auditLogs?.commands),
+            emojis: _patch(data?.auditLogs?.emojis),
+            invites: _patch(data?.auditLogs?.invites),
+            members: _patch(data?.auditLogs?.members),
+            messages: _patch(data?.auditLogs?.messages),
+            moderation: _patch(data?.auditLogs?.moderation),
+            roles: _patch(data?.auditLogs?.roles),
+            server: _patch(data?.auditLogs?.server),
+            voice: _patch(data?.auditLogs?.voice)
+        }
+    }
 
-module.exports = class modules extends Command {
+    return patch
+}
+
+/** A command that can be run in a client */
+module.exports = class ModulesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'modules',
             group: 'utility',
-            memberName: 'modules',
             description: stripIndent`
-                With this command you can toggle the different modules on and off.
-                These are the available modules: \`auto-mod\`, \`chat-filter\` \`welcome\`, \`audit-logs\` and \`all\`.
-                \`audit-logs\` has the sub-modules: \`channels\`, \`commands\`, \`emojis\`, \`invites\`, \`members\`, \`messages\`, \`moderation\`, \`roles\`, \`server\`, \`voice\` and \`all\`
+                Check the status of all available modules and sub-modules.
+                Use the \`module toggle\` command to toggle a module or sub-module.
             `,
-            format: stripIndent`
-                modules <module> - Toggle one or all modules.
-                modules audit-logs [sub-module] - Toggle one or all sub-modules of the audit logs.
-            `,
-            examples: ['modules auto-mod', 'modules audit-logs server'],
             userPermissions: ['ADMINISTRATOR'],
             guarded: true,
-            guildOnly: true,
-            args: [
-                {
-                    key: 'module',
-                    prompt: 'What module do you want to toggle?',
-                    type: 'string',
-                    oneOf: Modules,
-                    default: ''
-                },
-                {
-                    key: 'subModule',
-                    prompt: 'What sub-module of the audit logs do you want to toggle?',
-                    type: 'string',
-                    oneOf: AuditLogs,
-                    default: ''
-                }
-            ]
+            guildOnly: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.module The module to toggle
-     * @param {string} args.subModule The sub-module to toggle
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
      */
-    async run(message, { module, subModule }) {
-        const { guild } = message
+    async run(message) {
+        const { guild, guildId } = message
 
-        const data = await modulesDocs.findOne({ guild: guild.id })
-        const { autoMod, chatFilter, welcome, auditLogs } = data || {}
-        const { channels, commands, emojis, invites, members, messages, moderation, roles, server, voice } = auditLogs || {}
+        const data = await modules.findOne({ guild: guildId })
+        const patch = patchData(data)
+        const { auditLogs, autoMod, chatFilter, welcome } = patch
+        const { channels, commands, emojis, invites, members, messages, moderation, roles, server, voice } = auditLogs
 
-        const isEnabled = module => module === false ? 'Disabled' : 'Enabled'
-        const toggle = module => typeof module === 'undefined' ? false : !module
+        const disabled = new MessageEmbed()
+            .setColor('#4c9f4c')
+            .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
+            .setDescription(stripIndent`
+                **>** **Automatic moderation:** ${autoMod}
+                **>** **Chat filter:** ${chatFilter}
+                **>** **Welcome messages:** ${welcome}
+                **>** **Audit logs:**
+                \u2800 ⤷ **Channels:** ${channels}
+                \u2800 ⤷ **Commands:** ${commands}
+                \u2800 ⤷ **Emojis:** ${emojis}
+                \u2800 ⤷ **Invites:** ${invites}
+                \u2800 ⤷ **Members:** ${members}
+                \u2800 ⤷ **Messages:** ${messages}
+                \u2800 ⤷ **Moderation:** ${moderation}
+                \u2800 ⤷ **Roles:** ${roles}
+                \u2800 ⤷ **Server:** ${server}
+                \u2800 ⤷ **Voice:** ${voice}
+            `)
+            .setTimestamp()
 
-        if (!module) {
-            const disabled = new MessageEmbed()
-                .setColor('#4c9f4c')
-                .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
-                .setDescription(stripIndent`
-                    **>** **Automatic moderation:** ${isEnabled(autoMod)}
-                    **>** **Chat filter:** ${isEnabled(chatFilter)}
-                    **>** **Welcome messages:** ${isEnabled(welcome)}
-                    **>** **Audit logs:**
-                    \u2800 ⤷ **Channels:** ${isEnabled(channels)}
-                    \u2800 ⤷ **Commands:** ${isEnabled(commands)}
-                    \u2800 ⤷ **Emojis:** ${isEnabled(emojis)}
-                    \u2800 ⤷ **Invites:** ${isEnabled(invites)}
-                    \u2800 ⤷ **Members:** ${isEnabled(members)}
-                    \u2800 ⤷ **Messages:** ${isEnabled(messages)}
-                    \u2800 ⤷ **Moderation:** ${isEnabled(moderation)}
-                    \u2800 ⤷ **Roles:** ${isEnabled(roles)}
-                    \u2800 ⤷ **Server:** ${isEnabled(server)}
-                    \u2800 ⤷ **Voice:** ${isEnabled(voice)}
-                `)
-                .setTimestamp()
-
-            return message.say(disabled)
-        }
-
-        if (module.toLowerCase() === 'all') {
-            const doc = {
-                guild: guild.id,
-                autoMod: toggle(autoMod),
-                chatFilter: toggle(chatFilter),
-                welcome: toggle(welcome),
-                auditLogs: {
-                    channels: toggle(channels),
-                    commands: toggle(commands),
-                    emojis: toggle(emojis),
-                    invites: toggle(invites),
-                    members: toggle(members),
-                    messages: toggle(messages),
-                    moderation: toggle(moderation),
-                    server: toggle(server),
-                    roles: toggle(roles),
-                    voice: toggle(voice)
-                }
-            }
-
-            if (!data) await new modulesDocs(doc).save()
-            else await data.updateOne(doc)
-
-            return message.say(basicEmbed('green', 'check', 'Toggled every single module and sub-module.'))
-        }
-
-        const template = {
-            guild: guild.id,
-            autoMod,
-            chatFilter,
-            welcome,
-            auditLogs: {
-                channels,
-                commands,
-                emojis,
-                invites,
-                members,
-                messages,
-                moderation,
-                server,
-                roles,
-                voice
-            }
-        }
-
-        if (module.toLowerCase() !== 'audit-logs') {
-            if (module.toLowerCase() === 'auto-mod') template.autoMod = toggle(template.autoMod)
-            if (module.toLowerCase() === 'chat-filter') template.chatFilter = toggle(template.chatFilter)
-            if (module.toLowerCase() === 'welcome') template.welcome = toggle(template.welcome)
-
-            if (!data) await new modulesDocs(template).save()
-            else await data.updateOne(template)
-
-            return message.say(basicEmbed('green', 'check', `Toggled the module \`${module.toLowerCase()}\``))
-        }
-
-        if (!subModule) return message.say(basicEmbed('red', 'cross', 'Please specify a sub-module.'))
-
-        if (subModule.toLowerCase() === 'all') {
-            for (const sub in template.auditLogs) {
-                template.auditLogs[sub] = toggle(template.auditLogs[sub])
-            }
-
-            if (!data) await new modulesDocs(template).save()
-            else await data.updateOne(template)
-
-            return message.say(basicEmbed('green', 'check', 'Toggled every single sub-module of `audit-logs`.'))
-        }
-
-        template.auditLogs[subModule.toLowerCase()] = toggle(template.auditLogs[subModule.toLowerCase()])
-
-        if (!data) await new modulesDocs(template).save()
-        else await data.updateOne(template)
-
-        return message.say(basicEmbed('green', 'check', `Toggled the sub-module \`${subModule.toLowerCase()}\``))
+        await message.replyEmbed(disabled)
     }
 }

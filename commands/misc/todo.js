@@ -1,97 +1,162 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { todo: todoDocs } = require('../../utils/mongo/schemas')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { generateEmbed, basicEmbed, getArgument } = require('../../utils')
+const { todo } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { TodoSchema } = require('../../mongo/typings')
 
-module.exports = class todo extends Command {
+/** A command that can be run in a client */
+module.exports = class TodoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'todo',
             aliases: ['to-do'],
             group: 'misc',
-            memberName: 'todo',
             description: 'View your to-do list, or add/remove an item.',
             format: stripIndent`
-                todo - Display your to-do list.
+                todo <view> - Display your to-do list.
                 todo add [item] - Add an item to yout to-do list.
                 todo remove [number] - Remove an item from your to-do list.
             `,
-            examples: ['todo add Make awesome commands', 'todo remove 2'],
+            examples: [
+                'todo add Make awesome commands',
+                'todo remove 2'
+            ],
             clientPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
             args: [
                 {
                     key: 'subCommand',
+                    label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['add', 'remove'],
-                    default: ''
+                    oneOf: ['view', 'add', 'remove'],
+                    default: 'view'
                 },
                 {
                     key: 'item',
                     prompt: 'What item do you want to add/remove?',
                     type: 'string',
                     max: 512,
-                    default: ''
+                    required: false
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.subCommand The sub-command
-     * @param {string|number} args.item The item to add/remove
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'view'|'add'|'remove'} args.subCommand The sub-command
+     * @param {string} args.item The item to add/remove
      */
     async run(message, { subCommand, item }) {
-        const { author } = message
+        subCommand = subCommand.toLowerCase()
+        const { id } = message.author
 
-        // tries to get the to-do list of the user
-        const TODO = await todoDocs.findOne({ user: author.id })
-        const todoList = TODO ? Array(...TODO.list) : undefined
+        /** @type {TodoSchema} */
+        const TODO = await todo.findOne({ user: id })
+        const todoList = TODO ? Array(...TODO.list) : null
 
-        if (!subCommand) {
-            if (!TODO || todoList.length === 0) return message.say(basicEmbed('blue', 'info', 'Your to-do list empty.'))
+        switch (subCommand) {
+            case 'view':
+                return await this.view(message, todoList)
+            case 'add':
+                return await this.add(message, item, TODO)
+            case 'remove':
+                return await this.remove(message, item, todoList, TODO)
+        }
+    }
 
-            // creates and returns the paged embed containing the to-do list
-            return await generateEmbed(message, todoList, {
-                number: 5,
-                authorName: `${author.username}'s to-do list`,
-                authorIconURL: author.displayAvatarURL({ dynamic: true }),
-                title: 'Item',
-                hasObjects: false
-            })
+    /**
+     * The `view` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {string[]} todoList The to-do list
+     */
+    async view(message, todoList) {
+        if (!todoList || todoList.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
+            }))
         }
 
-        if (subCommand.toLowerCase() === 'add') {
-            if (!item) return message.say(basicEmbed('red', 'cross', 'Please specify the item you want to add to your to-do list.'))
+        const { author, channel } = message
 
-            // creates a new doc
-            const newDoc = {
-                user: author.id,
-                list: [item]
-            }
-
-            // adds the item to the to-do list
-            if (!TODO) await new todoDocs(newDoc).save()
-            else await TODO.updateOne({ $push: { list: item } })
-
-            return message.say(basicEmbed('green', 'check', 'Added the following item to your to-do list:', item))
+        if (channel.type !== 'DM') {
+            await message.reply('You should receive a DM with your to-do list in no time.')
         }
 
-        if (!item) return message.say(basicEmbed('red', 'cross', 'Please specify the number of item you want to remove from your to-do list.'))
+        await generateEmbed(message, todoList, {
+            number: 5,
+            authorName: 'Your to-do list',
+            authorIconURL: author.displayAvatarURL({ dynamic: true }),
+            title: 'Item',
+            hasObjects: false,
+            toUser: true
+        })
+    }
 
-        if (!TODO || todoList.length === 0) return message.say(basicEmbed('blue', 'info', 'Your to-do list empty.'))
+    /**
+     * The `add` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {string} item The new item to add
+     * @param {TodoSchema} todoData The existent to-do document
+     */
+    async add(message, item, todoData) {
+        if (!item) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            item = value
+        }
 
-        if (item <= 0 || item > todoList.length) return message.say(basicEmbed('red', 'cross', 'That\'s not a valid item number inside your to-do list.'))
+        /** @type {TodoSchema} */
+        const newDoc = {
+            user: message.author.id,
+            list: [item]
+        }
 
-        // removes the item from the to-do list
-        await TODO.updateOne({ $pull: { list: todoList[--item] } })
+        if (!todoData) await new todo(newDoc).save()
+        else await todoData.updateOne({ $push: { list: item } })
 
-        message.say(basicEmbed('green', 'check', `Removed item \`${++item}\` from your to-do list.`))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: 'Added the following item to your to-do list:', fieldValue: item
+        }))
+    }
+
+    /**
+     * The `remove` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {number} item The item you want to add or remove from the FAQ list
+     * @param {string[]} todoList The to-do list
+     * @param {TodoSchema} todoData The existent to-do document
+     */
+    async remove(message, item, todoList, todoData) {
+        if (!item) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            item = Math.abs(Number.parseInt(value))
+        }
+
+        if (!todoData || todoList.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
+            }))
+        }
+
+        if (item > todoList.length) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside your to-do list.'
+            }))
+        }
+
+        item--
+        await todoData.updateOne({ $pull: { list: todoList[item] } })
+        item++
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Removed item \`${item}\` from your to-do list.`
+        }))
     }
 }

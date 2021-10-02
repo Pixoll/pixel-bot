@@ -1,8 +1,6 @@
-const { stripIndent } = require('common-tags')
-const { MessageEmbed } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus, getLogsChannel } = require('../../utils/functions')
-const { setup, modules } = require('../../utils/mongo/schemas')
+const { MessageEmbed, User } = require('discord.js')
+const { CommandoClient } = require('../../command-handler/typings')
+const { isModuleEnabled, getLogsChannel } = require('../../utils')
 
 /**
  * Handles all of the emoji logs.
@@ -12,58 +10,53 @@ module.exports = (client) => {
     client.on('emojiCreate', async emoji => {
         const { guild, name, id, url } = emoji
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'emojis')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
+        /** @type {User} */
         const author = await emoji.fetchAuthor().catch(() => null)
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor('Created emoji', guild.iconURL({ dynamic: true }))
-            .setDescription(stripIndent`
-                **>** **Name:** ${name}
-                **>** **Author:** ${author.toString()} ${author.tag}
-            `)
+            .setDescription(`**${author.toString()} added an emoji:** ${name}`)
             .setThumbnail(url)
-            .setFooter(`Emoji ID: ${id}`)
+            .setFooter(`Emoji id: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
     client.on('emojiDelete', async emoji => {
-        const { guild, name, id, author, url } = emoji
+        const { guild, name, id, url } = emoji
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'emojis')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted emoji', guild.iconURL({ dynamic: true }))
-            .setDescription(stripIndent`
-                **>** **Name:** ${name}
-                **>** **Author:** ${author.toString()} ${author.tag}
-            `)
+            .setDescription(`**Name:** ${name}`)
             .setThumbnail(url)
-            .setFooter(`Emoji ID: ${id}`)
+            .setFooter(`Emoji id: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
     client.on('emojiUpdate', async (oldEmoji, newEmoji) => {
         const { guild, id, url } = oldEmoji
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'emojis')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const embed = new MessageEmbed()
@@ -71,9 +64,11 @@ module.exports = (client) => {
             .setAuthor('Updated emoji', guild.iconURL({ dynamic: true }))
             .addField('Name', `${oldEmoji.name} ➜ ${newEmoji.name}`)
             .setThumbnail(url)
-            .setFooter(`Emoji ID: ${id}`)
+            .setFooter(`Emoji id: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
+
+    client.emit('debug', 'Loaded audit-logs/emojis')
 }

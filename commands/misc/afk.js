@@ -1,78 +1,86 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed } = require('../../utils/functions')
-const { afk: afkDocs } = require('../../utils/mongo/schemas')
-const { stripIndent, oneLine } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { basicEmbed } = require('../../utils')
+const { afk } = require('../../mongo/schemas')
+const { stripIndent } = require('common-tags')
+const { AfkSchema } = require('../../mongo/typings')
 
-module.exports = class afk extends Command {
+/** A command that can be run in a client */
+module.exports = class AfkCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'afk',
             group: 'misc',
-            memberName: 'afk',
             description: 'Set an AFK status to display when you are mentioned.',
-            details: oneLine`
-                When using the command, \`status\` will be saved so when you get mentioned at any time, that \`status\`
-                will be sent. If instead of providing an \`status\` you send \`off\`, I will remove you AFK status.
-            `,
+            details: 'Set `status` as `off` to remove your AFK status.',
             format: stripIndent`
                 afk [status] - Set your status.
                 afk off - Remove your status.
             `,
-            examples: ['afk Coding', 'afk off'],
+            examples: [
+                'afk Coding',
+                'afk off'
+            ],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [{
                 key: 'status',
-                prompt: 'What is the status you want to set? Type `off` to remove it.',
+                prompt: 'What is the status you want to set? Responf with `off` to remove it (if existent).',
                 type: 'string',
                 max: 512
             }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {string} args.status The status to set or `off`
      */
     async run(message, { status }) {
-        // gets data that will be used later
-        const { author } = message
-        const guildID = message.guild.id
+        const { author, guildId } = message
 
-        // tries to get the AFK status if it exists
-        const getAFK = await afkDocs.findOne({ guild: guildID, user: author.id })
+        /** @type {AfkSchema} */
+        const afkStatus = await afk.findOne({ guild: guildId, user: author.id })
 
-        if (getAFK) {
+        if (afkStatus) {
             if (status.toLowerCase() === 'off') {
-                // removes the AFK status
-                await getAFK.deleteOne()
+                await afkStatus.deleteOne()
 
-                return message.say(basicEmbed('green', '', `Welcome back ${author}, I removed your AFK status`))
-                    .then(msg => msg.delete({ timeout: 10000 }).catch(() => null))
+                return await message.replyEmbed(basicEmbed({
+                    color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status`
+                })).then(async msg =>
+                    await msg.delete({ timeout: 10000 }).catch(() => null)
+                )
             }
 
-            // updates the AFK status
-            await getAFK.updateOne({ status: status })
+            await afkStatus.updateOne({ status })
 
-            return message.say(basicEmbed('green', 'check', 'I updated your AFK status to:', status))
+            return await message.replyEmbed(basicEmbed({
+                color: 'GREEN', emoji: 'check',
+                fieldName: 'I updated your AFK status to:', fieldValue: status
+            }))
         }
 
-        if (status.toLowerCase() === 'off') return message.say(basicEmbed('red', 'cross', 'You can\'t set your status as `off`'))
+        if (status.toLowerCase() === 'off') {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'You can\'t set your status as `off`'
+            }))
+        }
 
-        // creates a new document
+        /** @type {AfkSchema} */
         const doc = {
-            guild: guildID,
+            guild: guildId,
             user: author.id,
-            status: status
+            status
         }
 
-        // saves the AFK status
-        await new afkDocs(doc).save()
+        await new afk(doc).save()
 
-        message.say(basicEmbed('green', 'check', 'I set your AFK status as:', status))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: 'I set your AFK status as:', fieldValue: status
+        }))
     }
 }

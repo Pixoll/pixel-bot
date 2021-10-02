@@ -1,202 +1,221 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { MessageEmbed, TextChannel } = require('discord.js')
-const { ms } = require('../../utils/custom-ms')
-const { polls } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { MessageEmbed, TextChannel, Message } = require('discord.js')
+const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex } = require('../../utils')
+const { polls } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { formatTime, basicEmbed } = require('../../utils/functions')
+const { basicEmbed } = require('../../utils')
+const { PollSchema } = require('../../mongo/typings')
 
-const emojiRegex = /[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\u{200d}]*/ug
-
-/**
- * looks for valid emojis in the provided string
- * @param {string} string the string to look emojis in
- * @param {string[]} emojis all the available GuildEmojis
- * @returns {string[]}
- */
-function findEmojis(string, emojis) {
-    return string.split(/ +/).map(str => {
-        const guildEmoji = emojis.find(emoji => emoji === str.substr(-19, 18))
-
-        if (!guildEmoji && !str.replace(emojiRegex, '')) return str
-        return guildEmoji
-    }).filter(e => e)
-}
-
-module.exports = class poll extends Command {
+/** A command that can be run in a client */
+module.exports = class PollCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'poll',
             group: 'utility',
-            memberName: 'poll',
             description: 'Create or end a poll.',
             details: stripIndent`
-                \`channel\` can be a text channel's name, ID or mention.
-                \`duration\` uses the command time formatting, for more information use the \`help\` command, and has to be at least 1 minute.
-                You'll be asked for the message to use for the poll, and the emojis the bot should react with to that message.
+                ${channelDetails()}\n${timeDetails('duration')}
+                \`msg id\` has to be a message's id that's in the **same channel** that you specified.
             `,
             format: stripIndent`
-                poll create [channel] [duration] - Create a poll.
-                poll end <channel> - End the oldest poll.
+                poll create [channel] [duration] - Create a poll in that channel.
+                poll end <channel> <msg id> - End the oldest poll in that channel.
             `,
-            examples: ['poll create polls 12h', 'poll end #polls'],
+            examples: [
+                'poll create polls 12h',
+                'poll end #polls',
+                'poll end polls 890317796221792336'
+            ],
             userPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
                     key: 'subCommand',
+                    label: 'sub-command',
                     prompt: 'Do you want to create or end a poll?',
                     type: 'string',
                     oneOf: ['create', 'end']
                 },
                 {
                     key: 'channel',
-                    prompt: 'On what channel do you want to end a poll?',
+                    prompt: 'On what channel do you want to create/end the poll?',
                     type: 'text-channel',
-                    default: ''
+                    required: false
                 },
                 {
-                    key: 'duration',
-                    prompt: 'What is the duration of the new poll?',
-                    type: 'string',
-                    default: '',
-                    /** @param {string|number} time */
-                    parse: (time) => formatTime(time),
-                    /** @param {string|number} time @param {CommandoMessage} message */
-                    validate: (time, message) => {
-                        const subCommand = message.parseArgs().split(/ +/).shift().toLowerCase()
-                        if (subCommand === 'end') return true
-                        return !!formatTime(time) && formatTime(time) >= 60 * 1000
-                    },
-                    error: 'You either didn\'t use the correct format, or the duration is less that 1 minute. Please provide a valid duration.'
+                    key: 'durationOrMsg',
+                    label: 'duration or message',
+                    prompt: 'How long should the mute last? Or what\'s the message id of the poll you want to end?',
+                    type: ['date', 'timestamp', 'duration', 'string'],
+                    required: false
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'create'|'end'} args.subCommand The sub-command to use
+     * @param {TextChannel} args.channel The text channel of the poll to create or end
+     * @param {number|Date|string} args.durationOrMsg The duration of the poll to create,
+     * or the message of the poll to end
+     */
+    async run(message, { subCommand, channel, durationOrMsg }) {
+        subCommand = subCommand.toLowerCase()
+
+        switch (subCommand) {
+            case 'create':
+                return await this.create(message, channel, durationOrMsg)
+            case 'end':
+                return await this.end(message, channel, durationOrMsg)
+        }
+    }
 
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.subCommand The sub-command to use
-     * @param {TextChannel} args.channel The text channel of the poll
-     * @param {number} args.duration The duration of the poll
+     * The `create` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {TextChannel} channel The text channel of the poll to create
+     * @param {number|Date|string} duration The duration of the poll to create
      */
-    async run(message, { subCommand, channel, duration }) {
-        const { guild, author } = message
-        const channels = guild.channels.cache
-        const allEmojis = this.client.emojis.cache.map(({ id }) => id)
-
-        if (subCommand.toLowerCase() === 'create') {
-            if (!channel) return message.say(basicEmbed('red', 'cross', 'Please specify a text channel where to create the poll.'))
-            if (!duration) return message.say(basicEmbed('red', 'cross', 'Please specify the duration of the poll.'))
-
-            const longTime = ms(duration, { long: true })
-
-            const questions = [
-                'What will the message of the poll be? Type `cancel` to at any time to cancel creation.',
-                'Now, what emojis should the bot react with in the poll message?'
-            ]
-
-            // creates the collector
-            const collector = message.channel.createMessageCollector(msg => msg.author.id === author.id, {
-                max: questions.length,
-                time: 300000
-            })
-            var answered, counter = 0
-
-            // sends the first question
-            message.reply(questions[counter++])
-
-            collector.on('collect', /** @param {CommandoMessage} msg */ async ({ content }) => {
-                // checks if the collector has been cancelled
-                if (content.toLowerCase() === 'cancel') {
-                    message.reply('The poll creation has been cancelled.')
-                    return answered = true, collector.stop()
-                }
-
-                if (counter === 1 && content.length > 2000) {
-                    message.say(basicEmbed('red', 'cross', 'Make sure the message is not longer than 2000 characters.'))
-                    return answered = true, collector.stop()
-                }
-                if (counter === 2) {
-                    const emojis = findEmojis(content, allEmojis)
-
-                    if (emojis.length < 2) {
-                        message.say(basicEmbed('red', 'cross', 'Make sure you send at least 2 emojis separated by a space.'))
-                        return answered = true, collector.stop()
-                    }
-                }
-
-                // sends the next question
-                if (counter < questions.length) message.reply(questions[counter++])
-            })
-
-            collector.on('end', async collected => {
-                if (answered) return
-                if (collected.size < questions.length) {
-                    return message.say(basicEmbed('red', 'cross', 'You didn\'t answer in time or there was an error while creating your new question.'))
-                }
-
-                const [pollMessage, emojiString] = collected.map(({ content }) => content)
-                const emojis = findEmojis(emojiString, allEmojis)
-
-                const msg = await channel.send(pollMessage)
-                for (const emoji of emojis) await msg.react(emoji)
-
-                const newDoc = {
-                    guild: guild.id,
-                    channel: channel.id,
-                    message: msg.id,
-                    emojis: emojis,
-                    duration: longTime,
-                    endsAt: Date.now() + duration
-                }
-
-                await new polls(newDoc).save()
-
-                message.say(basicEmbed('green', 'check', `The poll was successfully created and is starting in ${channel}.`))
-            })
-
-            return
+    async create(message, channel, duration) {
+        while (typeof duration === 'string') {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            duration = value
         }
 
-        const pollData = await polls.findOne({ guild: guild.id, channel: channel?.id || message.channel.id })
-        if (!pollData) return message.say(basicEmbed('red', 'cross', 'I couldn\'t find the poll you were looking for.'))
+        if (typeof duration === 'number') duration = duration + Date.now()
+        if (duration instanceof Date) duration = duration.getTime()
 
-        const pollChannel = channels.get(pollData.channel)
-        const msg = await pollChannel?.messages.fetch(pollData.message, false)
-        if (!msg) return message.say(basicEmbed('red', 'cross', 'That poll or the channel were it was, was deleted.'))
+        const { guildId, client } = message
 
-        const reactions = msg.reactions.cache.map(r => r).filter(({ emoji }) => pollData.emojis.includes(emoji.id || emoji.name))
+        const pollMsg = await basicCollector(message, {
+            fieldName: 'What will the message of the poll be?'
+        }, { time: myMs('2m') })
+        if (!pollMsg) return
 
-        var results = []
-        for (const reaction of reactions) {
+        const allEmojis = client.emojis.cache
+        const emojis = []
+        while (emojis.length < 2) {
+            const emojisMsg = await basicCollector(message, {
+                fieldName: 'Now, what emojis should the bot react with in the poll message?'
+            }, { time: myMs('2m') })
+            if (!emojisMsg) return
+
+            const match = emojisMsg.content.match(emojiRegex)?.map(e => e).filter(e => e) || []
+            for (const emoji of match) {
+                if (emojis.includes(emoji)) continue
+
+                if (!Number.parseInt(emoji)) emojis.push(emoji)
+                if (allEmojis.get(emoji)) emojis.push(emoji)
+            }
+        }
+
+        const sent = await channel.send(pollMsg.content)
+        for (const emoji of emojis) await sent.react(emoji)
+
+        /** @type {PollSchema} */
+        const newDoc = {
+            guild: guildId,
+            channel: channel.id,
+            message: sent.id,
+            emojis,
+            duration: myMs(duration, { long: true }),
+            endsAt: duration
+        }
+
+        await new polls(newDoc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `The poll was successfully created in ${channel}.`
+        }))
+    }
+
+    /**
+     * The `end` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {TextChannel} channel The text channel of the poll to end
+     * @param {string} _msg The message id of the poll to end
+     */
+    async end(message, channel, _msg) {
+        if (!channel) channel = message.channel
+
+        if (_msg) {
+            while (!(_msg instanceof Message)) {
+                const msg = await channel.messages.fetch(_msg)
+                _msg = msg
+            }
+        }
+
+        const { guild, guildId } = message
+        const { channels } = guild
+
+        /** @type {PollSchema} */
+        const query = _msg ? {
+            guild: guildId,
+            channel: channel.id,
+            message: _msg.id
+        } : {
+            guild: guildId,
+            channel: channel.id
+        }
+
+        /** @type {PollSchema} */
+        const pollData = await polls.findOne(query)
+        if (!pollData) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the poll you were looking for.'
+            }))
+        }
+
+        /** @type {TextChannel} */
+        const pollChannel = channels.resolve(pollData.channel)
+        /** @type {Message} */
+        const msg = _msg || await pollChannel?.messages.fetch(pollData.message)
+        if (!msg) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That poll message or the channel were deleted.'
+            }))
+        }
+
+        const reactions = msg.reactions.cache.filter(r =>
+            pollData.emojis.includes(r.emoji.id || r.emoji.name)
+        )
+
+        const results = []
+        for (const [, reaction] of reactions) {
             const votes = reaction.count - 1
             const emoji = reaction.emoji.toString()
             results.push({ votes, emoji })
         }
 
-        const winners = results.sort((a, b) => b.votes - a.votes).filter(({ votes }, i, arr) => arr[0].votes === votes)
+        const winners = results.sort((a, b) => b.votes - a.votes).filter((d, i, arr) => arr[0].votes === d.votes)
 
-        const winner = winners.length === 1 ? `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : ''
-        const draw = winners.length > 1 ? `It seems like there was a draw between these choices: ${winners.map(({ emoji }) => emoji).join(', ')}` : ''
-        const noVotes = results.filter(({ votes }) => votes === 0).length === results.length ? 'It seems like no one voted on this poll...' : ''
+        const winner = winners.length === 1 ?
+            `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null
+
+        const draw = winners.length > 1 ?
+            `It seems like there was a draw between these choices: ${winners.map(d => d.emoji).join(', ')}` : null
+
+        const noVotes = results.filter(d => d.votes === 0).length === results.length ?
+            'It seems like no one voted on this poll...' : null
 
         const pollEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${guild.name}'s polls`, guild.iconURL({ dynamic: true }))
-            .setTitle('The poll has ended!')
-            .setURL(msg.url)
+            .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), msg.url)
             .setDescription(winner || noVotes || draw)
             .setTimestamp()
 
-        if (!noVotes) pollEmbed.addField('These are the full results:', results.map(({ emoji, votes }) => `**>** Choice ${emoji} with \`${votes}\` votes`))
+        if (!noVotes) pollEmbed.addField(
+            'These are the full results:',
+            results.map(d => `**>** Choice ${d.emoji} with \`${d.votes}\` votes.`).join('\n')
+        )
 
-        pollChannel.send(pollEmbed)
-
+        await pollChannel.send({ embeds: [pollEmbed] })
         await pollData.deleteOne()
     }
 }

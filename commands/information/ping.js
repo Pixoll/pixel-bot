@@ -1,23 +1,31 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const { oneLine } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 
-module.exports = class ping extends Command {
+/** A command that can be run in a client */
+module.exports = class PingCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'ping',
             group: 'info',
-            memberName: 'ping',
             description: 'Pong! 🏓',
             guarded: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-    * @param {CommandoMessage} message The message
-    */
-    run(message) {
-        message.say('Pong! 🏓')
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
+    async run(message) {
+        const pingMsg = await message.reply('Pinging...')
+
+        const roundtrip = pingMsg.createdTimestamp - message.createdTimestamp
+        const heartbeat = Math.round(this.client.ws.ping || 0)
+
+        await pingMsg.edit(oneLine`
+			🏓 Pong! The message round-trip took ${roundtrip}ms.
+			${heartbeat ? `The heartbeat ping is ${heartbeat}ms.` : ''}
+		`)
     }
 }

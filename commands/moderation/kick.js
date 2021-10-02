@@ -1,22 +1,24 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { GuildMember } = require('discord.js')
-const { isMod, docID, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { GuildMember, TextChannel } = require('discord.js')
+const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails } = require('../../utils')
+const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { ModerationSchema } = require('../../mongo/typings')
 
-module.exports = class kick extends Command {
+/** A command that can be run in a client */
+module.exports = class KickCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'kick',
             group: 'mod',
-            memberName: 'kick',
             description: 'Kick a member.',
-            details: stripIndent`
-                \`member\` can be a member's username, ID or mention.
-                If \`reason\` is not specified, it will default as 'No reason given.'
-            `,
+            details: `${memberDetails()}\n${reasonDetails()}`,
             format: 'kick [member] <reason>',
-            examples: ['kick Pixoll', 'kick Pixoll Get out!'],
+            examples: [
+                'kick Pixoll',
+                'kick Pixoll Get out!'
+            ],
             clientPermissions: ['KICK_MEMBERS'],
             userPermissions: ['KICK_MEMBERS'],
             throttling: { usages: 1, duration: 3 },
@@ -38,51 +40,58 @@ module.exports = class kick extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {GuildMember} args.member The member to kick
      * @param {string} args.reason The reason of the kick
      */
     async run(message, { member, reason }) {
+        const { guild, author, guildId } = message
         const { user } = member
-        const { guild, author } = message
-        const isOwner = guild.ownerID === author.id
-        const botID = this.client.user.id
-        const channel = guild.channels.cache.filter(({ type }) => type === 'text').first()
 
-        if (user.id === botID) return message.say(basicEmbed('red', 'cross', 'You can\'t make me ban myself.'))
-        if (user.id === author.id) return message.say(basicEmbed('red', 'cross', 'You can\'t ban yourself.'))
+        const uExcept = userException(user, author, this)
+        if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
 
-        if (!member.kickable) return message.say(basicEmbed('red', 'cross', `Unable to kick ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
-        if (!isOwner && isMod(member)) return message.say(basicEmbed('red', 'cross', 'That user is a mod/admin, you can\'t kick them.'))
+        const mExcept = memberException(member, this)
+        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
 
-        if (!member.user.bot) {
-            const invite = await channel.createInvite({ maxAge: 604800, maxUses: 1 })
-            await member.send(basicEmbed('gold', '', `You have been kicked from ${guild.name}`, stripIndent`
-                **Reason:** ${reason}
-                **Moderator:** ${author}
-                
-                Feel free to join back: ${invite.toString()}
-                *This invite will expire in 1 week.*
-            `)).catch(() => null)
+        if (!user.bot) {
+            const embed = basicEmbed({
+                color: 'GOLD', fieldName: `You have been kicked from ${guild.name}`,
+                fieldValue: stripIndent`
+                    **Reason:** ${reason}
+                    **Moderator:** ${author.toString()}
+
+                    *The invite will expire in 1 week.*
+                `
+            })
+
+            /** @type {TextChannel} */
+            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
+            const button = inviteButton(
+                await channel.createInvite({ maxAge: inviteMaxAge, maxUses: 1 })
+            )
+
+            await user.send({ embeds: [embed], components: [button] }).catch(() => null)
         }
 
         await member.kick(reason)
 
-        message.say(basicEmbed('green', 'check', `${user.tag} has been kicked`, `**Reason:** ${reason}`))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: `${user.tag} has been kicked`, fieldValue: `**Reason:** ${reason}`
+        }))
 
-        // creates and saves the document
+        /** @type {ModerationSchema} */
         const doc = {
-            _id: docID(),
+            _id: docId(),
             type: 'kick',
-            guild: guild.id,
+            guild: guildId,
             user: user.id,
             mod: author.id,
-            reason: reason
+            reason
         }
 
         await new moderations(doc).save()

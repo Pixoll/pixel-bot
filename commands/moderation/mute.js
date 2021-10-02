@@ -1,22 +1,20 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { ms } = require('../../utils/custom-ms')
-const { isMod, docID, basicEmbed, formatTime } = require('../../utils/functions')
-const { moderations, active, setup } = require('../../utils/mongo/schemas')
+const { myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp } = require('../../utils')
+const { docId, basicEmbed } = require('../../utils')
+const { moderations, active, setup } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { SetupSchema, ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
-module.exports = class mute extends Command {
+/** A command that can be run in a client */
+module.exports = class MuteCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'mute',
             group: 'mod',
-            memberName: 'mute',
             description: 'Mute a member so they cannot type or speak.',
-            details: stripIndent`
-                \`member\` can be a member\'s username, ID or mention.
-                \`duration\` uses the command time formatting, for more information use the \`help\` command. \`duration\` has to be at least 1 minute.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${memberDetails()}\n${timeDetails('duration')}\n${reasonDetails()}`,
             format: 'mute [member] [duration] <reason>',
             examples: ['mute Pixoll 2h', 'mute Pixoll 6h Excessive swearing'],
             clientPermissions: ['MANAGE_ROLES'],
@@ -31,93 +29,104 @@ module.exports = class mute extends Command {
                 },
                 {
                     key: 'duration',
-                    prompt: 'How long should the mute last? (at least 1 min)',
-                    type: 'string',
-                    /** @param {string|number} duration */
-                    parse: (duration) => formatTime(duration),
-                    /** @param {string|number} duration */
-                    validate: (duration) => !!formatTime(duration) && formatTime(duration) >= 60 * 1000,
-                    error: 'You either didn\'t use the correct format, or the duration is less that 1 minute. Please provide a valid duration.'
+                    prompt: 'How long should the mute last?',
+                    type: ['date', 'timestamp', 'duration']
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the mute?',
                     type: 'string',
+                    max: 512,
                     default: 'No reason given.'
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {GuildMember} args.member The member to mute
-     * @param {number} args.duration The duration of the mute
+     * @param {number|Date} args.duration The duration of the mute
      * @param {string} args.reason The reason of the mute
      */
     async run(message, { member, duration, reason }) {
-        // gets data that will be used later
-        const { guild, author } = message
-        const { user } = member
-        const isOwner = guild.ownerID === author.id
-        const botID = this.client.user.id
+        if (typeof duration === 'number') duration = duration + Date.now()
+        if (duration instanceof Date) duration = duration.getTime()
 
-        const _roles = await guild.roles.fetch()
-        const roles = _roles.cache
+        const { guild, author, guildId } = message
+        const { user, roles } = member
 
-        const data = await setup.findOne({ guild: guild.id })
-        if (!data || !data.mutedRole) return message.say(basicEmbed('red', 'cross', 'No mute role found in this server, please use the `setup` command before using this.'))
-
-        if (member.id === botID) return message.say(basicEmbed('red', 'cross', 'You can\'t make me mute myself.'))
-        if (member.id === author.id) return message.say(basicEmbed('red', 'cross', 'You can\'t mute yourself.'))
-
-        if (!member.manageable) return message.say(basicEmbed('red', 'cross', `Unable to mute ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
-        if (!isOwner && isMod(member)) return message.say(basicEmbed('red', 'cross', 'That user is a mod/admin, you can\'t mute them.'))
-
-        const longTime = ms(duration, { long: true })
-
-        const role = roles.get(data.mutedRole)
-
-        if (member.roles.cache.has(role.id)) return message.say(basicEmbed('red', 'cross', 'That user is already muted.'))
-
-        await member.roles.add(role)
-
-        if (!member.user.bot) member.send(basicEmbed('gold', '', `You have been muted on ${guild.name}`, stripIndent`
-            ** Duration:** ${longTime}
-            ** Reason:** ${reason}
-            ** Moderator:** ${author}
-        `)).catch(() => null)
-
-        message.say(basicEmbed('green', 'check', `${user.tag} has been muted`, stripIndent`
-            **Duration:** ${longTime}
-            **Reason:** ${reason}
-        `))
-
-        const documentID = docID()
-
-        const modLog = {
-            _id: documentID,
-            type: 'mute',
-            guild: guild.id,
-            user: user.id,
-            mod: author.id,
-            reason: reason,
-            duration: longTime
+        /** @type {SetupSchema} */
+        const data = await setup.findOne({ guild: guildId })
+        if (!data || !data.mutedRole) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross',
+                description: 'No mute role found in this server, please use the `setup` command before using this.'
+            }))
         }
 
-        const activeLog = {
-            _id: documentID,
+        const uExcept = userException(user, author, this)
+        if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
+        const mExcept = memberException(member, this)
+        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
+
+        const role = await guild.roles.fetch(data.mutedRole)
+
+        if (roles.cache.has(role.id)) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That user is already muted.'
+            }))
+        }
+
+        await roles.add(role)
+        this.client.emit('guildMemberMute', guild, author, user, reason, duration)
+
+        if (!user.bot) {
+            await user.send({
+                embeds: [basicEmbed({
+                    color: 'GOLD', fieldName: `You have been muted on ${guild.name}`,
+                    fieldValue: stripIndent`
+                        **Expires:** ${timestamp(duration, 'R')}
+                        **Reason:** ${reason}
+                        **Moderator:** ${author.toString()}
+                    `
+                })]
+            }).catch(() => null)
+        }
+
+        const documentId = docId()
+
+        /** @type {ModerationSchema} */
+        const modLog = {
+            _id: documentId,
             type: 'mute',
-            guild: guild.id,
+            guild: guildId,
             user: user.id,
-            duration: Date.now() + duration
+            mod: author.id,
+            reason,
+            duration: myMs(duration - Date.now(), { long: true })
+        }
+
+        /** @type {ActiveSchema} */
+        const activeLog = {
+            _id: documentId,
+            type: 'mute',
+            guild: guildId,
+            user: user.id,
+            duration
         }
 
         await new moderations(modLog).save()
         await new active(activeLog).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been muted`,
+            fieldValue: stripIndent`
+                **Expires:** ${timestamp(duration, 'R')}
+                **Reason:** ${reason}
+            `
+        }))
     }
 }

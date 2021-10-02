@@ -1,34 +1,38 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { polls: pollsDocs } = require('../../utils/mongo/schemas')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { polls } = require('../../mongo/schemas')
+const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
 
-module.exports = class polls extends Command {
+/** A command that can be run in a client */
+module.exports = class PollsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'polls',
             group: 'misc',
-            memberName: 'polls',
             description: 'Displays all the on-going polls on this server.',
             clientPermissions: ['MANAGE_MESSAGES'],
-            guildOnly: true,
-            throttling: { usages: 1, duration: 3 }
+            throttling: { usages: 1, duration: 3 },
+            guildOnly: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
     async run(message) {
-        const { guild } = message
+        const { guild, guildId } = message
 
-        // tries to get all the active polls in the server
-        const pollsData = await pollsDocs.find({ guild: message.guild.id })
-        if (!pollsData || pollsData.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no active polls.'))
+        const pollsData = await polls.find({ guild: guildId })
+        if (pollsData.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'There are no active polls.'
+            }))
+        }
 
         await generateEmbed(message, pollsData, {
             number: 5,
-            authorName: `${guild.name}'s polls`,
+            authorName: `There's ${pluralize('active poll', pollsData.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Poll',
             keys: ['channel', 'duration', 'endsAt']

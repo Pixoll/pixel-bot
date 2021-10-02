@@ -1,25 +1,25 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed, sleep } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { basicEmbed, sleep } = require('../../utils')
 
-module.exports = class restart extends Command {
+/** A command that can be run in a client */
+module.exports = class restartCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'restart',
             group: 'owner',
-            memberName: 'restart',
             description: 'Restarts the bot.',
-            ownerOnly: true
+            ownerOnly: true,
+            guarded: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        await message.say(basicEmbed('gold', 'loading', 'The bot will restart in 10 seconds...'))
+        await message.reply(basicEmbed('gold', 'loading', 'The bot will restart in 10 seconds...'))
 
         await sleep(10)
 

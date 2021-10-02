@@ -1,74 +1,73 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { ms } = require('../../utils/custom-ms')
-const { formatTime, basicEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { myMs, channelDetails, timeDetails } = require('../../utils')
+const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
 
-module.exports = class slowmode extends Command {
+/** A command that can be run in a client */
+module.exports = class SlowmodeCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'slowmode',
             aliases: ['ratelimit'],
             group: 'mod',
-            memberName: 'slowmode',
             description: 'Enable, change or disable slowmode/rate limit on a channel.',
             details: stripIndent`
-                \`channel\` can be a text channel's name, ID or mention.
-                \`time\` uses the command time formatting, for more information use the \`help\` command.
-                Using \`off\` or setting \`time\` as 0 will disable the slowmode on the specified channel.
+                ${channelDetails()}\n${timeDetails('time')}
+                Setting \`time\` as \`0\` or \`off\` will disable the slowmode on the specified channel.
             `,
-            format: stripIndent`
-                slowmode [time] <channel>
-                slowmode off <channel>
-            `,
-            examples: ['slowmode 3s #main-chat', 'slowmode off'],
+            format: 'slowmode [channel] [time]',
+            examples: [
+                'slowmode #main-chat 3s',
+                'slowmode commands off'
+            ],
             clientPermissions: ['MANAGE_CHANNELS'],
             userPermissions: ['MANAGE_CHANNELS'],
             guildOnly: true,
             args: [
                 {
-                    key: 'ratelimit',
-                    prompt: 'What will be the channel\'s new rate limit?',
-                    type: 'string',
-                    /** @param {string|number} time */
-                    parse: (time) => formatTime(time) / 1000,
-                    /** @param {string|number} time @param {CommandoMessage} message */
-                    validate: (time, message) => {
-                        const arg = message.parseArgs().split(/ +/).shift().toLowerCase()
-                        if (arg === 'off' || arg == 0) return true
-                        return !!formatTime(time) && formatTime(time) / 1000 <= 21600
-                    },
-                    error: 'You either didn\'t use the correct format, or you didn\'t type `off`. Please provide a valid rate limit.'
-                },
-                {
                     key: 'channel',
                     prompt: 'In what channel do you want to change the rate limit?',
-                    type: 'text-channel',
-                    default: ''
+                    type: ['text-channel', 'thread-channel']
+                },
+                {
+                    key: 'ratelimit',
+                    prompt: 'What will be the channel\'s new rate limit?',
+                    type: ['duration', 'string'],
+                    oneOf: ['off']
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {number} args.ratelimit The new rate limit
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to change the rate limit
+     * @param {number|'off'} args.ratelimit The new rate limit
      */
-    async run(message, { ratelimit, channel }) {
-        const target = channel || message.channel
+    async run(message, { channel, ratelimit }) {
+        ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
 
-        if (target.rateLimitPerUser === ratelimit) return message.say(basicEmbed('red', 'cross', 'The slowmode is already set to that value.'))
+        if (channel.rateLimitPerUser === ratelimit) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'The slowmode is already set to that value.'
+            }))
+        }
 
-        await target.setRateLimitPerUser(ratelimit)
+        await channel.setRateLimitPerUser(ratelimit)
 
-        const longTime = ms(ratelimit * 1000, { long: true })
+        if (ratelimit === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'GREEN', emoji: 'check', description: `Disabled slowmode in ${channel.toString()}`
+            }))
+        }
 
-        if (ratelimit === 0) return message.say(basicEmbed('green', 'check', `Disabled slowmode in #${target.name}`))
-        message.say(basicEmbed('green', 'check', `Changed slowmode in #${target.name}`, `**New rate limit:** ${longTime}`))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `Changed slowmode in #${channel.name}`,
+            fieldValue: `**New rate limit:** ${myMs(ratelimit * 1000, { long: true, showAnd: true })}`
+        }))
     }
 }

@@ -1,75 +1,164 @@
-const { Command, CommandoMessage, CommandGroup } = require('discord.js-commando')
-const { basicEmbed } = require('../../utils/functions')
-const { disabled } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const CommandGroup = require('../../command-handler/commands/group')
+const { basicEmbed, getArgument } = require('../../utils')
+const { disabled } = require('../../mongo/schemas')
+const { stripIndent } = require('common-tags')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { DisabledSchema } = require('../../mongo/typings')
+const { UpdateQuery } = require('mongoose')
 
-module.exports = class toggle extends Command {
+/** A command that can be run in a client */
+module.exports = class ToggleCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'toggle',
             group: 'utility',
-            memberName: 'toggle',
             description: 'Toggles a command or group on/off.',
-            format: 'toggle [command | group]',
-            examples: ['toggle ban', 'toggle moderation'],
+            details: '`name` can be either a command\'s name or alias, or a group\'s name.',
+            format: stripIndent`
+                toggle command [name]
+                toggle group [name]
+            `,
+            examples: [
+                'toggle command ban',
+                'toggle group moderation'
+            ],
             userPermissions: ['ADMINISTRATOR'],
-            guildOnly: true,
             guarded: true,
-            args: [{
-                key: 'target',
-                prompt: 'What command or group would you like to toggle?',
-                type: 'command|group'
-            }]
+            args: [
+                {
+                    key: 'subCommand',
+                    label: 'sub-command',
+                    prompt: 'What sub-command do you want to use?',
+                    type: 'string',
+                    oneOf: ['command', 'group']
+                },
+                {
+                    key: 'cmdOrGroup',
+                    label: 'command or group',
+                    prompt: 'What command or group would you like to toggle?',
+                    type: ['command', 'group'],
+                    required: false
+                }
+            ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'command'|'group'} args.subCommand The sub-command to use
+     * @param {Command|CommandGroup} args.cmdOrGroup The command or group to toggle
+     */
+    async run(message, { subCommand, cmdOrGroup }) {
+        subCommand = subCommand.toLowerCase()
+        const { guildId } = message
+
+        const query = guildId ?
+            { guild: guildId } :
+            { global: true }
+
+        /** @type {DisabledSchema} */
+        const data = await disabled.findOne(query)
+
+        switch (subCommand) {
+            case 'command':
+                return await this.command(message, cmdOrGroup, data)
+            case 'group':
+                return await this._group(message, cmdOrGroup, data)
+        }
+    }
 
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {Command|CommandGroup} args.target The command or group to toggle
+     * The `command` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {Command} command The command to toggle
+     * @param {DisabledSchema} data The disabled commands & groups data
      */
-    async run(message, { target }) {
-        const { guild } = message
-        const isCommand = !target.commands
-        const type = isCommand ? 'command' : 'group'
+    async command(message, command, data) {
+        while (!(command instanceof Command)) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            command = value
+        }
 
-        if (target.guarded) return message.say(basicEmbed('red', 'cross', `That ${type} is guarded and cannot be disabled.`))
+        const { guildId } = message
 
-        const isEnabled = target.isEnabledIn(guild)
-        const state = isEnabled ? 'disabled' : 'enabled'
-        target.setEnabledIn(guild, !isEnabled)
+        const isEnabled = guildId ? command.isEnabledIn(guildId, true) : command._globalEnabled
+        const global = guildId ? '' : ' globally'
 
-        const data = await disabled.findOne({ guild: guild.id })
+        if (guildId) command.setEnabledIn(guildId, !isEnabled)
+        else command._globalEnabled = !isEnabled
 
-        if (!data) {
-            const doc = isCommand ? {
-                guild: guild.id,
-                commands: isEnabled ? [target.name] : [],
+        if (data) {
+            /** @type {UpdateQuery<DisabledSchema>} */
+            const doc = !isEnabled ?
+                { $push: { commands: command.name } } :
+                { $pull: { commands: command.name } }
+
+            await data.updateOne(doc)
+        } else {
+            /** @type {DisabledSchema} */
+            const doc = {
+                guild: guildId,
+                global: !guildId,
+                commands: !isEnabled ? [command.name] : [],
                 groups: []
-            } : {
-                guild: guild.id,
-                commands: [],
-                groups: isEnabled ? [target.id] : []
             }
 
             await new disabled(doc).save()
         }
-        else {
-            const doc = isEnabled ? {
-                $push: isCommand ?
-                    { commands: target.name } :
-                    { groups: target.id }
-            } : {
-                $pull: isCommand ?
-                    { commands: target.name } :
-                    { groups: target.id }
-            }
 
-            await data.updateOne(doc)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `Toggled the \`${command.name}\` command${global}`,
+            fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`
+        }))
+    }
+
+    /**
+     * The `group` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandGroup} group The group to toggle
+     * @param {DisabledSchema} data The disabled commands & groups data
+     */
+    async _group(message, group, data) {
+        while (!(group instanceof CommandGroup)) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            group = value
         }
 
-        message.say(basicEmbed('green', 'check', `The \`${target.id || target.name}\` ${type} has been ${state}.`))
+        const { guildId } = message
+
+        const isEnabled = guildId ? group.isEnabledIn(guildId) : group._globalEnabled
+        const global = guildId ? '' : ' globally'
+
+        if (guildId) group.setEnabledIn(guildId, !isEnabled)
+        else group._globalEnabled = !isEnabled
+
+        if (data) {
+            /** @type {UpdateQuery<DisabledSchema>} */
+            const doc = !isEnabled ?
+                { $push: { groups: group.name } } :
+                { $pull: { groups: group.name } }
+
+            await data.updateOne(doc)
+        } else {
+            /** @type {DisabledSchema} */
+            const doc = {
+                guild: guildId,
+                global: !guildId,
+                commands: [],
+                groups: !isEnabled ? [group.name] : []
+            }
+
+            await new disabled(doc).save()
+        }
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `Toggled the \`${group.name}\` group${global}`,
+            fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`
+        }))
     }
 }

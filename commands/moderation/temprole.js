@@ -1,19 +1,47 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { Role, GuildMember } = require('discord.js')
-const { ms } = require('../../utils/custom-ms')
-const { active } = require('../../utils/mongo/schemas')
-const { basicEmbed, docID, isMod } = require('../../utils/functions')
+const { memberDetails, timeDetails, roleDetails, reasonDetails, timestamp } = require('../../utils')
+const { active } = require('../../mongo/schemas')
+const { basicEmbed, docId, isMod } = require('../../utils')
 const { stripIndent } = require('common-tags')
+const { ActiveSchema } = require('../../mongo/typings')
 
-module.exports = class temprole extends Command {
+/**
+ * Validates a {@link Role}
+ * @param {CommandoMessage} msg The member to validate
+ * @param {Role} role The role to validate
+ */
+function validRole(msg, role) {
+    if (!role) return false
+    if (role.managed) return false
+
+    const { member, client, author, clientMember } = msg
+    const botId = client.user.id
+
+    const botManagable = clientMember.roles.highest.comparePositionTo(role)
+    if (botManagable < 1) return false
+
+    const isOwner = author.id === botId
+    if (isOwner) return true
+
+    const memberManagable = member.roles.highest.comparePositionTo(role)
+    if (memberManagable < 1) return false
+    if (isMod(role)) return false
+
+    return true
+}
+
+/** A command that can be run in a client */
+module.exports = class TempRoleCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'temprole',
+            name: 'temp-role',
+            aliases: ['temprole'],
             group: 'mod',
-            memberName: 'temprole',
             description: 'Assign a role that persists for a limited time.',
-            details: '`member` can be a member\'s username, ID or mention.\n`time` uses the command time formatting, for more information use the `help` command. `time` has to be at least 1 minute.\n`[role]` can be a role\'s name, ID or mention.',
-            format: 'temprole [member] [duration] [role]',
+            details: `${memberDetails()}\n${timeDetails('time')}\n${roleDetails()}\n${reasonDetails()}`,
+            format: 'temprole [member] [duration] [role] <reason>',
             examples: ['temprole Pixoll 1d Moderator'],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
@@ -27,13 +55,8 @@ module.exports = class temprole extends Command {
                 },
                 {
                     key: 'duration',
-                    prompt: 'How long should this role last? (at least 1 min)',
-                    type: 'string',
-                    /** @param {string|number} duration */
-                    parse: (duration) => formatTime(duration),
-                    /** @param {string|number} duration */
-                    validate: (duration) => !!formatTime(duration) && formatTime(duration) >= 60 * 1000,
-                    error: 'You either didn\'t use the correct format, or the duration is less that 1 minute. Please provide a valid duration.'
+                    prompt: 'How long should this role last?',
+                    type: ['date', 'timestamp', 'duration']
                 },
                 {
                     key: 'role',
@@ -42,7 +65,7 @@ module.exports = class temprole extends Command {
                 },
                 {
                     key: 'reason',
-                    prompt: 'What is the reason you\'re giving them the role?',
+                    prompt: 'Why are you\'re giving them the role?',
                     type: 'string',
                     max: 512,
                     default: 'No reason given.'
@@ -51,54 +74,67 @@ module.exports = class temprole extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {GuildMember} args.member The member to give the role
      * @param {number} args.duration The duration of the role
      * @param {Role} args.role The role to give
      * @param {string} args.reason The reason
      */
     async run(message, { member, duration, role, reason }) {
-        const { guild, author } = message
-        const { user } = member
-        const longTime = ms(duration, { long: true })
-        const { position, managed } = role
+        if (typeof duration === 'number') duration = duration + Date.now()
+        if (duration instanceof Date) duration = duration.getTime()
 
-        const isOwner = guild.ownerID === author.id
-        const highestMember = member.roles.highest.position
-        const highestBot = guild.members.cache.get(botID).roles.highest.position
-
-        if (isMod(role) || managed) return message.say(basicEmbed('red', 'cross', 'You should not give this role to someone else.'))
-
-        if (isOwner) {
-            if (position >= highestBot) return message.say(basicEmbed('red', 'cross', 'The bot cannot assign this role to other members. Please check the role hierarchy or server ownership.'))
+        while (!validRole(message, role)) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
+            if (cancelled) return
+            role = value
         }
-        else if (position >= highestMember || position >= highestBot) return message.say(basicEmbed('red', 'cross', 'You or the bot cannot assign this role to other members. Please check the role hierarchy or server ownership.'))
 
-        if (!member.manageable) return message.say(basicEmbed('red', 'cross', `Unable to ban ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
+        const { guild, guildId, author } = message
+        const { user, roles } = member
 
-        if (member.roles.cache.has(role.id)) return message.say(basicEmbed('red', 'cross', 'That member already has that role.'))
+        if (roles.cache.has(role.id)) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That member already has that role.'
+            }))
+        }
 
-        await member.roles.add(role, reason)
+        await roles.add(role, reason)
 
-        message.say(basicEmbed('green', 'check', `Added role ${role.name} to ${user.tag}`, stripIndent`
-            **Duration:** ${longTime}
-            **Reason:** ${reason}
-        `))
+        if (!user.bot) {
+            await user.send({
+                embeds: [basicEmbed({
+                    color: 'GOLD', fieldName: `You have been given the \`${role.name}\` role on ${guild.name}`,
+                    fieldValue: stripIndent`
+                        **Expires:** ${timestamp(duration, 'R')}
+                        **Reason:** ${reason}
+                        **Moderator:** ${author.toString()}
+                    `
+                })]
+            }).catch(() => null)
+        }
 
+        /** @type {ActiveSchema} */
         const doc = {
-            _id: docID(),
-            type: 'temprole',
-            guild: guild.id,
+            _id: docId(),
+            type: 'temp-role',
+            guild: guildId,
             user: user.id,
             role: role.id,
-            duration: Date.now() + duration
+            duration
         }
 
         await new active(doc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `Added role \`${role.name}\` to ${user.tag}`,
+            fieldValue: stripIndent`
+                **Expires:** ${timestamp(duration, 'R')}
+                **Reason:** ${reason}
+            `
+        }))
     }
 }

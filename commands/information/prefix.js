@@ -1,14 +1,16 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { prefixes } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
-const { basicEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base'),
+	{ prefixes } = require('../../mongo/schemas'),
+	{ stripIndent } = require('common-tags'),
+	{ basicEmbed } = require('../../utils'),
+	{ CommandoMessage } = require('../../command-handler/typings'),
+	{ PrefixSchema } = require('../../mongo/typings')
 
-module.exports = class prefix extends Command {
+/** A command that can be run in a client */
+module.exports = class PrefixCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: 'prefix',
 			group: 'info',
-			memberName: 'prefix',
 			description: 'Get or change the prefix of the bot.',
 			details: stripIndent`
 				If \`new prefix\` is not defined, it will send the current prefix.
@@ -20,60 +22,61 @@ module.exports = class prefix extends Command {
 			throttling: { usages: 1, duration: 3 },
 			args: [{
 				key: 'newPrefix',
+				label: 'new prefix',
 				prompt: 'What is the new prefix you want to set for the bot?',
 				type: 'string',
-				default: ''
+				required: false
 			}]
 		})
 	}
 
-	onBlock() { return }
-	onError() { return }
-
 	/**
-	 * @param {CommandoMessage} message The message
-	 * @param {object} args The arguments
+	 * Runs the command
+	 * @param {CommandoMessage} message The message the command is being run for
+	 * @param {object} args The arguments for the command
 	 * @param {string} args.newPrefix The new prefix to set
 	 */
 	async run(message, { newPrefix }) {
-		// gets data that will be used later
-		const { guild, author, member } = message
-		const { client } = this
+		const { guild, client, member } = message
 
 		if (!newPrefix) {
-			// gets the current prefix
-			const prefix = guild ? guild.commandPrefix : client.commandPrefix
+			const prefix = guild?.prefix || client.prefix
+			const description = guild ? `The bot prefix in this server is \`${prefix}\`` :
+				`The global bot prefix is \`${prefix}\``
 
-			return message.say(basicEmbed('blue', 'info', `The prefix is \`${prefix}\``))
+			return await message.replyEmbed(basicEmbed({
+				color: 'BLUE', emoji: 'info', description
+			}))
 		}
 
-		// checks if the command was used in DMs and if the user in the bot's owner
-		if (!guild && !client.isOwner(author)) return message.say(basicEmbed('red', 'cross', 'Only the bot\'s owner can change the global prefix.'))
+		if (!guild && !client.isOwner(message)) {
+			return await this.onBlock(message, 'ownerOnly')
+		}
 
-		// checks if the user has admin permissions before changing the current prefix
 		if (guild && !member.permissions.has('ADMINISTRATOR')) {
-			client.emit('commandBlock', message, 'permission', { missing: ['ADMINISTRATOR'] })
-			return
+			return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
 		}
 
-		// changes the prefix
-		if (guild) guild.commandPrefix = newPrefix
-		else client.commandPrefix = newPrefix
+		if (guild) guild.prefix = newPrefix
+		else client.prefix = newPrefix
 
-		// tries to get the mongodb document
 		const getPrefix = await prefixes.findOne({ guild: guild?.id, global: !guild })
 
-		// creates a new document
+		/** @type {PrefixSchema} */
 		const newDoc = {
 			global: !guild,
 			guild: guild?.id,
 			prefix: newPrefix
 		}
 
-		// updates the prefix document
 		if (getPrefix) await getPrefix.updateOne({ prefix: newPrefix })
 		else await new prefixes(newDoc).save()
 
-		message.say(basicEmbed('green', 'check', `Changed the prefix to \`${newPrefix}\``))
+		const description = guild ? `Changed the bot prefix of this server to \`${newPrefix}\`` :
+			`Changed the global bot prefix to \`${newPrefix}\``
+
+		await message.replyEmbed(basicEmbed({
+			color: 'GREEN', emoji: 'check', description
+		}))
 	}
 }

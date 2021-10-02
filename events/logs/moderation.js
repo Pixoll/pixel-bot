@@ -1,8 +1,7 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, User, GuildAuditLogs, GuildMember } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus, fetchPartial, getLogsChannel } = require('../../utils/functions')
-const { setup, modules } = require('../../utils/mongo/schemas')
+const { MessageEmbed, GuildAuditLogs, GuildMember } = require('discord.js')
+const { CommandoClient } = require('../../command-handler/typings')
+const { isModuleEnabled, fetchPartial, getLogsChannel, timestamp } = require('../../utils')
 
 /**
  * Handles all of the moderation logs.
@@ -12,13 +11,12 @@ module.exports = (client) => {
     client.on('guildMemberRemove', async _member => {
         /** @type {GuildMember} */
         const { guild, user, id } = await fetchPartial(_member)
-
         if (!guild.available || id === client.user.id) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'members')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         /** @type {GuildAuditLogs} */
@@ -27,87 +25,144 @@ module.exports = (client) => {
         if (!kickLog || kickLog.action !== 'MEMBER_KICK') return
 
         const { executor, reason, target } = kickLog
-        if (target.id !== user.id) return
+        if (target.id !== id) return
 
-        const kick = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Kicked user', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
-                **>** **User:** ${user.toString()} ${user.tag}
-                **>** **Moderator:** ${executor.toString()} ${executor.tag}
-                **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
+                Moderator ${executor.toString()} kicked ${user.toString()} ${user.tag}
+                **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User ID: ${id}`)
+            .setFooter(`User id: ${id} | Mod id: ${executor.id}`)
             .setTimestamp()
 
-        logsChannel.send(kick).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
-    client.on('guildBanAdd', async (guild, _user) => {
-        if (!guild.available) return
+    client.on('guildBanAdd', async banLog => {
+        if (!banLog.guild.available) return
+        await banLog.fetch()
 
-        /** @type {User} */
-        const user = await fetchPartial(_user)
+        const { user, guild, reason } = banLog
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'moderation')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         /** @type {GuildAuditLogs} */
         const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-        const banLog = banLogs.entries.first()
+        const banLog2 = banLogs.entries.first()
 
-        const { executor, reason } = banLog || {}
-        const moderator = executor ? `${executor.toString()} ${executor.tag}` : 'Couldn\'t fetch moderator.'
+        let moderator
+        if (banLog2?.action === 'MEMBER_BAN_ADD' && banLog2?.target.id === user.id) {
+            const { executor } = banLog2 || {}
+            moderator = executor ? `Moderator ${executor.toString()} ` : null
+        }
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor('Banned user', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
-                **>** **User:** ${user.toString()} ${user.tag}
-                **>** **Moderator:** ${moderator}
-                **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
+                ${moderator ? moderator + 'banned' : 'Banned'} ${user.toString()} ${user.tag}
+                **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
             .setImage('https://media.giphy.com/media/fe4dDMD2cAU5RfEaCU/giphy.gif')
-            .setFooter(`User ID: ${user.id}`)
+            .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
-    client.on('guildBanRemove', async (guild, _user) => {
-        /** @type {User} */
-        const user = await fetchPartial(_user)
+    client.on('guildBanRemove', async unbanLog => {
+        if (!unbanLog.guild.available) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'moderation')
-        if (!status) return
+        const { user, guild } = unbanLog
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
+
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         /** @type {GuildAuditLogs} */
         const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-        const unbanLog = unbanLogs.entries.first()
+        const unbanLog2 = unbanLogs.entries.first()
 
-        const { executor, reason } = unbanLog || {}
-        const moderator = executor ? `${executor.toString()} ${executor.tag}` : 'Couldn\'t fetch moderator.'
+        let reason, moderator
+        if (unbanLog2?.action === 'MEMBER_BAN_REMOVE' && unbanLog2?.target.id === user.id) {
+            const { executor } = unbanLog2 || {}
+            reason = unbanLog2.reason
+            moderator = executor ? `Moderator ${executor.toString()} ` : null
+        }
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor('Unbanned user', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
-                **>** **User:** ${user.toString()} ${user.tag}
-                **>** **Moderator:** ${moderator}
-                **>** **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
+                ${moderator ? moderator + 'unbanned' : 'Unbanned'} ${user.toString()} ${user.tag}
+                **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User ID: ${user.id}`)
+            .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
+
+    client.on('guildMemberMute', async (guild, mod, user, reason, duration) => {
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
+
+        const logsChannel = await getLogsChannel(guild)
+        if (!logsChannel) return
+
+        const embed = new MessageEmbed()
+            .setColor('GOLD')
+            .setAuthor('Muted user', user.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
+            .setDescription(stripIndent`
+                Moderator ${mod.toString()} muted ${user.toString()} ${user.tag}
+                **Expires:** ${timestamp(duration, 'R')}
+                **Reason:** ${reason}
+            `)
+            .setFooter(`User id: ${user.id} | Mod id: ${mod.id}`)
+            .setTimestamp()
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+    })
+
+    client.on('guildMemberUnmute', async (guild, mod, user, reason, expired) => {
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
+
+        const logsChannel = await getLogsChannel(guild)
+        if (!logsChannel) return
+
+        const description = expired ?
+            `${user.toString()}'s mute has expired.` :
+            stripIndent`
+                Moderator ${mod.toString()} unmuted ${user.toString()} ${user.tag}
+                **Reason:** ${reason}
+            `
+        const footer = mod ?
+            `User id: ${user.id} | Mod id: ${mod.id}` :
+            `User id: ${user.id}`
+
+        const embed = new MessageEmbed()
+            .setColor('GOLD')
+            .setAuthor('Unmuted user', user.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
+            .setDescription(description)
+            .setFooter(footer)
+            .setTimestamp()
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+    })
+
+    client.emit('debug', 'Loaded audit-logs/moderation')
 }

@@ -1,13 +1,14 @@
 const { stripIndent } = require('common-tags')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed, sleep } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { basicEmbed, sleep } = require('../../utils')
 
-module.exports = class guild extends Command {
+/** A command that can be run in a client */
+module.exports = class guildCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'guild',
             group: 'owner',
-            memberName: 'guild',
             description: 'Displays information about a single guild, or you can get the invite, and also remove the bot from one.',
             format: stripIndent`
                 guild info [id] - Get information of a guild.
@@ -15,6 +16,7 @@ module.exports = class guild extends Command {
                 guild remove [id] - Remove the bot from a guild.
             `,
             ownerOnly: true,
+            dmOnly: true,
             args: [
                 {
                     key: 'subCommand',
@@ -23,29 +25,25 @@ module.exports = class guild extends Command {
                     oneOf: ['info', 'invite', 'remove']
                 },
                 {
-                    key: 'guildID',
-                    prompt: 'What is the ID or name of the guild?',
+                    key: 'guildId',
+                    prompt: 'What is the Id or name of the guild?',
                     type: 'string'
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {string} args.subCommand The sub-command
-     * @param {string} args.guildID The guild ID or name
+     * @param {string} args.guildId The guild Id or name
      */
-    async run(message, { subCommand, guildID }) {
-        if (message.channel.type !== 'dm') return message.say(basicEmbed('red', 'cross', 'This command can only be used on DMs.'))
-
+    async run(message, { subCommand, guildId }) {
         const guilds = this.client.guilds.cache
-        const guild = guilds.get(guildID) || guilds.find(({ name }) => name.toLowerCase() === guildID.toLowerCase())
-        if (!guild) return message.say(basicEmbed('red', 'cross', 'I couldn\'t find that guild.'))
+        const guild = guilds.get(guildId) || guilds.find(({ name }) => name.toLowerCase() === guildId.toLowerCase())
+        if (!guild) return message.reply(basicEmbed('red', 'cross', 'I couldn\'t find that guild.'))
 
         const guildOwner = guild.owner.user
         const botOwner = this.client.owners[0]
@@ -60,10 +58,10 @@ module.exports = class guild extends Command {
             const invites = await guild.fetchInvites().catch(() => null)
             const invite = invites?.first() || await channel.createInvite({ maxUses: 1 })
 
-            return message.say(basicEmbed('#4c9f4c', '', `You can join **${guild.name}** using [this link](${invite.toString()}).`))
+            return message.reply(basicEmbed('#4c9f4c', '', `You can join **${guild.name}** using [this link](${invite.toString()}).`))
         }
 
-        const msg = await message.say(basicEmbed('gold', '⚠', stripIndent`
+        const msg = await message.reply(basicEmbed('gold', '⚠', stripIndent`
             Are you sure you want to remove the bot from **${guild.name}**?
             You have 30 seconds to confirm...
         `))
@@ -79,8 +77,8 @@ module.exports = class guild extends Command {
             await msg.delete()
             const emoji = collected.first()?.emoji.name
 
-            if (!emoji) return message.say(basicEmbed('red', 'cross', 'You didn\'t confirm in time.'))
-            if (emoji === 'cross') return message.say(basicEmbed('green', 'check', 'The bot won\'t be removed from the guild.'))
+            if (!emoji) return message.reply(basicEmbed('red', 'cross', 'You didn\'t confirm in time.'))
+            if (emoji === 'cross') return message.reply(basicEmbed('green', 'check', 'The bot won\'t be removed from the guild.'))
 
             await guildOwner.send(basicEmbed('#4c9f4c', '', `Dear owner of ${guild.name}`, stripIndent`
                 The owner of this bot, ${botOwner.toString()}, has decided to remove the bot from your server.
@@ -89,7 +87,7 @@ module.exports = class guild extends Command {
                 **The bot will be removed from your server in 30 seconds.**
             `))
 
-            const toEdit = await message.say(basicEmbed('gold', 'loading', `The bot will be removed from **${guild.name}** in 30 seconds, please wait...`))
+            const toEdit = await message.reply(basicEmbed('gold', 'loading', `The bot will be removed from **${guild.name}** in 30 seconds, please wait...`))
 
             await sleep(30)
 

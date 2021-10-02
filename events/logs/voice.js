@@ -1,7 +1,6 @@
 const { MessageEmbed } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus, getLogsChannel } = require('../../utils/functions')
-const { setup, modules } = require('../../utils/mongo/schemas')
+const { CommandoClient } = require('../../command-handler/typings')
+const { isModuleEnabled, getLogsChannel, channelTypes } = require('../../utils')
 
 /**
  * Handles all of the voice logs.
@@ -11,10 +10,10 @@ module.exports = (client) => {
     client.on('voiceStateUpdate', async (oldState, newState) => {
         const { guild, member, id } = oldState
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'voice')
+        const status = await isModuleEnabled(guild, 'audit-logs', 'voice')
         if (!status) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const { channel: channel1, serverMute: mute1, serverDeaf: deaf1 } = oldState
@@ -23,27 +22,43 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated voice state', user.displayAvatarURL({ dynamic: true }))
-            .setDescription(`${user.toString()} ${user.tag}`)
-            .setFooter(`User ID: ${id}`)
+            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
+            .setFooter(`User id: ${id}`)
             .setTimestamp()
 
-        if (!channel1) embed.setColor('GREEN').addField(`Joined ${channel2.type} channel`, `${channel2.toString()} ${channel2.name}`)
-
-        if (!channel2) embed.setColor('ORANGE').addField(`Left ${channel1.type} channel`, `${channel1.toString()} ${channel1.name}`)
-
-        if (channel1 && channel2) {
-            if (channel1.id !== channel2.id) embed.addField(`Switched ${channel1.type} channels`, `${channel1} ➜ ${channel2}`)
+        if (!channel1) {
+            embed.setColor('GREEN')
+                .setDescription(
+                    `${user.toString()} joined  ${channelTypes[channel2.type].toLowerCase()} channel ${channel2.toString()}`
+                    )
         }
 
-        if (typeof mute1 === 'boolean' && typeof mute2 === 'boolean') {
-            if (mute1 !== mute2) embed.addField('Server mute', mute1 ? 'Yes ➜ No' : 'No ➜ Yes')
+        if (!channel2) {
+            embed.setColor('ORANGE')
+                .setDescription(
+                    `${user.toString()} left ${channelTypes[channel1.type].toLowerCase()} channel ${channel1.toString()}`
+                    )
         }
 
-        if (typeof deaf1 === 'boolean' && typeof deaf2 === 'boolean') {
-            if (deaf1 !== deaf2) embed.addField('Server deaf', deaf1 ? 'Yes ➜ No' : 'No ➜ Yes')
+        if (channel1 && channel2 && channel1.id !== channel2.id) {
+            embed.addField(
+                `Switched ${channelTypes[channel1.type].toLowerCase()} channels`,
+                `${channel1.toString()} ➜ ${channel2.toString()}`
+            )
         }
 
-        if (embed.fields.length !== 0) logsChannel.send(embed).catch(() => null)
+        if (typeof mute1 === 'boolean' && typeof mute2 === 'boolean' && mute1 !== mute2) {
+            embed.setDescription(`${user.toString()} has been server ${mute2 ? 'muted': 'unmuted'}`)
+        }
+
+        if (typeof deaf1 === 'boolean' && typeof deaf2 === 'boolean' && deaf1 !== deaf2) {
+            embed.setDescription(`${user.toString()} has been server ${deaf2 ? 'deafened': 'undeafened'}`)
+        }
+
+        if (embed.description || embed.fields.length !== 0) {
+            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        }
     })
+
+    client.emit('debug', 'Loaded audit-logs/voice')
 }

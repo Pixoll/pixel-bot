@@ -1,142 +1,153 @@
 const { stripIndent } = require('common-tags')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
-const { faq: faqDocs } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs } = require('../../utils')
+const { faq } = require('../../mongo/schemas')
+const { FaqSchema } = require('../../mongo/typings')
 
-module.exports = class faq extends Command {
+/** A command that can be run in a client */
+module.exports = class FaqCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'faq',
             group: 'info',
-            memberName: 'faq',
-            description: 'Displays the frequently asked questions (FAQ) related to my functionality and support.',
+            description: 'Displays the frequently asked questions (FAQ) related to the bot\'s functionality and support.',
             format: stripIndent`
-                faq - Display the FAQ list.
+                faq <view> - Display the FAQ list.
                 faq add - Add a new question to the FAQ list (bot's owner only).
                 faq remove [item] - Remove a question from the FAQ list (bot's owner only).
             `,
+            guarded: true,
             throttling: { usages: 1, duration: 3 },
             args: [
                 {
                     key: 'subCommand',
+                    label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['add', 'remove'],
-                    default: ''
+                    oneOf: ['view', 'add', 'remove'],
+                    default: 'view'
                 },
                 {
                     key: 'item',
                     prompt: 'What item do you want to remove from the FAQ list?',
                     type: 'integer',
                     min: 1,
-                    default: ''
+                    required: false
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.subCommand The sub-command
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'add'|'remove'|'view'} args.subCommand The sub-command
      * @param {number} args.item The item you want to add or remove from the FAQ list
      */
     async run(message, { subCommand, item }) {
-        const { author, channel } = message
+        subCommand = subCommand.toLowerCase()
+        const FAQ = await faq.find({})
 
-        // gets the FAQ document from mongodb
-        const FAQ = await faqDocs.find({})
+        switch (subCommand) {
+            case 'view':
+                return await this.view(message, FAQ)
+            case 'add':
+                return await this.add(message)
+            case 'remove':
+                return await this.remove(message, item, FAQ)
+        }
+    }
 
-        if (!subCommand) {
-            if (FAQ.length === 0) {
-                return message.say(basicEmbed('blue', 'info', 'The FAQ list is empty.'))
-            }
-
-            // creates and returns the paged embed containing the FAQ list
-            return await generateEmbed(message, FAQ, {
-                number: 5,
-                authorName: 'Frequently asked questions',
-                authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
-                keys: ['answer'],
-                keyTitle: { suffix: 'question' }
-            }, true)
+    /**
+     * The `view` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {FaqSchema[]} faqData The faq data
+     */
+    async view(message, faqData) {
+        if (faqData.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
+            }))
         }
 
-        // checks if the user using the command is a bot owner
-        if (!this.client.isOwner(author)) {
-            this.client.emit('commandBlock', message, 'permission')
-            return
+        await generateEmbed(message, faqData, {
+            number: 5,
+            authorName: 'Frequently asked questions',
+            authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
+            keys: ['answer'],
+            keyTitle: { suffix: 'question' }
+        })
+    }
+
+    /**
+     * The `add` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
+    async add(message) {
+        if (!this.client.isOwner(message)) {
+            return await this.onBlock(message, 'ownerOnly')
         }
 
-        if (subCommand.toLowerCase() === 'add') {
-            const questions = [
-                'What question do you want to answer? Type `cancel` to at any time to cancel creation.',
-                'Now, what would be it\'s answer?'
-            ]
+        const question = await basicCollector(message, {
+            fieldName: 'What question do you want to answer?'
+        }, { time: myMs('2m') })
+        if (!question) return
 
-            // creates the collector
-            const collector = channel.createMessageCollector(msg => msg.author.id === message.author.id, {
-                max: questions.length,
-                time: 300000
-            })
-            var answered, counter = 0
+        const answer = await basicCollector(question, {
+            fieldName: 'Now, what would be it\'s answer?'
+        }, { time: myMs('2m') })
+        if (!answer) return
 
-            // sends the first question
-            message.reply(questions[counter++])
-
-            collector.on('collect', /** @param {CommandoMessage} msg */ async ({ content }) => {
-                // checks if the collector has been cancelled
-                if (content.toLowerCase() === 'cancel') {
-                    message.reply('The new question creation has been cancelled.')
-                    return answered = true, collector.stop()
-                }
-
-                // checks if the question is over 128 characters and if the answer is over 512 characters
-                if (counter === 1 && content.length > 128) {
-                    message.say(basicEmbed('red', 'cross', 'Make sure the question is not longer than 128 characters.'))
-                    return answered = true, collector.stop()
-                }
-                if (counter === 2 && content.length > 512) {
-                    message.say(basicEmbed('red', 'cross', 'Make sure the answer is not longer than 512 characters.'))
-                    return answered = true, collector.stop()
-                }
-
-                // sends the next question
-                if (counter < questions.length) message.reply(questions[counter++])
-            })
-
-            collector.on('end', async collected => {
-                if (answered) return
-                if (collected.size < questions.length) {
-                    return message.say(basicEmbed('red', 'cross', 'You didn\'t answer in time or there was an error while creating your new question.'))
-                }
-
-                const [question, answer] = collected.map(({ content }) => content)
-
-                // creates the new document that will be saved into the FAQ list
-                const newDoc = { question, answer }
-
-                // adds the new item to the FAQ list
-                await new faqDocs(newDoc).save()
-
-                message.say(basicEmbed('green', 'check', 'The new question has been added to the FAQ list.'))
-            })
-
-            return
+        /** @type {FaqSchema} */
+        const newDoc = {
+            question: question.content,
+            answer: answer.content
         }
 
-        if (!item) return message.say(basicEmbed('red', 'cross', 'Please specify the number of item you want to remove from the FAQ list.'))
+        await new faq(newDoc).save()
 
-        if (!FAQ || FAQ.length === 0) return message.say(basicEmbed('blue', 'info', 'The FAQ list is empty.'))
+        await answer.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: 'The new question has been added to the FAQ list.'
+        }))
+    }
 
-        if (item <= 0 || item > FAQ.length) return message.say(basicEmbed('red', 'cross', 'That\'s not a valid item number inside the FAQ list.'))
+    /**
+     * The `remove` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {number} item The item you want to remove from the FAQ list
+     * @param {FaqSchema[]} faqData The faq data
+     */
+    async remove(message, item, faqData) {
+        if (!this.client.isOwner(message)) {
+            return await this.onBlock(message, 'ownerOnly')
+        }
 
-        // removes the item from the FAQ list
-        await FAQ[--item].deleteOne()
+        if (!item) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            item = value
+        }
 
-        message.say(basicEmbed('green', 'check', `Removed item \`${++item}\` from the FAQ list.`))
+        if (faqData.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
+            }))
+        }
+
+        if (item > faqData.length) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside the FAQ list.'
+            }))
+        }
+
+        item--
+        await faqData[item].deleteOne()
+        item++
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Removed question \`${item}\` from the FAQ list.`
+        }))
     }
 }

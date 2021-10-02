@@ -1,7 +1,8 @@
 const { MessageEmbed, TextChannel } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
-const { moduleStatus } = require('../../utils/functions')
-const { welcome, modules } = require('../../utils/mongo/schemas')
+const { CommandoClient } = require('../../command-handler/typings')
+const { isModuleEnabled } = require('../../utils')
+const { welcome } = require('../../mongo/schemas')
+const { WelcomeSchema } = require('../../mongo/typings')
 
 /**
  * This module manages welcome messages.
@@ -9,20 +10,23 @@ const { welcome, modules } = require('../../utils/mongo/schemas')
  */
 module.exports = (client) => {
     client.on('guildMemberAdd', async ({ guild, user }) => {
-        const status = await moduleStatus(modules, guild, 'welcome')
-        if (!status) return
+        if (user.bot) return
 
+        const isEnabled = await isModuleEnabled(guild, 'welcome')
+        if (!isEnabled) return
+
+        /** @type {WelcomeSchema} */
         const data = await welcome.findOne({ guild: guild.id })
         if (!data) return
 
         /** @type {TextChannel} */
-        const channel = guild.channels.resolve(data?.channel)
+        const channel = guild.channels.resolve(data.channel)
 
         /** @param {String} str */
         function format(str) {
             return str.replace(/{user}/g, user.toString())
-                .replace(/{server name}/g, guild.name)
-                .replace(/{member count}/g, guild.memberCount)
+                .replace(/{server_name}/g, guild.name)
+                .replace(/{member_count}/g, guild.memberCount)
         }
 
         const embed = new MessageEmbed()
@@ -33,12 +37,14 @@ module.exports = (client) => {
 
         if (data.dms) {
             embed.setDescription(format(data.dms))
-            await user.send(embed).catch(() => null)
+            await user.send({ embeds: [embed] }).catch(() => null)
         }
 
         if (channel && data.message) {
             embed.setDescription(format(data.message))
-            await channel.send(user.toString(), { embed })
+            await channel.send({ content: user.toString(), embeds: [embed] })
         }
     })
+
+    client.emit('debug', 'Loaded modules/welcome')
 }

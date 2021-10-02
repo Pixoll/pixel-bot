@@ -1,21 +1,24 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { active, setup } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
+const { active, setup } = require('../../mongo/schemas')
+const { memberDetails, reasonDetails, basicEmbed } = require('../../utils')
+const { SetupSchema } = require('../../mongo/typings')
+const { Document } = require('mongoose')
 
-module.exports = class unmute extends Command {
+/** A command that can be run in a client */
+module.exports = class UnmuteCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'unmute',
             group: 'mod',
-            memberName: 'unmute',
             description: 'Unmute a member.',
-            details: stripIndent`
-                \`member\` can be a member\'s username, ID or mention.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${memberDetails()}\n${reasonDetails()}`,
             format: 'unmute [member] <reason>',
-            examples: ['unmute Pixoll', 'unmute Pixoll Appealed'],
+            examples: [
+                'unmute Pixoll',
+                'unmute Pixoll Appealed'
+            ],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
             throttling: { usages: 1, duration: 3 },
@@ -30,39 +33,51 @@ module.exports = class unmute extends Command {
                     key: 'reason',
                     prompt: 'What is the reason of the unmute?',
                     type: 'string',
+                    max: 512,
                     default: 'No reason given.'
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {GuildMember} args.member The member to unmute
      * @param {string} args.reason The reason of the unmute
      */
     async run(message, { member, reason }) {
-        // gets data that will be used later
-        const { guild } = message
-        const { user } = member
-        const roles = guild.roles.cache
+        const { guild, guildId, author } = message
+        const { user, roles } = member
 
-        const data = await setup.findOne({ guild: guild.id })
-        if (!data || data.mutedRole) return message.say(basicEmbed('red', 'cross', 'No mute role found in this server, please use the `setup` command before using this.'))
+        /** @type {SetupSchema} */
+        const data = await setup.findOne({ guild: guildId })
+        if (!data || !data.mutedRole) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross',
+                description: 'No mute role found in this server, please use the `setup` command before using this.'
+            }))
+        }
 
-        const role = roles.get(data.mutedRole)
+        const role = await guild.roles.fetch(data.mutedRole)
 
-        if (!member.roles.cache.has(role.id)) return message.say(basicEmbed('red', 'cross', 'That user is not muted.'))
+        if (!roles.cache.has(role.id)) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That user is not muted.'
+            }))
+        }
 
-        await member.roles.remove(role)
+        await roles.remove(role)
+        this.client.emit('guildMemberUnmute', guild, author, user, reason)
 
-        message.say(basicEmbed('green', 'check', `${user.tag} has been unmuted`, `**Reason:** ${reason}`))
-
+        /** @type {Document} */
         const mute = await active.findOne({ type: 'mute', user: user.id })
         if (mute) await mute.deleteOne()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been unmuted`,
+            fieldValue: `**Reason:** ${reason}`
+        }))
     }
 }

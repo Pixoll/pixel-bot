@@ -1,46 +1,46 @@
-const now = new Date()
-const days_in_month = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
-const weeks_in_month = days_in_month / 7
-
 const s = 1000
 const m = s * 60
 const h = m * 60
 const d = h * 24
 const w = d * 7
-const mth = w * weeks_in_month
-const y = mth * 12
+const y = d * 365.25
+const mth = y / 12
 
 /**
  * Parses the milliseconds into a string, or a string into milliseconds
  * @param {number|string} val The amount of milliseconds or string to parse
  * @param {object} [options] Only appliable if the input is a number
+ * @param {boolean} options.number Whether to force the returned value to be a number or not
  * @param {boolean} options.long If the string should return the whole words
  * @param {number} options.length How many parameters should the string return
  * @param {boolean} options.showMs If the string should show the `ms`
  * @param {boolean} options.showAnd If the string should show and before the last item
  * @returns {string|number}
  */
-function ms(val, options = {}) {
-    if (!val) return
+function myMs(val, options = {}) {
+    if (val === undefined || val === null) return
     if (!['number', 'string'].includes(typeof val)) throw new TypeError('Expected a number or string.')
 
     const isNumber = !!Number(val) || Number(val) === 0
+
+    if (options.number) {
+        if (isNumber) return Math.abs(Number(val))
+        return _parse(val)
+    }
 
     if (typeof val === 'string' && !isNumber) {
         const ms = _parse(val)
         return ms
     }
 
-    const roundToZero = val > 0 ? Math.floor : Math.ceil
-
     const obj = {
-        year: roundToZero(val / y),
-        month: roundToZero(val / mth) % 12,
-        week: Math.trunc(roundToZero(val / w) % 4.345),
-        day: roundToZero(val / d) % 7,
-        hour: roundToZero(val / h) % 24,
-        minute: roundToZero(val / m) % 60,
-        second: roundToZero(val / s) % 60,
+        year: Math.trunc(val / y),
+        month: Math.trunc(val / mth) % 12,
+        week: Math.trunc(Math.trunc(val / w) % 4.345),
+        day: Math.trunc(val / d) % 7,
+        hour: Math.trunc(val / h) % 24,
+        minute: Math.trunc(val / m) % 60,
+        second: Math.trunc(val / s) % 60,
         millisecond: val % 1000,
     }
 
@@ -57,7 +57,7 @@ function ms(val, options = {}) {
         }
 
         else {
-            var char = prop.charAt(0)
+            let char = prop.charAt(0)
             if (prop === 'month') char = 'mth'
             if (prop === 'millisecond') char = 'ms'
 
@@ -76,6 +76,24 @@ function ms(val, options = {}) {
     return and(arr.join(', '))
 }
 
+/**
+ * Parses the specified time into a Discord template
+ * @param {number|Date} time The time to parse (in milliseconds)
+ * @param {'t'|'T'|'d'|'D'|'f'|'F'|'R'} [format] The format of the timestamp
+ * - `t`: Short time ➜ `16:20`
+ * - `T`: Long time ➜ `16:20:30`
+ * - `d`: Short date ➜ `20/04/2021`
+ * - `D`: Long date ➜ `20 April 2021`
+ * - `f`: Short date/time ➜ `20 April 2021 16:20`
+ * - `F`: Long date/time ➜ `Tuesday, 20 April 2021 16:20`
+ * - `R`: Relative time ➜ `2 months ago`
+ */
+function timestamp(time, format = 'f') {
+    if (!time) return
+    if (time instanceof Date) time = time.getTime()
+    return `<t:${Math.trunc(time / 1000)}:${format}>`
+}
+
 /** Converts ms and strings into future dates */
 class Duration {
     /**
@@ -89,7 +107,7 @@ class Duration {
          * The offset
          * @type {number}
          */
-        this.offset = isNumber ? val : ms(val)
+        this.offset = isNumber ? val : myMs(val)
 
         /** Get the date from now */
         this.fromNow = new Date(Date.now() + this.offset)
@@ -119,7 +137,7 @@ class Duration {
 function toNow(earlier, showIn) {
     if (!(earlier instanceof Date)) earlier = new Date(earlier)
     const returnString = showIn ? 'in ' : ''
-    var duration = Math.abs((Date.now() - earlier) / 1000)
+    let duration = Math.abs((Date.now() - earlier) / 1000)
 
     // Compare the duration in seconds
     if (duration < 45) return `${returnString}a few seconds`
@@ -147,8 +165,9 @@ function toNow(earlier, showIn) {
 
 module.exports = {
     Duration,
-    ms,
-    toNow
+    myMs,
+    toNow,
+    timestamp
 }
 
 /**
@@ -164,7 +183,7 @@ function _parse(str) {
     if (!match) return
 
     const arr = match.map((q, n, p) => regex.exec(p)).map((array) => array.splice(1))
-    var number = 0
+    let number = 0
 
     for (const [val, char] of arr) {
         const res = Number(val)

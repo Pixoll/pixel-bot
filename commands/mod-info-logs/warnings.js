@@ -1,21 +1,20 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { MessageEmbed, User } = require('discord.js')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { User } = require('discord.js')
+const { oneLine } = require('common-tags')
+const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
+const { moderations } = require('../../mongo/schemas')
+const { ModerationSchema } = require('../../mongo/typings')
 
-module.exports = class warnings extends Command {
+/** A command that can be run in a client */
+module.exports = class WarningsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'warnings',
             aliases: ['warns'],
             group: 'mod',
-            memberName: 'warnings',
             description: 'Displays user warnings or all warnings on this server.',
-            details: stripIndent`
-                If \`user\` is not specified, I will show every single moderation log.
-                \`user\` can be a user's username, ID or mention.
-            `,
+            details: userDetails,
             format: 'warnings <user>',
             examples: ['warnings Pixoll'],
             clientPermissions: ['MANAGE_MESSAGES'],
@@ -26,34 +25,49 @@ module.exports = class warnings extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get the warnings from?',
                 type: 'user',
-                default: ''
+                required: false
             }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the warnings from
      */
     async run(message, { user }) {
-        const { guild } = message
+        const { guild, guildId } = message
 
-        const query = user ? { guild: guild.id, type: 'warn', user: user.id } : { guild: guild.id, type: 'warn' }
+        /** @type {ModerationSchema} */
+        const query = user ? {
+            type: 'warn',
+            guild: guildId,
+            mod: user.id
+        } : {
+            type: 'warn',
+            guild: guildId
+        }
+
+        /** @type {ModerationSchema[]} */
         const warns = await moderations.find(query)
-        if (warns.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no warnings.'))
+        if (warns.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'There are no warnings.'
+            }))
+        }
 
-        const avatarURL = user ? user.displayAvatarURL({ dynamic: true }) : guild.iconURL({ dynamic: true })
+        const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
         await generateEmbed(message, warns, {
-            authorName: `${user?.username || guild.name}'s warnings`,
+            authorName: oneLine`
+                ${user ? `${user.username} has` : 'There\'s'}
+                ${pluralize('warning', modLogs.length)}
+            `,
             authorIconURL: avatarURL,
-            title: 'ID:',
-            keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'type', user ? 'user' : null],
-            useDocID: true
+            title: 'Id:',
+            keysExclude: ['updatedAt', 'guild', 'type', user ? 'user' : null],
+            useDocId: true
         })
     }
 }

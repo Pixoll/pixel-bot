@@ -1,9 +1,10 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { generateEmbed, capitalize, basicEmbed } = require('../../utils/functions')
-const Database = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { generateEmbed, basicEmbed } = require('../../utils')
+const Database = require('../../mongo/schemas')
 
 /** @param {string} val */
-const format = val => val.replace(/[A-Z]/g, '-$&').toLocaleLowerCase()
+const format = val => val.replace(/[A-Z]/g, '-$&').toLowerCase()
 /** @param {string} val */
 const deFormat = val => {
     const index = val.indexOf('-')
@@ -12,15 +13,16 @@ const deFormat = val => {
     return str
 }
 
-module.exports = class database extends Command {
+/** A command that can be run in a client */
+module.exports = class databaseCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'database',
             aliases: ['db'],
             group: 'owner',
-            memberName: 'database',
             description: 'Manage the database.',
             ownerOnly: true,
+            dmOnly: true,
             args: [
                 {
                     key: 'collection',
@@ -32,12 +34,10 @@ module.exports = class database extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {string} args.collection The collection to manage
      */
     async run(message, { collection }) {
@@ -52,7 +52,11 @@ module.exports = class database extends Command {
 
         const DBname = collection.replace('-', ' ').toUpperCase()
 
-        if (array.length === 0) return message.say(basicEmbed('blue', 'info', `The ${DBname} collection is empty.`))
+        if (array.length === 0) return message.reply({
+            embeds: [
+                basicEmbed('blue', 'info', `The ${DBname} collection is empty.`)
+            ]
+        })
 
         await generateEmbed(message, array, {
             authorName: `Database: ${DBname}`,

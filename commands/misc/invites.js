@@ -1,28 +1,34 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { Invite, Collection } = require('discord.js')
+const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
 
-module.exports = class invites extends Command {
+/** A command that can be run in a client */
+module.exports = class InvitesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'invites',
             group: 'misc',
-            memberName: 'invites',
-            description: 'Displays a list of all the invites of this server.',
+            description: 'Displays a list of all the invites of this server, ordered by most to least used.',
             clientPermissions: ['MANAGE_GUILD', 'MANAGE_MESSAGES'],
             guildOnly: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
     async run(message) {
         const { guild } = message
 
-        // gets all the invites in the server
-        const invites = await guild.fetchInvites().catch(() => null)
-        if (invites.size === 0) return message.say(basicEmbed('blue', 'info', 'There are no invites in this server.'))
+        /** @type {Collection<string, Invite>} */
+        const invites = await guild.invites.fetch().catch(() => null)
+        if (!invites || invites.size === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'There are no invites in this server.'
+            }))
+        }
 
         const invitesList = invites.map(({ uses, inviter, channel, url, code }) => ({
             uses: uses,
@@ -33,7 +39,7 @@ module.exports = class invites extends Command {
         })).sort((a, b) => b.uses - a.uses)
 
         await generateEmbed(message, invitesList, {
-            authorName: `${guild.name}'s invites`,
+            authorName: `There's ${pluralize('invite', invitesList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             keyTitle: { suffix: 'link' },
             keysExclude: ['link']

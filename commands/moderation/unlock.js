@@ -1,24 +1,18 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { MessageEmbed, TextChannel } = require('discord.js')
-const { cmdInfo, basicEmbed } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { TextChannel } = require('discord.js')
+const { basicEmbed, channelDetails, reasonDetails } = require('../../utils')
 
-module.exports = class unlock extends Command {
+/** A command that can be run in a client */
+module.exports = class UnlockCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'unlock',
             group: 'mod',
-            memberName: 'unlock',
             description: 'Unlock a channel, granting the `Send Messages` permission from @everyone.',
-            details: stripIndent`
-                \`channel\` can be either a text channel's name, mention or ID.
-                \`reason\` will default to "Thanks for waiting" if it's not specified.
-            `,
-            format: stripIndent`
-                unlock <reason> - Unlock the current channel.
-                unlock [channel] <reason> - Unlock a specific channel.
-            `,
-            examples: ['unlock Thanks for waiting.', 'unlock #chat Thanks for waiting.'],
+            details: `${channelDetails()}\n${reasonDetails('Thanks for waiting')}`,
+            format: 'lock [channel] <reason>',
+            examples: ['unlock #chat Thanks for waiting'],
             clientPermissions: ['MANAGE_CHANNELS'],
             userPermissions: ['MANAGE_CHANNELS'],
             guildOnly: true,
@@ -26,8 +20,7 @@ module.exports = class unlock extends Command {
                 {
                     key: 'channel',
                     prompt: 'What channel do you want to unlock?',
-                    type: 'text-channel',
-                    default: 'Thanks for waiting.'
+                    type: 'text-channel'
                 },
                 {
                     key: 'reason',
@@ -40,27 +33,36 @@ module.exports = class unlock extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to lock
      * @param {string} args.reason The message to send when the channel get's locked
      */
     async run(message, { channel, reason }) {
-        if (typeof channel === 'string') {
-            reason = `${channel} ${reason}`
-            channel = message.channel
+        const { guildId, channelId, guild } = message
+        const permissions = channel.permissionOverwrites
+        const { everyone } = guild.roles
+
+        const perms = permissions.cache.find(p => p.id === guildId)
+        if (!perms.deny.has('SEND_MESSAGES')) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
+            }))
         }
 
-        const perms = channel.permissionOverwrites.find(perm => perm.id === message.guild.id)
-        if (!perms.deny.has('SEND_MESSAGES')) return message.say(basicEmbed('red', 'cross', `${channel} is already unlocked.`))
+        await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })
+        await channel.send({
+            embeds: [basicEmbed({
+                emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason
+            })]
+        })
 
-        await channel.updateOverwrite(channel.guild.roles.everyone, { SEND_MESSAGES: null }, reason)
-        await channel.send(basicEmbed('#4c9f4c', '\\🔓', 'This channel has been unlocked', reason))
-
-        if (message.channel.id !== channel.id) await message.say(basicEmbed('green', 'check', `Unlocked ${channel}.`))
+        if (channelId !== channel.id) {
+            await message.replyEmbed(basicEmbed({
+                color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
+            }))
+        }
     }
 }

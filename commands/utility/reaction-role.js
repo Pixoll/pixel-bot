@@ -1,75 +1,58 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { TextChannel, Role, NewsChannel, Message } = require('discord.js')
-const { basicEmbed } = require('../../utils/functions')
-const { reactionRoles } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
-const emojiRegex = require('emoji-regex/RGI_Emoji')()
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { TextChannel, Role, Message } = require('discord.js')
+const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs } = require('../../utils')
+const { reactionRoles } = require('../../mongo/schemas')
+const { stripIndent, oneLine } = require('common-tags')
+const { ReactionRoleSchema } = require('../../mongo/typings')
+const RoleArgumentType = require('../../command-handler/types/role')
 
 /**
- * gets all the roles separated by commas
- * @param {string} string the string containing the roles
- * @param {CommandoMessage} message the command message
- * @returns {Role[]}
+ * Validates a {@link Role}
+ * @param {CommandoMessage} msg The member to validate
+ * @param {Role} role The role to validate
  */
-function getRoles(string, message) {
-    const isOwner = message.guild.ownerID === message.author.id
-    const highestMember = message.member.roles.highest.position
-    const highestBot = message.guild.members.cache.get(message.client.user.id).roles.highest.position
-    const array = string.toLowerCase().split(/\s*,\s*/)
+function validRole(msg, role) {
+    if (!(role instanceof Role)) return false
+    if (!role) return false
+    if (role.managed) return false
 
-    const rolesList = []
-    for (const str of array) {
-        const role = message.guild.roles.cache.get(str.replace(/[^0-9]/g, '')) || message.guild.roles.cache.find(({ name }) => name.toLowerCase() === str)
-        if (role) rolesList.push(role)
-    }
+    const { member, client, author, clientMember } = msg
+    const botId = client.user.id
 
-    /** @param {Role} role */
-    const filter = ({ position }) => {
-        if (isOwner) return position < highestBot
-        return position < highestMember && position < highestBot
-    }
+    const botManagable = clientMember.roles.highest.comparePositionTo(role)
+    if (botManagable < 1) return false
 
-    return rolesList.filter(filter).map(({ id }) => id)
+    const isOwner = author.id === botId
+    if (isOwner) return true
+
+    const memberManagable = member.roles.highest.comparePositionTo(role)
+    if (memberManagable < 1) return false
+    if (isMod(role)) return false
+
+    return true
 }
 
-/**
- * looks for valid emojis in the provided string
- * @param {string} string the string to look emojis in
- * @param {string[]} emojis all the available GuildEmojis
- * @returns {string[]}
- */
-function findEmojis(string, emojis = []) {
-    const gEmojis = string.match(/<a:.+?:\d+>|<:.+?:\d+>/g) || []
-    const sEmojis = string.match(emojiRegex) || []
-
-    const found = [...sEmojis]
-    gEmojis.forEach(emoji => {
-        const match = emojis.find(e => e === emoji.replace(/[^0-9]/g, ''))
-        if (match) found.push(match)
-    })
-
-    return found
-}
-
-module.exports = class reactionrole extends Command {
+/** A command that can be run in a client */
+module.exports = class ReactionRoleCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'reactionrole',
-            aliases: ['rrole'],
+            name: 'reaction-role',
+            aliases: ['reactionrole', 'reactrole', 'rrole'],
             group: 'utility',
-            memberName: 'reactionrole',
             description: 'Create or remove reaction roles.',
             details: stripIndent`
-                \`channel\` can be a text channel's name, ID or mention.
-                \`message\` has to be a valid message ID inside \`channel\`.
-                You'll be asked for the roles you wish to assign, and the emojis the bot should react with to that message.
-                Those emojis work as toggable buttons for the specified roles.
+                ${channelDetails()}
+                \`msg id\` has to be a message's id that's in the **same channel** that you specified.
             `,
             format: stripIndent`
-                reactionrole create [channel] [message] - Create reaction roles.
-                reactionrole remove [channel] [message] - Remove reaction roles.
+                reactrole create [channel] [msg id] - Create reaction roles.
+                reactrole remove [channel] [msg id] - Remove reaction roles.
             `,
-            examples: ['reactionrole remove #self-roles', 'reactionrole remove #self-roles 826935004936142918'],
+            examples: [
+                'reactrole create #reaction-roles 826935004936142918',
+                'reactrole remove #self-roles 826935004936142918'
+            ],
             clientPermissions: ['ADD_REACTIONS'],
             userPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
@@ -77,6 +60,7 @@ module.exports = class reactionrole extends Command {
             args: [
                 {
                     key: 'subCommand',
+                    label: 'sub-command',
                     prompt: 'Do you want to create or remove the reaction roles?',
                     type: 'string',
                     oneOf: ['create', 'remove']
@@ -87,7 +71,8 @@ module.exports = class reactionrole extends Command {
                     type: 'text-channel'
                 },
                 {
-                    key: 'messageId',
+                    key: 'msgId',
+                    label: 'message id',
                     prompt: 'On what message do you want to create or remove the reaction roles?',
                     type: 'string'
                 }
@@ -95,97 +80,125 @@ module.exports = class reactionrole extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.subCommand The sub-command to use
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'create'|'remove'} args.subCommand The sub-command to use
      * @param {TextChannel} args.channel The text channel of the reaction messages
-     * @param {string} args.messageId The message of the reaction messages
+     * @param {string} args.msgId The message of the reaction messages
      */
-    async run(message, { subCommand, channel, messageId }) {
-        /** @type {Message} */
-        const msg = await channel.messages.fetch(messageId).catch(() => null)
-        if (!msg) return message.say(basicEmbed('red', 'cross', 'That message doesn\'t exist.'))
+    async run(message, { subCommand, channel, msgId }) {
+        subCommand = subCommand.toLowerCase()
 
-        const { guild, author } = message
-        const allEmojis = this.client.emojis.cache.map(({ id }) => id)
-
-        const data = await reactionRoles.findOne({ guild: guild.id, channel: channel.id, message: msg.id })
-
-        if (subCommand.toLowerCase() === 'create') {
-            const questions = [
-                'What are the roles that you want to assign? Please send them separated by commas. Type `cancel` to at any time to cancel creation.',
-                'Now, what emojis should the bot react with in the message? These will be applied to the roles you specified in the same exact order.'
-            ]
-
-            // creates the collector
-            const collector = message.channel.createMessageCollector(msg => msg.author.id === author.id, {
-                max: questions.length,
-                time: 300000
-            })
-            var answered, counter = 0
-
-            // sends the first question
-            message.reply(questions[counter++])
-
-            collector.on('collect', /** @param {CommandoMessage} msg */ async ({ content }) => {
-                // checks if the collector has been cancelled
-                if (content.toLowerCase() === 'cancel') {
-                    message.reply('The poll creation has been cancelled.')
-                    return answered = true, collector.stop()
-                }
-
-                if (counter === 1) {
-                    const roles = getRoles(content, message)
-
-                    if (roles.length === 0) {
-                        message.say(basicEmbed('red', 'cross', 'Make sure the roles you sent can be given to other users.'))
-                        return answered = true, collector.stop()
-                    }
-                }
-
-                // sends the next question
-                if (counter < questions.length) message.reply(questions[counter++])
-            })
-
-            collector.on('end', async collected => {
-                if (answered) return
-                if (collected.size < questions.length) {
-                    return message.say(basicEmbed('red', 'cross', 'You didn\'t answer in time or there was an error while creating your new question.'))
-                }
-
-                const [roleString, emojiString] = collected.map(({ content }) => content)
-                const roles = getRoles(roleString, message)
-                const emojis = findEmojis(emojiString, allEmojis)
-
-                if (emojis.length !== roles.length) return message.say(basicEmbed('red', 'cross', 'Make sure you send the same amount of emojis as the roles.'))
-
-                for (const emoji of emojis) await msg.react(emoji)
-
-                const newDoc = {
-                    guild: guild.id,
-                    channel: channel.id,
-                    message: msg.id,
-                    roles: roles,
-                    emojis: emojis
-                }
-
-                if (data) await data.updateOne(newDoc)
-                else await new reactionRoles(newDoc).save()
-
-                message.say(basicEmbed('green', 'check', `The reaction roles were successfully created at [this message](${msg.url}).`))
-            })
-
-            return
+        let msg = await channel.messages.fetch(msgId)
+        while (!(msg instanceof Message)) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            msg = await channel.messages.fetch(value)
         }
 
-        if (!data) return message.say(basicEmbed('red', 'cross', 'I couldn\'t find the reaction roles you were looking for.'))
+        const { guildId } = message
 
-        message.say(basicEmbed('green', 'check', `The reaction roles of [this message](${msg.url}) were successfully removed.`))
+        /** @type {ReactionRoleSchema} */
+        const data = await reactionRoles.findOne({ guild: guildId, channel: channel.id, message: msg.id })
+
+        switch (subCommand) {
+            case 'create':
+                return await this.create(message, channel, msg, data)
+            case 'remove':
+                return await this.remove(message, msg, data)
+        }
+    }
+
+    /**
+     * The `create` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {TextChannel} channel The text channel of the reaction roles to create
+     * @param {Message} msg The message of the reaction roles to create
+     * @param {ReactionRoleSchema} data The data of the reaction roles
+     */
+    async create(message, channel, msg, data) {
+        const { client, guildId } = message
+        /** @type {RoleArgumentType} */
+        const roleType = client.registry.types.get('role')
+
+        const roles = []
+        while (roles.length === 0) {
+            const rolesMsg = await basicCollector(message, {
+                fieldName: 'What are the roles that you want to assign? Please send them separated by commas (max. 30 at once).'
+            }, { time: myMs('2m') })
+            if (!rolesMsg) return
+
+            for (const str of rolesMsg.content.split(/\s*,\s*/).slice(0, 30)) {
+                const con1 = roleType.validate(str, message)
+                const con2 = validRole(message, con1 === true ? roleType.parse(str, message) : null)
+                if (!con1 && !con2) continue
+
+                const role = roleType.parse(str, message)
+                roles.push(role)
+            }
+        }
+
+        const allEmojis = client.emojis.cache
+        const emojis = []
+        while (roles.length !== emojis.length) {
+            const emojisMsg = await basicCollector(message, {
+                fieldName: oneLine`
+                    Now, what emojis should the bot react with in the message?
+                    These will be applied to the roles you specified in the same exact order.
+                `
+            }, { time: myMs('2m') })
+            if (!emojisMsg) return
+
+            const match = emojisMsg.content.match(emojiRegex)?.map(e => e).filter(e => e) || []
+            for (const emoji of match) {
+                if (roles.length === emojis.length) break
+                if (emojis.includes(emoji)) continue
+
+                if (!Number.parseInt(emoji)) emojis.push(emoji)
+                if (allEmojis.get(emoji)) emojis.push(emoji)
+            }
+        }
+
+        for (const emoji of emojis) await msg.react(emoji)
+
+        /** @type {ReactionRoleSchema} */
+        const newDoc = {
+            guild: guildId,
+            channel: channel.id,
+            message: msg.id,
+            roles: roles.map(r => r.id),
+            emojis: emojis
+        }
+
+        if (data) await data.updateOne(newDoc)
+        else await new reactionRoles(newDoc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            description: `The reaction roles were successfully created at [this message](${msg.url}).`
+        }))
+    }
+
+    /**
+     * The `remove` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {Message} msg The message of the reaction roles to remove
+     * @param {ReactionRoleSchema} data The data of the reaction roles
+     */
+    async remove(message, { url }, data) {
+        if (!data) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the reaction roles you were looking for.'
+            }))
+        }
 
         await data.deleteOne()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            description: `The reaction roles of [this message](${url}) were successfully removed.`
+        }))
     }
 }

@@ -1,23 +1,26 @@
-const { User } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { docID, isMod, formatTime, basicEmbed } = require('../../utils/functions')
-const { moderations, active } = require('../../utils/mongo/schemas')
+const { User, GuildMember, TextChannel } = require('discord.js')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton } = require('../../utils')
+const { moderations, active } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { ms } = require('../../utils/custom-ms')
+const { myMs } = require('../../utils')
+const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
-module.exports = class tempban extends Command {
+/** A command that can be run in a client */
+module.exports = class TempBanCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'tempban',
+            name: 'temp-ban',
+            aliases: ['tempban'],
             group: 'mod',
-            memberName: 'tempban',
             description: 'Ban a user for a specified amount of time.',
-            details: stripIndent`
-                \`user\` can be a user's username, ID or mention.
-                If \`reason\` is not specified, it will default as 'No reason given.'.
-            `,
+            details: `${userDetails}\n${timeDetails('duration')}\n${reasonDetails()}`,
             format: 'tempban [user] [duration] <reason>',
-            examples: ['tempban Pixoll 1d', 'tempban Pixoll 30d Advertising in DM\'s'],
+            examples: [
+                'tempban Pixoll 1d',
+                'tempban Pixoll 30d Advertising in DM\'s'
+            ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             guildOnly: true,
@@ -30,13 +33,9 @@ module.exports = class tempban extends Command {
                 },
                 {
                     key: 'duration',
-                    prompt: 'How long should the ban last? (at least 1 min)',
+                    prompt: 'How long should the ban last?',
                     type: 'string',
-                    /** @param {string|number} duration */
-                    parse: (duration) => formatTime(duration),
-                    /** @param {string|number} duration */
-                    validate: (duration) => !!formatTime(duration) && formatTime(duration) >= 60 * 1000,
-                    error: 'You either didn\'t use the correct format, or the duration is less that 1 minute. Please provide a valid duration.'
+                    type: ['date', 'timestamp', 'duration']
                 },
                 {
                     key: 'reason',
@@ -49,80 +48,91 @@ module.exports = class tempban extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to temp-ban
      * @param {number} args.duration The duration of the temp-ban
      * @param {string} args.reason The reason of the temp-ban
      */
     async run(message, { user, duration, reason }) {
-        // gets data that will be used later
-        const { guild, author } = message
-        const { members } = guild
-        const isOwner = guild.ownerID === author.id
-        const botID = this.client.user.id
-        const channel = guild.channels.cache.filter(({ type }) => type === 'text').first()
+        if (typeof duration === 'number') duration = duration + Date.now()
+        if (duration instanceof Date) duration = duration.getTime()
 
-        if (user.id === botID) return message.say(basicEmbed('red', 'cross', 'You can\'t make me ban myself.'))
-        if (user.id === author.id) return message.say(basicEmbed('red', 'cross', 'You can\'t ban yourself.'))
+        const { guild, author, guildId } = message
+        const { members, bans } = guild
 
-        const isBanned = await message.guild.fetchBan(user).catch(() => null)
-        if (isBanned) return message.say(basicEmbed('red', 'cross', 'That user is already banned.'))
+        const uExcept = userException(user, author, this)
+        if (uExcept) return await message.replyEmbed(uExcept)
 
-        const member = message.guild.members.cache.get(user.id)
-        if (member) {
-            if (!member?.bannable) return message.say(basicEmbed('red', 'cross', `Unable to ban ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
-            if (!isOwner && isMod(member)) return message.say(basicEmbed('red', 'cross', 'That user is a mod/admin, you can\'t ban them.'))
+        const isBanned = await bans.fetch(user).catch(() => null)
+        if (isBanned) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That user is already banned.'
+            }))
         }
 
-        const longTime = ms(duration, { long: true })
+        /** @type {GuildMember} */
+        const member = await members.fetch(user).catch(() => null)
+        const mExcept = memberException(member, this)
+        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
 
-        // checks if the user is not a bot and if its in the server before trying to send the DM
-        if (!user.bot && member) {
-            const invite = await channel.createInvite({ maxAge: 0, maxUses: 1 })
+        if (!user.bot && !!member) {
+            const embed = basicEmbed({
+                color: 'GOLD', fieldName: `You have been temp-banned from ${guild.name}`,
+                fieldValue: stripIndent`
+                    **Expires:** ${timestamp(duration, 'R')}
+                    **Reason:** ${reason}
+                    **Moderator:** ${author.toString()}
 
-            await user.send(basicEmbed('gold', '', `You have been banned from ${guild.name}`, stripIndent`
-                **Reason:** ${reason}
-                **Duration:** ${longTime}
-                **Moderator:** ${author}
-                
-                Feel free to join back when your ban expires: ${invite.toString()}
-            `)).catch(() => null)
+                    *The invite will expire in 1 week.*
+                `
+            })
+
+            /** @type {TextChannel} */
+            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
+            const button = inviteButton(
+                await channel.createInvite({ maxAge: 0, maxUses: 1 })
+            )
+
+            await user.send({ embeds: [embed], components: [button] }).catch(() => null)
         }
 
-        await members.ban(user, { days: 7, reason: reason })
+        await members.ban(user, { days: 7, reason })
 
-        message.say(basicEmbed('green', 'check', `${user.tag} has been banned`, stripIndent`
-            **Duration:** ${longTime}
-            **Reason:** ${reason}
-        `))
+        const documentId = docId()
 
-        const documentID = docID()
-
-        // creates and saves the mongodb documents
+        /** @type {ModerationSchema} */
         const modDoc = {
-            _id: documentID,
+            _id: documentId,
             type: 'temp-ban',
-            guild: guild.id,
+            guild: guildId,
             user: user.id,
             mod: author.id,
-            reason: reason,
-            duration: longTime
+            reason,
+            duration: myMs(Date.now() - duration, { long: true })
         }
+
+        /** @type {ActiveSchema} */
         const activeDoc = {
-            _id: documentID,
+            _id: documentId,
             type: 'temp-ban',
-            guild: guild.id,
+            guild: guildId,
             user: user.id,
             mod: author.id,
-            duration: Date.now() + duration
+            duration
         }
 
         await new moderations(modDoc).save()
         await new active(activeDoc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been banned`,
+            fieldValue: stripIndent`
+                **Expires:** ${timestamp(duration, 'R')}
+                **Reason:** ${reason}
+            `
+        }))
     }
 }

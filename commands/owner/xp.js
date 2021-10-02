@@ -1,12 +1,13 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { ms } = require('../../utils/custom-ms')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { myMs } = require('../../utils')
 
-module.exports = class xp extends Command {
+/** A command that can be run in a client */
+module.exports = class xpCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'xp',
             group: 'owner',
-            memberName: 'xp',
             description: 'Gets the xp.',
             format: 'xp [message]',
             ownerOnly: true,
@@ -19,12 +20,10 @@ module.exports = class xp extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {CommandoMessage} args.msg The message to get the XP from
      */
     async run(message, { msg }) {
@@ -82,17 +81,17 @@ module.exports = class xp extends Command {
 
                 if (suffix === 'x') return `- ${val} ${task}`
 
-                const time = ms(ms(val)).replace(', ', '')
+                const time = myMs(myMs(val)).replace(', ', '')
                 return `- ${time} ${task}`
             }).join('\n')
 
         await message.delete()
 
-        const m = await message.say(`${week}\n\`\`\`!xp ${XP}\n${command}\`\`\``)
+        const m = await message.reply(`${week}\n\`\`\`!xp ${XP}\n${command}\`\`\``)
         await m.pin()
 
         const msgs = await message.channel.messages.fetch({ after: m.id }, false)
-        const target = msgs.filter(({ reference }) => reference.messageID === m.id).first()
+        const target = msgs.filter(({ reference }) => reference.messageId === m.id).first()
         await target.delete()
     }
 }

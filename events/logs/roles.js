@@ -1,21 +1,15 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, PermissionOverwrites } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
-const { formatPerm, customEmoji, moduleStatus, getKeyPerms, getLogsChannel } = require('../../utils/functions')
-const { setup, modules } = require('../../utils/mongo/schemas')
+const { MessageEmbed, Permissions } = require('discord.js')
+const { CommandoClient } = require('../../command-handler/typings')
+const { customEmoji, isModuleEnabled, getKeyPerms, getLogsChannel } = require('../../utils')
+const { permissions } = require('../../command-handler/util')
 
 /**
- * Formats the PermissionOverwrites into an array of string
- * @param {PermissionOverwrites|Readonly<Permissions>} perms The permissions to format
- * @param {boolean} [isRole] If these are role permissions
- * @returns {string[]}
+ * Formats the {@link Permissions} into an array of string
+ * @param {Readonly<Permissions>} perms The permissions to format
  */
-function format(perms, isRole) {
-    if (isRole) return perms?.toArray(false).map(perm => formatPerm(perm)) || []
-    return [
-        perms?.deny.toArray(false).map(perm => formatPerm(perm)) || [],
-        perms?.allow.toArray(false).map(perm => formatPerm(perm)) || []
-    ]
+function format(perms) {
+    return perms?.toArray(false).map(perm => permissions[perm.toString()]) || []
 }
 
 /**
@@ -35,12 +29,12 @@ function comparePerms(Old = [], New = []) {
  */
 module.exports = (client) => {
     client.on('roleCreate', async role => {
-        const { guild, id, name, hexColor } = role
+        const { guild, id, hexColor, mentionable, hoist, tags } = role
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'roles')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const colorLink = `https://www.color-hex.com/color/${hexColor.replace('#', '')}`
@@ -49,24 +43,34 @@ module.exports = (client) => {
             .setColor('GREEN')
             .setAuthor('Created role', guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Role:** ${role.toString()} ${name}
+                **>** **Role:** ${role.toString()}
                 **>** **Color:** [${hexColor}](${colorLink})
-                **>** **Key permissions:** ${getKeyPerms(role)}
+                **>** **Hoisted:** ${hoist ? 'Yes' : 'No'}
+                **>** **Mentionable:** ${mentionable ? 'Yes' : 'No'}
+                **>** **Mod perms:** ${getKeyPerms(role)}
             `)
-            .setFooter(`Role ID: ${id}`)
+            .setFooter(`Role id: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        if (tags) {
+            const bot = tags.botId ? `Bot role for <@${tags.botId}>` : null
+            const integration = tags.integrationId ? `Integration role for <@${tags.integrationId}>` : null
+            const boost = tags.premiumSubscriberRole ? `Default Server Booster role.` : null
+            const tagsArr = [bot, integration, boost].filter(t => t)
+            embed.addField('Tags', tagsArr.join('\n'))
+        }
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
     client.on('roleDelete', async role => {
-        const { guild, id, name, hexColor, mentionable, hoist } = role
+        const { guild, id, name, hexColor, mentionable, hoist, tags } = role
         if (!guild.available) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'roles')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const colorLink = `https://www.color-hex.com/color/${hexColor.replace('#', '')}`
@@ -79,29 +83,35 @@ module.exports = (client) => {
                 **>** **Color:** [${hexColor}](${colorLink})
                 **>** **Hoisted:** ${hoist ? 'Yes' : 'No'}
                 **>** **Mentionable:** ${mentionable ? 'Yes' : 'No'}
-                **>** **Key permissions:** ${getKeyPerms(role)}
+                **>** **Mod perms:** ${getKeyPerms(role)}
             `)
-            .setFooter(`Role ID: ${id}`)
+            .setFooter(`Role id: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        if (tags) {
+            const bot = tags.botId ? `Bot role for <@${tags.botId}>` : null
+            const integration = tags.integrationId ? `Integration role for <@${tags.integrationId}>` : null
+            const boost = tags.premiumSubscriberRole ? `Default Server Booster role.` : null
+            const tagsArr = [bot, integration, boost].filter(t => t)
+            embed.addField('Tags', tagsArr.join('\n'))
+        }
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
     client.on('roleUpdate', async (oldRole, newRole) => {
         const { guild, id } = oldRole
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'roles')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const { name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1, permissions: perms1 } = oldRole
         const { name: name2, hexColor: color2, hoist: hoist2, mentionable: mention2, permissions: perms2 } = newRole
 
-        const oldPerms = format(perms1, true)
-        const newPerms = format(perms2, true)
-        const [added, removed] = comparePerms(oldPerms, newPerms)
+        const [added, removed] = comparePerms(format(perms1), format(perms2))
 
         const color1link = `https://www.color-hex.com/color/${color1.replace('#', '')}`
         const color2link = `https://www.color-hex.com/color/${color2.replace('#', '')}`
@@ -109,8 +119,8 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated role', guild.iconURL({ dynamic: true }))
-            .setDescription(`${oldRole.toString()} ${oldRole.name}`)
-            .setFooter(`Role ID: ${id}`)
+            .setDescription(oldRole.toString())
+            .setFooter(`Role id: ${id}`)
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)
@@ -121,10 +131,14 @@ module.exports = (client) => {
 
         if (mention1 !== mention2) embed.addField('Mentionable', mention1 ? 'Yes ➜ No' : 'No ➜ Yes')
 
-        if (added.length !== 0) embed.addField(`${customEmoji('check', false)} Allowed permissions`, added.join(', '))
+        if (added.length !== 0) embed.addField(`${customEmoji('check')} Allowed permissions`, added.join(', '))
 
-        if (removed.length !== 0) embed.addField(`${customEmoji('cross', false)} Denied permissions`, removed.join(', '))
+        if (removed.length !== 0) embed.addField(`${customEmoji('cross')} Denied permissions`, removed.join(', '))
 
-        if (embed.fields.length > 0) logsChannel.send(embed).catch(() => null)
+        if (embed.fields.length !== 0) {
+            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        }
     })
+
+    client.emit('debug', 'Loaded audit-logs/roles')
 }

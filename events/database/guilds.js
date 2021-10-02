@@ -1,16 +1,16 @@
-const { CommandoClient } = require('discord.js-commando')
-const { active, afk, disabled, mcIp, modules, prefixes, polls, reactionRoles, rules, setup, stickyRoles, welcome } = require('../../utils/mongo/schemas')
+const { Document } = require('mongoose')
+const { CommandoClient } = require('../../command-handler/typings')
+const { active, afk, mcIp, modules, moderations, polls, rules, stickyRoles } = require('../../mongo/schemas')
+const { ModuleSchema } = require('../../mongo/typings')
 
 /**
  * Handles database behaviour in guild events.
  * @param {CommandoClient} client
  */
-module.exports = (client) => {
-    client.on('guildCreate', async ({ id }) => {
-        const data = await modules.findOne({ guild: id })
-
+module.exports = async (client) => {
+    client.on('guildCreate', async guild => {
         const document = modules.schema.obj
-        document.guild = id
+        document.guild = guild.id
 
         for (const prop in document) {
             const val = document[prop]
@@ -22,6 +22,8 @@ module.exports = (client) => {
             if (typeof val === 'function') document[prop] = false
         }
 
+        /** @type {ModuleSchema} */
+        const data = await modules.findOne({ guild: guild.id })
         if (!data) new modules(document).save()
         else await data.updateOne(document)
     })
@@ -29,52 +31,46 @@ module.exports = (client) => {
     const day = new Date().getUTCDate()
 
     if (day === 1) {
-        const guilds = client.guilds.cache.map(({ id }) => id)
-        const filter = ({ guild }) => !guilds.includes(guild)
+        client.emit('debug', 'Cleaning up database...')
 
-        async function fixGuildsData() {
-            const Active = await active.find({})
-            const Afk = await afk.find({})
-            const Disabled = await disabled.find({})
-            const McIp = await mcIp.find({})
-            const Modules = await modules.find({})
-            const Prefix = await prefixes.find({})
-            const Polls = await polls.find({})
-            const ReactionRoles = await reactionRoles.find({})
-            const Rules = await rules.find({})
-            const Setup = await setup.find({})
-            const StickyRoles = await stickyRoles.find({})
-            const Welcome = await welcome.find({})
+        const guilds = client.guilds.cache.map(d => d.id)
+        const filter = doc => !guilds.includes(doc.guild)
 
-            const notActive = Active.filter(filter)
-            const notAfk = Afk.filter(filter)
-            const notDisabled = Disabled.filter(filter)
-            const notMcIp = McIp.filter(filter)
-            const notModules = Modules.filter(filter)
-            const notPrefix = Prefix.filter(({ guild, global }) => !guilds.includes(guild) && !global)
-            const notPolls = Polls.filter(filter)
-            const notReactionRoles = ReactionRoles.filter(filter)
-            const notRules = Rules.filter(filter)
-            const notSetup = Setup.filter(filter)
-            const notStickyRoles = StickyRoles.filter(filter)
-            const notWelcome = Welcome.filter(filter)
+        /** @type {Document[]} */
+        const Active = await active.find({})
+        /** @type {Document[]} */
+        const Afk = await afk.find({})
+        /** @type {Document[]} */
+        const McIp = await mcIp.find({})
+        /** @type {Document[]} */
+        const Modules = await modules.find({})
+        /** @type {Document[]} */
+        const Moderations= await moderations.find({})
+        /** @type {Document[]} */
+        const Polls = await polls.find({})
+        /** @type {Document[]} */
+        const Rules = await rules.find({})
+        /** @type {Document[]} */
+        const StickyRoles = await stickyRoles.find({})
 
-            for (const doc of notActive) await doc.deleteOne()
-            for (const doc of notAfk) await doc.deleteOne()
-            for (const doc of notDisabled) await doc.deleteOne()
-            for (const doc of notMcIp) await doc.deleteOne()
-            for (const doc of notModules) await doc.deleteOne()
-            for (const doc of notPrefix) await doc.deleteOne()
-            for (const doc of notPolls) await doc.deleteOne()
-            for (const doc of notReactionRoles) await doc.deleteOne()
-            for (const doc of notRules) await doc.deleteOne()
-            for (const doc of notSetup) await doc.deleteOne()
-            for (const doc of notStickyRoles) await doc.deleteOne()
-            for (const doc of notWelcome) await doc.deleteOne()
+        const notActive = Active.filter(filter)
+        const notAfk = Afk.filter(filter)
+        const notMcIp = McIp.filter(filter)
+        const notModules = Modules.filter(filter)
+        const notModerations = Moderations.filter(filter)
+        const notPolls = Polls.filter(filter)
+        const notRules = Rules.filter(filter)
+        const notStickyRoles = StickyRoles.filter(filter)
 
-            console.log('Cleaned up guilds database')
-        }
+        for (const doc of notActive) await doc.deleteOne()
+        for (const doc of notAfk) await doc.deleteOne()
+        for (const doc of notMcIp) await doc.deleteOne()
+        for (const doc of notModules) await doc.deleteOne()
+        for (const doc of notModerations) await doc.deleteOne()
+        for (const doc of notPolls) await doc.deleteOne()
+        for (const doc of notRules) await doc.deleteOne()
+        for (const doc of notStickyRoles) await doc.deleteOne()
 
-        fixGuildsData()
+        client.emit('debug', 'Cleaned up database')
     }
 }

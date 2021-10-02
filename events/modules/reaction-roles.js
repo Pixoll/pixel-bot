@@ -1,35 +1,37 @@
-const { TextChannel, NewsChannel, Message, MessageReaction, User, Role, GuildMember } = require('discord.js')
-const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { findCommonElement, fetchPartial } = require('../../utils/functions')
-const { reactionRoles } = require('../../utils/mongo/schemas')
+const { TextChannel, Message, MessageReaction, User, Role, GuildMember } = require('discord.js')
+const { CommandoClient } = require('../../command-handler/typings')
+const { findCommonElement, fetchPartial } = require('../../utils')
+const { reactionRoles } = require('../../mongo/schemas')
+const { ReactionRoleSchema } = require('../../mongo/typings')
 
 /**
  * This module manages reaction roles.
  * @param {CommandoClient} client
  */
-module.exports = (client) => {
-    async function getReactionRoles() {
+module.exports = async (client) => {
+    async function removeMissingData() {
+        /** @type {ReactionRoleSchema[]} */
         const rRoles = await reactionRoles.find({})
         if (rRoles.length === 0) return
-        const { guilds } = client
+        const guilds = client.guilds.cache
+        const channels = client.channels.cache
 
         for (const data of rRoles) {
-            /** @type {CommandoGuild} */
-            const guild = await guilds.fetch(data.guild, false).catch(() => null)
+            const guild = guilds.get(data.guild)
             if (!guild) {
                 await data.deleteOne()
                 continue
             }
 
-            /** @type {TextChannel|NewsChannel} */
-            const channel = guild.channels.resolve(data.channel)
+            /** @type {TextChannel} */
+            const channel = channels.get(data.channel)
             if (!channel) {
                 await data.deleteOne()
                 continue
             }
 
             /** @type {Message} */
-            const message = await channel.messages.fetch(data.message, false).catch(() => null)
+            const message = await channel.messages.fetch(data.message).catch(() => null)
             const reactions = message?.reactions.cache
             const commonEmojis = !!findCommonElement(reactions?.map(({ emoji }) => emoji.id || emoji.name), data.emojis)
 
@@ -39,70 +41,66 @@ module.exports = (client) => {
             }
         }
 
-        setTimeout(getReactionRoles, 60 * 1000)
+        setTimeout(removeMissingData, 60 * 1000)
     }
 
-    getReactionRoles()
+    await removeMissingData()
 
     client.on('messageReactionAdd', async (_reaction, _user) => {
         /** @type {MessageReaction} */
         const { message, emoji } = await fetchPartial(_reaction)
+        /** @type {User} */
+        const user = await fetchPartial(_user)
+
         const { guild } = message
         const reaction = emoji.id || emoji.name
+        if (user.bot || !guild) return
 
-        /** @type {User} */
-        const { bot, id } = await fetchPartial(_user)
-
-        if (bot || !guild) return
         const { roles, members } = guild
 
-        const rRoles = await reactionRoles.find({})
-        if (rRoles.length === 0) return
+        /** @type {ReactionRoleSchema} */
+        const data = await reactionRoles.findOne({ guild: guild.id, message: message.id })
+        if (!data) return
+        if (!data.emojis.includes(reaction)) return
 
-        for (const data of rRoles) {
-            if (message.id !== data.message || !data.emojis.includes(reaction)) continue
+        const i = data.emojis.indexOf(reaction)
 
-            /** @type {number} */
-            const i = data.emojis.indexOf(reaction)
+        /** @type {Role} */
+        const role = await roles.fetch(data.roles[i]).catch(() => null)
+        /** @type {GuildMember} */
+        const member = await members.fetch(user).catch(() => null)
+        if (!member || !role) return
 
-            /** @type {Role} */
-            const role = await roles.fetch(data.roles[i], false).catch(() => null)
-            /** @type {GuildMember} */
-            const member = await members.fetch({ user: id, cache: false }).catch(() => null)
-            if (!member || !role) continue
-
-            member.roles.add(role).catch(() => null)
-        }
+        await member.roles.add(role).catch(() => null)
     })
 
     client.on('messageReactionRemove', async (_reaction, _user) => {
         /** @type {MessageReaction} */
         const { message, emoji } = await fetchPartial(_reaction)
+        /** @type {User} */
+        const user = await fetchPartial(_user)
+
         const { guild } = message
         const reaction = emoji.id || emoji.name
+        if (user.bot || !guild) return
 
-        /** @type {User} */
-        const { bot, id } = await fetchPartial(_user)
-
-        if (bot || !guild) return
         const { roles, members } = guild
 
-        const rRoles = await reactionRoles.find({})
-        if (rRoles.length === 0) return
+        /** @type {ReactionRoleSchema} */
+        const data = await reactionRoles.findOne({ guild: guild.id, message: message.id })
+        if (!data) return
+        if (!data.emojis.includes(reaction)) return
 
-        for (const data of rRoles) {
-            if (message.id !== data.message || !data.emojis.includes(reaction)) continue
+        const i = data.emojis.indexOf(reaction)
 
-            /** @type {number} */
-            const i = data.emojis.indexOf(reaction)
+        /** @type {Role} */
+        const role = await roles.fetch(data.roles[i]).catch(() => null)
+        /** @type {GuildMember} */
+        const member = await members.fetch(user).catch(() => null)
+        if (!member || !role) return
 
-            /** @type {Role} */
-            const role = await roles.fetch(data.roles[i], false).catch(() => null)
-            /** @type {GuildMember} */
-            const member = await members.fetch({ user: id, cache: false }).catch(() => null)
-            if (!member || !role) continue
-
-            member.roles.remove(role).catch(() => null)
-        }
+        await member.roles.remove(role).catch(() => null)
     })
+
+    client.emit('debug', 'Loaded modules/reaction-roles')
 }

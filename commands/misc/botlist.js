@@ -1,31 +1,33 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { generateEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { generateEmbed, pluralize } = require('../../utils')
+const { GuildMember, Collection } = require('discord.js')
 
-module.exports = class botlist extends Command {
+/** A command that can be run in a client */
+module.exports = class BotListCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'botlist',
             aliases: ['bots'],
             group: 'misc',
-            memberName: 'botlist',
-            description: 'Displays the bot list of this server.',
+            description: 'Displays the bot list of the server.',
             guildOnly: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
     async run(message) {
-        // gets a list of the bots in the server
-        const members = await message.guild.members.fetch()
-        const botList = members.filter(({ user: { bot } }) => bot).map(bot => bot)
+        /** @type {Collection<string, GuildMember>} */
+        const members = await message.guild.members.fetch().catch(() => null)
+        const botList = members.filter(m => m.user.bot)
+            .map(bot => `${bot.toString()} ${bot.user.tag}`)
 
         await generateEmbed(message, botList, {
             number: 20,
-            color: 'random',
-            authorName: 'Bot list',
+            authorName: `There's ${pluralize('bot', botList.length)}`,
             useDescription: true
         })
     }

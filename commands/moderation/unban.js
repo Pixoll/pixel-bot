@@ -1,22 +1,23 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { MessageEmbed, User } = require('discord.js')
-const { cmdInfo, basicEmbed } = require('../../utils/functions')
-const { active } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { User } = require('discord.js')
+const { basicEmbed, userDetails, reasonDetails } = require('../../utils')
+const { active } = require('../../mongo/schemas')
+const { Document } = require('mongoose')
 
-module.exports = class unban extends Command {
+/** A command that can be run in a client */
+module.exports = class UnbanCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'unban',
             group: 'mod',
-            memberName: 'unban',
             description: 'Unban a user.',
-            details: stripIndent`
-                \`user\` has to be a user\'s ID or mention.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${userDetails}\n${reasonDetails()}`,
             format: 'unban [user] <reason>',
-            examples: ['unban 667937325002784768', 'unban 802267523058761759 Appealed'],
+            examples: [
+                'unban @Pixoll',
+                'unban 802267523058761759 Appealed'
+            ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             throttling: { usages: 1, duration: 3 },
@@ -38,24 +39,32 @@ module.exports = class unban extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to unban
      * @param {string} args.reason The reason of the unban
      */
     async run(message, { user, reason }) {
-        const isBanned = await message.guild.fetchBan(user).catch(() => null)
-        if (!isBanned) return message.say(basicEmbed('red', 'cross', 'That user is not banned.'))
+        const { members, bans } = message.guild
 
-        await message.guild.members.unban(user, reason)
+        const isBanned = await bans.fetch(user).catch(() => null)
+        if (!isBanned) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That user is not banned.'
+            }))
+        }
 
-        message.say(basicEmbed('green', 'check', `${user.tag} has been unbanned`, `**Reason:** ${reason}`))
+        await members.unban(user, reason)
 
+        /** @type {Document} */
         const data = await active.findOne({ type: 'temp-ban', user: user.id })
         if (data) await data.deleteOne()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been unbanned`,
+            fieldValue: `**Reason:** ${reason}`
+        }))
     }
 }

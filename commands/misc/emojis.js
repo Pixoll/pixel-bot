@@ -1,53 +1,44 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
-const { oneLine } = require('common-tags')
 
-module.exports = class emojis extends Command {
+/** A command that can be run in a client */
+module.exports = class EmojisCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'emojis',
-            aliases: ['emotes'],
             group: 'misc',
-            memberName: 'emojis',
             description: 'Displays a list of server emojis.',
-            details: oneLine`
-                If the amount of emojis is too big, I will only display the maximum amount I'm able to,
-                and I will also show the actual amount of emojis and the emojis I'm actually displaying.
-            `,
+            details: 'If the amount of emojis is too big, I will only display the maximum amount I\'m able to.',
             guildOnly: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
-    run(message) {
-        // gets data that will be used later
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
+    async run(message) {
         const { guild } = message
-        const emojisCache = guild.emojis.cache
+        const _emojis = await guild.emojis.fetch()
 
-        // creates an array with some of the emojis' data
-        const emojis = emojisCache.map(emoji => ({
+        const emojis = _emojis.map(emoji => ({
             animated: emoji.animated,
             string: emoji.toString()
         }))
 
-        // filters the animated emojis and the normal ones
-        const notAnimated = emojis.filter(({ animated }) => !animated).map(({ string }) => string)
-        const isAnimated = emojis.filter(({ animated }) => animated).map(({ string }) => string)
+        const notAnimated = emojis.filter(e => !e.animated).map(e => e.string)
+        const isAnimated = emojis.filter(e => e.animated).map(e => e.string)
 
-        // cuts the string at a max od 1024 characters so it can fit in the embed
         const normal = notAnimated.join(' ').match(/.{1,1024}(>|$)/g)[0].split(' ')
         const animated = isAnimated.join(' ').match(/.{1,1024}(>|$)/g)[0].split(' ')
 
-        // creates an embed with the emojis list
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s emojis`, guild.iconURL({ dynamic: true }))
             .addField(`Normal emojis: ${notAnimated.length} (${normal.length} displayed)`, normal.join(' '))
             .addField(`Animated emojis: ${isAnimated.length} (${animated.length} displayed)`, animated.join(' '))
 
-        message.say(embed)
+        await message.replyEmbed(embed)
     }
 }

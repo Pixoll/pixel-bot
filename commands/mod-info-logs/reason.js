@@ -1,28 +1,31 @@
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed } = require('../../utils/functions')
-const { moderations, active } = require('../../utils/mongo/schemas')
+const { basicEmbed, docId } = require('../../utils')
+const { moderations, active } = require('../../mongo/schemas')
+const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
-module.exports = class reason extends Command {
+/** A command that can be run in a client */
+module.exports = class ReasonCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'reason',
             group: 'mod',
-            memberName: 'reason',
             description: 'Change the reason of a moderation log.',
             details: stripIndent`
-                \`modlog ID\` has to be a valid moderation log ID. To see all the moderation logs in this server use the \`modlogs\` command.
+                \`modlog Id\` has to be a valid mod log Id. To see all the mod logs in this server use the \`modlogs\` command.
                 \`new reason\` will be the new reason of the moderation log.
             `,
-            format: 'reason [modlog ID] [new reason]',
-            examples: ['reason aa2be4fab2d1 Post NSFW and being racist'],
+            format: 'reason [modlog Id] [new reason]',
+            examples: [`reason ${docId()} Post NSFW and being racist`],
             userPermissions: ['ADMINISTRATOR'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
-                    key: 'modlogID',
-                    prompt: 'What is the ID of the mod log you want to change the duration?',
+                    key: 'modlogId',
+                    label: 'mod log id',
+                    prompt: 'What is the Id of the mod log you want to change the duration?',
                     type: 'string',
                     max: 12
                 },
@@ -36,24 +39,38 @@ module.exports = class reason extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-    * @param {CommandoMessage} message The message
-    * @param {object} args The arguments
-    * @param {string} args.modlogID The mod log ID
+    * @param {CommandoMessage} message The message the command is being run for
+    * @param {object} args The arguments for the command
+    * @param {string} args.modlogId The mod log Id
     * @param {number} args.reason The new reason
     */
-    async run(message, { modlogID, reason }) {
-        const modLog = await moderations.findOne({ guild: message.guild.id, _id: modlogID })
-        if (!modLog) return message.say(basicEmbed('red', 'cross', 'That ID is either invalid or it does not exist.'))
+    async run(message, { modlogId, reason }) {
+        const { guildId } = message
 
-        const activeLog = await active.findOne({ guild: message.guild.id, _id: modlogID })
+        /** @type {ModerationSchema} */
+        const query = {
+            guild: guildId,
+            _id: modlogId
+        }
 
-        await modLog.updateOne({ reason: reason })
-        await activeLog?.updateOne({ reason: reason })
+        /** @type {ModerationSchema} */
+        const modLog = await moderations.findOne(query)
+        if (!modLog) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
+            }))
+        }
 
-        message.say(basicEmbed('green', 'check', `Updated reason for mod log \`${modlogID}\``, `**New reason:** ${reason}`))
+        /** @type {ActiveSchema} */
+        const activeLog = await active.findOne(query)
+
+        await modLog.updateOne({ reason })
+        await activeLog?.updateOne({ reason })
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: `Updated reason for mod log \`${modlogId}\``, fieldValue: `**New reason:** ${reason}`
+        }))
     }
 }

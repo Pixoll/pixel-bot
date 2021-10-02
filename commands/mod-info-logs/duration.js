@@ -1,67 +1,91 @@
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { ms } = require('../../utils/custom-ms')
-const { basicEmbed } = require('../../utils/functions')
-const { moderations, active } = require('../../utils/mongo/schemas')
+const { myMs, basicEmbed, timeDetails, docId, randomDate } = require('../../utils')
+const { moderations, active } = require('../../mongo/schemas')
+const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
-module.exports = class duration extends Command {
+/** A command that can be run in a client */
+module.exports = class DurationCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'duration',
             group: 'mod',
-            memberName: 'duration',
             description: 'Change the duration of a punishment.',
             details: stripIndent`
-                \`modlog ID\` has to be a valid moderation log ID. To see all the moderation logs in this server use the \`modlogs\` command.
-                \`duration\` uses the command time formatting, for more information use the \`help\` command. \`duration\` has to be at least 1 minute.
+                \`modlog Id\` has to be a valid mod log id. To see all the mod logs in this server use the \`modlogs\` command.
+                ${timeDetails('new duration')}
             `,
-            format: 'duration [modlog ID] [duration]',
-            examples: ['duration aa2be4fab2d1 30d'],
+            format: 'duration [modlog id] [new duration]',
+            examples: [
+                `duration ${docId()} 12/30/2022`,
+                `duration ${docId()} <t:${randomDate}>`,
+                `duration ${docId()} 30d`
+            ],
             userPermissions: ['ADMINISTRATOR'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
-                    key: 'modlogID',
-                    prompt: 'What is the ID of the mod log you want to change the duration?',
+                    key: 'modlogId',
+                    label: 'mod log id',
+                    prompt: 'What is the id of the mod log you want to change the duration?',
                     type: 'string',
                     max: 12
                 },
                 {
                     key: 'duration',
                     prompt: 'What will be the new duration of the mod log?',
-                    type: 'string',
-                    /** @param {string|number} duration */
-                    parse: (duration) => formatTime(duration),
-                    /** @param {string|number} duration */
-                    validate: (duration) => !!formatTime(duration) && formatTime(duration) >= 60 * 1000,
-                    error: 'You either didn\'t use the correct format, or the duration is less that 1 minute. Please provide a valid duration.'
+                    type: ['date', 'timestamp', 'duration']
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-    * @param {CommandoMessage} message The message
-    * @param {object} args The arguments
-    * @param {string} args.modlogID The mod log ID
-    * @param {number} args.duration The new duration
-    */
-    async run(message, { modlogID, duration }) {
-        const modLog = await moderations.findOne({ guild: message.guild.id, _id: modlogID })
-        if (!modLog) return message.say(basicEmbed('red', 'cross', 'That ID is either invalid or it does not exist.'))
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {string} args.modlogId The mod log Id
+     * @param {number|Date} args.duration The new duration
+     */
+    async run(message, { modlogId, duration }) {
+        const { guildId } = message
 
-        const activeLog = await active.findOne({ guild: message.guild.id, _id: modlogID })
-        if (!activeLog) return message.say(basicEmbed('red', 'cross', 'That punishment has expired.'))
+        /** @type {ModerationSchema} */
+        const query = {
+            guild: guildId,
+            _id: modlogId
+        }
 
-        const longTime = ms(duration, { long: true })
+        /** @type {ModerationSchema} */
+        const modLog = await moderations.findOne(query)
+        if (!modLog) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
+            }))
+        }
+
+        /** @type {ActiveSchema} */
+        const activeLog = await active.findOne(query)
+        if (!activeLog) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That punishment has expired.'
+            }))
+        }
+
+        if (typeof duration === 'number') duration = duration + Date.now()
+        if (duration instanceof Date) duration = duration.getTime()
+
+        /** @type {string} */
+        const longTime = myMs(duration - Date.now(), { long: true })
 
         await modLog.updateOne({ duration: longTime })
-        await activeLog.updateOne({ duration: Date.parse(activeLog.createdAt) + duration })
+        await activeLog.updateOne({ duration })
 
-        message.say(basicEmbed('green', 'check', `Updated duration for mod log \`${modlogID}\``, `**New duration:** ${longTime}`))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: `Updated duration for mod log \`${modlogId}\``, fieldValue: `**New duration:** ${longTime}`
+        }))
     }
 }

@@ -1,46 +1,77 @@
-const { stripIndent } = require('common-tags')
+const { oneLine } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
-const { CommandoClient, CommandoMessage } = require('discord.js-commando')
-const { sliceDots, moduleStatus, fetchPartial, getLogsChannel } = require('../../utils/functions')
-const { setup, modules } = require('../../utils/mongo/schemas')
+const { CommandoClient } = require('../../command-handler/typings')
+const { isModuleEnabled, getLogsChannel, sliceDots, code } = require('../../utils')
 
 /**
  * Handles all of the command logs.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('message', async _message => {
-        /** @type {CommandoMessage} */
-        const message = await fetchPartial(_message)
+    client.on('commandRun', async (command, _, message) => {
+        const { guild, author, channel, id, url, cleanContent } = message
+        const isModCommand = !!command.userPermissions || command.ownerOnly ||
+            command.serverOwnerOnly || command.name === 'prefix'
 
-        const { guild, author, isCommand, command, channel, content, id, url } = message
-        const isModCommand = !!command?.userPermissions || command?.ownerOnly || command?.name === 'prefix'
+        if (channel.type === 'DM' || command.hidden || !isModCommand) return
 
-        if (!guild || author.bot || !isCommand || command?.hidden || !isModCommand) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
+        if (!isEnabled) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'commands')
-        if (!status) return
-
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
-        const _content = sliceDots(content, 1024)
+        const content = sliceDots(cleanContent, 1016)
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor(`Used ${command.name} command`, author.displayAvatarURL({ dynamic: true }))
-            .setDescription(stripIndent`
-                **>** **User:** ${author.toString()} ${author.tag}
-                **>** **Channel:** ${channel.toString()} ${channel.name}
-                **>** **Link:** [Click here](${url})
+            .setDescription(oneLine`
+                ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
+                [Jump to message](${url})
             `)
-            .addField('Message', _content)
-            .setFooter(stripIndent`
-                Author ID: ${author.id}
-                Message ID: ${id}
-            `)
+            .addField('Message', code(content))
+            .setFooter(`Author id: ${author.id} | Message id: ${id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
+
+    client.on('commandPrefixChange', async (guild, prefix) => {
+        if (!guild) return
+
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
+        if (!isEnabled) return
+
+        const logsChannel = await getLogsChannel(guild)
+        if (!logsChannel) return
+
+        const embed = new MessageEmbed()
+            .setColor('BLUE')
+            .setAuthor('Updated command prefix', guild.iconURL({ dynamic: true }))
+            .setDescription(`**New prefix:** ${prefix}`)
+            .setTimestamp()
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+    })
+
+    client.on('commandStatusChange', async (guild, command, enabled) => {
+        if (!guild) return
+
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
+        if (!isEnabled) return
+
+        const logsChannel = await getLogsChannel(guild)
+        if (!logsChannel) return
+
+        const embed = new MessageEmbed()
+            .setColor('BLUE')
+            .setAuthor('Updated command status', guild.iconURL({ dynamic: true }))
+            .setDescription(`The \`${command.name}\` command has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
+            .setTimestamp()
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+    })
+
+    client.emit('debug', 'Loaded audit-logs/commands')
 }

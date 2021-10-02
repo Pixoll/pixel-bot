@@ -1,8 +1,7 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, Invite } = require('discord.js')
-const { CommandoClient, CommandoMessage } = require('discord.js-commando')
-const { formatDate, moduleStatus, validURL, fetchPartial, getLogsChannel } = require('../../utils/functions')
-const { setup, modules } = require('../../utils/mongo/schemas')
+const { MessageEmbed, Invite, Collection } = require('discord.js')
+const { CommandoClient } = require('../../command-handler/typings')
+const { isModuleEnabled, validURL, getLogsChannel, timestamp } = require('../../utils')
 
 /**
  * Handles all of the invite logs.
@@ -12,10 +11,10 @@ module.exports = (client) => {
     client.on('inviteCreate', async invite => {
         const { guild, inviter, maxUses, expiresAt, temporary, channel } = invite
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'invites')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const embed = new MessageEmbed()
@@ -23,25 +22,25 @@ module.exports = (client) => {
             .setAuthor('Created invite', guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
                 **>** **Link:** ${invite.toString()}
-                **>** **Channel:** ${channel.toString()} ${channel.name}
+                **>** **Channel:** ${channel.toString()}
                 **>** **Inviter:** ${inviter.toString()} ${inviter.tag}
-                **>** **Max uses:** ${maxUses || 'No limit'}
-                **>** **Expires at:** ${formatDate(expiresAt) || 'Never'}
-                **>** **Temporary membership:** ${temporary ? 'Yes' : 'No'}
+                **>** **Max. uses:** ${maxUses || 'No limit'}
+                **>** **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
+                **>** **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
-            .setFooter(`Inviter ID: ${inviter.id}`)
+            .setFooter(`Inviter id: ${inviter.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
     client.on('inviteDelete', async invite => {
         const { guild, channel } = invite
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'invites')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
         const embed = new MessageEmbed()
@@ -49,29 +48,28 @@ module.exports = (client) => {
             .setAuthor('Deleted invite', guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
                 **>** **Link:** ${invite.toString()}
-                **>** **Channel:** ${channel.toString()} ${channel.name}
+                **>** **Channel:** ${channel.toString()}
             `)
-            .setFooter(`Channel ID: ${channel.id}`)
+            .setFooter(`Channel id: ${channel.id}`)
             .setTimestamp()
 
-        logsChannel.send(embed).catch(() => null)
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
-    client.on('message', async _message => {
-        /** @type {CommandoMessage} */
-        const message = await fetchPartial(_message)
-
+    client.on('cMessageCreate', async message => {
         const { guild, author, isCommand, content, channel, url } = message
         if (!guild || author.bot || isCommand) return
 
-        const status = await moduleStatus(modules, guild, 'auditLogs', 'invites')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
+        if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(setup, guild)
+        const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
-        const invites = await guild.fetchInvites().catch(() => null)
+        /** @type {Collection<string,Invite>} */
+        const invites = await guild.invites.fetch().catch(() => null)
 
+        const embeds = []
         for (const link of content.split(/ +/)) {
             const isLink = validURL(link)
             if (!isLink) continue
@@ -79,31 +77,36 @@ module.exports = (client) => {
             /** @type {Invite} */
             const invite = await client.fetchInvite(link).catch(() => null)
             if (!invite) continue
-            if (invites.get(invite.code)) continue
+            if (invites?.get(invite.code)) continue
 
             const { channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild } = invite
 
             const embed = new MessageEmbed()
                 .setColor('BLUE')
-                .setAuthor('Posted invite', author.displayAvatarURL({ dynamic: true }))
+                .setAuthor(`${author.tag} posted an invite`, author.displayAvatarURL({ dynamic: true }))
                 .setDescription(stripIndent`
-                    **>** **User:** ${author.toString()} ${author.tag}
-                    **>** **Channel:** ${channel.toString()} ${channel.name}
-                    **>** **Message:** [Click here](${url})
-                    **>** **Invite:** ${invite.toString()}
+                    ${author.toString()} posted an invite in ${channel.toString()} [Jump to message](${url})
+                    **Invite:** ${invite.toString()}
                 `)
                 .addField('Invite information', stripIndent`
                     **>** **Server:** ${invGuild.name}
                     **>** **Channel:** ${invChannel.toString()} ${invChannel.name}
                     **>** **Online members:** ${presenceCount}/${memberCount}
                     **>** **Max uses:** ${maxUses || 'No limit'}
-                    **>** **Expires at:** ${formatDate(expiresAt) || 'Never'}
+                    **>** **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                     **>** **Temporary membership:** ${temporary ? 'Yes' : 'No'}
                 `)
-                .setFooter(`Server ID: ${invGuild.id}`)
+                .setFooter(`Server id: ${invGuild.id}`)
                 .setTimestamp()
 
-            logsChannel.send(embed).catch(() => null)
+            embeds.push(embed)
+        }
+
+        while (embeds.length !== 0) {
+            const toSend = embeds.splice(0, 10).filter(e => e)
+            await logsChannel.send({ embeds: toSend }).catch(() => null)
         }
     })
+
+    client.emit('debug', 'Loaded audit-logs/invites')
 }

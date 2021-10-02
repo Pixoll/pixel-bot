@@ -1,19 +1,16 @@
-const { stripIndent } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { generateEmbed } = require('../../utils/functions')
+const { generateEmbed, basicEmbed, pluralize, memberDetails } = require('../../utils')
 
-module.exports = class roles extends Command {
+/** A command that can be run in a client */
+module.exports = class RolesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'roles',
             group: 'misc',
-            memberName: 'roles',
             description: 'Displays a list of roles in the server, or the roles of a specific member.',
-            details: stripIndent`
-                If \`member\` is not specified, it will display the server roles.
-                \`member\` can be a member's username, ID or mention.
-            `,
+            details: memberDetails(),
             format: 'roles <member>',
             examples: ['roles Pixoll'],
             clientPermissions: ['MANAGE_MESSAGES'],
@@ -22,37 +19,46 @@ module.exports = class roles extends Command {
                 key: 'member',
                 prompt: 'What member do you want to get the roles from?',
                 type: 'member',
-                default: ''
+                required: false
             }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {GuildMember} args.member The member to get the roles from
      */
     async run(message, { member }) {
-        const { guild } = message
+        const { guild, guildId } = message
 
-        const filter = ({ id }) => id !== message.guild.id
-        const memberRoles = member.roles?.cache.filter(filter)
+        const memberRoles = member?.roles.cache.filter(role => role.id !== guildId)
         const guildRoles = !memberRoles ? await guild.roles.fetch() : null
 
-        const rolesCache = memberRoles || guildRoles?.cache
-        if (!rolesCache) return message.say(basicEmbed('red', 'cross', 'There was an error trying to get the roles of the server.'))
+        const rolesCache = memberRoles || guildRoles.filter(role => role.id !== guildId)
+        if (!rolesCache) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'I couldn\'t find any roles..'
+            }))
+        }
 
-        const name = member.user?.username || guild.name
-        const avatar = member.user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
+        const name = member?.user.username || guild.name
+        const avatar = member?.user.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        const roles = !!rolesCache?.size ? rolesCache.map(role => role).sort((a, b) => b.position - a.position) : ['This member has no roles.']
+        const roles = !!rolesCache?.size ?
+            rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) :
+            'This member has no roles.'
+
+        if (typeof roles == 'string') {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: roles
+            }))
+        }
 
         await generateEmbed(message, roles, {
             number: 20,
-            authorName: `${name}'s roles`,
+            authorName: `${name} has ${pluralize('role', roles.length)}`,
             authorIconURL: avatar,
             useDescription: true
         })

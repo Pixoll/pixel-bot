@@ -1,20 +1,22 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { oneLine } = require('common-tags')
 const { User } = require('discord.js')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
+const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
+const { moderations } = require('../../mongo/schemas')
+const { ModerationSchema } = require('../../mongo/typings')
 
-module.exports = class modlogs extends Command {
+/** A command that can be run in a client */
+module.exports = class ModLogsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'modlogs',
+            name: 'mod-logs',
+            aliases: ['modlogs'],
             group: 'mod',
-            memberName: 'modlogs',
-            description: 'Displays user moderator logs of a user or all mod logs on this server.',
-            details: stripIndent`
-                If \`user\` is not specified, I will show every single moderation log.
-                \`user\` can be a user's username, ID or mention.
-            `,
+            description:
+                'Displays all moderator logs of the server of from a specific user, or all if none is specified'
+            ,
+            details: userDetails,
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],
             clientPermissions: ['MANAGE_MESSAGES'],
@@ -25,35 +27,48 @@ module.exports = class modlogs extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get the mod logs from?',
                 type: 'user',
-                default: ''
+                required: false
             }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod logs from
      */
     async run(message, { user }) {
-        const { guild } = message
+        const { guild, guildId } = message
 
-        const query = user ? { guild: guild.id, mod: user.id } : { guild: guild.id }
+        /** @type {ModerationSchema} */
+        const query = user ? {
+            guild: guildId,
+            mod: user.id
+        } : {
+            guild: guildId
+        }
+
+        /** @type {ModerationSchema[]} */
         const modLogs = await moderations.find(query)
-        if (modLogs.length === 0) return message.say(basicEmbed('blue', 'info', 'There are no moderation logs.'))
+        if (modLogs.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'There are no moderation logs.'
+            }))
+        }
 
-        const avatarURL = user ? user.displayAvatarURL({ dynamic: true }) : guild.iconURL({ dynamic: true })
+        const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
         await generateEmbed(message, modLogs, {
-            authorName: `${user?.username || guild.name}'s moderation logs`,
+            authorName: oneLine`
+                ${user ? `${user.username} has` : 'There\'s'}
+                ${pluralize('mod log', modLogs.length)}
+            `,
             authorIconURL: avatarURL,
-            title: ' |  ID:',
+            title: ' |  Id:',
             keyTitle: { prefix: 'type' },
-            keysExclude: ['__v', 'updatedAt', 'type', 'guild', '_id', user ? 'mod' : null],
-            useDocID: true
+            keysExclude: ['updatedAt', 'guild', user ? 'mod' : null],
+            useDocId: true
         })
     }
 }

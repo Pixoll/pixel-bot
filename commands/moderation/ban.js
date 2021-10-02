@@ -1,22 +1,24 @@
 const { User, GuildMember } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { docID, isMod, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { docId, basicEmbed, userException, memberException, reasonDetails, userDetails } = require('../../utils')
+const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { ModerationSchema } = require('../../mongo/typings')
 
-module.exports = class ban extends Command {
+/** A command that can be run in a client */
+module.exports = class BanCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'ban',
             group: 'mod',
-            memberName: 'ban',
             description: 'Ban a user permanently.',
-            details: stripIndent`
-                \`user\` has to be a user's username, ID or mention.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${userDetails}\n${reasonDetails()}`,
             format: 'ban [user] <reason>',
-            examples: ['ban Pixoll', 'ban Pixoll The Ban Hammer has Spoken!'],
+            examples: [
+                'ban Pixoll',
+                'ban Pixoll The Ban Hammer has Spoken!'
+            ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             throttling: { usages: 1, duration: 3 },
@@ -38,55 +40,61 @@ module.exports = class ban extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to ban
      * @param {string} args.reason The reason of the ban
      */
     async run(message, { user, reason }) {
-        // gets data that will be used later
-        const { guild, author } = message
-        const isOwner = guild.ownerID === author.id
-        const botID = this.client.user.id
-        const { members } = guild
+        const { guild, author, guildId } = message
+        const { members, bans } = guild
 
-        if (user.id === botID) return message.say(basicEmbed('red', 'cross', 'You can\'t make me ban myself.'))
-        if (user.id === author.id) return message.say(basicEmbed('red', 'cross', 'You can\'t ban yourself.'))
+        const uExcept = userException(user, author, this)
+        if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
 
-        const isBanned = await message.guild.fetchBan(user).catch(() => null)
-        if (isBanned) return message.say(basicEmbed('red', 'cross', 'That user is already banned.'))
-
-        /** @type {GuildMember} */
-        const member = await message.guild.members.fetch({ user: user.id, cache: false }).catch(() => null)
-        if (member) {
-            if (!member?.bannable) return message.say(basicEmbed('red', 'cross', `Unable to ban ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
-            if (!isOwner && isMod(member)) return message.say(basicEmbed('red', 'cross', 'That user is a mod/admin, you can\'t ban them.'))
+        const isBanned = await bans.fetch(user).catch(() => null)
+        if (isBanned) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That user is already banned.'
+            }))
         }
 
-        // checks if the user is not a bot and if its in the server before trying to send the DM
-        if (!user.bot && member) await user.send(basicEmbed('gold', '', `You have been banned from ${guild.name}`, stripIndent`
-            **Reason:** ${reason}
-            **Moderator:** ${author}
-        `)).catch(() => null)
+        /** @type {GuildMember} */
+        const member = await members.fetch(user).catch(() => null)
+        const mExcept = memberException(member, this)
+        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
 
-        await members.ban(user, { days: 7, reason: reason })
+        if (!user.bot && !!member) {
+            await user.send({
+                embeds: [basicEmbed({
+                    color: 'GOLD', fieldName: `You have been banned from ${guild.name}`,
+                    fieldValue: stripIndent`
+                        **Reason:** ${reason}
+                        **Moderator:** ${author.toString()}
+                    `
+                })]
+            }).catch(() => null)
+        }
 
-        message.say(basicEmbed('green', 'check', `${user.tag} has been banned`, `**Reason:** ${reason}`))
+        await members.ban(user, { days: 7, reason })
 
-        // creates and saves the document
+        /** @type {ModerationSchema} */
         const doc = {
-            _id: docID(),
+            _id: docId(),
             type: 'ban',
-            guild: guild.id,
+            guild: guildId,
             user: user.id,
             mod: author.id,
-            reason: reason
+            reason
         }
 
         await new moderations(doc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: `${user.tag} has been banned`, fieldValue: `**Reason:** ${reason}`
+        }))
     }
 }

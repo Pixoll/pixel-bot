@@ -1,30 +1,34 @@
-const { MessageEmbed } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
+const { MessageButton, MessageActionRow } = require('discord.js')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 
-module.exports = class invite extends Command {
+/** A command that can be run in a client */
+module.exports = class InviteCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'invite',
             group: 'info',
-            memberName: 'invite',
             description: 'Invite this bot to your server.',
             guarded: true
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-    * @param {CommandoMessage} message The message
-    */
-    run(message) {
-        const link = `https://discord.com/api/oauth2/authorize?client_id=${this.client.user.id}&permissions=8&scope=applications.commands%20bot`
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
+    async run(message) {
+        const button = new MessageButton()
+            .setLabel('Invite')
+            .setStyle('LINK')
+            .setURL(this.client.botInvite)
 
-        const embed = new MessageEmbed()
-            .setColor('#4c9f4c')
-            .setDescription(`Invite the bot using [this link](${link}).`)
+        const row = new MessageActionRow()
+            .addComponents(button)
 
-        message.say(embed)
+        await message.reply({
+            content: 'Click the button below to invite the bot.',
+            components: [row]
+        })
     }
 }

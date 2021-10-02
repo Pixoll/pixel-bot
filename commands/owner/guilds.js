@@ -1,33 +1,33 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed, generateEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { basicEmbed, generateEmbed } = require('../../utils')
 
-module.exports = class guilds extends Command {
+/** A command that can be run in a client */
+module.exports = class guildsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'guilds',
             group: 'owner',
-            memberName: 'guilds',
             description: 'Displays all the guilds the bot\'s in.',
-            ownerOnly: true
+            ownerOnly: true,
+            dmOnly: true,
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
     async run(message) {
-        if (message.channel.type !== 'dm') return message.say(basicEmbed('red', 'cross', 'This command can only be used in DMs.'))
-
         // gets all the guilds the bot's in
         const guilds = this.client.guilds.cache
-        if (!guilds || guilds.size === 0) return message.say(basicEmbed('blue', 'info', 'There bot is not in any server.'))
+        if (!guilds || guilds.size === 0) return message.reply(basicEmbed('blue', 'info', 'There bot is not in any server.'))
 
         const guildsList = guilds.map(({ name, id, owner }) => ({
             name: name,
-            'Guild ID': id,
+            'Guild Id': id,
             owner: owner.user.toString(),
-            'Owner ID': owner.id
+            'Owner Id': owner.id
         }))
 
         // creates and sends a paged embed with the bans

@@ -1,104 +1,138 @@
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { docID, isMod, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { docId, isMod, basicEmbed, memberDetails } = require('../../utils')
+const { moderations } = require('../../mongo/schemas')
+const { ModerationSchema } = require('../../mongo/typings')
 
 /**
- * gets all the users separated by commas
- * @param {string} string the string containing the users
- * @param {CommandoMessage} message the command message
+ * Validates a {@link GuildMember}
+ * @param {CommandoMessage} msg The member to validate
+ * @param {GuildMember} member The member to validate
  */
-async function getMembers(string, message) {
-    const isOwner = message.guild.ownerID === message.author.id
-    const botID = message.client.user.id
-    const array = string.toLowerCase().split(/\s*,\s*/)
+function validMember(msg, member) {
+    if (!member) return false
 
-    const membersList = []
-    for (const str of array) {
-        const memberByID = await message.guild.members.fetch({ user: str.replace(/[^0-9]/g, ''), cache: false }).catch(() => null)
-        const memberByQuery = !memberByID ? await message.guild.members.fetch({ query: str, limit: 1 }).catch(() => null) : null
+    const { author, guild, client } = msg
+    const { user } = member
+    const authorId = author.id
 
-        /** @type {GuildMember} */
-        const member = memberByID || memberByQuery.first()
-
-        if (member) membersList.push(member)
+    if (user.id !== client.user.id && user.id !== authorId) {
+        if (!member.bannable) return false
+        if (guild.ownerId === authorId) return true
+        if (isMod(member)) return false
+        return true
+    } else {
+        return true
     }
-
-    /** @param {GuildMember} member */
-    const filter = member => {
-        if (member.user.id !== botID && member.user.id !== message.author.id) {
-            if (!member.bannable) return false
-            if (isOwner) return true
-            return !isMod(member)
-        }
-    }
-
-    return membersList.filter(filter)
 }
 
-module.exports = class multiban extends Command {
+/** A command that can be run in a client */
+module.exports = class MultiBanCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'multiban',
+            name: 'multi-ban',
+            aliases: ['multiban', 'mass-ban', 'massban'],
             group: 'mod',
-            memberName: 'multiban',
-            description: 'Ban multiple members permanently.',
-            details: '`members` has to be all the members\'s username, ID or mention, separated by commas (max. of 30 at once).',
-            format: 'multiban [members]',
-            examples: ['multiban Pixoll, 801615120027222016'],
+            description: 'Ban multiple members at the same time (max. 30 at once).',
+            details: stripIndent`
+                \`reason\` **has** to be surrounded by quotes.
+                ${memberDetails(null, true)}
+            `,
+            format: 'multi-ban "[reason]" [members]',
+            examples: ['multi-ban "Raid" Pixoll, 801615120027222016'],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
-            args: [{
-                key: 'members',
-                prompt: 'What members do you want to ban?',
-                type: 'string',
-                parse: async (string, message) => await getMembers(string, message),
-                validate: async (string, message) => await getMembers(string, message).length >= 1,
-                error: 'I couldn\'t find any of the members you specified. Please check the role hierarchy and server ownership.'
-            }]
+            args: [
+                {
+                    key: 'reason',
+                    prompt: 'What is the reason of the ban?',
+                    type: 'string',
+                    max: 512
+                },
+                {
+                    key: 'members',
+                    prompt: 'What members do you want to ban?',
+                    type: 'string',
+                    validate: async (val, msg, arg) => {
+                        const type = msg.client.registry.types.get('member')
+                        const array = val.split(/\s*,\s*/).slice(0, 30)
+                        const valid = []
+                        for (const str of array) {
+                            const con1 = await type.validate(str, msg, arg)
+                            const con2 = validMember(msg, con1 === true ? await type.parse(str, msg) : null)
+                            valid.push(con1 && con2)
+                        }
+                        const wrong = valid.filter(b => b !== true)
+                        return wrong[0] === undefined
+                    },
+                    parse: async (val, msg) => {
+                        const type = msg.client.registry.types.get('member')
+                        const array = val.split(/\s*,\s*/).slice(0, 30)
+                        const valid = []
+                        for (const str of array) {
+                            valid.push(await type.parse(str, msg))
+                        }
+                        return valid
+                    },
+                    error: 'At least one of the members you specified was invalid, please try again.'
+                }
+            ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {string} args.reason The reason of the ban
      * @param {GuildMember[]} args.members The members to ban
      */
-    async run(message, { members }) {
-        for (const member of members) {
-            // gets data that will be used later
-            const { user } = member
-            const { guild, author } = message
-            const { members } = guild
-            const reason = 'Mass ban.'
+    async run(message, { reason, members }) {
+        const { guild, author, guildId } = message
+        const manager = guild.members
+        const authorId = author.id
 
-            // checks if the user is not a bot before trying to send the DM
-            if (!user.bot) await user.send(basicEmbed('gold', '', `You have been banned from ${guild.name}`, stripIndent`
-                **Reason:** ${reason}
-                **Moderator:** ${author}
-            `)).catch(() => null)
+        const toEdit = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Banning members...'
+        }))
 
-            await members.ban(user, { days: 7, reason: reason })
+        for (const { user } of members) {
+            if (!user.bot) {
+                await user.send({
+                    embeds: [basicEmbed({
+                        color: 'GOLD', fieldName: `You have been banned from ${guild.name}`,
+                        fieldValue: stripIndent`
+                            **Reason:** ${reason}
+                            **Moderator:** ${author.toString()}
+                        `
+                    })]
+                }).catch(() => null)
+            }
 
-            // creates and saves the document
+            await manager.ban(user, { days: 7, reason })
+
+            /** @type {ModerationSchema} */
             const doc = {
-                _id: docID(),
+                _id: docId(),
                 type: 'ban',
-                guild: guild.id,
+                guild: guildId,
                 user: user.id,
-                mod: author.id,
+                mod: authorId,
                 reason: reason
             }
 
             await new moderations(doc).save()
         }
 
-        message.say(basicEmbed('green', 'check', `The following members have been banned:`, members.map(({ user }) => `"${user.tag}"`).join(', ')))
+        await toEdit.edit({
+            embeds: [basicEmbed({
+                color: 'GREEN', emoji: 'check', fieldName: `Banned the following users:`,
+                fieldValue: members.map(m => `"${m.user.tag}"`).join(', ')
+            })]
+        })
     }
 }

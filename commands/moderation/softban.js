@@ -1,22 +1,25 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { User } = require('discord.js')
-const { isMod, docID, basicEmbed } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { User, TextChannel, GuildMember } = require('discord.js')
+const { docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge } = require('../../utils')
+const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { ModerationSchema } = require('../../mongo/typings')
 
-module.exports = class softban extends Command {
+/** A command that can be run in a client */
+module.exports = class SoftBanCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'softban',
+            name: 'soft-ban',
+            aliases: ['softban'],
             group: 'mod',
-            memberName: 'softban',
             description: 'Soft-ban a user (Ban and immediate unban to delete user messages).',
-            details: stripIndent`
-                \`user\` has to be a user's username, ID or mention.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${userDetails}\n${reasonDetails()}`,
             format: 'softban [user] <reason>',
-            examples: ['softban Pixoll', 'softban Pixoll Mass-spam'],
+            examples: [
+                'softban Pixoll',
+                'softban Pixoll Mass-spam'
+            ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             throttling: { usages: 1, duration: 3 },
@@ -38,58 +41,70 @@ module.exports = class softban extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to soft-ban
      * @param {string} args.reason The reason of the soft-ban
      */
     async run(message, { user, reason }) {
-        const { guild, author } = message
-        const { members } = guild
-        const isOwner = guild.ownerID === author.id
-        const botID = this.client.user.id
-        const channel = guild.channels.cache.filter(({ type }) => type === 'text').first()
+        const { guild, author, guildId } = message
+        const { members, bans } = guild
 
-        if (user.id === botID) return message.say(basicEmbed('red', 'cross', 'You can\'t make me ban myself.'))
-        if (user.id === author.id) return message.say(basicEmbed('red', 'cross', 'You can\'t ban yourself.'))
+        const uExcept = userException(user, author, this)
+        if (uExcept) return await message.replyEmbed(uExcept)
 
-        const isBanned = await message.guild.fetchBan(user).catch(() => null)
-        if (isBanned) return message.say(basicEmbed('red', 'cross', 'That user is already banned.'))
-
-        const member = message.guild.members.cache.get(user.id)
-        if (!member?.bannable) return message.say(basicEmbed('red', 'cross', `Unable to ban ${user.tag}`, 'Please check the role hierarchy or server ownership.'))
-        if (!isOwner && isMod(member)) return message.say(basicEmbed('red', 'cross', 'That user is a mod/admin, you can\'t ban them.'))
-
-        if (!user.bot && member) {
-            const invite = await channel.createInvite({ maxAge: 604800, maxUses: 1 })
-            await member.send(basicEmbed('gold', '', `You have been soft-banned from ${guild.name}`, stripIndent`
-                **Reason:** ${reason}
-                **Moderator:** ${author}
-                
-                Feel free to join back: ${invite.toString()}
-                *This invite will expire in 1 week.*
-            `)).catch(() => null)
+        const isBanned = await bans.fetch(user).catch(() => null)
+        if (isBanned) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That user is already banned.'
+            }))
         }
 
-        await members.ban({ days: 7, reason: reason })
+        /** @type {GuildMember} */
+        const member = await members.fetch(user).catch(() => null)
+        const mExcept = memberException(member, this)
+        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
+
+        if (!user.bot && !!member) {
+            const embed = basicEmbed({
+                color: 'GOLD', fieldName: `You have been soft-banned from ${guild.name}`,
+                fieldValue: stripIndent`
+                    **Reason:** ${reason}
+                    **Moderator:** ${author.toString()}
+
+                    *The invite will expire in 1 week.*
+                `
+            })
+
+            /** @type {TextChannel} */
+            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
+            const button = inviteButton(
+                await channel.createInvite({ maxAge: inviteMaxAge, maxUses: 1 })
+            )
+
+            await user.send({ embeds: [embed], components: [button] }).catch(() => null)
+        }
+
+        await members.ban(user, { days: 7, reason })
         await members.unban(user, 'Soft-ban')
 
-        message.say(basicEmbed('green', 'check', `${user.tag} has been soft-banned`, `**Reason:** ${reason}`))
-
-        // creates and saves the document
+        /** @type {ModerationSchema} */
         const doc = {
-            _id: docID(),
+            _id: docId(),
             type: 'soft-ban',
-            guild: guild.id,
+            guild: guildId,
             user: user.id,
             mod: author.id,
-            reason: reason
+            reason
         }
 
         await new moderations(doc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been soft-banned`,
+            fieldValue: `**Reason:** ${reason}`
+        }))
     }
 }

@@ -1,62 +1,22 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, User } = require('discord.js')
-const { getDayDiff, capitalize } = require('../../utils/functions')
-const { moderations } = require('../../utils/mongo/schemas')
 const { stripIndent } = require('common-tags')
+const { getDayDiff, code } = require('../../utils')
+const { ModerationSchema } = require('../../mongo/typings')
+const { moderations } = require('../../mongo/schemas')
 
-/**
- * filters the stats by type
- * @param {array} stats the stats
- * @param {string[]} filter the type of the punishment
- * @param {string} row the name of the row
- * @param {number} pad the padding for the content
- */
-function getStats(stats, filter, row, pad) {
-    const seven = stats.filter(({ type, createdAt }) => filter.includes(type) && getDayDiff(createdAt) <= 7).length.toString()
-    const thirty = stats.filter(({ type, createdAt }) => filter.includes(type) && getDayDiff(createdAt) <= 30).length.toString()
-    const all = stats.filter(({ type }) => filter.includes(type)).length.toString()
-
-    return row.padEnd(pad, ' ') + seven.padEnd(pad, ' ') + thirty.padEnd(pad, ' ') + all
-}
-
-/**
- * creates an embed with the user's mod starts
- * @param {array} stats the data to look up into
- * @param {User} user the user to get the mod starts from
- */
-function modStatsEmbed(stats, user) {
-    const pad = 10
-
-    const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'
-
-    const mutes = getStats(stats, ['mute'], 'Mutes', pad)
-    const bans = getStats(stats, ['ban', 'temp-ban'], 'Bans', pad)
-    const kicks = getStats(stats, ['kick'], 'Kicks', pad)
-    const warns = getStats(stats, ['warn'], 'Warns', pad)
-    const total = getStats(stats, ['mute', 'ban', 'temp-ban', 'kick', 'warn'], 'Total', pad)
-
-    const table = '```' + `${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}` + '```'
-
-    const modStats = new MessageEmbed()
-        .setColor('#4c9f4c')
-        .setAuthor(`${user.username}'s moderation statistics`, user.displayAvatarURL({ dynamic: true }))
-        .setDescription(table)
-        .setFooter(`User ID: ${user.id}`)
-        .setTimestamp()
-
-    return modStats
-}
-
-module.exports = class modstats extends Command {
+/** A command that can be run in a client */
+module.exports = class ModStatsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'modstats',
+            name: 'mod-stats',
+            aliases: ['modstats'],
             group: 'mod',
-            memberName: 'modstats',
-            description: 'Displays moderation statistics for a moderator or admin.',
+            description: 'Displays your moderation statistics or for a moderator or admin.',
             details: stripIndent`
                 If \`user\` is not specified, I will show your own moderation statistics.
-                \`user\` can be a user's username, ID or mention.
+                \`user\` can be a user's username, id or mention.
             `,
             format: 'modstats <user>',
             examples: ['modstats Pixoll'],
@@ -67,25 +27,59 @@ module.exports = class modstats extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get the statistics from?',
                 type: 'user',
-                default: ''
+                required: false
             }]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod stats from
      */
     async run(message, { user }) {
         const { guild, author } = message
+        if (!user) user = author
 
-        const modStats = await moderations.find({ guild: guild.id, mod: user?.id || author.id })
+        /** @type {ModerationSchema[]} */
+        const stats = await moderations.find({ guild: guild.id, mod: user.id })
 
-        if (!user) message.say(modStatsEmbed(modStats, author))
-        else message.say(modStatsEmbed(modStats, user))
+        const pad = 10
+        const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'
+
+        const mutes = this.getStats(stats, 'mute', 'Mutes', pad)
+        const bans = this.getStats(stats, ['ban', 'temp-ban'], 'Bans', pad)
+        const kicks = this.getStats(stats, 'kick', 'Kicks', pad)
+        const warns = this.getStats(stats, 'warn', 'Warns', pad)
+        const total = this.getStats(stats, ['mute', 'ban', 'temp-ban', 'kick', 'warn'], 'Total', pad)
+
+        const table = code(`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}`)
+
+        const embed = new MessageEmbed()
+            .setColor('#4c9f4c')
+            .setAuthor(`${user.username}'s moderation statistics`, user.displayAvatarURL({ dynamic: true }))
+            .setDescription(table)
+            .setFooter(`User id: ${user.id}`)
+            .setTimestamp()
+
+        await message.replyEmbed(embed)
+    }
+
+    /**
+     * Filters the stats by type
+     * @param {ModerationSchema[]} stats The stats to filter
+     * @param {string|string[]} filter The type of the punishment
+     * @param {string} row The name of the row
+     * @param {number} pad The padding for the content
+     */
+    getStats(stats, filter, row, pad) {
+        if (typeof filter === 'string') filter = [filter]
+
+        const seven = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 7).length.toString()
+        const thirty = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 30).length.toString()
+        const all = stats.filter(m => filter.includes(m.type)).length.toString()
+
+        return row.padEnd(pad, ' ') + seven.padEnd(pad, ' ') + thirty.padEnd(pad, ' ') + all
     }
 }

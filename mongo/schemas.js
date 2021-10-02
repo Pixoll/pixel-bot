@@ -19,6 +19,7 @@ const afk = model('afk', Schema({
 
 const disabled = model('disabled', Schema({
     guild: String,
+    global: Boolean,
     commands: Array,
     groups: Array
 }), 'disabled')
@@ -100,7 +101,6 @@ const reminders = model('reminders', Schema({
     user: String,
     reminder: String,
     remindAt: Number,
-    link: String,
     message: String,
     channel: String
 }, { timestamps: true }))

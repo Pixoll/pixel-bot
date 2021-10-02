@@ -1,21 +1,22 @@
 const util = require('util')
-const discord = require('discord.js')
+const { Util: { splitMessage } } = require('discord.js')
 const { stripIndents } = require('common-tags')
-const { Command, CommandoMessage } = require('discord.js-commando')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
 
 /** @param {string} str */
 function escapeRegex(str) {
-	return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+	return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
 }
 
 const nlPattern = new RegExp('!!NL!!', 'g')
 
+/** A command that can be run in a client */
 module.exports = class EvalCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: 'eval',
 			group: 'owner',
-			memberName: 'eval',
 			description: 'Executes JavaScript code.',
 			details: 'Only the bot owner(s) may use this command.',
 			format: 'eval [script]',
@@ -29,11 +30,8 @@ module.exports = class EvalCommand extends Command {
 		})
 
 		this.lastResult = null
-		Object.defineProperty(this, '_sensitivePattern', { value: null, configurable: true })
+		this._sensitivePattern = null
 	}
-
-	onBlock() { return }
-	onError() { return }
 
 	/**
 	 * 
@@ -66,7 +64,7 @@ module.exports = class EvalCommand extends Command {
 		}
 
 		// Run the code and measure its execution time
-		var hrDiff
+		let hrDiff
 		try {
 			const hrStart = process.hrtime()
 			this.lastResult = eval(script)
@@ -98,14 +96,14 @@ module.exports = class EvalCommand extends Command {
 		const prepend = `\`\`\`javascript\n${prependPart}\n`
 		const append = `\n${appendPart}\n\`\`\``
 		if (input) {
-			return discord.splitMessage(stripIndents`
+			return splitMessage(stripIndents`
 				*Executed in ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1000000}ms.*
 				\`\`\`javascript
 				${inspected}
 				\`\`\`
 			`, { maxLength: 1900, prepend, append })
 		} else {
-			return discord.splitMessage(stripIndents`
+			return splitMessage(stripIndents`
 				*Callback executed after ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1000000}ms.*
 				\`\`\`javascript
 				${inspected}
@@ -117,10 +115,10 @@ module.exports = class EvalCommand extends Command {
 	get sensitivePattern() {
 		if (!this._sensitivePattern) {
 			const client = this.client
-			var pattern = ''
+			let pattern = ''
 			if (client.token) pattern += escapeRegex(client.token)
-			Object.defineProperty(this, '_sensitivePattern', { value: new RegExp(pattern, 'gi'), configurable: false })
+			this._sensitivePattern = new RegExp(pattern, 'gi')
 		}
 		return this._sensitivePattern
 	}
-};
+}

@@ -1,13 +1,15 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { rules: rulesDocs } = require('../../utils/mongo/schemas')
-const { generateEmbed, basicEmbed } = require('../../utils/functions')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { rules } = require('../../mongo/schemas')
+const { generateEmbed, basicEmbed } = require('../../utils')
+const { RuleSchema } = require('../../mongo/typings')
 
-module.exports = class rules extends Command {
+/** A command that can be run in a client */
+module.exports = class RulesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'rules',
             group: 'misc',
-            memberName: 'rules',
             description: 'Displays all the rules of this server.',
             clientPermissions: ['MANAGE_MESSAGES'],
             guildOnly: true,
@@ -15,22 +17,27 @@ module.exports = class rules extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
-    /** @param {CommandoMessage} message */
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     */
     async run(message) {
-        // tries to get the saved rules for the server
-        const rulesData = await rulesDocs.findOne({ guild: message.guild.id })
-        const rules = rulesData ? Array(...rulesData.rules) : undefined
+        const { guildId, guild } = message
 
-        if (!rules || rules.length === 0) return message.say(basicEmbed('blue', 'info', 'The are no saved rules for this server.'))
+        /** @type {RuleSchema} */
+        const rulesData = await rules.findOne({ guild: guildId })
+        const rulesList = rulesData ? Array(...rulesData.rules) : null
 
-        // creates and sends the paged embed containing the rules
-        await generateEmbed(message, rules, {
+        if (!rulesList || rulesList.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
+            }))
+        }
+
+        await generateEmbed(message, rulesList, {
             number: 5,
-            authorName: `${message.guild.name}'s rules`,
-            authorIconURL: message.guild.iconURL({ dynamic: true }),
+            authorName: `${guild.name}'s rules`,
+            authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Rule',
             hasObjects: false
         })

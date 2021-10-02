@@ -1,59 +1,58 @@
 const { MessageEmbed } = require('discord.js')
-const { afk } = require('../../utils/mongo/schemas')
-const { basicEmbed, fetchPartial } = require('../../utils/functions')
-const { CommandoClient, CommandoMessage } = require('discord.js-commando')
-const { toNow } = require('../../utils/custom-ms')
+const { afk } = require('../../mongo/schemas')
+const { basicEmbed, sleep, timestamp } = require('../../utils')
+const { CommandoClient } = require('../../command-handler/typings')
+const { Document } = require('mongoose')
+const { AfkSchema } = require('../../mongo/typings')
 
 /**
  * This module manages `!afk`'s timeouts and mentions.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('message', async _message => {
-        /** @type {CommandoMessage} */
-        const message = await fetchPartial(_message)
-
+    client.on('cMessageCreate', async message => {
         const { guild, author, isCommand, command } = message
 
         if (!guild || author.bot) return
         if (isCommand && command?.name === 'afk') return
 
+        /** @type {Document} */
         const status = await afk.findOne({ guild: guild.id, user: author.id })
         if (!status) return
 
         await status.deleteOne()
 
-        message.say(basicEmbed('green', '', `Welcome back ${author.toString()}, I removed your AFK status.`))
-            .then(msg =>
-                msg.delete({ timeout: 10 * 1000 }).catch(() => null)
-            )
+        const toDelete = await message.replyEmbed(basicEmbed({
+            color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`
+        }))
+
+        await sleep(5)
+        await toDelete.delete().catch(() => null)
     })
 
-    client.on('message', async _message => {
-        /** @type {CommandoMessage} */
-        const message = await fetchPartial(_message)
-
+    client.on('cMessageCreate', async message => {
         const { guild, author, mentions } = message
         const { everyone, users } = mentions
 
         if (!guild || author.bot || everyone) return
 
         for (const [, user] of users) {
+            /** @type {AfkSchema} */
             const data = await afk.findOne({ guild: guild.id, user: user.id })
             if (!data) return
-
-            const diff = toNow(data.updatedAt)
 
             const embed = new MessageEmbed()
                 .setColor('GOLD')
                 .setAuthor(`${user.username} is AFK`, user.displayAvatarURL({ dynamic: true }))
-                .addField('Status:', data.status)
-                .setFooter(`${diff} ago`)
+                .setDescription(`${data.status}\n${timestamp(data.updatedAt, 'R')}`)
                 .setTimestamp(data.updatedAt)
 
-            message.say(embed).then(msg =>
-                msg.delete({ timeout: 30000 }).catch(() => null)
-            )
+            const toDelete = await message.replyEmbed(embed)
+
+            await sleep(10)
+            await toDelete.delete().catch(() => null)
         }
     })
+
+    client.emit('debug', 'Loaded modules/afk')
 }

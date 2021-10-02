@@ -1,5 +1,6 @@
-const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { disabled } = require('../../utils/mongo/schemas')
+const { CommandoClient } = require('../../command-handler/typings')
+const { disabled } = require('../../mongo/schemas')
+const { DisabledSchema } = require('../../mongo/typings')
 
 /**
  * Disables all saved modules in all servers.
@@ -7,13 +8,12 @@ const { disabled } = require('../../utils/mongo/schemas')
  */
 module.exports = async (client) => {
     const { commands, groups } = client.registry
+    /** @type {DisabledSchema[]} */
     const Disabled = await disabled.find({})
     const { guilds } = client
 
     for (const data of Disabled) {
-        /** @type {CommandoGuild} */
-        const guild = await guilds.fetch(data.guild, false).catch(() => null)
-
+        const guild = guilds.cache.get(data.guild)
         if (!guild) {
             await data.deleteOne()
             continue
@@ -27,12 +27,12 @@ module.exports = async (client) => {
         }
 
         for (const group of data.groups) {
-            const match = groups.find(gr => gr.id === group)
+            const match = groups.find(grp => grp.id === group)
             if (!match) continue
 
             match.setEnabledIn(guild, false)
         }
     }
 
-    console.log('Disabled commands & groups')
+    client.emit('debug', 'Disabled commands & groups')
 }

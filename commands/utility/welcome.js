@@ -1,26 +1,29 @@
 const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { basicEmbed } = require('../../utils/functions')
-const { welcome: welcomeDocs } = require('../../utils/mongo/schemas')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { basicEmbed, basicCollector, myMs, getArgument, channelDetails } = require('../../utils')
+const { welcome } = require('../../mongo/schemas')
+const { WelcomeSchema } = require('../../mongo/typings')
 
-module.exports = class welcome extends Command {
+/** A command that can be run in a client */
+module.exports = class WelcomeCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'welcome',
             group: 'utility',
-            memberName: 'welcome',
-            description: 'This command allows you to setup welcoming messages that can be sent in DMs and in a specific channel of your server.',
+            description: 'Setup welcoming messages that can be sent in DMs and in a specific channel of your server.',
             details: stripIndent`
+                ${channelDetails('text-channel')}
                 In both you can use the following fields:
                 **>** **{user}:** Tags the new member with a mention.
-                **>** **{server name}:** This server's name.
-                **>** **{member count}:** The member count of this server.
+                **>** **{server_name}:** This server's name.
+                **>** **{member_count}:** The member count of this server.
             `,
             format: stripIndent`
-                welcome - Display the current welcomes.
-                welcome dms [message] - Set/change the DMs welcomes.
-                welcome channel [channel] [message] - Set/change the welcomes to a channel. 
+                welcome <view> - Display the current welcomes.
+                welcome dms - Set/update the DMs welcomes.
+                welcome channel [text-channel] - Set/update the welcomes to a channel. 
             `,
             examples: ['welcome channel #welcome'],
             userPermissions: ['ADMINISTRATOR'],
@@ -28,103 +31,124 @@ module.exports = class welcome extends Command {
             args: [
                 {
                     key: 'subCommand',
+                    label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['dms', 'channel'],
-                    default: ''
+                    oneOf: ['view', 'dms', 'channel'],
+                    default: 'view'
                 }, {
                     key: 'channel',
                     prompt: 'On what channel do you want the welcomes?',
-                    type: 'text-channel|string',
-                    max: 512,
-                    /** @param {string} channel @param {CommandoMessage} message */
-                    validate: (channel, message) => {
-                        const arg = message.parseArgs().split(/ +/).shift().toLowerCase()
-                        if (arg === 'dms') return true
-
-                        const channels = message.guild.channels.cache
-                        const match = channels.filter(({ type, name, id }) =>
-                            type === 'text' && (
-                                name.toLowerCase().includes(channel) ||
-                                id === channel.replace(/[^0-9]/g, '')
-                            )
-                        )
-                        if (match.size > 1) return false
-                        return !!match
-                    },
-                    default: ''
-                },
-                {
-                    key: 'msg',
-                    prompt: 'What message do you want to set?',
-                    type: 'string',
-                    max: 512,
-                    default: ''
+                    type: 'text-channel',
+                    required: false
                 }
             ]
         })
     }
 
-    onBlock() { return }
-    onError() { return }
+    /**
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {'view'|'dms'|'channel'} args.subCommand The sub-command to use
+     * @param {TextChannel} args.channel The channel where to send the welcome messages
+     */
+    async run(message, { subCommand, channel }) {
+        subCommand = subCommand.toLowerCase()
+        const { guildId } = message
+
+        /** @type {WelcomeSchema} */
+        const data = await welcome.findOne({ guild: guildId })
+
+        switch (subCommand) {
+            case 'view':
+                return await this.view(message, data)
+            case 'dms':
+                return await this.dms(message, data)
+            case 'channel':
+                return await this.channel(message, data, channel)
+        }
+    }
 
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {string} args.subCommand The sub-command to use
-     * @param {TextChannel|string} args.channel The channel to use
-     * @param {string} args.msg The message to set
+     * The `view` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {WelcomeSchema} data The welcome messages data
      */
-    async run(message, { subCommand, channel, msg }) {
+    async view(message, data) {
         const { guild } = message
 
-        const welcomes = await welcomeDocs.findOne({ guild: guild.id })
+        const dataChannel = guild.channels.resolve(data?.channel)
+        const channelName = dataChannel ? `(in #${dataChannel.name})` : ''
 
-        if (!subCommand) {
-            const dataChannel = guild.channels.cache.get(welcomes?.channel)
-            const channelName = dataChannel ? `(in #${dataChannel.name})` : ''
+        const embed = new MessageEmbed()
+            .setColor('#4c9f4c')
+            .setAuthor(`${guild.name}'s welcome messages`, guild.iconURL({ dynamic: true }))
+            .addField('Direct messages', data?.dms || 'There\'s no saved DM message')
+            .addField(
+                `Server channel ${channelName}`,
+                data?.message?.replace(/{[\w_]+}/g, '`$&`') || 'There\'s no saved server channel message'
+            )
+            .setTimestamp()
 
-            const embed = new MessageEmbed()
-                .setColor('#4c9f4c')
-                .setAuthor(`${guild.name}'s welcome messages`, guild.iconURL({ dynamic: true }))
-                .addField('Direct messages', welcomes?.dms || 'There\'s no saved DM message')
-                .addField(`Server channel ${channelName}`, welcomes?.message?.replace(/{[\w ]+}/g, '`$&`') || 'There\'s no saved server channel message')
-                .setTimestamp()
+        await message.replyEmbed(embed)
+    }
 
-            return message.say(embed)
-        }
+    /**
+     * The `dms` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {WelcomeSchema} data The welcome messages data
+     */
+    async dms(message, data) {
+        const welcomeMsg = await basicCollector(message, {
+            fieldName: 'What message would you like me to send in DMs?'
+        }, { time: myMs('2m') })
+        if (!welcomeMsg) return
 
-        const saved = basicEmbed('green', 'check', 'Your message has been successfully saved.')
-
-        if (subCommand.toLowerCase() === 'dms') {
-            if (typeof channel === 'string') {
-                msg = channel
-            }
-
-            if (!msg) return message.say(basicEmbed('red', 'cross', 'Please specify the message to send.'))
-
-            const doc = {
-                guild: guild.id,
-                dms: msg
-            }
-
-            if (!welcomes) await new welcomeDocs(doc).save()
-            else await welcomes.updateOne(doc)
-
-            return message.say(saved)
-        }
-
-        if (!msg) return message.say(basicEmbed('red', 'cross', 'Please specify the message to send.'))
-
+        /** @type {WelcomeSchema} */
         const doc = {
-            guild: guild.id,
-            channel: channel.id,
-            message: msg
+            guild: message.guildId,
+            dms: welcomeMsg.content
         }
 
-        if (!welcomes) await new welcomeDocs(doc).save()
-        else await welcomes.updateOne(doc)
+        if (!data) await data.updateOne(doc)
+        else await new welcome(doc).save()
 
-        message.say(saved)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
+        }))
+    }
+
+    /**
+     * The `channel` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {WelcomeSchema} data The welcome messages data
+     * @param {TextChannel} channel The channel where to send the welcome messages
+     */
+    async channel(message, data, channel) {
+        if (!channel) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            channel = value
+        }
+
+        const welcomeMsg = await basicCollector(message, {
+            fieldName: `What message would you like me to send in #${channel.name}?`
+        }, { time: myMs('2m') })
+        if (!welcomeMsg) return
+
+        /** @type {WelcomeSchema} */
+        const doc = {
+            guild: message.guildId,
+            channel: channel.id,
+            message: welcomeMsg.content
+        }
+
+        if (data) await data.updateOne(doc)
+        else await new welcome(doc).save()
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
+        }))
     }
 }

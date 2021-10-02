@@ -1,36 +1,34 @@
-const { Command, CommandoMessage } = require('discord.js-commando')
-const { Duration, toNow } = require('../../utils/custom-ms')
-const { basicEmbed, formatTime, customEmoji } = require('../../utils/functions')
-const { reminders } = require('../../utils/mongo/schemas')
-const { stripIndent } = require('common-tags')
+const Command = require('../../command-handler/commands/base')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { reminders } = require('../../mongo/schemas')
+const { basicEmbed, customEmoji, timestamp, timeDetails, randomDate } = require('../../utils')
+const { ReminderSchema } = require('../../mongo/typings')
 
-module.exports = class reminder extends Command {
+/** A command that can be run in a client */
+module.exports = class ReminderCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'reminder',
             aliases: ['remindme', 'remind'],
             group: 'misc',
-            memberName: 'reminder',
-            description: 'Set a reminder.',
-            details: stripIndent`
-                \`time\` uses the command time formatting, for more information use the \`help\` command.
-                \`reminder\` is the reminder that I have to send you after the \`time\` you specified, it can be anything you want.`,
+            description: 'Set a reminder, and forget.',
+            details: timeDetails('time'),
             format: 'reminder [time] [reminder]',
-            examples: ['reminder 1d Do some coding'],
+            examples: [
+                'reminder 02/02/2022-21:58 Pixoll\'s b-day!',
+                `remindme <t:${randomDate}:R> Get some groceries`,
+                'remind 1d Do some coding'
+            ],
             throttling: { usages: 1, duration: 3 },
+            guarded: true,
             args: [
                 {
                     key: 'time',
-                    prompt: 'In how much time would you like to be reminded?',
-                    type: 'string',
-                    /** @param {string|number} time */
-                    parse: (time) => formatTime(time),
-                    /** @param {string|number} time */
-                    validate: (time) => !!formatTime(time),
-                    error: 'You didn\'t use the correct format. Please try again.'
+                    prompt: 'When would you like to be reminded?',
+                    type: ['date', 'timestamp', 'duration']
                 },
                 {
-                    key: 'remindAbout',
+                    key: 'reminder',
                     prompt: 'What do you want to be reminded about?',
                     type: 'string',
                     max: 512
@@ -39,34 +37,36 @@ module.exports = class reminder extends Command {
         })
     }
 
-    onBlock() { return }
-    onError() { return }
-
     /**
-     * @param {CommandoMessage} message The message
-     * @param {object} args The arguments
-     * @param {number} args.time The time when the user should be reminder
-     * @param {string} args.remindAbout What to remind the user about
+     * Runs the command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {number|Date} args.time The time when the user should be reminder
+     * @param {string} args.reminder What to remind the user about
      */
-    async run(message, { time, remindAbout }) {
-        const date = new Duration(time)
-        const remindIn = toNow(date.fromNow, true)
-        const remindAt = date.format.replace(' ', ' at ')
+    async run(message, { time, reminder }) {
+        if (typeof time === 'number') time = time + Date.now()
+        if (time instanceof Date) time = time.getTime()
 
-        await message.react(customEmoji('cross', false))
+        const { author, url, id, channelId } = message
+        const stamp = timestamp(time, 'R')
 
-        await message.say(basicEmbed('green', 'check', `I'll remind you ${remindIn} (on ${remindAt})`, remindAbout))
-
-        // creates and saves the new reminder
+        /** @type {ReminderSchema} */
         const doc = {
-            user: message.author.id,
-            reminder: remindAbout,
-            remindAt: Date.now() + time,
-            link: message.url,
-            message: message.id,
-            channel: message.channel.id
+            user: author.id,
+            reminder,
+            remindAt: time,
+            message: id,
+            channel: channelId
         }
 
         await new reminders(doc).save()
+
+        await message.react(customEmoji('cross'))
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: `I'll remind you ${stamp} for:`, fieldValue: reminder,
+            footer: 'React with ❌ to cancel the reminder.'
+        }))
     }
 }
