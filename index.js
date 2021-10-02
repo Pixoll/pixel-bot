@@ -35,10 +35,10 @@ const client = new CommandoClient({
     ],
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     presence: {
-        activity: {
+        activities: [{
             name: 'for !help',
             type: 'WATCHING'
-        }
+        }]
     }
 })
 
