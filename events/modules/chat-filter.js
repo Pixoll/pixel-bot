@@ -1,15 +1,15 @@
 const { MessageEmbed } = require('discord.js')
-const { CommandoClient } = require('discord.js-commando')
-const { ms } = require('../../utils/custom-ms')
-const { isMod, validURL, docID } = require('../../utils/functions')
-const { moderations, active, setup, modules } = require('../../utils/mongo/schemas')
+const { CommandoClient } = require('../../command-handler/typings')
+const { myMs } = require('../../utils')
+const { isMod, validURL, docId } = require('../../utils')
+const { moderations, active, setup, modules } = require('../../mongo/schemas')
 
 /**
  * This module manages the chat filter.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('message', async message => {
+    client.on('messageCreate', async message => {
         if (!message.guild || message.author.bot || isMod(message.member)) return
 
         const data = await modules.findOne({ guild: message.guild.id })
@@ -61,10 +61,10 @@ module.exports = (client) => {
                 .setDescription(`**<:check:802617654396715029> ${message.author} has been warned\nReason${reason.length > 1 ? 's' : ''}:** ${reason.join(' - ')}`)
 
             message.member.send(`You have been **warned** on **${message.guild.name}\nReason${reason.length > 1 ? 's' : ''}:** ${reason.join(' - ')}\n**Moderator:** ${client.user} - Auto-moderation system`).catch(() => null)
-            message.say(warned).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
+            message.reply(warned).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
 
             await new moderations({
-                _id: docID(),
+                _id: docId(),
                 type: 'warn',
                 guild: message.guild.id,
                 user: message.author.id,
@@ -74,7 +74,7 @@ module.exports = (client) => {
         }
     })
 
-    client.on('message', async message => {
+    client.on('messageCreate', async message => {
         if (!message.guild || message.author.bot || isMod(message.member)) return
         const data = await setup.findOne({ guild: message.guild.id })
         if (!data) return
@@ -104,10 +104,10 @@ module.exports = (client) => {
                 .setDescription(`**<:check:802617654396715029> ${message.member} has been muted for 1 minute\nReason:** Spam detection`)
 
             message.member.send(`You have been **muted** on **${message.guild.name}** for **1 minute\nReason:** Spam detection\n**Moderator:** ${client.user} - Auto-moderation system`).catch(() => null)
-            message.say(muted).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
+            message.reply(muted).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
 
             await new moderations({
-                _id: docID(),
+                _id: docId(),
                 type: 'mute',
                 guild: message.guild.id,
                 user: message.author.id,
@@ -119,13 +119,13 @@ module.exports = (client) => {
                 type: 'mute',
                 guild: message.guild.id,
                 user: client.user.id,
-                duration: Date.now() + ms('1m')
+                duration: Date.now() + myMs('1m')
             }).save()
         })
     })
 
-    client.on('message', async message => {
-        if (!message.guild || message.author.bot || message.content.startsWith(message.guild ? message.guild.commandPrefix : client.commandPrefix) || isMod(message.member)) return
+    client.on('messageCreate', async message => {
+        if (!message.guild || message.author.bot || message.content.startsWith(message.guild ? message.guild.prefix : client.prefix) || isMod(message.member)) return
 
         const data = await modules.findOne({ guild: message.guild.id })
         if (data && typeof (data.chatFilter) === 'boolean' && !data.chatFilter) return
@@ -143,10 +143,10 @@ module.exports = (client) => {
                 .setDescription(`**<:check:802617654396715029> ${message.author} has been warned\nReason:** Posted an invite`)
 
             message.member.send(`You have been **warned** on **${message.guild.name}\nReason:** Posted an invite\n**Moderator:** ${client.user} - Auto-moderation system`).catch(() => null)
-            message.say(warned).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
+            message.reply(warned).then(msg => msg.delete({ timeout: 30000 }).catch(() => null))
 
             await new moderations({
-                _id: docID(),
+                _id: docId(),
                 type: 'warn',
                 guild: message.guild.id,
                 user: message.author.id,

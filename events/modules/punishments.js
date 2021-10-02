@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
-const { CommandoClient, CommandoGuild } = require('discord.js-commando')
-const { active, setup } = require('../../utils/mongo/schemas')
+const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
+const { active, setup } = require('../../mongo/schemas')
 
 /**
  * This module manages expired punishments.
@@ -38,7 +38,7 @@ module.exports = (client) => {
                 .setColor('#f1c40f')
                 .setAuthor(`${user.tag} | Unban`, user.displayAvatarURL({ dynamic: true }))
                 .setDescription(`**>** **User:** ${user}\n**>** **Moderator:** <@${mod.mod}>\n**>** **Reason:** Ban has expired.`)
-                .setFooter(`User ID: ${user.id}`)
+                .setFooter(`User Id: ${user.id}`)
                 .setTimestamp()
 
             logsChannel.send(embed).catch(() => null)
