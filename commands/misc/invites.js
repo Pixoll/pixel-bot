@@ -30,19 +30,18 @@ module.exports = class InvitesCommand extends Command {
             }))
         }
 
-        const invitesList = invites.map(({ uses, inviter, channel, url, code }) => ({
-            uses: uses,
-            inviter: inviter.tag,
-            channel: channel.toString(),
-            link: url,
-            code: code
+        const invitesList = invites.map(inv => ({
+            uses: inv.uses,
+            inviter: inv.inviter.tag,
+            channel: inv.channel.toString(),
+            link: inv.url,
+            code: inv.code
         })).sort((a, b) => b.uses - a.uses)
 
         await generateEmbed(message, invitesList, {
             authorName: `There's ${pluralize('invite', invitesList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            keyTitle: { suffix: 'link' },
-            keysExclude: ['link']
+            keyTitle: { suffix: 'link' }
         })
     }
 }

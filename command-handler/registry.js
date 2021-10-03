@@ -299,11 +299,10 @@ class CommandoRegistry {
 	 */
 	registerDefaultTypes(types = {}) {
 		types = {
-			string: true, integer: true, float: true, boolean: true, duration: true, date: true,
-			timestamp: true, user: true, member: true, role: true, channel: true, textChannel: true,
-			threadChannel: true, voiceChannel: true, stageChannel: true, categoryChannel: true,
-			message: true, invite: true, customEmoji: true, defaultEmoji: true, command: true, group: true,
-			...types
+			string: true, integer: true, float: true, boolean: true, duration: true, date: true, user: true,
+			member: true, role: true, channel: true, textChannel: true, threadChannel: true, voiceChannel: true,
+			stageChannel: true, categoryChannel: true, message: true, invite: true, customEmoji: true,
+			defaultEmoji: true, command: true, group: true, ...types
 		}
 
 		for (let type in types) {

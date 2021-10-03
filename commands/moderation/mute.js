@@ -30,7 +30,7 @@ module.exports = class MuteCommand extends Command {
                 {
                     key: 'duration',
                     prompt: 'How long should the mute last?',
-                    type: ['date', 'timestamp', 'duration']
+                    type: ['date', 'duration']
                 },
                 {
                     key: 'reason',

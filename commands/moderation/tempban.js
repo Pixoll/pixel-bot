@@ -35,7 +35,7 @@ module.exports = class TempBanCommand extends Command {
                     key: 'duration',
                     prompt: 'How long should the ban last?',
                     type: 'string',
-                    type: ['date', 'timestamp', 'duration']
+                    type: ['date', 'duration']
                 },
                 {
                     key: 'reason',

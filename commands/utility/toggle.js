@@ -93,7 +93,7 @@ module.exports = class ToggleCommand extends Command {
 
         if (data) {
             /** @type {UpdateQuery<DisabledSchema>} */
-            const doc = !isEnabled ?
+            const doc = isEnabled ?
                 { $push: { commands: command.name } } :
                 { $pull: { commands: command.name } }
 
@@ -103,7 +103,7 @@ module.exports = class ToggleCommand extends Command {
             const doc = {
                 guild: guildId,
                 global: !guildId,
-                commands: !isEnabled ? [command.name] : [],
+                commands: isEnabled ? [command.name] : [],
                 groups: []
             }
 

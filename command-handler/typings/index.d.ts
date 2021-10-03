@@ -1310,9 +1310,9 @@ export interface ArgumentResult {
 	answers: Message[]
 }
 
-export type ArgumentTypes = 'string' | 'integer' | 'float' | 'boolean' | 'duration' | 'date' | 'timestamp' |
-	'user' | 'member' | 'role' | 'channel' | 'text-channel' | 'thread-channel' | 'voice-channel' | 'stage-channel' |
-	'category-channel' | 'message' | 'invite' | 'custom-emoji' | 'default-emoji' | 'command' | 'group'
+export type ArgumentTypes = 'string' | 'integer' | 'float' | 'boolean' | 'duration' | 'date' | 'user' | 'member' |
+	'role' | 'channel' | 'text-channel' | 'thread-channel' | 'voice-channel' | 'stage-channel' | 'category-channel' |
+	'message' | 'invite' | 'custom-emoji' | 'default-emoji' | 'command' | 'group'
 
 export class ClientGuildMember extends GuildMember {
 	/** The client this member is for */
@@ -1566,17 +1566,12 @@ export interface DefaultTypesOptions {
 	 * Whether to register the built-in duration type
 	 * @default true
 	 */
-	 duration?: boolean
+	duration?: boolean
 	/**
 	 * Whether to register the built-in date type
 	 * @default true
 	 */
 	date?: boolean
-	/**
-	 * Whether to register the built-in timestamp type
-	 * @default true
-	 */
-	timestamp?: boolean
 	/**
 	 * Whether to register the built-in user type
 	 * @default true

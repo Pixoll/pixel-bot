@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { myMs, basicEmbed, timeDetails, docId, randomDate } = require('../../utils')
+const { myMs, basicEmbed, timeDetails, docId } = require('../../utils')
 const { moderations, active } = require('../../mongo/schemas')
 const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
@@ -19,7 +19,6 @@ module.exports = class DurationCommand extends Command {
             format: 'duration [modlog id] [new duration]',
             examples: [
                 `duration ${docId()} 12/30/2022`,
-                `duration ${docId()} <t:${randomDate}>`,
                 `duration ${docId()} 30d`
             ],
             userPermissions: ['ADMINISTRATOR'],
@@ -36,7 +35,7 @@ module.exports = class DurationCommand extends Command {
                 {
                     key: 'duration',
                     prompt: 'What will be the new duration of the mod log?',
-                    type: ['date', 'timestamp', 'duration']
+                    type: ['date', 'duration']
                 }
             ]
         })

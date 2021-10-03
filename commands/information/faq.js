@@ -95,7 +95,7 @@ module.exports = class FaqCommand extends Command {
         }, { time: myMs('2m') })
         if (!question) return
 
-        const answer = await basicCollector(question, {
+        const answer = await basicCollector(message, {
             fieldName: 'Now, what would be it\'s answer?'
         }, { time: myMs('2m') })
         if (!answer) return
@@ -108,7 +108,7 @@ module.exports = class FaqCommand extends Command {
 
         await new faq(newDoc).save()
 
-        await answer.replyEmbed(basicEmbed({
+        await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The new question has been added to the FAQ list.'
         }))
     }

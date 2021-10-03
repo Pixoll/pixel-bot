@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { MessageEmbed, User, GuildMember } = require('discord.js')
-const { getKeyPerms, timestamp, userDetails } = require('../../utils')
+const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
+const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class WhoIsCommand extends Command {
@@ -31,30 +31,52 @@ module.exports = class WhoIsCommand extends Command {
      */
     async run(message, { user }) {
         const { guild } = message
-        const target = user || message.author
+        if (!user) user = message.author
 
+        /** @type {UserFlags} */
+        const flags = await user.fetchFlags().catch(() => null)
         /** @type {GuildMember} */
-        const member = await guild?.members.fetch(target).catch(() => null)
+        const member = await guild?.members.fetch(user).catch(() => null)
         const permissions = getKeyPerms(member)
 
-        const avatar = target.displayAvatarURL({ dynamic: true, size: 2048 })
+        let description = [user.toString()]
+        if (flags) {
+            for (const flag of flags) description.push(userFlags[flag])
+        }
+        if (member?.premiumSince) description.push(customEmoji('boost'))
+        if (!flags?.toArray().includes('VERIFIED_BOT') && user.bot) {
+            description.push(customEmoji('bot'))
+        }
+
+        const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 })
 
         const userInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(target.tag, target.displayAvatarURL({ dynamic: true }), avatar)
+            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatar)
             .setThumbnail(avatar)
-            .setDescription(target.toString())
+            .setDescription(description.join(' '))
             .setTimestamp()
 
         if (member) {
             if (member.presence) {
-                for (const { type, name, state, details, url } of member.presence.activities) {
-                    const status = details && !!state ? `${details}\n${state}` : details || '\u200B'
+                for (const { type, name, state, details, url, timestamps } of member.presence.activities) {
+                    const status = details && !!state ? `${details}\n${state}` : details
+                    let times = ''
+                    if (timestamps) {
+                        if (!timestamps.end) times = `Started ${timestamp(timestamps.start, 'R')}`
+                        else times = `${myMs(
+                            timestamps.end.getTime() - (timestamps.start?.getTime() || Date.now()),
+                            { long: true, showAnd: true }
+                        )} left`
+                    }
 
                     if (type === 'CUSTOM' && !!state) userInfo.addField('Custom status:', state)
-                    if (type === 'STREAMING') userInfo.addField(`Currently streaming ${name}`, url)
+                    if (type === 'STREAMING') userInfo.addField(`Streaming ${name}`, url)
                     if (!['COMPETING', 'CUSTOM'].includes(type)) {
-                        userInfo.addField(`Currently ${type.toLowerCase()} ${name}`, status)
+                        userInfo.addField(
+                            `${capitalize(type)} ${name}`,
+                            status ? `${status}\n${times}` : times || '\u200B'
+                        )
                     }
                 }
             }
@@ -62,7 +84,7 @@ module.exports = class WhoIsCommand extends Command {
             userInfo.addField('Joined', timestamp(member.joinedAt, 'R'), true)
         }
 
-        userInfo.addField('Registered', timestamp(target.createdAt, 'R'), true)
+        userInfo.addField('Registered', timestamp(user.createdAt, 'R'), true)
 
         if (member) {
             const acknowledgement = guild.ownerId === member.id ?

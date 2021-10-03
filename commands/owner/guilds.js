@@ -20,24 +20,21 @@ module.exports = class guildsCommand extends Command {
      */
     async run(message) {
         // gets all the guilds the bot's in
+        const { users } = this.client
         const guilds = this.client.guilds.cache
         if (!guilds || guilds.size === 0) return message.reply(basicEmbed('blue', 'info', 'There bot is not in any server.'))
 
-        const guildsList = guilds.map(({ name, id, owner }) => ({
-            name: name,
-            'Guild Id': id,
-            owner: owner.user.toString(),
-            'Owner Id': owner.id
+        const guildsList = guilds.map(g => ({
+            name: g.name,
+            'Guild id': g.id,
+            owner: g.ownerId,
         }))
 
         // creates and sends a paged embed with the bans
         await generateEmbed(message, guildsList, {
-            number: 6,
             authorName: `${this.client.user.username}'s guilds`,
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
-            title: 'Name:',
-            keyTitle: { suffix: 'name' },
-            keysExclude: ['name']
+            keyTitle: { suffix: 'name' }
         })
     }
 }

@@ -50,9 +50,7 @@ module.exports = class AfkCommand extends Command {
 
                 return await message.replyEmbed(basicEmbed({
                     color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status`
-                })).then(async msg =>
-                    await msg.delete({ timeout: 10000 }).catch(() => null)
-                )
+                }))
             }
 
             await afkStatus.updateOne({ status })

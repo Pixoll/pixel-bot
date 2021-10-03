@@ -136,7 +136,7 @@ module.exports = class TodoCommand extends Command {
         if (!item) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
-            item = Math.abs(Number.parseInt(value))
+            item = Math.abs(Number.parseInt(value || 0) || 0)
         }
 
         if (!todoData || todoList.length === 0) {

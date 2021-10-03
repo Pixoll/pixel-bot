@@ -49,28 +49,18 @@ module.exports = class ServerInfoCommand extends Command {
             .setColor('RANDOM')
             .setAuthor(name, server.iconURL({ dynamic: true }))
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
-            .addFields(
-                {
-                    name: 'Information',
-                    value: stripIndent`
-                        **>** **Owner:** ${owner.user.tag} ${ownerCrown}
-                        **>** **Channel categories:** ${categories}
-                        **>** **Text channels:** ${text}
-                        **>** **Voice channels:** ${voice}
-                    `,
-                    inline: true
-                },
-                {
-                    name: '\u200B',
-                    value: stripIndent`
-                        **>** **Server boost lvl:** ${formatLvl(premiumTier)}
-                        **>** **Server boosts:** ${premiumSubscriptionCount} ${boost}
-                        **>** **Members:** ${memberCount}
-                        **>** **Roles:** ${_roles.size}
-                    `,
-                    inline: true
-                }
-            )
+            .addField('Information', stripIndent`
+                **>** **Owner:** ${owner.user.tag} ${ownerCrown}
+                **>** **Channel categories:** ${categories}
+                **>** **Text channels:** ${text}
+                **>** **Voice channels:** ${voice}
+            `, true)
+            .addField('\u200B', stripIndent`
+                **>** **Server boost lvl:** ${formatLvl(premiumTier)}
+                **>** **Server boosts:** ${premiumSubscriptionCount} ${boost}
+                **>** **Members:** ${memberCount}
+                **>** **Roles:** ${_roles.size}
+            `, true)
             .setFooter(`Server id: ${id} | Created at`)
             .setTimestamp(createdTimestamp)
 

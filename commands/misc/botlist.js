@@ -1,7 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, pluralize } = require('../../utils')
-const { GuildMember, Collection } = require('discord.js')
 
 /** A command that can be run in a client */
 module.exports = class BotListCommand extends Command {
@@ -20,8 +19,7 @@ module.exports = class BotListCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        /** @type {Collection<string, GuildMember>} */
-        const members = await message.guild.members.fetch().catch(() => null)
+        const members = message.guild.members.cache
         const botList = members.filter(m => m.user.bot)
             .map(bot => `${bot.toString()} ${bot.user.tag}`)
 

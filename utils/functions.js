@@ -97,7 +97,7 @@ async function getLogsChannel(guild) {
 
 /**
  * A custom emoji.
- * @typedef {'cross'|'check'|'info'|'neutral'|'loading'} CustomEmoji
+ * @typedef {'cross'|'check'|'info'|'neutral'|'loading'|'boost'|'bot'} CustomEmoji
  */
 
 /**
@@ -112,6 +112,8 @@ function customEmoji(emoji = '', animated = false) {
     if (emoji === 'loading') return '<a:loading:863666168053366814>'
     if (emoji === 'neutral') return '<:neutral:819395069608984617>'
     if (emoji === 'info') return '<:info:802617654262890527>'
+    if (emoji === 'boost') return '<a:boost:806364586231595028>'
+    if (emoji === 'bot') return '<:bot1:893998060965883904><:bot2:893998060718399528>'
 
     if (animated) {
         if (emoji === 'cross') return '<a:cross:863118691917889556>'

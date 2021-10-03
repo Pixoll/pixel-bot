@@ -2,6 +2,23 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
 
+/**
+ * 
+ * @param {string[]} arr 
+ */
+function sliceEmojis(arr) {
+    const dummy = [], normal = []
+    for (const emoji of arr) {
+        if (dummy.join(' ').length + emoji.length + 1 > 1024) {
+            normal.push([...dummy])
+            dummy.splice(0, dummy.length)
+        }
+        dummy.push(emoji)
+    }
+    normal.push(dummy)
+    return normal
+}
+
 /** A command that can be run in a client */
 module.exports = class EmojisCommand extends Command {
     constructor(client) {
@@ -27,17 +44,25 @@ module.exports = class EmojisCommand extends Command {
             string: emoji.toString()
         }))
 
-        const notAnimated = emojis.filter(e => !e.animated).map(e => e.string)
-        const isAnimated = emojis.filter(e => e.animated).map(e => e.string)
-
-        const normal = notAnimated.join(' ').match(/.{1,1024}(>|$)/g)[0].split(' ')
-        const animated = isAnimated.join(' ').match(/.{1,1024}(>|$)/g)[0].split(' ')
-
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s emojis`, guild.iconURL({ dynamic: true }))
-            .addField(`Normal emojis: ${notAnimated.length} (${normal.length} displayed)`, normal.join(' '))
-            .addField(`Animated emojis: ${isAnimated.length} (${animated.length} displayed)`, animated.join(' '))
+
+        const notAnimated = emojis.filter(e => !e.animated).map(e => e.string)
+        const isAnimated = emojis.filter(e => e.animated).map(e => e.string)
+
+        const normal = sliceEmojis(notAnimated)
+        const animated = sliceEmojis(isAnimated)
+
+        embed.addField(`Normal emojis: ${notAnimated.length}`, normal.shift().join(' ') || 'No emojis found.')
+        while (normal.length !== 0) {
+            embed.addField('ㅤ', normal.shift().join(' '))
+        }
+
+        embed.addField(`Animated emojis: ${isAnimated.length}`, animated.shift().join(' ') || 'No emojis found.')
+        while (animated.length !== 0) {
+            embed.addField('ㅤ', animated.shift().join(' '))
+        }
 
         await message.replyEmbed(embed)
     }

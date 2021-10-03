@@ -45,9 +45,10 @@ const randomDate = Math.trunc(Date.now() / 1000000) * 1000 + 10 ** 5
 const inviteMaxAge = 604800
 
 /** @type {RegExp} */
-const dEmojiRegex = require('emoji-regex/RGI_Emoji.js')()
+const defaultEmojiRegex = require('emoji-regex/RGI_Emoji.js')()
 const gEmojiIdRegex = /\d{18}/g
-const emojiRegex = new RegExp(`${dEmojiRegex.source}|${gEmojiIdRegex.source}`, 'g')
+const guildEmojiRegex = /<a?:(\w+):(\d{18})>/g
+const emojiRegex = new RegExp(`${defaultEmojiRegex.source}|${gEmojiIdRegex.source}`, 'g')
 
 const embedColor = '#4c9f4c'
 
@@ -164,11 +165,29 @@ const sysChannelFlags = {
     SUPPRESS_GUILD_REMINDER_NOTIFICATIONS: 'Server setup tips',
 }
 
+const userFlags = {
+    HOUSE_BRAVERY: '<:bravery:894110822786281532>',
+    HOUSE_BRILLIANCE: '<:brilliance:894110822626885663> ',
+    HOUSE_BALANCE: '<:balance:894110823553855518>',
+    HYPESQUAD_EVENTS: '<:hypesquad:894113047763898369>',
+    DISCORD_EMPLOYEE: '<:discord_staff:894115772832546856>',
+    PARTNERED_SERVER_OWNER: '<:partner:894116243785785344>',
+    BUGHUNTER_LEVEL_1: '<:bug_hunter:894117053714292746>',
+    BUGHUNTER_LEVEL_2: '<:bug_buster:894117053856878592>',
+    EARLY_SUPPORTER: '<:early_supporter:894117997264896080>',
+    EARLY_VERIFIED_BOT_DEVELOPER: '<:verified_developer:894117997378142238>',
+    DISCORD_CERTIFIED_MODERATOR: '<:certified_moderator:894118624447586304>',
+    VERIFIED_BOT: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
+    TEAM_USER: '',
+}
+
 module.exports = {
     channelDetails,
     channelTypes,
+    defaultEmojiRegex,
     embedColor,
     emojiRegex,
+    guildEmojiRegex,
     guildFeatures,
     inviteMaxAge,
     locales,
@@ -182,5 +201,6 @@ module.exports = {
     sysChannelFlags,
     timeDetails,
     userDetails,
+    userFlags,
     verificationLevels,
 }

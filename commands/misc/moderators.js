@@ -2,7 +2,6 @@ const { oneLine } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { isMod, generateEmbed, basicEmbed, pluralize } = require('../../utils')
-const { GuildMember, Collection } = require('discord.js')
 
 /** A command that can be run in a client */
 module.exports = class ModeratorsCommand extends Command {
@@ -26,29 +25,26 @@ module.exports = class ModeratorsCommand extends Command {
     async run(message) {
         const { guild } = message
 
-        /** @type {Collection<string, GuildMember>} */
-        const members = await guild.members.fetch().catch(() => null)
+        const members = guild.members.cache
         const mods = members?.filter(m => isMod(m, true) && !m.user.bot)
         if (!mods || mods.size === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There are no moderators.'
+                color: 'BLUE', emoji: 'info',
+                description: 'There are no moderators, try running the `admins` command instead.'
             }))
         }
 
-        const modsList = mods.map(({ user, roles }) => {
-            const rolesList = roles.cache.filter(m => isMod(m, true)).sort((a, b) => b.position - a.position).map(r => r)
-            return {
-                tag: user.tag,
-                roles: rolesList,
-                list: rolesList.map(r => r.name).join(', ') || 'None'
-            }
-        }).sort((a, b) => b.roles[0]?.position - a.roles[0]?.position)
+        const modsList = mods.sort((a, b) => b.roles.highest.position - a.roles.highest.position)
+            .map(mbr => ({
+                tag: mbr.user.tag,
+                list: mbr.roles.cache.filter(m => isMod(m, true)).sort((a, b) => b.position - a.position)
+                    .map(r => r).map(r => r.name).join(', ') || 'None'
+            }))
 
         await generateEmbed(message, modsList, {
             authorName: `There's ${pluralize('moderator', modsList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            keyTitle: { suffix: 'tag' },
-            keysExclude: ['roles']
+            keyTitle: { suffix: 'tag' }
         })
     }
 }

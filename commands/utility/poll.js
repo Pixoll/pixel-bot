@@ -48,7 +48,7 @@ module.exports = class PollCommand extends Command {
                     key: 'durationOrMsg',
                     label: 'duration or message',
                     prompt: 'How long should the mute last? Or what\'s the message id of the poll you want to end?',
-                    type: ['date', 'timestamp', 'duration', 'string'],
+                    type: ['date', 'duration', 'string'],
                     required: false
                 }
             ]

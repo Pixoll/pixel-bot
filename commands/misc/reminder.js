@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { reminders } = require('../../mongo/schemas')
-const { basicEmbed, customEmoji, timestamp, timeDetails, randomDate } = require('../../utils')
+const { basicEmbed, customEmoji, timestamp, timeDetails } = require('../../utils')
 const { ReminderSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
@@ -16,7 +16,6 @@ module.exports = class ReminderCommand extends Command {
             format: 'reminder [time] [reminder]',
             examples: [
                 'reminder 02/02/2022-21:58 Pixoll\'s b-day!',
-                `remindme <t:${randomDate}:R> Get some groceries`,
                 'remind 1d Do some coding'
             ],
             throttling: { usages: 1, duration: 3 },
@@ -25,7 +24,7 @@ module.exports = class ReminderCommand extends Command {
                 {
                     key: 'time',
                     prompt: 'When would you like to be reminded?',
-                    type: ['date', 'timestamp', 'duration']
+                    type: ['date', 'duration']
                 },
                 {
                     key: 'reminder',
@@ -48,7 +47,7 @@ module.exports = class ReminderCommand extends Command {
         if (typeof time === 'number') time = time + Date.now()
         if (time instanceof Date) time = time.getTime()
 
-        const { author, url, id, channelId } = message
+        const { author, id, channelId } = message
         const stamp = timestamp(time, 'R')
 
         /** @type {ReminderSchema} */

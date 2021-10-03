@@ -39,12 +39,12 @@ module.exports = class InviteInfoCommand extends Command {
             .setColor('#4c9f4c')
             .setAuthor(guild.name, guild.iconURL({ dynamic: true }), url)
             .setDescription(stripIndent`
-                **>** **Inviter:** ${inviter || 'Couldn\'t fetch inviter.'}
-                **>** **Channel:** ${channel.toString()}
-                **>** **Online members:** ${presenceCount.toLocaleString()}/${memberCount.toLocaleString()}
-                **>** **Max uses:** ${maxUses || 'No limit'}
-                **>** **Expires:** ${expiresAt ? timestamp(expiresAt) : 'Never'}
-                **>** **Temp. membership:** ${temporary ? 'Yes' : 'No'}
+                **Inviter:** ${inviter || 'Inviter is unavailable.'}
+                **Channel:** ${channel.toString()}
+                **Online members:** ${presenceCount.toLocaleString()}/${memberCount.toLocaleString()}
+                **Max uses:** ${maxUses || 'No limit'}
+                **Expires:** ${expiresAt ? timestamp(expiresAt) : 'Never'}
+                **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
             .setFooter(`Server id: ${guild.id}`)
 

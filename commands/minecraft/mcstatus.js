@@ -74,13 +74,13 @@ module.exports = class McStatusCommand extends Command {
             case 'check':
                 return await this.check(message, savedServer)
             case 'java':
-                return await this.java(message, ip || 25565, port)
+                return await this.java(message, ip, port || 25565)
             case 'bedrock':
-                return await this.bedrock(message, ip || 19132, port)
+                return await this.bedrock(message, ip, port || 19132)
             case 'save:java':
-                return await this.saveJava(message, ip || 25565, port, savedServer)
+                return await this.saveJava(message, ip, port || 25565, savedServer)
             case 'save:bedrock':
-                return await this.saveBedrock(message, ip || 19132, port, savedServer)
+                return await this.saveBedrock(message, ip, port || 19132, savedServer)
         }
     }
 
@@ -295,23 +295,15 @@ module.exports = class McStatusCommand extends Command {
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`Server IP: ${host}`)
-            .addFields(
-                {
-                    name: 'Description',
-                    value: stripIndent`
-                        ${remDiscFormat(motdLine1.toRaw())}
-                        ${remDiscFormat(motdLine2.toRaw())}
-                    `
-                },
-                {
-                    name: 'Information',
-                    value: stripIndent`
-                        **>** **Online players:** ${onlinePlayers}/${maxPlayers}
-                        **>** **Version:** ${version}
-                        **>** **Ping:** ${roundTripLatency}ms
-                    `
-                }
-            )
+            .addField('Description', stripIndent`
+                ${remDiscFormat(motdLine1.toRaw())}
+                ${remDiscFormat(motdLine2.toRaw())}
+            `)
+            .addField('Information', stripIndent`
+                **Online players:** ${onlinePlayers}/${maxPlayers}
+                **Version:** ${version}
+                **Ping:** ${roundTripLatency}ms
+            `)
             .setTimestamp()
 
         return serverInfo

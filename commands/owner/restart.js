@@ -19,10 +19,11 @@ module.exports = class restartCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        await message.reply(basicEmbed('gold', 'loading', 'The bot will restart in 10 seconds...'))
+        await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'The bot will restart in 10 seconds...'
+        }))
 
         await sleep(10)
-
         process.exit(1)
     }
 }

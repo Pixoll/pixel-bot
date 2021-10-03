@@ -56,7 +56,7 @@ module.exports = class TempRoleCommand extends Command {
                 {
                     key: 'duration',
                     prompt: 'How long should this role last?',
-                    type: ['date', 'timestamp', 'duration']
+                    type: ['date', 'duration']
                 },
                 {
                     key: 'role',

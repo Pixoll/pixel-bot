@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { MessageEmbed, User } = require('discord.js')
-const { userDetails } = require('../../utils')
+const { MessageEmbed, User, MessageAttachment, MessageActionRow, MessageButton } = require('discord.js')
+const { userDetails, noReplyInDMs } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class AvatarCommand extends Command {
@@ -32,13 +32,16 @@ module.exports = class AvatarCommand extends Command {
     async run(message, { user }) {
         if (!user) user = message.author
 
-        const avatarURL = user.displayAvatarURL({ dynamic: true, size: 2048 })
+        const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 })
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setStyle('LINK')
+                    .setLabel('Download')
+                    .setURL(avatar)
+            )
 
-        const embed = new MessageEmbed()
-            .setColor('#4c9f4c')
-            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatarURL)
-            .setImage(avatarURL)
-
-        await message.replyEmbed(embed)
+        await message.channel.sendTyping()
+        await message.reply({ content: user.tag, files: [avatar], components: [row], ...noReplyInDMs(message) })
     }
 }

@@ -1,7 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, generateEmbed, pluralize } = require('../../utils')
-const { GuildMember, Collection } = require('discord.js')
 
 /** A command that can be run in a client */
 module.exports = class DiscriminatorCommand extends Command {
@@ -31,23 +30,22 @@ module.exports = class DiscriminatorCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {number} args.discriminator The discriminator to filter displayed members
+     * @param {string} args.discriminator The discriminator to filter displayed members
      */
     async run(message, { discriminator }) {
-        /** @type {Collection<string, GuildMember>} */
-        const members = await message.guild.members.fetch().catch(() => null)
-        const match = members?.filter(m => m.user.discriminator === discriminator)
+        const members = message.guild.members.cache
+        const match = members.filter(m => m.user.discriminator === discriminator)
             .map(m => `${m.toString()} ${m.user.tag}`)
 
         if (!match || match.length === 0) {
-            return await message.reply(basicEmbed({
+            return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find any members.'
             }))
         }
 
         await generateEmbed(message, match, {
             number: 20,
-            authorName: `Matched ${pluralize('member', match.length)}`,
+            authorName: `Found ${pluralize('member', match.length)}`,
             useDescription: true
         })
     }

@@ -10,7 +10,7 @@ const { AfkSchema } = require('../../mongo/typings')
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('cMessageCreate', async message => {
+    client.on('messageCreate', async message => {
         const { guild, author, isCommand, command } = message
 
         if (!guild || author.bot) return
@@ -22,15 +22,17 @@ module.exports = (client) => {
 
         await status.deleteOne()
 
-        const toDelete = await message.replyEmbed(basicEmbed({
-            color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`
-        }))
+        const toDelete = await message.reply({
+            embeds: [basicEmbed({
+                color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`
+            })]
+        })
 
-        await sleep(5)
+        await sleep(10)
         await toDelete.delete().catch(() => null)
     })
 
-    client.on('cMessageCreate', async message => {
+    client.on('messageCreate', async message => {
         const { guild, author, mentions } = message
         const { everyone, users } = mentions
 
@@ -47,9 +49,9 @@ module.exports = (client) => {
                 .setDescription(`${data.status}\n${timestamp(data.updatedAt, 'R')}`)
                 .setTimestamp(data.updatedAt)
 
-            const toDelete = await message.replyEmbed(embed)
+            const toDelete = await message.reply({ embeds: [embed] })
 
-            await sleep(10)
+            await sleep(15)
             await toDelete.delete().catch(() => null)
         }
     })
