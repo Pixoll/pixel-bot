@@ -50,7 +50,7 @@ module.exports = class ErrorsCommand extends Command {
                 _id: val._id,
                 /** @type {string} */
                 type: val.type,
-                message: val.name + whatCommand + ': ' + '``' + val.message + '``',
+                message: val.name + whatCommand + (val.message ? (': ' + '``' + val.message + '``') : ''),
                 /** @type {Date} */
                 createdAt: val.createdAt,
                 /** @type {string} */
