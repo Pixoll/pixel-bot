@@ -65,7 +65,7 @@ client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
 
 client.on('ready', async () => {
     await require('./mongo')(client)
-    await eventHandler(client)
+    await eventHandler(client, 'auto-punish', 'chat-filter', 'punishments')
 
     await client.owners[0].send('**Debug message:** Bot is online.')
     client.emit('debug', `${client.user.tag} is fully online!`)

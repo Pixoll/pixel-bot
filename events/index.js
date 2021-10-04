@@ -1,69 +1,27 @@
 const { CommandoClient } = require('../command-handler/typings')
-
-// Database
-const cmdsGroupsData = require('./database/cmds-groups')
-const guildsData = require('./database/guilds')
-const membersData = require('./database/members')
-const prefixesData = require('./database/prefixes')
-
-// Modules
-const afk = require('./modules/afk')
-const autoPunish = require('./modules/auto-punish')
-const chatFilter = require('./modules/chat-filter')
-const polls = require('./modules/polls')
-const punishments = require('./modules/punishments')
-const reactionRoles = require('./modules/reaction-roles')
-const reminders = require('./modules/reminders')
-const welcome = require('./modules/welcome')
-
-// Logs
-const channels = require('./logs/channels')
-const commands = require('./logs/commands')
-const emojis = require('./logs/emojis')
-const invites = require('./logs/invites')
-const members = require('./logs/members')
-const messages = require('./logs/messages')
-const moderation = require('./logs/moderation')
-const owner = require('./logs/owner')
-const roles = require('./logs/roles')
-const server = require('./logs/server')
-const voice = require('./logs/voice')
+const { isAsyncFunction } = require('util/types')
+const path = require('path')
 
 /**
  * Handler function for every module.
- * @param {CommandoClient} client
+ * @param {CommandoClient} client The client these handlers are for
+ * @param {string[]} exclude The modules to exclude when loading the event handlers
  */
-module.exports = async (client) => {
+module.exports = async (client, ...exclude) => {
     client.emit('debug', 'Loading event handlers...')
 
-    // Database
-    await cmdsGroupsData(client)
-    await guildsData(client)
-    membersData(client)
-    await prefixesData(client)
+    const test = require('require-all')(path.join(__dirname))
+    for (const folder of Object.values(test)) {
+        if (typeof folder !== 'object') continue
 
-    // Modules
-    afk(client)
-    // autoPunish(client)
-    // chatFilter(client)
-    await polls(client)
-    // punishments(client)
-    await reactionRoles(client)
-    await reminders(client)
-    welcome(client)
+        for (const file in folder) {
+            if (exclude.includes(file)) continue
 
-    // Logs
-    channels(client)
-    commands(client)
-    emojis(client)
-    invites(client)
-    members(client)
-    messages(client)
-    moderation(client)
-    owner(client)
-    roles(client)
-    server(client)
-    voice(client)
+            const func = folder[file]
+            if (isAsyncFunction(func)) await func(client)
+            else func(client)
+        }
+    }
 
     client.emit('debug', 'Loaded all event handlers')
 }

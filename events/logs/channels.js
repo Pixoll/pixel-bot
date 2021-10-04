@@ -1,8 +1,8 @@
-const { stripIndent } = require('common-tags')
+const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { myMs, rtcRegions } = require('../../utils')
-const { difference, capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, getLogsChannel, channelTypes } = require('../../utils')
+const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, getLogsChannel, channelTypes } = require('../../utils')
 const { permissions } = require('../../command-handler/util')
 
 /**
@@ -50,6 +50,29 @@ module.exports = (client) => {
             .setDescription(`${channel.toString()} ${category}`)
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
+
+        const perms = []
+        for (const [, perm] of channel.permissionOverwrites.cache) {
+            /** @type {GuildMember|Role} */
+            const target = await guild[perm.type + 's'].fetch(perm.id).catch(() => null)
+            const [deny, allow] = format(perm)
+            if (deny.length === 0 && allow.length === 0) continue
+
+            let base = oneLine`
+                **${capitalize(perm.type)}:** ${target.toString()}
+                ${target instanceof GuildMember ? target.user.tag : ''}
+            `
+
+            if (deny.length !== 0) base += `\n${customEmoji('cross')} **Denied:** ${deny.join(', ')}`
+            if (allow.length !== 0) base += `\n${customEmoji('check')} **Allowed:** ${allow.join(', ')}`
+
+            perms.push(base)
+        }
+
+        if (perms.length !== 0) {
+            embed.addField('Permissions', perms.shift())
+            for (const perm of perms) embed.addField('\u2800', perm)
+        }
 
         await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
@@ -126,17 +149,13 @@ module.exports = (client) => {
         if (cache1.size !== cache2.size) {
             const action = cache1.size > cache2.size ? 'Removed' : 'Added'
 
-            const [{ id: targetId }] = action === 'Added' ?
-                difference(cache1.toJSON(), cache2.toJSON()) :
-                difference(cache2.toJSON(), cache1.toJSON())
-
-            const diff = action === 'Added' ? cache2.get(targetId) : cache1.get(targetId)
+            const diff = cache1.difference(cache2).first()
 
             /** @type {Role|GuildMember} */
             const target = guild[diff.type + 's'].cache.get(diff.id)
 
             const mention = target.toString()
-            const name = remDiscFormat(target.user.tag)
+            const name = remDiscFormat(target.user?.tag)
 
             embed.addField(`${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
 
@@ -152,7 +171,7 @@ module.exports = (client) => {
             const target = guild[perms1.type + 's'].cache.get(perms1.id)
 
             const mention = target.toString()
-            const name = remDiscFormat(target.name || target.user.tag)
+            const name = remDiscFormat(target.user?.tag)
 
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)
@@ -164,7 +183,7 @@ module.exports = (client) => {
             const [neutral2] = comparePerms(allowed, removed1)
             const neutral = [...neutral1, ...neutral2]
 
-            embed.addField('Updated permissions', `**>** **${capitalize(perms1.type)}:** ${mention} ${name}\n`)
+            embed.addField('Updated permissions', `**${capitalize(perms1.type)}:** ${mention} ${name}\n`)
             let field = embed.fields.find(f => f.name === 'Updated permissions').value
 
             function addValue(value) {
