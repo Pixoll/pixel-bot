@@ -17,7 +17,7 @@ const colors = [
 ].map(s => s.toUpperCase())
 
 /** A command that can be run in a client */
-module.exports = class embedsCommand extends Command {
+module.exports = class EmbedsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'embeds',
@@ -47,10 +47,10 @@ module.exports = class embedsCommand extends Command {
                 .setColor(Color.toUpperCase())
                 .setDescription(removeUnderscores(Color))
 
-        if (color) message.reply(embed(color))
+        if (color) message.replyEmbed(embed(color))
         else {
             for (const _color of colors) {
-                await message.reply(embed(_color))
+                await message.replyEmbed(embed(_color))
             }
         }
     }

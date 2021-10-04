@@ -3,7 +3,7 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, sleep } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class restartCommand extends Command {
+module.exports = class RestartCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'restart',
@@ -19,11 +19,27 @@ module.exports = class restartCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'The bot will restart in 10 seconds...'
+        let count = 10
+        const toEdit = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: `The bot will restart in ${count--} seconds...`
         }))
+        await sleep(1)
 
-        await sleep(10)
+        while (count > 0) {
+            await toEdit.edit({
+                embeds: [basicEmbed({
+                    color: 'GOLD', emoji: 'loading', description: `The bot will restart in ${count--} seconds...`
+                })]
+            })
+            await sleep(1)
+        }
+
+        await toEdit.edit({
+            embeds: [basicEmbed({
+                color: 'GOLD', emoji: 'loading', description: 'Restarting...'
+            })]
+        })
+
         process.exit(1)
     }
 }

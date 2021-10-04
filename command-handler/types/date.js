@@ -1,6 +1,8 @@
 const { myMs } = require('../../utils')
 const ArgumentType = require('./base')
 
+const currentYear = new Date().getUTCFullYear()
+
 class DateArgumentType extends ArgumentType {
     constructor(client) {
         super(client, 'date')
@@ -11,7 +13,7 @@ class DateArgumentType extends ArgumentType {
      * @return Whether the value is valid
      */
     validate(val) {
-        const [d, mo, y, h = 0, m = 0, s = 0] = val.split(/\/|-|:/g).map(s => Number.parseInt(s))
+        const [d, mo, y = currentYear, h = 0, m = 0, s = 0] = val.split(/\/|-|:/g).map(s => Number.parseInt(s))
         const date = new Date(y, mo - 1, d, h, m, s)
 
         if (!Boolean(date * 1)) {
@@ -34,7 +36,7 @@ class DateArgumentType extends ArgumentType {
      * @return Usable value
      */
     parse(val) {
-        const [d, mo, y, h = 0, m = 0, s = 0] = val.split(/\/|-|:/g).map(s => Number.parseInt(s))
+        const [d, mo, y = currentYear, h = 0, m = 0, s = 0] = val.split(/\/|-|:/g).map(s => Number.parseInt(s))
         const date = new Date(y, mo - 1, d, h, m, s)
         return date
     }

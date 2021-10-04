@@ -4,7 +4,7 @@ const { basicEmbed, generateEmbed } = require('../../utils')
 const { errors: errorDocs } = require('../../mongo/schemas')
 
 /** A command that can be run in a client */
-module.exports = class errorsCommand extends Command {
+module.exports = class ErrorsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'errors',
@@ -39,10 +39,6 @@ module.exports = class errorsCommand extends Command {
      * @param {string} args.filter The filter to apply or the error to remove
      */
     async run(message, { subCommand, filter }) {
-        const options = {
-            embeds: []
-        }
-
         const Errors = await errorDocs.find({})
         const errorsList = Errors.map(val => {
             delete val.__v
@@ -65,7 +61,7 @@ module.exports = class errorsCommand extends Command {
         })
 
         if (errorsList.length === 0) {
-            return message.replyEmbed(basicEmbed({
+            return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There have been no errors or bugs lately.'
             }))
         }

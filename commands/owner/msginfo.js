@@ -2,9 +2,10 @@ const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { get } = require('lodash')
+const { sliceDots, code } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class msginfoCommand extends Command {
+module.exports = class MsgInfoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'msginfo',
@@ -38,14 +39,14 @@ module.exports = class msginfoCommand extends Command {
     async run(message, { msg, property }) {
         const thing = property ? get(msg, property) : msg
 
-        await message.author.send(stripIndent`
+        await message.direct(stripIndent`
             **Message:** ${msg.url}
             **Type:** ${typeof thing}
         `)
 
         const response = `${typeof thing === 'object' ? JSON.stringify(thing, null, 4) : thing}`
-        const dots = response.length > 1987 ? '\n...' : ''
+        const string = sliceDots(response, 1950)
 
-        await message.author.send(`\`\`\`js\n${response.substr(0, 1987)}${dots}\`\`\``)
+        await message.direct(code(string, 'js'))
     }
 }

@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { myMs } = require('../../utils')
+const { myMs, code } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class xpCommand extends Command {
@@ -11,12 +11,7 @@ module.exports = class xpCommand extends Command {
             description: 'Gets the xp.',
             format: 'xp [message]',
             ownerOnly: true,
-            hidden: true,
-            args: [{
-                key: 'msg',
-                prompt: 'What is the message to get the XP from?',
-                type: 'message'
-            }]
+            hidden: true
         })
     }
 
@@ -24,11 +19,13 @@ module.exports = class xpCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {CommandoMessage} args.msg The message to get the XP from
      */
-    async run(message, { msg }) {
-        const week = msg.content.split('\n').shift()
-        const table = msg.content.replace(/ +/g, ' ').split('\n').slice(4)
+    async run(message) {
+        const fetched = await message.channel.messages.fetch({ before: message.id, limit: 1 })
+        const { content } = fetched.first()
+
+        const week = content.split('\n').shift()
+        const table = content.replace(/ +/g, ' ').split('\n').slice(4)
 
         var XP = 0
         const tasks = []
@@ -44,7 +41,7 @@ module.exports = class xpCommand extends Command {
             while (task.endsWith('/')) task = task.split(' ').slice(0, -2).join(' ')
 
             if (task === 'meeting') task = 'meetings'
-            if (task.endsWith('event')) task = 'events'
+            if (task.includes('event')) task = 'events'
 
             const match = tasks.find(target => target.task === task)
             const index = tasks.indexOf(match)
@@ -86,12 +83,11 @@ module.exports = class xpCommand extends Command {
             }).join('\n')
 
         await message.delete()
-
-        const m = await message.reply(`${week}\n\`\`\`!xp ${XP}\n${command}\`\`\``)
+        const m = await message.say(`${week}\n${code(`!xp ${XP}\n${command}`)}`)
         await m.pin()
 
-        const msgs = await message.channel.messages.fetch({ after: m.id }, false)
-        const target = msgs.filter(({ reference }) => reference.messageId === m.id).first()
+        const msgs = await message.channel.messages.fetch({ after: m.id })
+        const target = msgs.filter(msg => msg.reference.messageId === m.id).first()
         await target.delete()
     }
 }

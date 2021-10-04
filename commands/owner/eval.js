@@ -22,6 +22,7 @@ module.exports = class EvalCommand extends Command {
 			format: 'eval [script]',
 			ownerOnly: true,
 			hidden: true,
+			guarded: true,
 			args: [{
 				key: 'script',
 				prompt: 'What code would you like to evaluate?',
@@ -87,25 +88,26 @@ module.exports = class EvalCommand extends Command {
 		const inspected = util.inspect(result, { depth: 0 })
 			.replace(nlPattern, '\n')
 			.replace(this.sensitivePattern, '--snip--')
+			.replace(escapeRegex(`/${this.client.token}/gi`), '--snip--')
 		const split = inspected.split('\n')
 		const last = inspected.length - 1
 		const prependPart = inspected[0] !== '{' && inspected[0] !== '[' && inspected[0] !== "'" ? split[0] : inspected[0]
 		const appendPart = inspected[last] !== '}' && inspected[last] !== ']' && inspected[last] !== "'" ?
 			split[split.length - 1] :
 			inspected[last]
-		const prepend = `\`\`\`javascript\n${prependPart}\n`
+		const prepend = `\`\`\`js\n${prependPart}\n`
 		const append = `\n${appendPart}\n\`\`\``
 		if (input) {
 			return splitMessage(stripIndents`
 				*Executed in ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1000000}ms.*
-				\`\`\`javascript
+				\`\`\`js
 				${inspected}
 				\`\`\`
 			`, { maxLength: 1900, prepend, append })
 		} else {
 			return splitMessage(stripIndents`
 				*Callback executed after ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1000000}ms.*
-				\`\`\`javascript
+				\`\`\`js
 				${inspected}
 				\`\`\`
 			`, { maxLength: 1900, prepend, append })

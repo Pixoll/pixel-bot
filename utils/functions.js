@@ -150,7 +150,7 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
     const embed = new MessageEmbed()
         .setColor(color)
 
-    if (description) embed.setDescription(description)
+    if (description) embed.setDescription(embedText)
     if (fieldName) {
         if (!fieldValue) throw new Error('The argument fieldValue must be specified')
         embed.addField(embedText, fieldValue)

@@ -1,20 +1,10 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed } = require('../../utils')
+const { generateEmbed, basicEmbed, addDashes, removeDashes } = require('../../utils')
 const Database = require('../../mongo/schemas')
 
-/** @param {string} val */
-const format = val => val.replace(/[A-Z]/g, '-$&').toLowerCase()
-/** @param {string} val */
-const deFormat = val => {
-    const index = val.indexOf('-')
-    const char = val.charAt(index + 1).toUpperCase()
-    const str = val.replace(/-[a-z]/, char)
-    return str
-}
-
 /** A command that can be run in a client */
-module.exports = class databaseCommand extends Command {
+module.exports = class DatabaseCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'database',
@@ -28,7 +18,7 @@ module.exports = class databaseCommand extends Command {
                     key: 'collection',
                     prompt: 'What collection do you want to manage?',
                     type: 'string',
-                    oneOf: Object.keys(Database).map(format)
+                    oneOf: Object.keys(Database).map(addDashes)
                 }
             ]
         })
@@ -41,7 +31,7 @@ module.exports = class databaseCommand extends Command {
      * @param {string} args.collection The collection to manage
      */
     async run(message, { collection }) {
-        const data = await Database[deFormat(collection)].find({})
+        const data = await Database[removeDashes(collection)].find({})
 
         const array = Array(...data).map(({ _doc: val }) => {
             delete val._id
@@ -52,11 +42,11 @@ module.exports = class databaseCommand extends Command {
 
         const DBname = collection.replace('-', ' ').toUpperCase()
 
-        if (array.length === 0) return message.reply({
-            embeds: [
-                basicEmbed('blue', 'info', `The ${DBname} collection is empty.`)
-            ]
-        })
+        if (array.length === 0) {
+            return message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: `The ${DBname} collection is empty.`
+            }))
+        }
 
         await generateEmbed(message, array, {
             authorName: `Database: ${DBname}`,

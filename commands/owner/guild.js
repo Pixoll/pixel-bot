@@ -4,7 +4,7 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, sleep } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class guildCommand extends Command {
+module.exports = class GuildCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'guild',
@@ -41,6 +41,8 @@ module.exports = class guildCommand extends Command {
      * @param {string} args.guildId The guild Id or name
      */
     async run(message, { subCommand, guildId }) {
+        return
+
         const guilds = this.client.guilds.cache
         const guild = guilds.get(guildId) || guilds.find(({ name }) => name.toLowerCase() === guildId.toLowerCase())
         if (!guild) return message.reply(basicEmbed('red', 'cross', 'I couldn\'t find that guild.'))

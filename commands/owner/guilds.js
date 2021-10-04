@@ -3,7 +3,7 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, generateEmbed } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class guildsCommand extends Command {
+module.exports = class GuildsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'guilds',
@@ -19,10 +19,12 @@ module.exports = class guildsCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        // gets all the guilds the bot's in
-        const { users } = this.client
         const guilds = this.client.guilds.cache
-        if (!guilds || guilds.size === 0) return message.reply(basicEmbed('blue', 'info', 'There bot is not in any server.'))
+        if (!guilds || guilds.size === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'There bot is not in any server.'
+            }))
+        }
 
         const guildsList = guilds.map(g => ({
             name: g.name,
