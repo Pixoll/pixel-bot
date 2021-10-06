@@ -16,7 +16,13 @@ class CommandoMessage extends Message {
 	 * @param {Message} data
 	 */
 	constructor(client, data) {
-		super(client, _patch(data))
+		const old = data
+		data = data.toJSON()
+		data.channelId = old.channelId
+		data.type = old.type
+		data.author = old.author
+
+		super(client, data)
 
 		this._commando = true
 
