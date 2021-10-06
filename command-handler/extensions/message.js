@@ -17,7 +17,6 @@ class CommandoMessage extends Message {
 	 */
 	constructor(client, data) {
 		super(client, _patch(data))
-		console.log(this)
 
 		this._commando = true
 
@@ -580,7 +579,7 @@ function _patch(data) {
 	patched.edited_timestamp = data.editedAt?.toISOString() || null
 	patched.tts = Boolean(data.tts)
 	patched.mention_everyone = Boolean(data.mentions?.everyone)
-	patched.mentions = [...data.mentions?.toJSON().users, data.mentions?.toJSON().members].filter(m => m) || []
+	patched.mentions = [...data.mentions?.users.toJSON(), data.mentions?.members?.toJSON()].filter(m => m) || []
 	patched.mention_roles = data.mentions?.toJSON().roles || []
 	patched.mention_channels = data.mentions?.toJSON().channels || []
 	patched.attachments = data.attachments?.toJSON() || []
