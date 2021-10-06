@@ -1,6 +1,5 @@
 const ArgumentType = require('./base')
-/** @type {RegExp} */
-const emojiRegex = require('emoji-regex/RGI_Emoji.js')()
+const emojiRegex = require('emoji-regex')()
 const { Argument } = require('../typings')
 const { Emoji } = require('discord.js')
 

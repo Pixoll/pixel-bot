@@ -16,13 +16,8 @@ class CommandoMessage extends Message {
 	 * @param {Message} data
 	 */
 	constructor(client, data) {
-		const old = data
-		data = data.toJSON()
-		data.channelId = old.channelId
-		data.type = old.type
-		data.author = old.author
-
-		super(client, data)
+		super(client, _patch(data))
+		console.log(this)
 
 		this._commando = true
 
@@ -567,3 +562,51 @@ function noReplyInDMs(msg) {
 }
 
 module.exports = CommandoMessage
+
+/**
+ * Patch
+ * @param {Message} data 
+ * @private
+ */
+function _patch(data) {
+	const patched = {}
+	patched.id = data.id || null
+	patched.channel_id = data.channelId || null
+	patched.guild_id = data.guildId || null
+	patched.author = data.author || null
+	patched.member = data.member || null
+	patched.content = data.content || null
+	patched.timestamp = data.createdAt?.toISOString() || null
+	patched.edited_timestamp = data.editedAt?.toISOString() || null
+	patched.tts = Boolean(data.tts)
+	patched.mention_everyone = Boolean(data.mentions?.everyone)
+	patched.mentions = [...data.mentions?.toJSON().users, data.mentions?.toJSON().members].filter(m => m) || []
+	patched.mention_roles = data.mentions?.toJSON().roles || []
+	patched.mention_channels = data.mentions?.toJSON().channels || []
+	patched.attachments = data.attachments?.toJSON() || []
+	patched.embeds = data.embeds?.map(em => em.toJSON()) || []
+	patched.reactions = data.reactions?.cache.toJSON() || []
+	patched.nonce = data.nonce || null
+	patched.pinned = Boolean(data.pinned)
+	patched.webhook_id = data.webhookId || null
+	patched.type = data.type
+	patched.activity = data.activity || {}
+	patched.application = data.client?.application.toJSON() || null
+	patched.application_id = data.applicationId || null
+	patched.message_reference = data.reference || null
+	patched.flags = data.flags?.bitfield || 0
+	patched.type = data.type || null
+	patched.referenced_message = null
+	patched.interaction = data.interaction || null
+	patched.thread = data.thread?.toJSON() || null
+	patched.components = data.components || []
+	patched.stickers = data.stickers?.toJSON() || []
+	patched.sticker_items = patched.stickers
+	for (const prop in patched) {
+		if (patched[prop] === null) {
+			delete patched[prop]
+		}
+	}
+
+	return patched
+}

@@ -44,8 +44,7 @@ const randomDate = Math.trunc(Date.now() / 1000000) * 1000 + 10 ** 5
 
 const inviteMaxAge = 604800
 
-/** @type {RegExp} */
-const defaultEmojiRegex = require('emoji-regex/RGI_Emoji.js')()
+const defaultEmojiRegex = require('emoji-regex')()
 const gEmojiIdRegex = /\d{18}/g
 const guildEmojiRegex = /<a?:(\w+):(\d{18})>/g
 const emojiRegex = new RegExp(`${defaultEmojiRegex.source}|${gEmojiIdRegex.source}`, 'g')

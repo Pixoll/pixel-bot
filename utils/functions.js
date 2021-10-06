@@ -51,10 +51,11 @@ async function fetchPartial(object) {
 /**
  * Adds dashes to the string on every upper case letter
  * @param {string} str The string to parse
+ * @param {boolean} [under] Wether to use underscores instead or not
  */
-function addDashes(str) {
+function addDashes(str, under = false) {
     if (!str) return
-    return str.replace(/[A-Z]/g, '-$&').toLowerCase()
+    return str.replace(/[A-Z]/g, under ? '_$&' : '-$&').toLowerCase()
 }
 
 /**
