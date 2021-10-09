@@ -16,13 +16,7 @@ class CommandoMessage extends Message {
 	 * @param {Message} data
 	 */
 	constructor(client, data) {
-		const old = data
-		data = data.toJSON()
-		data.channelId = old.channelId
-		data.type = old.type
-		data.author = old.author
-
-		super(client, data)
+		super(client, _patch(data))
 
 		this._commando = true
 
@@ -573,45 +567,81 @@ module.exports = CommandoMessage
  * @param {Message} data 
  * @private
  */
-function _patch(data) {
-	const patched = {}
-	patched.id = data.id || null
-	patched.channel_id = data.channelId || null
-	patched.guild_id = data.guildId || null
-	patched.author = data.author || null
-	patched.member = data.member || null
-	patched.content = data.content || null
-	patched.timestamp = data.createdAt?.toISOString() || null
-	patched.edited_timestamp = data.editedAt?.toISOString() || null
-	patched.tts = Boolean(data.tts)
-	patched.mention_everyone = Boolean(data.mentions?.everyone)
-	patched.mentions = [...data.mentions?.users.toJSON(), data.mentions?.members?.toJSON()].filter(m => m) || []
-	patched.mention_roles = data.mentions?.toJSON().roles || []
-	patched.mention_channels = data.mentions?.toJSON().channels || []
-	patched.attachments = data.attachments?.toJSON() || []
-	patched.embeds = data.embeds?.map(em => em.toJSON()) || []
-	patched.reactions = data.reactions?.cache.toJSON() || []
-	patched.nonce = data.nonce || null
-	patched.pinned = Boolean(data.pinned)
-	patched.webhook_id = data.webhookId || null
-	patched.type = data.type
-	patched.activity = data.activity || {}
-	patched.application = data.client?.application.toJSON() || null
-	patched.application_id = data.applicationId || null
-	patched.message_reference = data.reference || null
-	patched.flags = data.flags?.bitfield || 0
-	patched.type = data.type || null
-	patched.referenced_message = null
-	patched.interaction = data.interaction || null
-	patched.thread = data.thread?.toJSON() || null
-	patched.components = data.components || []
-	patched.stickers = data.stickers?.toJSON() || []
-	patched.sticker_items = patched.stickers
+ function _patch(data) {
+	const patched = {
+		id: data.id,
+		channel_id: data.channelId,
+		guild_id: data.guildId,
+		author: data.author,
+		member: data.member,
+		content: data.content,
+		timestamp: data.createdAt?.toISOString(),
+		edited_timestamp: data.editedAt?.toISOString(),
+		tts: Boolean(data.tts),
+		attachments: data.attachments.map(att => ({
+			id: att.id,
+			filename: att.name,
+			content_type: att.contentType,
+			size: att.size,
+			url: att.url,
+			proxy_url: att.proxyURL,
+			height: att.height,
+			width: att.width
+		})),
+		embeds: data.embeds,
+		reactions: data.reactions?.cache.toJSON() || [],
+		nonce: data.nonce,
+		pinned: Boolean(data.pinned),
+		webhook_id: data.webhookId,
+		type: data.type,
+		activity: data.activity,
+		application: data.groupActivityApplication,
+		application_id: data.applicationId,
+		message_reference: data.reference ? {
+			message_id: data.reference.messageId,
+			channel_id: data.reference.channelId,
+			guild_id: data.reference.guildId,
+		} : null,
+		flags: data.flags?.bitfield,
+		type: messageTypes[data.type],
+		interaction: data.interaction,
+		thread: data.thread?.toJSON(),
+		components: data.components,
+		stickers: data.stickers?.toJSON() || [],
+		sticker_items: data.stickers?.toJSON() || []
+	}
+
 	for (const prop in patched) {
-		if (patched[prop] === null) {
+		if (patched[prop] === null || patched[prop] === undefined) {
 			delete patched[prop]
 		}
 	}
 
 	return patched
+}
+
+const messageTypes = {
+	DEFAULT: 0,
+	RECIPIENT_ADD: 1,
+	RECIPIENT_REMOVE: 2,
+	CALL: 3,
+	CHANNEL_NAME_CHANGE: 4,
+	CHANNEL_ICON_CHANGE: 5,
+	CHANNEL_PINNED_MESSAGE: 6,
+	GUILD_MEMBER_JOIN: 7,
+	USER_PREMIUM_GUILD_SUBSCRIPTION: 8,
+	USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1: 9,
+	USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2: 10,
+	USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3: 11,
+	CHANNEL_FOLLOW_ADD: 12,
+	GUILD_DISCOVERY_DISQUALIFIED: 14,
+	GUILD_DISCOVERY_REQUALIFIED: 15,
+	GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING: 16,
+	GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING: 17,
+	THREAD_CREATED: 18,
+	REPLY: 19,
+	APPLICATION_COMMAND: 20,
+	THREAD_STARTER_MESSAGE: 21,
+	GUILD_INVITE_REMINDER: 22,
+	CONTEXT_MENU_COMMAND: 23,
 }
