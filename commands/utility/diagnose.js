@@ -15,7 +15,7 @@ module.exports = class DiagnoseCommand extends Command {
             description: 'Diagnose any command or group to determine if they are disabled or not.',
             details: '`name` can be either a command\'s name or alias, or a group\'s name.',
             format: stripIndent`
-                diagnose <check> - Check the status of all commands and groups.
+                diagnose <all> - Check the status of all commands and groups.
                 diagnose command [name] - Check the status of a single command.
                 diagnose group [name] - Check the status of a single group.
             `,
@@ -31,8 +31,8 @@ module.exports = class DiagnoseCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['check', 'command', 'group', 'module'],
-                    default: 'check'
+                    oneOf: ['all', 'command', 'group'],
+                    default: 'all'
                 },
                 {
                     key: 'cmdOrGroup',
@@ -49,7 +49,7 @@ module.exports = class DiagnoseCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {'check'|'command'|'group'} args.subCommand The sub-command to use
+     * @param {'all'|'command'|'group'} args.subCommand The sub-command to use
      * @param {Command|CommandGroup} args.cmdOrGroup The command or group to diagnose
      */
     async run(message, { subCommand, cmdOrGroup }) {

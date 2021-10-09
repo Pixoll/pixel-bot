@@ -55,6 +55,7 @@ async function fetchPartial(object) {
  */
 function addDashes(str, under = false) {
     if (!str) return
+    if (typeof under !== 'boolean') under = false
     return str.replace(/[A-Z]/g, under ? '_$&' : '-$&').toLowerCase()
 }
 
@@ -626,7 +627,7 @@ async function tempban(guild, bot, user, time, reason = 'No reason given.') {
 
     const doc1 = {
         _id: docId(),
-        type: 'tempban',
+        type: 'temp-ban',
         guild: guildId,
         user: user.id,
         mod: bot.id,
@@ -635,7 +636,7 @@ async function tempban(guild, bot, user, time, reason = 'No reason given.') {
     }
 
     const doc2 = {
-        type: 'tempban',
+        type: 'temp-ban',
         guild: guildId,
         user: user.id,
         duration: Date.now() + time

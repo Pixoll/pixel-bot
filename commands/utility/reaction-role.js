@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
-const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs } = require('../../utils')
+const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, isMod } = require('../../utils')
 const { reactionRoles } = require('../../mongo/schemas')
 const { stripIndent, oneLine } = require('common-tags')
 const { ReactionRoleSchema } = require('../../mongo/typings')

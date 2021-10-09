@@ -57,7 +57,7 @@ module.exports = class HelpCommand extends Command {
                     const guildOnly = !guild ? !cmd.guildOnly : true
                     const dmOnly = guild ? !cmd.dmOnly : true
 
-                    return !cmd.hidden && cmd.isEnabledIn(guild) && hasPerms && guildOnly && dmOnly
+                    return !cmd.hidden && hasPerms && guildOnly && dmOnly
                 }
 
                 const commands = groups.map(g => g.commands.filter(filterCmd)).filter(g => g.size > 0)

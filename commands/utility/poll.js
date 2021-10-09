@@ -82,8 +82,14 @@ module.exports = class PollCommand extends Command {
      * @param {number|Date|string} duration The duration of the poll to create
      */
     async create(message, channel, duration) {
-        while (typeof duration === 'string') {
+        if (!channel) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            channel = value
+        }
+
+        while (!duration || typeof duration === 'string') {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
             if (cancelled) return
             duration = value
         }

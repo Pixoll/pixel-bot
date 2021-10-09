@@ -21,10 +21,10 @@ module.exports = (client) => {
             if (!user) continue
             const member = guild.members.cache.get(user.id)
 
-            if (mod.type === 'tempban') {
+            if (mod.type === 'temp-ban') {
                 const ban = await guild.fetchBan(user).catch(() => null)
                 if (ban) guild.members.unban(user, 'Ban has expired.')
-            } else if (mod.type === 'mute' || mod.type === 'temprole') {
+            } else if (mod.type === 'mute' || mod.type === 'temp-role') {
                 if (!member) continue
                 const role = mod.type === 'mute' ? guild.roles.cache.find(role => role.name.toLowerCase() === 'muted') : guild.roles.cache.find(role => role.id === mod.role)
                 if (role && member.roles.cache.has(role.id)) member.roles.remove(role)

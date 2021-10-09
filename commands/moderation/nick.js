@@ -48,11 +48,11 @@ module.exports = class NicknameCommand extends Command {
      * @param {string} args.nickname The new nickname
      */
     async run(message, { member, nickname }) {
-        const { tag, username, manageable } = member.user
+        const { tag, username } = member.user
 
-        if (!manageable) {
+        if (!member.manageable) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', fieldName: `Unable to change ${user.tag}'s nickname`,
+                color: 'RED', emoji: 'cross', fieldName: `Unable to change ${tag}'s nickname`,
                 fieldValue: 'Please check the role hierarchy or server ownership.'
             }))
         }
