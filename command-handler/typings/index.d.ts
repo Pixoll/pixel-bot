@@ -1,4 +1,4 @@
-import { Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment, MessageEditOptions, MessageEmbed, MessageOptions, MessageAdditions, PermissionResolvable, PermissionString, User, UserResolvable, InviteGenerationOptions, GuildMember, ClientUser } from 'discord.js'
+import { Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment, MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable, InviteGenerationOptions, GuildMember, ClientUser } from 'discord.js'
 
 /** A fancy argument */
 export class Argument {
@@ -651,7 +651,7 @@ export class CommandoMessage extends Message {
 	 * @param id The id of the channel the response is in ("DM" for direct messages)
 	 * @param options Options for the response
 	 */
-	private editCurrentResponse(id: string, options: MessageEditOptions | Exclude<MessageAdditions, MessageAttachment>): Promise<CommandoMessage | CommandoMessage[]>
+	private editCurrentResponse(id: string, options: MessageEditOptions | Exclude<MessageAttachment>): Promise<CommandoMessage | CommandoMessage[]>
 	/**
 	 * Edits a response to the command message
 	 * @param response The response message(s) to edit
@@ -676,33 +676,6 @@ export class CommandoMessage extends Message {
 	 * @param user User to use for the mention command format
 	 */
 	public anyUsage(argString?: string, prefix?: string, user?: User): string
-	/**
-	 * Responds with a code message
-	 * @param lang Language for the code block
-	 * @param content Content for the message
-	 * @param options Options for the message
-	 */
-	// public code: CommandoMessage['say']
-	/**
-	 * Responds with a direct message
-	 * @param content Content for the message
-	 * @param options Options for the message
-	 */
-	// public direct: CommandoMessage['say']
-	/**
-	 * Responds with an embed
-	 * @param embed Embed to send
-	 * @param content Content for the message
-	 * @param options Options for the message
-	 */
-	// public embed(embed: MessageEmbed, content?: StringResolvable, options?: (MessageOptions & { split?: false }) | MessageAdditions): Promise<CommandoMessage>
-	/**
-	 * Responds with an embed
-	 * @param embed Embed to send
-	 * @param content Content for the message
-	 * @param options Options for the message
-	 */
-	// public embed(embed: MessageEmbed, content?: StringResolvable, options?: (MessageOptions & { split: true }) | MessageAdditions): Promise<CommandoMessage[]>
 	/**
 	 * Initialises the message for a command
 	 * @param command Command the message triggers
@@ -730,8 +703,8 @@ export class CommandoMessage extends Message {
 	 * @param options Options for the message
 	 */
 	public say(
-		content: StringResolvable | MessageOptions | MessageAdditions,
-		options?: MessageOptions | MessageAdditions
+		content: StringResolvable | MessageOptions,
+		options?: MessageOptions
 	): Promise<CommandoMessage>
 	/**
 	 * Responds with a direct message
@@ -739,8 +712,8 @@ export class CommandoMessage extends Message {
 	 * @param options Options for the message
 	 */
 	public direct(
-		content: StringResolvable | MessageOptions | MessageAdditions,
-		options?: MessageOptions | MessageAdditions
+		content: StringResolvable | MessageOptions,
+		options?: MessageOptions
 	): Promise<CommandoMessage>
 	/**
 	 * Responds with a code message
@@ -750,8 +723,8 @@ export class CommandoMessage extends Message {
 	 */
 	public code(
 		lang: string,
-		content: StringResolvable | MessageOptions | MessageAdditions,
-		options?: MessageOptions | MessageAdditions
+		content: StringResolvable | MessageOptions,
+		options?: MessageOptions
 	): Promise<CommandoMessage>
 	/**
 	 * Responds with an embed
@@ -761,8 +734,8 @@ export class CommandoMessage extends Message {
 	 */
 	public embed(
 		embed: MessageEmbed | MessageEmbed[],
-		content?: StringResolvable | MessageOptions | MessageAdditions,
-		options?: MessageOptions | MessageAdditions
+		content?: StringResolvable | MessageOptions,
+		options?: MessageOptions
 	): Promise<CommandoMessage>
 	/**
 	 * Responds with a reply + embed
@@ -772,8 +745,8 @@ export class CommandoMessage extends Message {
 	 */
 	public replyEmbed(
 		embed: MessageEmbed | MessageEmbed[],
-		content?: StringResolvable | MessageOptions | MessageAdditions,
-		options?: MessageOptions | MessageAdditions
+		content?: StringResolvable | MessageOptions,
+		options?: MessageOptions
 	): Promise<CommandoMessage>
 	/**
 	 * Creates a usage string for the message's command
@@ -1692,8 +1665,8 @@ export interface RespondOptions {
 }
 
 export interface RespondEditOptions {
-	content: StringResolvable | MessageEditOptions | Exclude<MessageAdditions, MessageAttachment>
-	options?: MessageEditOptions | Exclude<MessageAdditions, MessageAttachment>
+	content: StringResolvable | MessageEditOptions | Exclude<MessageAttachment>
+	options?: MessageEditOptions | Exclude<MessageAttachment>
 	type?: ResponseType
 }
 
