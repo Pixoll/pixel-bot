@@ -59,6 +59,7 @@ const modules = model('modules', Schema({
     guild: String,
     // autoMod: Boolean,
     // chatFilter: Boolean,
+    stickyRoles: Boolean,
     welcome: Boolean,
     auditLogs: {
         channels: Boolean,
@@ -68,6 +69,7 @@ const modules = model('modules', Schema({
         members: Boolean,
         messages: Boolean,
         moderation: Boolean,
+        modules: Boolean,
         roles: Boolean,
         server: Boolean,
         voice: Boolean

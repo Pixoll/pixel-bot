@@ -64,6 +64,7 @@ export interface ModuleSchema extends BaseSchema {
     // autoMod: boolean
     // chatFilter: boolean
     welcome: boolean
+    stickyRoles: boolean
     auditLogs: {
         channels: boolean
         commands: boolean
@@ -72,15 +73,16 @@ export interface ModuleSchema extends BaseSchema {
         members: boolean
         messages: boolean
         moderation: boolean
+        modules: boolean
         roles: boolean
         server: boolean
         voice: boolean
     }
 }
 
-export type Module = 'auto-mod' | 'chat-filter' | 'welcome' | 'audit-logs'
-export type AuditLog = 'channels' | 'commands' | 'emojis' | 'invites' |
-    'members' | 'messages' | 'moderation' | 'roles' | 'server' | 'voice'
+export type Module = 'auto-mod' | 'chat-filter' | 'sticky-roles' | 'welcome' | 'audit-logs'
+export type AuditLog = 'channels' | 'commands' | 'emojis' | 'invites' | 'members' |
+    'messages' | 'moderation' | 'modules' | 'roles' | 'server' | 'voice'
 
 export interface PrefixSchema extends BaseSchema {
     global: boolean
