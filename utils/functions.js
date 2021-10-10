@@ -827,7 +827,7 @@ async function pagedEmbed(message, data, template, ...extra) {
             }
         }
         if (button.customId === `${message.id}:page_end`) {
-            index = (data.total - data.number)
+            index = data.total - (data.total % data.number)
             pageDown.setDisabled(false)
             pageStart.setDisabled(false)
             pageUp.setDisabled()
