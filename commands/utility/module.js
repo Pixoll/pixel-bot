@@ -31,6 +31,7 @@ function patchData(data) {
             members: _patch(data?.auditLogs?.members),
             messages: _patch(data?.auditLogs?.messages),
             moderation: _patch(data?.auditLogs?.moderation),
+            modules: _patch(data?.auditLogs?.modules),
             roles: _patch(data?.auditLogs?.roles),
             server: _patch(data?.auditLogs?.server),
             voice: _patch(data?.auditLogs?.voice)
@@ -165,7 +166,7 @@ module.exports = class ModuleCommand extends Command {
             subModule = value.toLowerCase()
         }
 
-        const { guildId } = message
+        const { guildId, guild } = message
 
         const patch = { guild: guildId, ...patchData(data) }
         if (!subModule) patch[removeDashes(module)] = !patch[removeDashes(module)]
@@ -177,6 +178,8 @@ module.exports = class ModuleCommand extends Command {
         const type = subModule ? 'sub-module' : 'module'
         const target = subModule ? `${module}/${subModule}` : module
         const status = subModule ? patch[removeDashes(module)][removeDashes(subModule)] : patch[removeDashes(module)]
+
+        this.client.emit('moduleStatusChange', guild, target, status)
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `Toggled the ${type} \`${target}\``,

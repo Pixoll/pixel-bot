@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { modules } = require('../../mongo/schemas')
+const { modules: Modules } = require('../../mongo/schemas')
 const { ModuleSchema } = require('../../mongo/typings')
 
 /**
@@ -24,6 +24,7 @@ function patchData(data) {
             members: _patch(data?.auditLogs?.members),
             messages: _patch(data?.auditLogs?.messages),
             moderation: _patch(data?.auditLogs?.moderation),
+            modules: _patch(data?.auditLogs?.modules),
             roles: _patch(data?.auditLogs?.roles),
             server: _patch(data?.auditLogs?.server),
             voice: _patch(data?.auditLogs?.voice)
@@ -56,11 +57,13 @@ module.exports = class ModulesCommand extends Command {
     async run(message) {
         const { guild, guildId } = message
 
-        const data = await modules.findOne({ guild: guildId })
+        const data = await Modules.findOne({ guild: guildId })
         const patch = patchData(data)
         const { auditLogs, /* autoMod, chatFilter, */ welcome } = patch
-        const { channels, commands, emojis, invites, members, messages, moderation, roles, server, voice } = auditLogs
-        
+        const {
+            channels, commands, emojis, invites, members, messages, moderation, modules, roles, server, voice
+        } = auditLogs
+
         // **>** **Automatic moderation:** ${autoMod}
         // **>** **Chat filter:** ${chatFilter}
 
@@ -77,6 +80,7 @@ module.exports = class ModulesCommand extends Command {
                 \u2800 ⤷ **Members:** ${members}
                 \u2800 ⤷ **Messages:** ${messages}
                 \u2800 ⤷ **Moderation:** ${moderation}
+                \u2800 ⤷ **Modules:** ${modules}
                 \u2800 ⤷ **Roles:** ${roles}
                 \u2800 ⤷ **Server:** ${server}
                 \u2800 ⤷ **Voice:** ${voice}
