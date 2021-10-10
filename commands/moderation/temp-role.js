@@ -122,7 +122,7 @@ module.exports = class TempRoleCommand extends Command {
             _id: docId(),
             type: 'temp-role',
             guild: guildId,
-            user: user.id,
+            user: { id: user.id, tag: user.tag },
             role: role.id,
             duration
         }

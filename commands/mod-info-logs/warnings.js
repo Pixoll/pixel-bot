@@ -64,7 +64,7 @@ module.exports = class WarningsCommand extends Command {
         await generateEmbed(message, warns, {
             authorName: oneLine`
                 ${user ? `${user.username} has` : 'There\'s'}
-                ${pluralize('warning', modLogs.length)}
+                ${pluralize('warning', warns.length)}
             `,
             authorIconURL: avatarURL,
             title: 'Id:',

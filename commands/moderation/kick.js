@@ -89,8 +89,8 @@ module.exports = class KickCommand extends Command {
             _id: docId(),
             type: 'kick',
             guild: guildId,
-            user: user.id,
-            mod: author.id,
+            user: { id: user.id, tag: user.tag },
+            mod: { id: author.id, tag: author.tag },
             reason
         }
 

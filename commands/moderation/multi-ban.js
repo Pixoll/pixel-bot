@@ -120,8 +120,8 @@ module.exports = class MultiBanCommand extends Command {
                 _id: docId(),
                 type: 'ban',
                 guild: guildId,
-                user: user.id,
-                mod: authorId,
+                user: { id: user.id, tag: user.tag },
+                mod: { id: authorId, tag: author.tag },
                 reason: reason
             }
 

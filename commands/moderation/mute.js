@@ -103,8 +103,8 @@ module.exports = class MuteCommand extends Command {
             _id: documentId,
             type: 'mute',
             guild: guildId,
-            user: user.id,
-            mod: author.id,
+            user: { id: user.id, tag: user.tag },
+            mod: { id: author.id, tag: author.tag },
             reason,
             duration: myMs(duration - Date.now(), { long: true })
         }
@@ -114,7 +114,7 @@ module.exports = class MuteCommand extends Command {
             _id: documentId,
             type: 'mute',
             guild: guildId,
-            user: user.id,
+            user: { id: user.id, tag: user.tag },
             duration
         }
 

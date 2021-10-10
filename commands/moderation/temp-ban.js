@@ -108,8 +108,8 @@ module.exports = class TempBanCommand extends Command {
             _id: documentId,
             type: 'temp-ban',
             guild: guildId,
-            user: user.id,
-            mod: author.id,
+            user: { id: user.id, tag: user.tag },
+            mod: { id: author.id, tag: author.tag },
             reason,
             duration: myMs(Date.now() - duration, { long: true })
         }
@@ -119,8 +119,8 @@ module.exports = class TempBanCommand extends Command {
             _id: documentId,
             type: 'temp-ban',
             guild: guildId,
-            user: user.id,
-            mod: author.id,
+            user: { id: user.id, tag: user.tag },
+            mod: { id: author.id, tag: author.tag },
             duration
         }
 

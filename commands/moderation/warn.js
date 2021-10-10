@@ -68,8 +68,8 @@ module.exports = class warnCommand extends Command {
             _id: docId(),
             type: 'warn',
             guild: guildId,
-            user: user.id,
-            mod: author.id,
+            user: { id: user.id, tag: user.tag },
+            mod: { id: author.id, tag: author.tag },
             reason
         }
 
