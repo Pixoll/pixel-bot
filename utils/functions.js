@@ -6,6 +6,7 @@ const { CommandoMessage, CommandoGuild, Command, Argument } = require('../comman
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
+const { disabledPageButtons } = require('./constants')
 const { version } = require('../package.json')
 const { moderations, active, modules, setup } = require('../mongo/schemas')
 const { permissions } = require('../command-handler/util')
@@ -759,66 +760,92 @@ function docId() {
  * @param {array} extra Extra data for the embed template.
  */
 async function pagedEmbed(message, data, template, ...extra) {
-    const options = {
-        embeds: []
+    const pageStart = new MessageButton()
+        .setStyle('PRIMARY')
+        .setCustomId(`${message.id}:page_start`)
+        .setEmoji('⏪')
+        .setDisabled()
+    const pageDown = new MessageButton()
+        .setStyle('PRIMARY')
+        .setCustomId(`${message.id}:page_down`)
+        .setEmoji('⬅️')
+        .setDisabled()
+    const pageUp = new MessageButton()
+        .setStyle('PRIMARY')
+        .setCustomId(`${message.id}:page_up`)
+        .setEmoji('➡️')
+    const pageEnd = new MessageButton()
+        .setStyle('PRIMARY')
+        .setCustomId(`${message.id}:page_end`)
+        .setEmoji('⏩')
+
+    if (data.total <= data.number) {
+        pageUp.setDisabled()
+        pageEnd.setDisabled()
     }
 
-    let messageToEdit
-    const embed1 = basicEmbed({
-        color: 'GOLD', emoji: 'loading', description: 'Loading data...'
+    await message.channel.sendTyping().catch(() => null)
+    const msg = await message.replyEmbed(await template(0, ...extra), {
+        components: [
+            new MessageActionRow()
+                .addComponents(pageStart, pageDown, pageUp, pageEnd)
+        ]
     })
-    if (data.toUser) {
-        options.embeds[0] = embed1
-        messageToEdit = await message.direct(options)
-    } else {
-        messageToEdit = await message.replyEmbed(embed1)
-    }
-
-    options.embeds[0] = await template(0, ...extra)
-    const msg = await messageToEdit.edit(options)
-
     if (data.total <= data.number) return
 
-    // reacts with the navigation arrows
-    await msg.react('⬅️')
-    await msg.react('➡️')
-
-    const filter = (reaction, user) =>
-        ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === message.author.id
-
-    // creates a collector for the reactions
-    const collector = msg.createReactionCollector({ filter, time: 60000 })
-
     let index = 0
-
-    collector.on('collect', async reaction => {
-        if (message.guild) {
-            const react = msg.reactions.resolve(reaction)
-            await react.users.remove(message.author).catch(() => null)
-        }
-
-        // goes down a page if the reaction is ⬅️, and up in the opposite case
-        if (reaction.emoji.name === '⬅️') {
-            if (index === 0) return
-            index -= data.number
-        }
-        else {
-            if (index + data.number >= data.total) return
-            index += data.number
-        }
-
-        options.embeds[0] = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Loading data...'
-        })
-        await msg.edit(options)
-
-        options.embeds[0] = await template(index, ...extra)
-        await msg.edit(options)
+    const _collector = message.channel.createMessageComponentCollector({
+        filter: int => int.user.id === message.author.id,
+        time: myMs('2m')
     })
 
-    collector.on('end', async () => {
-        if (!message.guild) return
-        await msg.reactions.removeAll().catch(() => null)
+    _collector.on('collect', async button => {
+        if (!button.isButton()) return
+        if (button.customId === `${message.id}:page_start`) {
+            index = 0
+            pageUp.setDisabled(false)
+            pageEnd.setDisabled(false)
+            pageDown.setDisabled()
+            pageStart.setDisabled()
+        }
+        if (button.customId === `${message.id}:page_down`) {
+            index -= data.number
+            pageUp.setDisabled(false)
+            pageEnd.setDisabled(false)
+            if (index === 0) {
+                pageDown.setDisabled()
+                pageStart.setDisabled()
+            }
+        }
+        if (button.customId === `${message.id}:page_up`) {
+            index += data.number
+            pageDown.setDisabled(false)
+            pageStart.setDisabled(false)
+            if (index >= data.total - data.number) {
+                pageUp.setDisabled()
+                pageEnd.setDisabled()
+            }
+        }
+        if (button.customId === `${message.id}:page_end`) {
+            index = (data.total - data.number)
+            pageDown.setDisabled(false)
+            pageStart.setDisabled(false)
+            pageUp.setDisabled()
+            pageEnd.setDisabled()
+        }
+
+        await button.update({
+            embeds: [await template(index, ...extra)],
+            components: [
+                new MessageActionRow()
+                    .addComponents(pageStart, pageDown, pageUp, pageEnd)
+            ],
+            ...noReplyInDMs(msg)
+        }).catch(() => null)
+    })
+
+    _collector.on('end', async () => {
+        await msg.edit({ components: [disabledPageButtons] })
     })
 }
 
@@ -850,7 +877,6 @@ async function generateEmbed(message, array, data) {
     } = data
 
     if (array.length === 0) throw new Error('array cannot be empty')
-    if (!authorName) throw new Error('authorName cannot be undefined or empty')
     keysExclude.push(...[keyTitle.prefix, keyTitle.suffix, '_id', '__v'])
 
     async function createEmbed(start) {
@@ -859,10 +885,10 @@ async function generateEmbed(message, array, data) {
 
         const embed = new MessageEmbed()
             .setColor(color.toUpperCase())
-            .setAuthor(authorName, authorIconURL)
             .setTimestamp()
-        if (pages > 1) embed.setFooter(`Page ${start / number + 1} of ${pages}`)
 
+        if (authorName) embed.setAuthor(authorName, authorIconURL)
+        if (pages > 1) embed.setFooter(`Page ${Math.round(start / number + 1)} of ${pages}`)
         if (useDescription) return embed.setDescription(current.join('\n'))
 
         const { users, channels } = message.client

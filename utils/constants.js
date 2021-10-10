@@ -1,4 +1,5 @@
 const { stripIndent, oneLine } = require('common-tags');
+const { MessageActionRow, MessageButton } = require('discord.js');
 
 // const stampsLink = 'https://discord.com/developers/docs/reference#message-formatting-timestamp-styles'
 // const timeDetails = stripIndent`
@@ -180,10 +181,35 @@ const userFlags = {
     TEAM_USER: '',
 }
 
+const disabledPageButtons = new MessageActionRow()
+    .addComponents(
+        new MessageButton()
+            .setStyle('SECONDARY')
+            .setCustomId('disabled_start')
+            .setEmoji('⏪')
+            .setDisabled(),
+        new MessageButton()
+            .setStyle('SECONDARY')
+            .setCustomId('disabled_down')
+            .setEmoji('⬅️')
+            .setDisabled(),
+        new MessageButton()
+            .setStyle('SECONDARY')
+            .setCustomId('disabled_up')
+            .setEmoji('➡️')
+            .setDisabled(),
+        new MessageButton()
+            .setStyle('SECONDARY')
+            .setCustomId('disabled_end')
+            .setEmoji('⏩')
+            .setDisabled()
+    )
+
 module.exports = {
     channelDetails,
     channelTypes,
     defaultEmojiRegex,
+    disabledPageButtons,
     embedColor,
     emojiRegex,
     guildEmojiRegex,
