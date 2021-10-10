@@ -36,7 +36,7 @@ module.exports = class RemindersCommand extends Command {
         await generateEmbed(message, data, {
             authorName: `You have ${pluralize('reminder', data.length)}`,
             authorIconURL: author.displayAvatarURL({ dynamic: true }),
-            title: 'Reminder set on',
+            title: 'Reminder set for',
             keyTitle: { suffix: 'remindAt' },
             keys: ['reminder'],
             toUser: true

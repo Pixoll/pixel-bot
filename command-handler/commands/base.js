@@ -329,8 +329,8 @@ class Command {
 	 * (if applicable see {@link Command#run})
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onError(err, message, args, fromPattern, result) { // eslint-disable-line no-unused-vars
-		const { tag } = message.client.owners[0]
+	onError(err, message, args, fromPattern, result) {
+		const owner = message.client.owners[0]
 		const { serverInvite } = message.client.options
 		const emoji = '<:cross:802617654442852394>'
 
@@ -338,7 +338,7 @@ class Command {
 			.setColor('RED')
 			.setDescription(stripIndent`
 				${emoji} **An unexpected error happened**
-				Please contact ${tag}, or join the [support server](${serverInvite}).
+				Please contact ${owner.toString()} (${owner.tag}), or join the [support server](${serverInvite}).
 			`)
 			.addField(err.name, '```' + err.message + '```')
 

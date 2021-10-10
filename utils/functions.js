@@ -82,8 +82,16 @@ async function isModuleEnabled(guild, module, subModule) {
     module = removeDashes(module)
     subModule = removeDashes(subModule)
     const check = subModule ? data?.[module]?.[subModule] : data?.[module]
-    const status = typeof check === 'boolean' && !check
-    return !status
+    if (typeof check === 'object') {
+        let status = []
+        for (const prop in check) {
+            if (typeof check[prop] === 'function') continue
+            status.push(check[prop] === false ? false : true)
+        }
+        return Boolean(status.filter(b => b)[0])
+    }
+    const status = typeof check === 'boolean' && check
+    return status
 }
 
 /**

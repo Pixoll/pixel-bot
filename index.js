@@ -39,7 +39,8 @@ const client = new CommandoClient({
             name: 'for !help',
             type: 'WATCHING'
         }]
-    }
+    },
+    failIfNotExists: false
 })
 
 client.on('debug', msg => {
