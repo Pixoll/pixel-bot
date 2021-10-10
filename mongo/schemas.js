@@ -1,11 +1,16 @@
 const { model, Schema } = require('mongoose')
 
+const schemaUser = {
+    id: String,
+    tag: String
+}
+
 const active = model('active', Schema({
     _id: String,
     type: String,
     guild: String,
-    user: String,
-    mod: String,
+    user: schemaUser,
+    mod: schemaUser,
     reason: String,
     role: String,
     duration: Number
@@ -42,8 +47,8 @@ const moderations = model('moderations', Schema({
     _id: String,
     type: String,
     guild: String,
-    user: String,
-    mod: String,
+    user: schemaUser,
+    mod: schemaUser,
     reason: String,
     duration: String
 }, { timestamps: true }))

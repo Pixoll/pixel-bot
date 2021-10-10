@@ -72,7 +72,7 @@ module.exports = class UnmuteCommand extends Command {
         this.client.emit('guildMemberUnmute', guild, author, user, reason)
 
         /** @type {Document} */
-        const mute = await active.findOne({ type: 'mute', user: user.id })
+        const mute = await active.findOne({ type: 'mute', user: { id: user.id } })
         if (mute) await mute.deleteOne()
 
         await message.replyEmbed(basicEmbed({

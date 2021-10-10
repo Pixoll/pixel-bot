@@ -32,8 +32,8 @@ function validMember(msg, member) {
 module.exports = class MultiBanCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'multi-ban',
-            aliases: ['multiban', 'mass-ban', 'massban'],
+            name: 'multiban',
+            aliases: ['massban', 'multi-ban', 'mass-ban'],
             group: 'mod',
             description: 'Ban multiple members at the same time (max. 30 at once).',
             details: stripIndent`

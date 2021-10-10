@@ -37,8 +37,8 @@ function validRole(msg, role) {
 module.exports = class ReactionRoleCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'reaction-role',
-            aliases: ['reactionrole', 'reactrole', 'rrole'],
+            name: 'reactionrole',
+            aliases: ['reactrole', 'rrole', 'reaction-role', 'react-role'],
             group: 'utility',
             description: 'Create or remove reaction roles.',
             details: stripIndent`

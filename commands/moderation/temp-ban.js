@@ -11,8 +11,8 @@ const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 module.exports = class TempBanCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'temp-ban',
-            aliases: ['tempban'],
+            name: 'tempban',
+            aliases: ['temp-ban'],
             group: 'mod',
             description: 'Ban a user for a specified amount of time.',
             details: `${userDetails}\n${timeDetails('duration')}\n${reasonDetails()}`,

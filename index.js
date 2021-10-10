@@ -49,6 +49,7 @@ client.on('debug', msg => {
     console.log('debug >', msg)
 })
 client.emit('debug', 'Created client')
+client.on('rateLimit', console.log)
 
 client.registry
     .registerDefaultTypes()

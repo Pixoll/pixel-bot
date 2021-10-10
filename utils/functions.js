@@ -1,12 +1,12 @@
 const {
     MessageEmbed, GuildMember, User, Role, MessageOptions, PermissionResolvable, TextChannel,
-    GuildChannel, Message, ColorResolvable, AwaitMessagesOptions, MessageActionRow, MessageButton, Invite
+    GuildChannel, Message, ColorResolvable, AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument } = require('../command-handler/typings')
 const { transform, isEqual, isArray, isObject } = require('lodash')
-const { stripIndent } = require('common-tags')
+const { stripIndent, oneLine } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
-const { disabledPageButtons } = require('./constants')
+const { disabledPageButtons, disabledFilterMenu } = require('./constants')
 const { version } = require('../package.json')
 const { moderations, active, modules, setup } = require('../mongo/schemas')
 const { permissions } = require('../command-handler/util')
@@ -750,33 +750,48 @@ function docId() {
 }
 
 /**
+ * @typedef {(start: number, filter?: string) => Promise<{embed: MessageEmbed, total: number}>} TemplateEmbedFunction
+ */
+
+/**
  * Creates a basic paged embed with the template provided.
  * @param {CommandoMessage} message Used to send the embed.
  * @param {object} data The number of pages the embed should have.
  * @param {number} data.number The number of chunks of data to be displayed in one page.
  * @param {number} data.total The total chunks of data.
- * @param {boolean} data.toUser Whether to send the embed to the user DMs or not.
- * @param {(start: number) => Promise<MessageEmbed>} template The embed template to use.
- * @param {array} extra Extra data for the embed template.
+ * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not.
+ * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
+ * @param {TemplateEmbedFunction} template The embed template to use.
  */
-async function pagedEmbed(message, data, template, ...extra) {
+async function pagedEmbed(message, data, template) {
+    if (!data.components) {
+        data.components = []
+    }
+
+    const ids = {
+        start: `${message.id}:page_start`,
+        down: `${message.id}:page_down`,
+        up: `${message.id}:page_up`,
+        end: `${message.id}:page_end`
+    }
+
     const pageStart = new MessageButton()
         .setStyle('PRIMARY')
-        .setCustomId(`${message.id}:page_start`)
+        .setCustomId(ids.start)
         .setEmoji('⏪')
         .setDisabled()
     const pageDown = new MessageButton()
         .setStyle('PRIMARY')
-        .setCustomId(`${message.id}:page_down`)
+        .setCustomId(ids.down)
         .setEmoji('⬅️')
         .setDisabled()
     const pageUp = new MessageButton()
         .setStyle('PRIMARY')
-        .setCustomId(`${message.id}:page_up`)
+        .setCustomId(ids.up)
         .setEmoji('➡️')
     const pageEnd = new MessageButton()
         .setStyle('PRIMARY')
-        .setCustomId(`${message.id}:page_end`)
+        .setCustomId(ids.end)
         .setEmoji('⏩')
 
     if (data.total <= data.number) {
@@ -784,14 +799,17 @@ async function pagedEmbed(message, data, template, ...extra) {
         pageEnd.setDisabled()
     }
 
+    const first = await template(0)
     await message.channel.sendTyping().catch(() => null)
-    const msg = await message.replyEmbed(await template(0, ...extra), {
+    const msg = await message.replyEmbed(first.embed, {
         components: [
+            ...data.components,
             new MessageActionRow()
                 .addComponents(pageStart, pageDown, pageUp, pageEnd)
-        ]
+        ].filter(c => c)
     })
-    if (data.total <= data.number) return
+
+    if (data.total <= data.number && !data.components[0]) return
 
     let index = 0
     const _collector = message.channel.createMessageComponentCollector({
@@ -799,53 +817,88 @@ async function pagedEmbed(message, data, template, ...extra) {
         time: myMs('2m')
     })
 
-    _collector.on('collect', async button => {
-        if (!button.isButton()) return
-        if (button.customId === `${message.id}:page_start`) {
-            index = 0
-            pageUp.setDisabled(false)
-            pageEnd.setDisabled(false)
-            pageDown.setDisabled()
-            pageStart.setDisabled()
-        }
-        if (button.customId === `${message.id}:page_down`) {
-            index -= data.number
-            pageUp.setDisabled(false)
-            pageEnd.setDisabled(false)
-            if (index === 0) {
+    /** @type {?string[]} */
+    const menuOptions = data.components[0] ?
+        data.components[0].components.filter(c => c instanceof MessageSelectMenu)[0].options.map(op => op.value) :
+        []
+    let option = 'all'
+
+    _collector.on('collect', async int => {
+        if (msg.id !== int.message.id) return
+
+        if (int.isButton()) {
+            const oldData = await template(index, option)
+            if (typeof oldData.total !== 'number') oldData.total = data.total
+
+            if (int.customId === ids.start) {
+                index = 0
+                pageUp.setDisabled(false)
+                pageEnd.setDisabled(false)
                 pageDown.setDisabled()
                 pageStart.setDisabled()
             }
-        }
-        if (button.customId === `${message.id}:page_up`) {
-            index += data.number
-            pageDown.setDisabled(false)
-            pageStart.setDisabled(false)
-            if (index >= data.total - data.number) {
+            if (int.customId === ids.down) {
+                index -= data.number
+                pageUp.setDisabled(false)
+                pageEnd.setDisabled(false)
+                if (index === 0) {
+                    pageDown.setDisabled()
+                    pageStart.setDisabled()
+                }
+            }
+            if (int.customId === ids.up) {
+                index += data.number
+                pageDown.setDisabled(false)
+                pageStart.setDisabled(false)
+                if (index >= oldData.total - data.number) {
+                    pageUp.setDisabled()
+                    pageEnd.setDisabled()
+                }
+            }
+            if (int.customId === ids.end) {
+                index = oldData.total - (oldData.total % data.number)
+                pageDown.setDisabled(false)
+                pageStart.setDisabled(false)
                 pageUp.setDisabled()
                 pageEnd.setDisabled()
             }
-        }
-        if (button.customId === `${message.id}:page_end`) {
-            index = data.total - (data.total % data.number)
-            pageDown.setDisabled(false)
-            pageStart.setDisabled(false)
-            pageUp.setDisabled()
-            pageEnd.setDisabled()
+            const templateData = await template(index, option)
+
+            return await int.update({
+                embeds: [templateData.embed],
+                components: [
+                    ...data.components,
+                    new MessageActionRow()
+                        .addComponents(pageStart, pageDown, pageUp, pageEnd)
+                ].filter(c => c),
+                ...noReplyInDMs(msg)
+            }).catch(() => null)
         }
 
-        await button.update({
-            embeds: [await template(index, ...extra)],
-            components: [
-                new MessageActionRow()
-                    .addComponents(pageStart, pageDown, pageUp, pageEnd)
-            ],
-            ...noReplyInDMs(msg)
-        }).catch(() => null)
+        if (int.isSelectMenu()) {
+            option = menuOptions.find(op => op === int.values[0])
+            const templateData = await template(0, option)
+            pageUp.setDisabled(templateData.total <= data.number)
+            pageEnd.setDisabled(templateData.total <= data.number)
+            pageDown.setDisabled()
+            pageStart.setDisabled()
+
+            return await int.update({
+                embeds: [templateData.embed],
+                components: [
+                    ...data.components,
+                    new MessageActionRow()
+                        .addComponents(pageStart, pageDown, pageUp, pageEnd)
+                ].filter(c => c),
+                ...noReplyInDMs(msg)
+            }).catch(() => null)
+        }
     })
 
     _collector.on('end', async () => {
-        await msg.edit({ components: [disabledPageButtons] })
+        await msg.edit({
+            components: [data.components[0] ? disabledFilterMenu : null, disabledPageButtons].filter(c => c)
+        })
     })
 }
 
@@ -854,32 +907,43 @@ async function pagedEmbed(message, data, template, ...extra) {
  * @param {CommandoMessage} message This lets me know where to send the embed
  * @param {array} array The array that contains the data to be displayed
  * @param {object} data Some extra data for the embed
- * @param {number} [data.number] The number of chunks to display per page
- * @param {string} [data.color] The color of the embed
+ * @param {number} [data.number=6] The number of chunks to display per page
+ * @param {string} [data.color='#4c9f4c'] The color of the embed
  * @param {string} data.authorName The name of the author
- * @param {string} [data.authorIconURL] The icon URL of the author
- * @param {string} [data.title] The title of each section in the embed
- * @param {boolean} [data.useDescription] Whether to use `setDescription()` or not
- * @param {boolean} [data.inLine] Whether the data should be displayed inline in the embed
- * @param {boolean} [data.toUser] Whether to send the embed to the user DMs or not
+ * @param {string} [data.authorIconURL=null] The icon URL of the author
+ * @param {string} [data.title=''] The title of each section in the embed
+ * @param {boolean} [data.useDescription=false] Whether to use `setDescription()` or not
+ * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
+ * @param {boolean} [data.inLine=false] Whether the data should be displayed inline in the embed
+ * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not
  * @param {boolean} [data.hasObjects] Whether `array` contains objects inside or not
- * @param {object} [data.keyTitle] A custom key data to use from the nested objects on the title
+ * @param {object} [data.keyTitle={}] A custom key data to use from the nested objects on the title
  * @param {string} [data.keyTitle.suffix] The name of the key to use as a suffix
  * @param {string} [data.keyTitle.prefix] The name of the key to use as a prefix
- * @param {string[]} [data.keys] The properties to display in the embed. If empty I will use every property
- * @param {string[]} [data.keysExclude] The properties to exclude on the embed. If empty I will use `data.keys` or every property
- * @param {string} [data.useDocId] Whether to use the document's Id on each data chunk
+ * @param {string[]} [data.keys=undefined] The properties to display in the embed. If empty I will use every property
+ * @param {string[]} [data.keysExclude=[]] The properties to exclude on the embed. If empty I will use `data.keys` or every property
+ * @param {boolean} [data.useDocId=false] Whether to use the document's Id on each data chunk
  */
-async function generateEmbed(message, array, data) {
+async function generateEmbed(message, _array, data) {
     const {
-        number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription, title = '', inLine,
-        toUser, hasObjects = true, keyTitle = {}, keys, keysExclude = [], useDocId
+        number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription = false, title = '', inLine = false,
+        toUser = false, hasObjects = true, keyTitle = {}, keys, keysExclude = [], useDocId = false, components = []
     } = data
 
-    if (array.length === 0) throw new Error('array cannot be empty')
+    if (_array.length === 0) throw new Error('array cannot be empty')
     keysExclude.push(...[keyTitle.prefix, keyTitle.suffix, '_id', '__v'])
 
-    async function createEmbed(start) {
+    /** @param {number} start @param {string} [filter] */
+    async function createEmbed(start, filter) {
+        const array = []
+        array.splice(0, array.length)
+        if (filter) {
+            if (filter === 'all') array.push(..._array)
+            else array.push(..._array.filter(doc => doc.type === filter))
+        } else {
+            array.push(..._array)
+        }
+
         const pages = Math.trunc(array.length / number) + ((array.length / number) % 1 === 0 ? 0 : 1)
         const current = array.slice(start, start + number)
 
@@ -889,9 +953,17 @@ async function generateEmbed(message, array, data) {
 
         if (authorName) embed.setAuthor(authorName, authorIconURL)
         if (pages > 1) embed.setFooter(`Page ${Math.round(start / number + 1)} of ${pages}`)
-        if (useDescription) return embed.setDescription(current.join('\n'))
+        if (useDescription) return {
+            embed: embed.setDescription(current.join('\n')),
+            total: array.length
+        }
 
-        const { users, channels } = message.client
+        if (array.length === 0) return {
+            embed: embed.addField('There\'s nothing to see here', 'Please try with another filter.'),
+            total: array.length
+        }
+
+        const { channels } = message.client
 
         let index = 0
         for (const item of current) {
@@ -916,16 +988,9 @@ async function generateEmbed(message, array, data) {
 
                 const propName = capitalize(key.replace('createdAt', 'date'))
 
-                /** @type {User} */
-                const user = ['mod', 'user'].includes(key) ?
-                    await users.fetch(item[key]).catch(() => null)
-                    : null
-                const userStr = user ? `${user.toString()} ${user.tag}` : null
-
+                const userStr = ['mod', 'user'].includes(key) ? `<@${item[key].id}> ${item[key].tag}` : null
                 /** @type {GuildChannel} */
-                const channel = key === 'channel' ?
-                    await channels.fetch(item[key]).catch(() => null) :
-                    null
+                const channel = key === 'channel' ? channels.resolve(item[key]) : null
 
                 const created = key === 'createdAt' ? `<t:${Math.trunc(item[key] * 1 / 1000)}>` : null
                 const duration = key === 'duration' && Number(item[key]) ? myMs(item[key], { long: true, length: 2, showAnd: true }) : null
@@ -940,10 +1005,10 @@ async function generateEmbed(message, array, data) {
             index++
         }
 
-        return embed
+        return { embed: embed, total: array.length }
     }
 
-    await pagedEmbed(message, { number, total: array.length, toUser }, createEmbed)
+    await pagedEmbed(message, { number, total: _array.length, toUser, components }, createEmbed)
 }
 
 /**
@@ -954,8 +1019,8 @@ async function generateEmbed(message, array, data) {
 function commandInfo(cmd, guild) {
     const { prefix: _prefix, user, owners } = cmd.client
     let {
-        name, description, details, examples, aliases, group,
-        guarded, throttling, ownerOnly, guildOnly, dmOnly
+        name, description, details, examples, aliases, group, guarded,
+        throttling, ownerOnly, guildOnly, dmOnly, deprecated, replacing
     } = cmd
 
     const prefix = guild?.prefix || _prefix
@@ -977,8 +1042,15 @@ function commandInfo(cmd, guild) {
 
     const embed = new MessageEmbed()
         .setColor('#4c9f4c')
-        .setAuthor(`Information for command: ${name}`, user.displayAvatarURL({ dynamic: true }))
+        .setAuthor(
+            `Information for command: ${name} ${deprecated ? `(Deprecated)` : ''}`,
+            user.displayAvatarURL({ dynamic: true })
+        )
         .setDescription(stripIndent`
+            ${deprecated ? oneLine`
+                **This command has been marked as deprecated, which means it will be removed in future updates.
+                Please start using the \`${replacing}\` command from now on.**
+            ` : ''}
             ${description}
             ${details ? `\n>>> ${details}` : ''}
         `)

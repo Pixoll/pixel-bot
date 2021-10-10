@@ -35,12 +35,28 @@ module.exports = class InfractionsCommand extends Command {
     async run(message, { user }) {
         const { guildId } = message
 
-        const mods = await moderations.find({ guild: guildId, user: user.id })
+        const mods = await moderations.find({ guild: guildId, user: { id: user.id } })
         if (mods.length === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no infractions.'
             }))
         }
+
+        const filterMenu = new MessageActionRow().addComponents(
+            new MessageSelectMenu()
+                .setCustomId(`${message.id}:menu`)
+                .setMaxValues(1).setMinValues(1)
+                .setPlaceholder('Filter...')
+                .setOptions([
+                    { label: 'All', value: 'all', emoji: '🎲' },
+                    { label: 'Bans', value: 'ban', emoji: '822644311140204554' },
+                    { label: 'Soft bans', value: 'soft-ban', emoji: '🔨' },
+                    { label: 'Temp bans', value: 'temp-ban', emoji: '⏲' },
+                    { label: 'Kicks', value: 'kick', emoji: '🥾' },
+                    { label: 'Mutes', value: 'mute', emoji: '🔇' },
+                    { label: 'Warns', value: 'warn', emoji: '⚠' },
+                ])
+        )
 
         await generateEmbed(message, mods, {
             authorName: `${user.username} has ${pluralize('infraction', mods.length)}`,
@@ -48,7 +64,8 @@ module.exports = class InfractionsCommand extends Command {
             title: ' |  ID:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'user'],
-            useDocId: true
+            useDocId: true,
+            components: [filterMenu]
         })
     }
 }

@@ -126,7 +126,7 @@ module.exports = class HelpCommand extends Command {
                         `)
                 }
 
-                return embed
+                return { embed }
             }
 
             return await pagedEmbed(message, { number: 1, total: 2 }, helpEmbed)

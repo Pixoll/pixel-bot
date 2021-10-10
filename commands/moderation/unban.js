@@ -59,7 +59,7 @@ module.exports = class UnbanCommand extends Command {
         await members.unban(user, reason)
 
         /** @type {Document} */
-        const data = await active.findOne({ type: 'temp-ban', user: user.id })
+        const data = await active.findOne({ type: 'temp-ban', user: { id: user.id } })
         if (data) await data.deleteOne()
 
         await message.replyEmbed(basicEmbed({

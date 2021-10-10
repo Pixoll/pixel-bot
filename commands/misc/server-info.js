@@ -22,6 +22,7 @@ module.exports = class ServerInfoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'serverinfo',
+            aliases: ['server-info'],
             group: 'misc',
             description: 'Displays some information and statistics of the server, such as owner, boosts and member count.',
             guildOnly: true

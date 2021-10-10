@@ -207,6 +207,20 @@ class Command {
 		this.unknown = Boolean(info.unknown)
 
 		/**
+		 * Whether the command is marked as deprecated
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.deprecated = Boolean(info.deprecated)
+
+		/**
+		 * The name or alias of the command that is replacing the deprecated command.
+		 * Required if `deprecated` is `true`.
+		 * @type {string}
+		 */
+		this.replacing = info.replacing
+
+		/**
 		 * Whether the command is enabled globally
 		 * @type {boolean}
 		 * @private
@@ -553,6 +567,12 @@ class Command {
 		}
 		if (info.patterns && (!Array.isArray(info.patterns) || info.patterns.some(pat => !(pat instanceof RegExp)))) {
 			throw new TypeError('Command patterns must be an Array of regular expressions.')
+		}
+		if (Boolean(info.deprecated) && typeof info.replacing !== 'string') {
+			throw new TypeError('Command replacing must be a string.')
+		}
+		if (Boolean(info.deprecated) && info.replacing !== info.replacing.toLowerCase()) {
+			throw new TypeError('Command replacing must be lowercase.')
 		}
 	}
 }

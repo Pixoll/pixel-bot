@@ -8,8 +8,8 @@ const { stripIndent } = require('common-tags')
 module.exports = class RoleInfoCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'role-info',
-            aliases: ['roleinfo'],
+            name: 'roleinfo',
+            aliases: ['role-info'],
             group: 'misc',
             description:
                 'Displays multiple information about a role, such as color, position, members and key permissions (if any).'

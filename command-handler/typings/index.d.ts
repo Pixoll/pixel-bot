@@ -311,6 +311,16 @@ export abstract class Command {
 	public unknown: boolean
 	/** Permissions required by the user to use the command */
 	public userPermissions: PermissionResolvable[]
+	/**
+	 * Whether the command is marked as deprecated
+	 * @default false
+	 */
+	public deprecated: boolean
+	/**
+	 * The name or alias of the command that is replacing the deprecated command.
+	 * Required if `deprecated` is `true`.
+	 */
+	public replacing: string
 
 	/**
 	 * Checks whether the user has permission to use the command
@@ -1407,6 +1417,16 @@ export interface CommandInfo {
 	 * @default false
 	 */
 	unknown?: boolean
+	/**
+	 * Whether the command is marked as deprecated.
+	 * @default false
+	 */
+	deprecated?: boolean
+	/**
+	 * The name or alias of the command that is replacing the deprecated command.
+	 * Required if `deprecated` is `true`.
+	 */
+	replacing?: string
 }
 
 export interface CommandoClientEvents extends ClientEvents {

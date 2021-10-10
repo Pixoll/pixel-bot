@@ -7,8 +7,8 @@ const { User, GuildBan } = require('discord.js')
 module.exports = class BanCheckCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'ban-check',
-            aliases: ['bancheck'],
+            name: 'bancheck',
+            aliases: ['ban-check'],
             group: 'mod',
             description: 'Check if a user is banned.',
             details: userDetails,

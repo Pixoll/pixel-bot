@@ -13,7 +13,7 @@ module.exports = class WarningsCommand extends Command {
             name: 'warnings',
             aliases: ['warns'],
             group: 'mod',
-            description: 'Displays user warnings or all warnings on this server.',
+            description: 'Displays warnings of a specific user, or all warnings on this server.',
             details: userDetails,
             format: 'warnings <user>',
             examples: ['warnings Pixoll'],
@@ -21,6 +21,8 @@ module.exports = class WarningsCommand extends Command {
             userPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
+            deprecated: true,
+            replacing: 'modlogs',
             args: [{
                 key: 'user',
                 prompt: 'What user do you want to get the warnings from?',
@@ -43,7 +45,7 @@ module.exports = class WarningsCommand extends Command {
         const query = user ? {
             type: 'warn',
             guild: guildId,
-            mod: user.id
+            mod: { id: user.id }
         } : {
             type: 'warn',
             guild: guildId

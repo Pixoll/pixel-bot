@@ -3,23 +3,27 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, docId } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { Document } = require('mongoose')
+const { oneLine } = require('common-tags')
 
 /** A command that can be run in a client */
 module.exports = class DeleteWarnCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'delete-warn',
-            aliases: ['deletewarn', 'delwarn'],
+            name: 'deletewarn',
+            aliases: ['delwarn', 'delete-warn', 'del-warn'],
             group: 'mod',
             description: 'Clear a single warning from a member.',
-            details:
-                '`warning id` has to be a valid warning id. To see all the warnings in this server use the `warnings` command.'
-            ,
+            details: oneLine`
+                \`warning id\` has to be a valid warning id.
+                To see all the warnings in this server use the \`warnings\` command.
+            `,
             format: 'delwarn [warning id]',
             examples: [`delwarn ${docId()}`],
             userPermissions: ['ADMINISTRATOR'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
+            deprecated: true,
+            replacing: 'modlog delete',
             args: [{
                 key: 'warnId',
                 label: 'warning id',

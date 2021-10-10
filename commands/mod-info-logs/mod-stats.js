@@ -10,8 +10,8 @@ const { moderations } = require('../../mongo/schemas')
 module.exports = class ModStatsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'mod-stats',
-            aliases: ['modstats'],
+            name: 'modstats',
+            aliases: ['mod-stats'],
             group: 'mod',
             description: 'Displays your moderation statistics or for a moderator or admin.',
             details: stripIndent`
@@ -43,7 +43,7 @@ module.exports = class ModStatsCommand extends Command {
         if (!user) user = author
 
         /** @type {ModerationSchema[]} */
-        const stats = await moderations.find({ guild: guild.id, mod: user.id })
+        const stats = await moderations.find({ guild: guild.id, mod: { id: user.id } })
 
         const pad = 10
         const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'

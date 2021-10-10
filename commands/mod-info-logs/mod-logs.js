@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { oneLine } = require('common-tags')
-const { User } = require('discord.js')
+const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { ModerationSchema } = require('../../mongo/typings')
@@ -10,11 +10,11 @@ const { ModerationSchema } = require('../../mongo/typings')
 module.exports = class ModLogsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'mod-logs',
-            aliases: ['modlogs'],
+            name: 'modlogs',
+            aliases: ['mod-logs'],
             group: 'mod',
             description:
-                'Displays all moderator logs of the server of from a specific user, or all if none is specified'
+                'Displays all moderator logs of the server of a specific user, or all if none is specified'
             ,
             details: userDetails,
             format: 'modlogs <user>',
@@ -44,7 +44,7 @@ module.exports = class ModLogsCommand extends Command {
         /** @type {ModerationSchema} */
         const query = user ? {
             guild: guildId,
-            mod: user.id
+            mod: { id: user.id }
         } : {
             guild: guildId
         }
@@ -57,6 +57,22 @@ module.exports = class ModLogsCommand extends Command {
             }))
         }
 
+        const filterMenu = new MessageActionRow().addComponents(
+            new MessageSelectMenu()
+                .setCustomId(`${message.id}:menu`)
+                .setMaxValues(1).setMinValues(1)
+                .setPlaceholder('Filter...')
+                .setOptions([
+                    { label: 'All', value: 'all', emoji: '🎲' },
+                    { label: 'Bans', value: 'ban', emoji: '822644311140204554' },
+                    { label: 'Soft bans', value: 'soft-ban', emoji: '🔨' },
+                    { label: 'Temp bans', value: 'temp-ban', emoji: '⏲' },
+                    { label: 'Kicks', value: 'kick', emoji: '🥾' },
+                    { label: 'Mutes', value: 'mute', emoji: '🔇' },
+                    { label: 'Warns', value: 'warn', emoji: '⚠' },
+                ])
+        )
+
         const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
         await generateEmbed(message, modLogs, {
@@ -68,7 +84,8 @@ module.exports = class ModLogsCommand extends Command {
             title: ' |  Id:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['updatedAt', 'guild', user ? 'mod' : null],
-            useDocId: true
+            useDocId: true,
+            components: [filterMenu]
         })
     }
 }

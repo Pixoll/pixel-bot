@@ -8,8 +8,8 @@ const { stripIndent } = require('common-tags')
 module.exports = class InviteInfoCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'invite-info',
-            aliases: ['inviteinfo'],
+            name: 'inviteinfo',
+            aliases: ['invite-info'],
             group: 'misc',
             description: 'Displays information about an invite.',
             details: '`invite` may be a link, an invite codes, or a vanity code.',

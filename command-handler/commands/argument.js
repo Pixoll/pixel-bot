@@ -1,5 +1,5 @@
 const { Util: { escapeMarkdown }, MessageEmbed } = require('discord.js')
-const { oneLine, stripIndents } = require('common-tags')
+const { oneLine } = require('common-tags')
 const isPromise = require('is-promise')
 const ArgumentUnionType = require('../types/union')
 const { ArgumentInfo, ArgumentDefault, ArgumentType, CommandoClient, ArgumentResult, CommandoMessage } = require('../typings')

@@ -36,8 +36,8 @@ function validRole(msg, role) {
 module.exports = class TempRoleCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'temp-role',
-            aliases: ['temprole'],
+            name: 'temprole',
+            aliases: ['temp-role'],
             group: 'mod',
             description: 'Assign a role that persists for a limited time.',
             details: `${memberDetails()}\n${timeDetails('time')}\n${roleDetails()}\n${reasonDetails()}`,

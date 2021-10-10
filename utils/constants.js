@@ -1,5 +1,5 @@
 const { stripIndent, oneLine } = require('common-tags');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
 
 // const stampsLink = 'https://discord.com/developers/docs/reference#message-formatting-timestamp-styles'
 // const timeDetails = stripIndent`
@@ -205,10 +205,21 @@ const disabledPageButtons = new MessageActionRow()
             .setDisabled()
     )
 
+const disabledFilterMenu = new MessageActionRow()
+    .addComponents(
+        new MessageSelectMenu()
+            .setCustomId('disabled_menu')
+            .setMaxValues(1).setMinValues(1)
+            .setPlaceholder('Filter...')
+            .setOptions({ label: 'place_holder', value: 'place_holder' })
+            .setDisabled()
+    )
+
 module.exports = {
     channelDetails,
     channelTypes,
     defaultEmojiRegex,
+    disabledFilterMenu,
     disabledPageButtons,
     embedColor,
     emojiRegex,

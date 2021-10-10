@@ -10,8 +10,8 @@ const { ModerationSchema } = require('../../mongo/typings')
 module.exports = class SoftBanCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'soft-ban',
-            aliases: ['softban'],
+            name: 'softban',
+            aliases: ['soft-ban'],
             group: 'mod',
             description: 'Soft-ban a user (Ban and immediate unban to delete user messages).',
             details: `${userDetails}\n${reasonDetails()}`,
