@@ -16,6 +16,7 @@ function patchData(data) {
         // autoMod: _patch(data?.autoMod),
         // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
+        stickyRoles: _patch(data?.stickyRoles),
         auditLogs: {
             channels: _patch(data?.auditLogs?.channels),
             commands: _patch(data?.auditLogs?.commands),
@@ -59,7 +60,7 @@ module.exports = class ModulesCommand extends Command {
 
         const data = await Modules.findOne({ guild: guildId })
         const patch = patchData(data)
-        const { auditLogs, /* autoMod, chatFilter, */ welcome } = patch
+        const { auditLogs, /* autoMod, chatFilter, */ welcome, stickyRoles } = patch
         const {
             channels, commands, emojis, invites, members, messages, moderation, modules, roles, server, voice
         } = auditLogs
@@ -71,6 +72,7 @@ module.exports = class ModulesCommand extends Command {
             .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
+                **>** **Sticky roles:** ${stickyRoles}
                 **>** **Welcome messages:** ${welcome}
                 **>** **Audit logs:**
                 \u2800 ⤷ **Channels:** ${channels}

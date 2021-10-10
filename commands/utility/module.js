@@ -23,6 +23,7 @@ function patchData(data) {
         // autoMod: _patch(data?.autoMod),
         // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
+        stickyRoles: _patch(data?.stickyRoles),
         auditLogs: {
             channels: _patch(data?.auditLogs?.channels),
             commands: _patch(data?.auditLogs?.commands),

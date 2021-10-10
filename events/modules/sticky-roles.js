@@ -1,23 +1,20 @@
 const { GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { fetchPartial } = require('../../utils')
+const { fetchPartial, isModuleEnabled } = require('../../utils')
 const { stickyRoles, setup } = require('../../mongo/schemas')
 const { SetupSchema, StickyRoleSchema } = require('../../mongo/typings')
 
 /**
- * Handles database behaviour in member events.
+ * Handles sticky roles for joining/leaving members.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
     client.on('guildMemberAdd', async member => {
-        const { guild, user, roles, id } = member
+        const { guild, roles, id } = member
         if (id === client.user.id) return
 
-        /** @type {SetupSchema} */
-        const data = await setup.findOne({ guild: guild.id })
-
-        if (data?.memberRole && !user.bot) await roles.add(data.memberRole).catch(() => null)
-        if (data?.botRole && user.bot) await roles.add(data.botRole).catch(() => null)
+        const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
+        if (!isEnabled) return
 
         /** @type {StickyRoleSchema} */
         const rolesData = await stickyRoles.findOne({ guild: guild.id, user: id })
@@ -31,6 +28,9 @@ module.exports = (client) => {
         const { guild, id, roles } = await fetchPartial(member)
         const botId = client.user.id
         if (id === botId) return
+
+        const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
+        if (!isEnabled) return
 
         const { members } = guild
 
@@ -59,4 +59,6 @@ module.exports = (client) => {
         if (!rolesData) await new stickyRoles(doc).save()
         else await rolesData.updateOne({ roles: rolesArray })
     })
+
+    client.emit('debug', 'Loaded modules/sticky-roles')
 }
