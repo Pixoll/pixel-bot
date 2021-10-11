@@ -80,8 +80,10 @@ const permissions = {
 	USE_APPLICATION_COMMANDS: 'Use application commands',
 	REQUEST_TO_SPEAK: 'Request to speak',
 	MANAGE_THREADS: 'Manage threads',
-	USE_PUBLIC_THREADS: 'Create public threads',
-	USE_PRIVATE_THREADS: 'Create private threads',
+	USE_PUBLIC_THREADS: 'Use public threads',
+	USE_PRIVATE_THREADS: 'Use private threads',
+	CREATE_PUBLIC_THREADS: 'Create public threads',
+	CREATE_PRIVATE_THREADS: 'Create private threads',
 	USE_EXTERNAL_STICKERS: 'Use external stickers',
 }
 

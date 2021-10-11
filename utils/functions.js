@@ -352,7 +352,7 @@ function isMod(roleOrMember, noAdmin) {
 }
 
 /**
- * Gets the key permissions from a role or member.
+ * Gets the mod permissions from a role or member.
  * @param {Role|GuildMember} roleOrMember A role or member.
  */
 function getKeyPerms(roleOrMember) {
@@ -367,7 +367,7 @@ function getKeyPerms(roleOrMember) {
         'SEND_MESSAGES', 'SEND_TTS_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'READ_MESSAGE_HISTORY', 'USE_EXTERNAL_EMOJIS',
         'VIEW_GUILD_INSIGHTS', 'CONNECT', 'SPEAK', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'USE_VAD',
         'CHANGE_NICKNAME', 'MANAGE_WEBHOOKS', 'USE_APPLICATION_COMMANDS', 'REQUEST_TO_SPEAK', 'USE_EXTERNAL_STICKERS',
-        'USE_PUBLIC_THREADS', 'USE_PRIVATE_THREADS'
+        'USE_PUBLIC_THREADS', 'USE_PRIVATE_THREADS', 'CREATE_PRIVATE_THREADS', 'CREATE_PUBLIC_THREADS'
     ]
 
     const filtered = perms.toArray().filter(perm => !filter.includes(perm))
