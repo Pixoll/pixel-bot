@@ -54,16 +54,22 @@ client.on('rateLimit', console.log)
 client.registry
     .registerDefaultTypes()
     .registerGroups([
-        { id: 'info', name: 'Information', guarded: true },
+        { id: 'channels', name: '💬 Channels', guarded: true },
+        { id: 'info', name: 'ℹ️ Information', guarded: true },
         // { id: 'fun', name: 'Fun commands' },
-        { id: 'minecraft', name: 'Minecraft' },
-        { id: 'misc', name: 'Miscellaneous' },
-        { id: 'mod', name: 'Moderation' },
-        { id: 'owner', name: 'Owner only', guarded: true },
-        { id: 'utility', name: 'Utility', guarded: true }
+        { id: 'minecraft', name: '<:minecraft:897178717925834773> Minecraft' },
+        { id: 'misc', name: '🎲 Miscellaneous' },
+        { id: 'mod', name: '<:ban_hammer:822644311140204554> Moderation' },
+        { id: 'mod-logs', name: '🗃 Moderation logs' },
+        { id: 'owner', name: '<a:owner_crown:806558872440930425> Owner only', guarded: true },
+        { id: 'settings', name: '⚙ Settings', guarded: true },
+        { id: 'utility', name: '🛠 Utility', guarded: true },
     ])
+    .client.emit('debug', `Loaded ${client.registry.groups.size} groups`)
+
+client.registry
     .registerCommandsIn(path.join(__dirname, '/commands'))
-client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
+    .client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
 
 client.on('ready', async () => {
     await require('./mongo')(client)

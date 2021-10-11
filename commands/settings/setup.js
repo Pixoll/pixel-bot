@@ -35,7 +35,7 @@ module.exports = class SetupCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setup',
-            group: 'utility',
+            group: 'settings',
             description: oneLine`
                 Setup the bot to it\'s core. The data collected from this command is never deleted,
                 so you don\'t have to worry about doing this twice if I ever leave the server and rejoin.

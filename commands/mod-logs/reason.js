@@ -10,7 +10,7 @@ module.exports = class ReasonCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'reason',
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Change the reason of a moderation log.',
             details: stripIndent`
                 \`modlog Id\` has to be a valid mod log Id. To see all the mod logs in this server use the \`modlogs\` command.

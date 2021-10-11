@@ -12,7 +12,7 @@ module.exports = class ToggleCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'toggle',
-            group: 'utility',
+            group: 'settings',
             description: 'Toggles a command or group on/off.',
             details: '`name` can be either a command\'s name or alias, or a group\'s name.',
             format: stripIndent`

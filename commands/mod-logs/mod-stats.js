@@ -12,7 +12,7 @@ module.exports = class ModStatsCommand extends Command {
         super(client, {
             name: 'modstats',
             aliases: ['mod-stats'],
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Displays your moderation statistics or for a moderator or admin.',
             details: stripIndent`
                 If \`user\` is not specified, I will show your own moderation statistics.

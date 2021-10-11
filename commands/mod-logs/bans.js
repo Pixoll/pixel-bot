@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { GuildBan, Collection } = require('discord.js')
+const { GuildBan, Collection, GuildAuditLogs } = require('discord.js')
 const { basicEmbed, generateEmbed, abcOrder, pluralize } = require('../../utils')
 
 /** A command that can be run in a client */
@@ -8,7 +8,7 @@ module.exports = class BansCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'bans',
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Displays all the bans of this server, or look for a specific ban.',
             clientPermissions: ['BAN_MEMBERS', 'MANAGE_MESSAGES'],
             userPermissions: ['BAN_MEMBERS'],
@@ -31,15 +31,27 @@ module.exports = class BansCommand extends Command {
             }))
         }
 
-        const bansList = bans.map(({ user, reason }) => ({
-            tag: user.tag,
-            id: user.id,
-            reason: reason?.replace(/%20/g, ' ') || 'No reason given.'
-        })).sort((a, b) =>
-            abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
-        )
+        /** @type {GuildAuditLogs} */
+        const _banLogs = await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD' }).catch(() => null)
+        const banLogs = _banLogs?.entries.toJSON() || []
 
-        await generateEmbed(message, bansList, {
+        const bansList = []
+        for (const [, { user, reason }] of bans) {
+            const banLog = banLogs.find(log => log.target.id === user.id)
+            const exec = banLog?.executor
+            const mod = exec ? {
+                mod: { id: exec.id, tag: exec.tag }
+            } : {}
+
+            bansList.push({
+                tag: user.tag, id: user.id, ...mod,
+                reason: reason?.replace(/%20/g, ' ') || 'No reason given.'
+            })
+        }
+
+        await generateEmbed(message, bansList.sort((a, b) =>
+            abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
+        ), {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             keyTitle: { suffix: 'tag' }

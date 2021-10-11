@@ -11,7 +11,7 @@ module.exports = class ModLogCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'modlog',
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Show or delete a single moderation log.',
             details: stripIndent`
                 The \`view\` sub-command will display the details of a single mod log.
@@ -114,7 +114,7 @@ module.exports = class ModLogCommand extends Command {
         await modLog.deleteOne()
 
         return await message.replyEmbed(basicEmbed({
-            color: 'green', emoji: 'check', description: `Deleted mod log with id \`${modLog._id}\``
+            color: 'GREEN', emoji: 'check', description: `Deleted mod log with id \`${modLog._id}\``
         }))
     }
 }

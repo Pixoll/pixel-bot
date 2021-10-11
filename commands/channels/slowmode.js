@@ -11,7 +11,7 @@ module.exports = class SlowmodeCommand extends Command {
         super(client, {
             name: 'slowmode',
             aliases: ['ratelimit'],
-            group: 'mod',
+            group: 'channels',
             description: 'Enable, change or disable slowmode/rate limit on a channel.',
             details: stripIndent`
                 ${channelDetails()}\n${timeDetails('time')}

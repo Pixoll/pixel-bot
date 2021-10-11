@@ -11,7 +11,7 @@ module.exports = class LockdownCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'lockdown',
-            group: 'mod',
+            group: 'channels',
             description: 'Lock every text channel that was specified when using the `setup` command',
             details: channelDetails('text-channels', true),
             format: stripIndent`

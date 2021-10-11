@@ -10,7 +10,7 @@ module.exports = class PrefixCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: 'prefix',
-			group: 'info',
+			group: 'settings',
 			description: 'Get or change the prefix of the bot.',
 			details: stripIndent`
 				If \`new prefix\` is not defined, it will send the current prefix.

@@ -11,7 +11,7 @@ module.exports = class DeleteWarnCommand extends Command {
         super(client, {
             name: 'deletewarn',
             aliases: ['delwarn', 'delete-warn', 'del-warn'],
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Clear a single warning from a member.',
             details: oneLine`
                 \`warning id\` has to be a valid warning id.

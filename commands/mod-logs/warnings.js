@@ -12,7 +12,7 @@ module.exports = class WarningsCommand extends Command {
         super(client, {
             name: 'warnings',
             aliases: ['warns'],
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Displays warnings of a specific user, or all warnings on this server.',
             details: userDetails,
             format: 'warnings <user>',

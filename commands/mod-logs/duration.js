@@ -10,7 +10,7 @@ module.exports = class DurationCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'duration',
-            group: 'mod',
+            group: 'mod-logs',
             description: 'Change the duration of a punishment.',
             details: stripIndent`
                 \`modlog Id\` has to be a valid mod log id. To see all the mod logs in this server use the \`modlogs\` command.
