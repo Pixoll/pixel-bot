@@ -81,11 +81,7 @@ module.exports = class TodoCommand extends Command {
             }))
         }
 
-        const { author, channel } = message
-
-        if (channel.type !== 'DM') {
-            await message.reply('You should receive a DM with your to-do list in no time.')
-        }
+        const { author } = message
 
         await generateEmbed(message, todoList, {
             number: 5,
@@ -93,7 +89,8 @@ module.exports = class TodoCommand extends Command {
             authorIconURL: author.displayAvatarURL({ dynamic: true }),
             title: 'Item',
             hasObjects: false,
-            toUser: true
+            toUser: true,
+            dmMsg: 'Check your DMs for your to-do list.'
         })
     }
 

@@ -20,7 +20,7 @@ module.exports = class RemindersCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const { author, channel } = message
+        const { author } = message
 
         const data = await reminders.find({ user: author.id })
         if (data.length === 0) {
@@ -29,17 +29,14 @@ module.exports = class RemindersCommand extends Command {
             }))
         }
 
-        if (channel.type !== 'DM') {
-            await message.reply('You should receive a DM with your reminders in no time.')
-        }
-
         await generateEmbed(message, data, {
             authorName: `You have ${pluralize('reminder', data.length)}`,
             authorIconURL: author.displayAvatarURL({ dynamic: true }),
             title: 'Reminder set for',
             keyTitle: { suffix: 'remindAt' },
             keys: ['reminder'],
-            toUser: true
+            toUser: true,
+            dmMsg: 'Check your DMs for the list of your reminders.'
         })
     }
 }

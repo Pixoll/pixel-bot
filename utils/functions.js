@@ -159,7 +159,7 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
     const embedText = `${customEmoji(emoji)} ${fieldName || description}`
 
     const embed = new MessageEmbed()
-        .setColor(color)
+        .setColor(typeof color === 'string' ? color.toUpperCase() : color)
 
     if (description) embed.setDescription(embedText)
     if (fieldName) {
@@ -478,12 +478,14 @@ function getDateDiff(date) {
     const milliseconds = Math.abs(Date.now() - date)
 
     // [years, months, days, hours, minutes, seconds]
-    const difference = new Date(milliseconds).toISOString().replace(/T|:/g, '-').substring(0, 19).split('-').map(v => Number(v))
+    const difference = new Date(milliseconds).toISOString().replace(/T|:/g, '-')
+        .substring(0, 19).split('-').map(v => Number(v))
     let [years, months, days, hours, minutes, seconds] = difference
 
     years -= 1970 // makes sure the year starts on 0
 
-    return [years + 'y', --months + 'mo', --days + 'd', hours + 'h', minutes + 'm', seconds + 's'].filter(value => !value.startsWith('0'))
+    return [years + 'y', --months + 'mo', --days + 'd', hours + 'h', minutes + 'm', seconds + 's']
+        .filter(value => !value.startsWith('0'))
 }
 
 /**
@@ -622,7 +624,9 @@ async function tempban(guild, bot, user, time, reason = 'No reason given.') {
     const duration = myMs(time, { long: true })
 
     if (member && !user.bot) {
-        const invite = await channels.cache.filter(({ type }) => !['category', 'store'].includes(type)).first().createInvite({ maxAge: 0, maxUses: 1 })
+        const invite = await channels.cache.filter(({ type }) =>
+            !['category', 'store'].includes(type)
+        ).first().createInvite({ maxAge: 0, maxUses: 1 })
         await user.send(stripIndent`
             You have been **banned** from **${guildName}** for **${duration}**
             **Reason:** ${reason}
@@ -669,7 +673,9 @@ async function kick(guild, bot, member, reason = 'No reason given.') {
     if (reason.length > 512 || !member.kickable || isMod(member)) return
 
     if (!member.user.bot) {
-        const invite = await channels.cache.filter(ch => !['category', 'store'].includes(ch.type)).first().createInvite({ maxAge: 604800, maxUses: 1 })
+        const invite = await channels.cache.filter(ch =>
+            !['category', 'store'].includes(ch.type)
+        ).first().createInvite({ maxAge: 604800, maxUses: 1 })
         await member.send(stripIndent`
             You have been **kicked** from **${guildName}**
             **Reason:** ${reason}
@@ -760,19 +766,22 @@ function docId() {
  * @param {number} data.number The number of chunks of data to be displayed in one page.
  * @param {number} data.total The total chunks of data.
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not.
+ * @param {string} [data.dmMsg=''] Whether to send the embed to the user DMs or not.
  * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
  * @param {TemplateEmbedFunction} template The embed template to use.
  */
 async function pagedEmbed(message, data, template) {
+    const { channel, author, id } = message
+
     if (!data.components) {
         data.components = []
     }
 
     const ids = {
-        start: `${message.id}:page_start`,
-        down: `${message.id}:page_down`,
-        up: `${message.id}:page_up`,
-        end: `${message.id}:page_end`
+        start: `${id}:page_start`,
+        down: `${id}:page_down`,
+        up: `${id}:page_up`,
+        end: `${id}:page_end`
     }
 
     const pageStart = new MessageButton()
@@ -799,22 +808,37 @@ async function pagedEmbed(message, data, template) {
         pageEnd.setDisabled()
     }
 
+    if (data.toUser) {
+        if (channel.type !== 'DM') {
+            await message.reply(stripIndent`
+                ${data.dmMsg || ''}
+                **Didn\'t get the DM?** Then please allow DMs from server members.
+            `)
+            await author.dmChannel.sendTyping().catch(() => null)
+        } else {
+            data.toUser = false
+        }
+    } else {
+        await channel.sendTyping().catch(() => null)
+    }
+
     const first = await template(0)
-    await message.channel.sendTyping().catch(() => null)
-    const msg = await message.replyEmbed(first.embed, {
+    const msgOptions = {
+        embeds: [first.embed],
         components: [
             ...data.components,
             new MessageActionRow()
                 .addComponents(pageStart, pageDown, pageUp, pageEnd)
         ].filter(c => c)
-    })
+    }
+    const msg = data.toUser ? await message.direct(msgOptions) : await message.reply(msgOptions)
 
     if (data.total <= data.number && !data.components[0]) return
 
     let index = 0
-    const _collector = message.channel.createMessageComponentCollector({
-        filter: int => int.user.id === message.author.id,
-        time: myMs('2m')
+    const _collector = channel.createMessageComponentCollector({
+        filter: int => int.user.id === author.id,
+        time: myMs('1m')
     })
 
     /** @type {?string[]} */
@@ -856,7 +880,8 @@ async function pagedEmbed(message, data, template) {
                 }
             }
             if (int.customId === ids.end) {
-                index = oldData.total - (oldData.total % data.number)
+                const newIndex = oldData.total - (oldData.total % data.number)
+                index = oldData.total === newIndex ? newIndex - 1 : newIndex
                 pageDown.setDisabled(false)
                 pageStart.setDisabled(false)
                 pageUp.setDisabled()
@@ -916,18 +941,21 @@ async function pagedEmbed(message, data, template) {
  * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
  * @param {boolean} [data.inLine=false] Whether the data should be displayed inline in the embed
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not
+ * @param {boolean} [data.dmMsg=''] The message to send to the user in DMs. Only if `toUser` is true
  * @param {boolean} [data.hasObjects] Whether `array` contains objects inside or not
  * @param {object} [data.keyTitle={}] A custom key data to use from the nested objects on the title
  * @param {string} [data.keyTitle.suffix] The name of the key to use as a suffix
  * @param {string} [data.keyTitle.prefix] The name of the key to use as a prefix
  * @param {string[]} [data.keys=undefined] The properties to display in the embed. If empty I will use every property
- * @param {string[]} [data.keysExclude=[]] The properties to exclude on the embed. If empty I will use `data.keys` or every property
+ * @param {string[]} [data.keysExclude=[]] The properties to exclude on the embed.
+ * If empty I will use `data.keys` or every property
  * @param {boolean} [data.useDocId=false] Whether to use the document's Id on each data chunk
  */
 async function generateEmbed(message, _array, data) {
     const {
-        number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription = false, title = '', inLine = false,
-        toUser = false, hasObjects = true, keyTitle = {}, keys, keysExclude = [], useDocId = false, components = []
+        number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription = false,
+        title = '', inLine = false, toUser = false, dmMsg = '', hasObjects = true, keyTitle = {},
+        keys, keysExclude = [], useDocId = false, components = []
     } = data
 
     if (_array.length === 0) throw new Error('array cannot be empty')
@@ -993,8 +1021,10 @@ async function generateEmbed(message, _array, data) {
                 const channel = key === 'channel' ? channels.resolve(item[key]) : null
 
                 const created = key === 'createdAt' ? `<t:${Math.trunc(item[key] * 1 / 1000)}>` : null
-                const duration = key === 'duration' && Number(item[key]) ? myMs(item[key], { long: true, length: 2, showAnd: true }) : null
-                const endsAt = key === 'endsAt' ? `<t:${Math.trunc(item[key] * 1 / 1000)}> (<t:${Math.trunc(item[key] * 1 / 1000)}:R>)` : null
+                const duration = key === 'duration' && Number(item[key]) ?
+                    myMs(item[key], { long: true, length: 2, showAnd: true }) : null
+                const endsAt = key === 'endsAt' ?
+                    `<t:${Math.trunc(item[key] * 1 / 1000)}> (<t:${Math.trunc(item[key] * 1 / 1000)}:R>)` : null
 
                 const docData = userStr || channel?.toString() || created || duration || endsAt || item[key]
 
@@ -1008,7 +1038,7 @@ async function generateEmbed(message, _array, data) {
         return { embed: embed, total: array.length }
     }
 
-    await pagedEmbed(message, { number, total: _array.length, toUser, components }, createEmbed)
+    await pagedEmbed(message, { number, total: _array.length, toUser, dmMsg, components }, createEmbed)
 }
 
 /**
