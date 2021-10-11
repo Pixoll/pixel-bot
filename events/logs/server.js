@@ -46,14 +46,16 @@ module.exports = (client) => {
             features: features1, icon: icon1, verificationLevel: verLVL1, explicitContentFilter: expFilter1,
             mfaLevel: mfa1, widgetChannel: widgetChan1, widgetEnabled: widgetOn1, discoverySplash: discSplash1,
             publicUpdatesChannel: updateChan1, rulesChannel: rulesChan1, preferredLocale: lang1, nsfwLevel: nsfw1,
-            partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1
+            partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1,
+            maximumBitrate: maxBitrate1
         } = oldGuild
         const { name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,
             defaultMessageNotifications: notif2, banner: banner2, description: desc2, splash: splash2, vanityURLCode: url2,
             features: features2, icon: icon2, verificationLevel: verLVL2, explicitContentFilter: expFilter2,
             mfaLevel: mfa2, widgetChannel: widgetChan2, widgetEnabled: widgetOn2, discoverySplash: discSplash2,
             publicUpdatesChannel: updateChan2, rulesChannel: rulesChan2, preferredLocale: lang2, nsfwLevel: nsfw2,
-            partnered: partner2, premiumTier: boostLvl2, systemChannelFlags: sysChanFlags2, verified: verified2
+            partnered: partner2, premiumTier: boostLvl2, systemChannelFlags: sysChanFlags2, verified: verified2,
+            maximumBitrate: maxBitrate2
         } = newGuild
 
         const imgOptions = { dynamic: true, size: 1024 }
@@ -177,6 +179,10 @@ module.exports = (client) => {
         if (partner1 !== partner2) embed.addField('Partened', partner1 ? 'Yes ➜ No' : 'No ➜ Yes')
 
         if (verified1 !== verified2) embed.addField('Verified', verified1 ? 'Yes ➜ No' : 'No ➜ Yes')
+
+        if (maxBitrate1 !== maxBitrate2) {
+            embed.addField('Max. bitrate', maxBitrate1 / 1000 + 'kbps ➜ ' + maxBitrate2 / 1000 + 'kbps')
+        }
 
         if (boostLvl1 !== boostLvl2) {
             embed.addField('Server boost level', `${removeUnderscores(boostLvl1)} ➜ ${removeUnderscores(boostLvl2)}`)
