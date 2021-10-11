@@ -772,6 +772,8 @@ function docId() {
  */
 async function pagedEmbed(message, data, template) {
     const { channel, author, id } = message
+    const isDMs = channel.type === 'DM'
+    const targetChan = data.toUser ? author.dmChannel : channel
 
     if (!data.components) {
         data.components = []
@@ -808,19 +810,12 @@ async function pagedEmbed(message, data, template) {
         pageEnd.setDisabled()
     }
 
-    if (data.toUser) {
-        if (channel.type !== 'DM') {
-            await message.reply(stripIndent`
-                ${data.dmMsg || ''}
-                **Didn\'t get the DM?** Then please allow DMs from server members.
-            `)
-            await author.dmChannel.sendTyping().catch(() => null)
-        } else {
-            data.toUser = false
-        }
-    } else {
-        await channel.sendTyping().catch(() => null)
-    }
+    if (data.toUser && !isDMs) await message.reply(stripIndent`
+        ${data.dmMsg || ''}
+        **Didn\'t get the DM?** Then please allow DMs from server members.
+    `)
+
+    await targetChan.sendTyping().catch(() => null)
 
     const first = await template(0)
     const msgOptions = {
@@ -831,12 +826,12 @@ async function pagedEmbed(message, data, template) {
                 .addComponents(pageStart, pageDown, pageUp, pageEnd)
         ].filter(c => c)
     }
-    const msg = data.toUser ? await message.direct(msgOptions) : await message.reply(msgOptions)
+    const msg = !isDMs ? await message.direct(msgOptions) : await message.reply(msgOptions)
 
     if (data.total <= data.number && !data.components[0]) return
 
     let index = 0
-    const _collector = channel.createMessageComponentCollector({
+    const collector = targetChan.createMessageComponentCollector({
         filter: int => int.user.id === author.id,
         time: myMs('1m')
     })
@@ -847,7 +842,7 @@ async function pagedEmbed(message, data, template) {
         []
     let option = 'all'
 
-    _collector.on('collect', async int => {
+    collector.on('collect', async int => {
         if (msg.id !== int.message.id) return
 
         if (int.isButton()) {
@@ -920,7 +915,7 @@ async function pagedEmbed(message, data, template) {
         }
     })
 
-    _collector.on('end', async () => {
+    collector.on('end', async () => {
         await msg.edit({
             components: [data.components[0] ? disabledFilterMenu : null, disabledPageButtons].filter(c => c)
         })
