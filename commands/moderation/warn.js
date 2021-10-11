@@ -74,6 +74,7 @@ module.exports = class warnCommand extends Command {
         }
 
         await new moderations(doc).save()
+        this.client.emit('guildMemberWarn', guild, author, user, reason)
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been warned`,

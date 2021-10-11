@@ -123,7 +123,7 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Muted user', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor('Muted member', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 Moderator ${mod.toString()} muted ${user.toString()} ${user.tag}
@@ -155,10 +155,31 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Unmuted user', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor('Unmuted member', user.displayAvatarURL({ dynamic: true }))
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(description)
             .setFooter(footer)
+            .setTimestamp()
+
+        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+    })
+
+    client.on('guildMemberWarn', async (guild, mod, user, reason) => {
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
+
+        const logsChannel = await getLogsChannel(guild)
+        if (!logsChannel) return
+
+        const embed = new MessageEmbed()
+            .setColor('GOLD')
+            .setAuthor('Warned member', user.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
+            .setDescription(stripIndent`
+                Moderator ${mod.toString()} warned ${user.toString()} ${user.tag}
+                **Reason:** ${reason}
+            `)
+            .setFooter(`User id: ${user.id} | Mod id: ${mod.id}`)
             .setTimestamp()
 
         await logsChannel.send({ embeds: [embed] }).catch(() => null)
