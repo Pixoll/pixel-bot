@@ -117,6 +117,7 @@ export interface ReminderSchema extends BaseSchema {
     reminder: string
     remindAt: number
     message: string
+    msgURL: string
     channel: string
 }
 

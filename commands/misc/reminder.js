@@ -12,11 +12,12 @@ module.exports = class ReminderCommand extends Command {
             aliases: ['remindme', 'remind'],
             group: 'misc',
             description: 'Set a reminder, and forget.',
-            details: timeDetails('time'),
-            format: 'reminder [time] [reminder]',
+            details: timeDetails('time') + '\nIf `reminder` is not specified, it will default to "Not specified".',
+            format: 'reminder [time] <reminder>',
             examples: [
-                'reminder 02/02/2022-21:58 Pixoll\'s b-day!',
-                'remind 1d Do some coding'
+                'reminder 02/02/2022 Pixoll\'s b-day!',
+                'remindme 1d Do some coding',
+                'remind 2w',
             ],
             throttling: { usages: 1, duration: 3 },
             guarded: true,
@@ -30,7 +31,8 @@ module.exports = class ReminderCommand extends Command {
                     key: 'reminder',
                     prompt: 'What do you want to be reminded about?',
                     type: 'string',
-                    max: 512
+                    max: 512,
+                    default: '`Not specified`'
                 }
             ]
         })
@@ -47,7 +49,7 @@ module.exports = class ReminderCommand extends Command {
         if (typeof time === 'number') time = time + Date.now()
         if (time instanceof Date) time = time.getTime()
 
-        const { author, id, channelId } = message
+        const { author, id, channelId, url } = message
         const stamp = timestamp(time, 'R')
 
         /** @type {ReminderSchema} */
@@ -56,8 +58,11 @@ module.exports = class ReminderCommand extends Command {
             reminder,
             remindAt: time,
             message: id,
-            channel: channelId
+            msgURL: url,
+            channel: channelId,
         }
+
+        return console.log(doc)
 
         await new reminders(doc).save()
 

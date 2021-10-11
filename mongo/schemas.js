@@ -109,6 +109,7 @@ const reminders = model('reminders', Schema({
     reminder: String,
     remindAt: Number,
     message: String,
+    msgURL: String,
     channel: String
 }, { timestamps: true }))
 
