@@ -62,8 +62,6 @@ module.exports = class ReminderCommand extends Command {
             channel: channelId,
         }
 
-        return console.log(doc)
-
         await new reminders(doc).save()
 
         await message.react(customEmoji('cross'))

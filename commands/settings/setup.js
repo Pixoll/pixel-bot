@@ -132,26 +132,11 @@ module.exports = class SetupCommand extends Command {
             .slice(0, 78).filter(c => c)
 
         const toDisplay = [
-            {
-                key: 'Audit logs channel',
-                value: logsChannel?.toString() || null
-            },
-            {
-                key: 'Default members role',
-                value: memberRole?.name || null
-            },
-            {
-                key: 'Default bots role',
-                value: botRole?.name || null
-            },
-            {
-                key: 'Muted members role',
-                value: mutedRole?.name || null
-            },
-            {
-                key: 'Lockdown channels',
-                value: lockdownChannels.join(', ') || null
-            },
+            { key: 'Audit logs channel', value: logsChannel?.toString() || null },
+            { key: 'Default members role', value: memberRole?.name || null },
+            { key: 'Default bots role', value: botRole?.name || null },
+            { key: 'Muted members role', value: mutedRole?.name || null },
+            { key: 'Lockdown channels', value: lockdownChannels.join(', ') || null },
         ].filter(obj => obj.value).map(obj => `**>** **${obj.key}:** ${obj.value}`)
 
         const embed = new MessageEmbed()
@@ -297,7 +282,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         if (data) await data.updateOne({ logsChannel: channel.id })
-        else await new setup(defaultDoc(message.guildId, 'logsChannel', channel.id))
+        else await new setup(defaultDoc(message.guildId, 'logsChannel', channel.id)).save()
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -321,7 +306,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         if (data) await data.updateOne({ mutedRole: role.id })
-        else await new setup(defaultDoc(message.guildId, 'mutedRole', role.id))
+        else await new setup(defaultDoc(message.guildId, 'mutedRole', role.id)).save()
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -345,7 +330,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         if (data) await data.updateOne({ memberRole: role.id })
-        else await new setup(defaultDoc(message.guildId, 'memberRole', role.id))
+        else await new setup(defaultDoc(message.guildId, 'memberRole', role.id)).save()
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -369,7 +354,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         if (data) await data.updateOne({ botRole: role.id })
-        else await new setup(defaultDoc(message.guildId, 'botRole', role.id))
+        else await new setup(defaultDoc(message.guildId, 'botRole', role.id)).save()
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -411,7 +396,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         if (data) await data.updateOne({ $push: { lockChannels: { $each: channels.map(c => c.id) } } })
-        else await new setup(defaultDoc(message.guildId, 'lockChannels', channels.map(c => c.id)))
+        else await new setup(defaultDoc(message.guildId, 'lockChannels', channels.map(c => c.id))).save()
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
