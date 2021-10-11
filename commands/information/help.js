@@ -67,16 +67,16 @@ module.exports = class HelpCommand extends Command {
                     .setColor('#4c9f4c')
                     .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
                     .setFooter(
-                        `Page ${++page} of 2 | Version: ${version} | Developer: ${owner}`,
+                        `Page ${++page} of 4 | Version: ${version} | Developer: ${owner}`,
                         user.displayAvatarURL({ dynamic: true })
                     )
 
                 if (page === 1) {
                     embed.setTitle('Commands list')
                         .setDescription(stripIndent`
-                            To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`
-                            You can also mention me to use a command, for example: \`@${user.tag} help\`
-                            To view detailed information about a specific command, type: \`${prefix}help <command>\`
+                            To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`.
+                            You can also mention me to use a command, for example: \`@${user.tag} help\`.
+                            Type \`${prefix}help <command>\` for detailed information of a command.
                         `)
 
                     for (const group of commands) {
@@ -88,48 +88,59 @@ module.exports = class HelpCommand extends Command {
                 }
 
                 if (page === 2) {
-                    embed.setTitle('Commands usage')
-                        .setDescription(stripIndent`
-                            ${oneLine`
-                                Some commands will have their arguments surrounded by different types
-                                of paranthesis or even include vertical bars inside them. The meaning
-                                of each one of these is listed below.
-                            `}
+                    embed.setTitle(`About ${user.username}`)
+                        .addField(
+                            '**Oops!** Seems like there\'s nothing to see here!',
+                            'This page is still a work in progress, please be patient.'
+                        )
+                }
 
-                            **>** **Square paranthesis** \`[]\`: This argument is required.
-                            **>** **Arrow parenthesis** \`<>\`: This argument is optional.
-                            **>** **Vertical bar** \`|\`: This means \`or\`.
-                        `)
-                        .addField('Time formatting', stripIndent`
-                            ${oneLine`
-                                Other commands will require the use of special formatting for time.
-                                It can either a number representing the amount of seconds, or a number
-                                followed by a letter (it\'s not case sensitive). The number can have
-                                decimals if you need them to. This are the letters that I support and
-                                their meanings:
-                            `}
+                if (page === 3) {
+                    embed.setTitle('Commands usage').setDescription(stripIndent`
+                        ${oneLine`
+                            Some commands will have their arguments surrounded by different types
+                            of paranthesisthem. The meaning of each one of these is listed below.
+                        `}
 
-                            **>** **Letter** \`ms\`: milliseconds
-                            **>** **Letter** \`s\`: seconds
-                            **>** **Letter** \`m\`: minutes
-                            **>** **Letter** \`h\`: hours
-                            **>** **Letter** \`d\`: days
-                            **>** **Letter** \`w\`: weeks
-                            **>** **Letter** \`mth\`: months
-                            **>** **Letter** \`y\`: years
+                        **>** **Square paranthesis** \`[]\`: This argument is required.
+                        **>** **Arrow parenthesis** \`<>\`: This argument is optional.
+                    `)
+                }
 
-                            ${oneLine`
-                                An example of this would be \`3d\`, which means \`3 days\`.
-                                Another one would be \`1.5y\`, which means \`1 year and a half\`.
-                                This also works: \`1d12h\`, which means \`1 day and 12 hours\`.
-                            `}
-                        `)
+                if (page === 4) {
+                    embed.setTitle('Time formatting').setDescription(stripIndent`
+                        ${oneLine`
+                            Other commands will require the use of special formatting for time.
+                            It can either a number representing the amount of seconds, or a number
+                            followed by a letter (it\'s not case sensitive). The number can have
+                            decimals if you need them to. This are the letters that I support and
+                            their meanings:
+                        `}
+
+                        **>** **Letter** \`ms\`: milliseconds
+                        **>** **Letter** \`s\`: seconds
+                        **>** **Letter** \`m\`: minutes
+                        **>** **Letter** \`h\`: hours
+                        **>** **Letter** \`d\`: days
+                        **>** **Letter** \`w\`: weeks
+                        **>** **Letter** \`mth\`: months
+                        **>** **Letter** \`y\`: years
+
+                        ${oneLine`
+                            An example of this would be \`3d\`, which means \`3 days\`.
+                            Another one would be \`1.5y\`, which means \`1 year and a half\`.
+                            This also works: \`1d12h\`, which means \`1 day and 12 hours\`.
+                        `}
+                    `)
                 }
 
                 return { embed }
             }
 
-            return await pagedEmbed(message, { number: 1, total: 2 }, helpEmbed)
+            return await pagedEmbed(message, {
+                number: 1, total: 4, toUser: true,
+                dmMsg: 'Check your DMs for a list of the commands and information about the bot.'
+            }, helpEmbed)
         }
 
         if (cmd.hidden) {
