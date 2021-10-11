@@ -11,7 +11,6 @@ module.exports = class RulesCommand extends Command {
             name: 'rules',
             group: 'misc',
             description: 'Displays all the rules of this server.',
-            clientPermissions: ['MANAGE_MESSAGES'],
             guildOnly: true,
             throttling: { usages: 1, duration: 3 }
         })

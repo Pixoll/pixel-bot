@@ -10,7 +10,7 @@ module.exports = class InvitesCommand extends Command {
             name: 'invites',
             group: 'misc',
             description: 'Displays a list of all the invites of this server, ordered by most to least used.',
-            clientPermissions: ['MANAGE_GUILD', 'MANAGE_MESSAGES'],
+            clientPermissions: ['MANAGE_GUILD'],
             guildOnly: true
         })
     }

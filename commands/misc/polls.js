@@ -10,7 +10,6 @@ module.exports = class PollsCommand extends Command {
             name: 'polls',
             group: 'misc',
             description: 'Displays all the on-going polls on this server.',
-            clientPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true
         })

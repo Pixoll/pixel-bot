@@ -10,7 +10,7 @@ module.exports = class BansCommand extends Command {
             name: 'bans',
             group: 'mod-logs',
             description: 'Displays all the bans of this server, or look for a specific ban.',
-            clientPermissions: ['BAN_MEMBERS', 'MANAGE_MESSAGES'],
+            clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             guildOnly: true
         })

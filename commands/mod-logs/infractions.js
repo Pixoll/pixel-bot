@@ -14,7 +14,6 @@ module.exports = class InfractionsCommand extends Command {
             details: userDetails,
             format: 'infractions [user]',
             examples: ['infractions Pixoll'],
-            clientPermissions: ['MANAGE_MESSAGES'],
             userPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,

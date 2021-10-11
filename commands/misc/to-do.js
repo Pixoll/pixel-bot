@@ -22,7 +22,6 @@ module.exports = class TodoCommand extends Command {
                 'todo add Make awesome commands',
                 'todo remove 2'
             ],
-            clientPermissions: ['MANAGE_MESSAGES'],
             throttling: { usages: 1, duration: 3 },
             args: [
                 {

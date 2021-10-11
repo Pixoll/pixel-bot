@@ -13,7 +13,6 @@ module.exports = class RolesCommand extends Command {
             details: memberDetails(),
             format: 'roles <member>',
             examples: ['roles Pixoll'],
-            clientPermissions: ['MANAGE_MESSAGES'],
             guildOnly: true,
             args: [{
                 key: 'member',
