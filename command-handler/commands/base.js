@@ -33,7 +33,7 @@ class Command {
 		 * @type {string[]}
 		 */
 		this.aliases = info.aliases || []
-		if (typeof info.autoAliases === 'undefined' || info.autoAliases) {
+		if (Boolean(info.autoAliases)) {
 			if (this.name.includes('-')) this.aliases.push(this.name.replace(/-/g, ''))
 			for (const alias of this.aliases) {
 				if (alias.includes('-')) this.aliases.push(alias.replace(/-/g, ''))

@@ -1319,7 +1319,7 @@ export interface CommandInfo {
 	aliases?: string[]
 	/**
 	 * Whether automatic aliases should be added
-	 * @default true
+	 * @default false
 	 */
 	autoAliases?: boolean
 	/** The id of the group the command belongs to (must be lowercase) */
