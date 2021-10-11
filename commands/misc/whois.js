@@ -32,6 +32,7 @@ module.exports = class WhoIsCommand extends Command {
     async run(message, { user }) {
         const { guild } = message
         if (!user) user = message.author
+        user = await user.fetch()
 
         /** @type {UserFlags} */
         const flags = await user.fetchFlags().catch(() => null)
@@ -55,6 +56,7 @@ module.exports = class WhoIsCommand extends Command {
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatar)
             .setThumbnail(avatar)
             .setDescription(description.join(' '))
+            .setImage(user.bannerURL({ dynamic: true, size: 2048 }))
             .setTimestamp()
 
         if (member) {
@@ -91,6 +93,8 @@ module.exports = class WhoIsCommand extends Command {
                 'Server owner' : permissions === 'Administrator' ? permissions : null
             if (acknowledgement) userInfo.addField('Acknowledgement', acknowledgement, true)
         }
+
+        userInfo.addField('Banner', 'Look below:')
 
         await message.replyEmbed(userInfo)
     }
