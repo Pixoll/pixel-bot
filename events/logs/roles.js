@@ -24,12 +24,25 @@ function comparePerms(Old = [], New = []) {
 }
 
 /**
+ * Returns a clickable link to the image. `None` if the link is invald
+ * @param {string} link The link of the image
+ * @param {boolean} [old] If it's the old image
+ */
+function imageLink(link, old) {
+    if (link) {
+        if (old) return 'See thumbnail'
+        return `[Click here](${link})`
+    }
+    return 'None'
+}
+
+/**
  * Handles all of the role logs.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
     client.on('roleCreate', async role => {
-        const { guild, id, hexColor, mentionable, hoist, tags } = role
+        const { guild, id, hexColor, mentionable, hoist, tags, unicodeEmoji } = role
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
@@ -37,20 +50,25 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
-        const colorLink = `https://www.color-hex.com/color/${hexColor.replace('#', '')}`
+        const color = hexColor === '#000000' ? null : hexColor
+        const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
+        const url = role.iconURL({ size: 2048 }) || colorURL
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor('Created role', guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Role:** ${role.toString()}
-                **>** **Color:** [${hexColor}](${colorLink})
-                **>** **Hoisted:** ${hoist ? 'Yes' : 'No'}
-                **>** **Mentionable:** ${mentionable ? 'Yes' : 'No'}
-                **>** **Mod perms:** ${getKeyPerms(role)}
+                **Role:** ${role.toString()}
+                **Color:** ${color ? `[${color}](${colorURL})` : 'None'}
+                **Emoji:** ${unicodeEmoji || 'None'}
+                **Hoisted:** ${hoist ? 'Yes' : 'No'}
+                **Mentionable:** ${mentionable ? 'Yes' : 'No'}
+                **Mod perms:** ${getKeyPerms(role)}
             `)
             .setFooter(`Role id: ${id}`)
             .setTimestamp()
+
+        if (url) embed.setThumbnail(url)
 
         if (tags) {
             const bot = tags.botId ? `Bot role for <@${tags.botId}>` : null
@@ -64,7 +82,7 @@ module.exports = (client) => {
     })
 
     client.on('roleDelete', async role => {
-        const { guild, id, name, hexColor, mentionable, hoist, tags } = role
+        const { guild, id, name, hexColor, mentionable, hoist, tags, unicodeEmoji } = role
         if (!guild.available) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
@@ -73,20 +91,25 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
-        const colorLink = `https://www.color-hex.com/color/${hexColor.replace('#', '')}`
+        const color = hexColor === '#000000' ? null : hexColor
+        const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
+        const url = role.iconURL({ size: 2048 }) || colorURL
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted role', guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Name:** ${name}
-                **>** **Color:** [${hexColor}](${colorLink})
-                **>** **Hoisted:** ${hoist ? 'Yes' : 'No'}
-                **>** **Mentionable:** ${mentionable ? 'Yes' : 'No'}
-                **>** **Mod perms:** ${getKeyPerms(role)}
+                **Name:** ${name}
+                **Color:** ${color ? `[${color}](${colorURL})` : 'No color'}
+                **Emoji:** ${unicodeEmoji || 'None'}
+                **Hoisted:** ${hoist ? 'Yes' : 'No'}
+                **Mentionable:** ${mentionable ? 'Yes' : 'No'}
+                **Mod perms:** ${getKeyPerms(role)}
             `)
             .setFooter(`Role id: ${id}`)
             .setTimestamp()
+
+        if (url) embed.setThumbnail(url)
 
         if (tags) {
             const bot = tags.botId ? `Bot role for <@${tags.botId}>` : null
@@ -108,8 +131,14 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
-        const { name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1, permissions: perms1 } = oldRole
-        const { name: name2, hexColor: color2, hoist: hoist2, mentionable: mention2, permissions: perms2 } = newRole
+        const {
+            name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1,
+            permissions: perms1, unicodeEmoji: emoji1, icon: icon1
+        } = oldRole
+        const {
+            name: name2, hexColor: color2, hoist: hoist2, mentionable: mention2,
+            permissions: perms2, unicodeEmoji: emoji2, icon: icon2
+        } = newRole
 
         const [added, removed] = comparePerms(format(perms1), format(perms2))
 
@@ -126,6 +155,13 @@ module.exports = (client) => {
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)
 
         if (color1 !== color2) embed.addField('Color', `[${color1}](${color1link}) ➜ [${color2}](${color2link})`)
+
+        if (emoji1 !== emoji2) embed.addField('Emoji', `${emoji1 || 'None'} ➜ ${emoji2 || 'None'}`)
+
+        if (icon1 !== icon2) embed.addField('Icon', stripIndent`
+            **>** **Before:** ${imageLink(oldRole.iconURL({ size: 2048 }), true)}
+            **>** **After:** ${imageLink(newRole.iconURL({ size: 2048 }))}
+        `).setThumbnail(oldRole.iconURL({ size: 2048 }))
 
         if (hoist1 !== hoist2) embed.addField('Hoisted', hoist1 ? 'Yes ➜ No' : 'No ➜ Yes')
 

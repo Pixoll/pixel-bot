@@ -15,7 +15,7 @@ require('dotenv').config()
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
 
 const client = new CommandoClient({
-    prefix: '!',
+    prefix: '!!',
     owner: '667937325002784768',
     serverInvite: 'https://discord.gg/Pc9pAHf3GU',
     inviteOptions: {
