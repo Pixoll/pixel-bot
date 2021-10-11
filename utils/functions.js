@@ -824,7 +824,8 @@ async function pagedEmbed(message, data, template) {
             ...data.components,
             new MessageActionRow()
                 .addComponents(pageStart, pageDown, pageUp, pageEnd)
-        ].filter(c => c)
+        ].filter(c => c),
+        ...noReplyInDMs(message)
     }
     const msg = !isDMs ? await message.direct(msgOptions) : await message.reply(msgOptions)
 

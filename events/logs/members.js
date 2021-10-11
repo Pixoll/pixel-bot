@@ -1,7 +1,19 @@
+const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { timestamp } = require('../../utils')
 const { isModuleEnabled, fetchPartial, getLogsChannel } = require('../../utils')
+
+/**
+ * Returns a clickable link to the image. `None` if the link is invald
+ * @param {string} link The link of the image
+ */
+function imageLink(link) {
+    if (link) return `[Click here](${link})`
+    return 'None'
+}
+
+const imgOptions = { dynamic: true, size: 2048 }
 
 /**
  * Handles all of the member logs.
@@ -67,11 +79,8 @@ module.exports = (client) => {
         await logsChannel.send({ embeds: [embed] }).catch(() => null)
     })
 
-    client.on('guildMemberUpdate', async (_oldMember, newMember) => {
-        /** @type {GuildMember} */
-        const oldMember = await fetchPartial(_oldMember)
-
-        const { guild, user, id } = oldMember
+    client.on('guildMemberUpdate', async (oldMember, newMember) => {
+        const { guild } = newMember
         if (!guild.available) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
@@ -80,19 +89,24 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return
 
-        const { roles: roles1, nickname: nick1 } = oldMember
-        const { roles: roles2, nickname: nick2 } = newMember
+        const { roles: roles1, nickname: nick1, avatar: avatar1 } = oldMember
+        const { roles: roles2, nickname: nick2, avatar: avatar2, user, id } = newMember
 
         const role = roles1.cache.difference(roles2.cache).first()
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated member', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor('Updated member', newMember.displayAvatarURL({ dynamic: true }))
             .setDescription(`${user.toString()} ${user.tag}`)
             .setFooter(`User id: ${id}`)
             .setTimestamp()
 
         if (nick1 !== nick2) embed.addField('Nickname', `${nick1 || 'None'} ➜ ${nick2 || 'None'}`)
+
+        if (avatar1 !== avatar2) embed.addField('Server avatar', stripIndent`
+            **>** **Before:** ${imageLink(oldMember.displayAvatarURL(imgOptions))}
+            **>** **After:** ${imageLink(newMember.displayAvatarURL(imgOptions))}
+        `).setThumbnail(newMember.displayAvatarURL(imgOptions))
 
         if (role) {
             const action = roles2.cache.has(role.id) ? 'Added' : 'Removed'

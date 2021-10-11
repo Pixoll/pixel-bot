@@ -17,13 +17,9 @@ function compareArrays(Old = [], New = []) {
 /**
  * Returns a clickable link to the image. `None` if the link is invald
  * @param {string} link The link of the image
- * @param {boolean} [old] If it's the old image
  */
-function imageLink(link, old) {
-    if (link) {
-        if (old) return 'See thumbnail'
-        return `[Click here](${link})`
-    }
+function imageLink(link) {
+    if (link) return `[Click here](${link})`
     return 'None'
 }
 
@@ -62,7 +58,7 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated server', oldGuild.iconURL(imgOptions))
+            .setAuthor('Updated server', newGuild.iconURL(imgOptions))
             .setFooter(`Server id: ${id}`)
             .setTimestamp()
 
@@ -81,7 +77,7 @@ module.exports = (client) => {
             imagesEmbed.addField('Icon', stripIndent`
                 **>** **Before:** ${imageLink(oldGuild.iconURL(imgOptions), true)}
                 **>** **After:** ${imageLink(newGuild.iconURL(imgOptions))}
-            `).setThumbnail(oldGuild.iconURL(imgOptions))
+            `).setThumbnail(newGuild.iconURL(imgOptions))
 
             await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
         }
@@ -139,7 +135,7 @@ module.exports = (client) => {
                     **>** **Before:** ${imageLink(oldGuild.bannerURL(imgOptions), true)}
                     **>** **After:** ${imageLink(newGuild.bannerURL(imgOptions))}
                 `
-            }]).setThumbnail(oldGuild.bannerURL(imgOptions))
+            }]).setThumbnail(newGuild.bannerURL(imgOptions))
 
             await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
         }
@@ -150,7 +146,7 @@ module.exports = (client) => {
                     **>** **Before:** ${imageLink(oldGuild.splashURL(imgOptions), true)}
                     **>** **After:** ${imageLink(newGuild.splashURL(imgOptions))}
                 `
-            }]).setThumbnail(oldGuild.splashURL(imgOptions))
+            }]).setThumbnail(newGuild.splashURL(imgOptions))
 
             await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
         }
@@ -216,7 +212,7 @@ module.exports = (client) => {
                     **>** **Before:** ${imageLink(oldGuild.discoverySplashURL(imgOptions), true)}
                     **>** **After:** ${imageLink(newGuild.discoverySplashURL(imgOptions))}
                 `
-            }]).setThumbnail(oldGuild.discoverySplashURL(imgOptions))
+            }]).setThumbnail(newGuild.discoverySplashURL(imgOptions))
 
             await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
         }

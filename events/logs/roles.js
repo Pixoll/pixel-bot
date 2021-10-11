@@ -26,13 +26,9 @@ function comparePerms(Old = [], New = []) {
 /**
  * Returns a clickable link to the image. `None` if the link is invald
  * @param {string} link The link of the image
- * @param {boolean} [old] If it's the old image
  */
-function imageLink(link, old) {
-    if (link) {
-        if (old) return 'See thumbnail'
-        return `[Click here](${link})`
-    }
+function imageLink(link) {
+    if (link) return `[Click here](${link})`
     return 'None'
 }
 
@@ -159,9 +155,9 @@ module.exports = (client) => {
         if (emoji1 !== emoji2) embed.addField('Emoji', `${emoji1 || 'None'} ➜ ${emoji2 || 'None'}`)
 
         if (icon1 !== icon2) embed.addField('Icon', stripIndent`
-            **>** **Before:** ${imageLink(oldRole.iconURL({ size: 2048 }), true)}
+            **>** **Before:** ${imageLink(oldRole.iconURL({ size: 2048 }))}
             **>** **After:** ${imageLink(newRole.iconURL({ size: 2048 }))}
-        `).setThumbnail(oldRole.iconURL({ size: 2048 }))
+        `).setThumbnail(newRole.iconURL({ size: 2048 }))
 
         if (hoist1 !== hoist2) embed.addField('Hoisted', hoist1 ? 'Yes ➜ No' : 'No ➜ Yes')
 
