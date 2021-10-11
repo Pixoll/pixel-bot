@@ -45,7 +45,7 @@ module.exports = class ModulesCommand extends Command {
                 Check the status of all available modules and sub-modules.
                 Use the \`module toggle\` command to toggle a module or sub-module.
             `,
-            userPermissions: ['ADMINISTRATOR'],
+            userPermissions: ['MANAGE_MESSAGES'],
             guarded: true,
             guildOnly: true
         })

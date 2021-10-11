@@ -54,7 +54,7 @@ module.exports = class ReactionRoleCommand extends Command {
                 'reactrole remove #self-roles 826935004936142918'
             ],
             clientPermissions: ['ADD_REACTIONS'],
-            userPermissions: ['MANAGE_MESSAGES'],
+            userPermissions: ['MANAGE_ROLES'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
