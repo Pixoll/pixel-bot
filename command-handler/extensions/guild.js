@@ -13,7 +13,11 @@ class CommandoGuild extends Guild {
 	 * @param {Guild} data 
 	 */
 	constructor(client, data) {
-		super(client, data)
+		super(client, { id: data.id })
+		for (const prop in data) {
+			this[prop] = data[prop]
+		}
+		client.emit('debug', `Created new ${this.constructor.name} with id ${this.id}`)
 
 		this._commando = true
 
