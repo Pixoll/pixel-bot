@@ -1,5 +1,5 @@
 console.log('Starting bot...')
-// require('./command-handler/extensions')
+require('./command-handler/extensions')
 
 const { CommandoMessage, Command } = require('./command-handler/typings')
 const CommandoClient = require('./command-handler/client')

@@ -1,11 +1,10 @@
-const { Client, User, UserResolvable, Collection } = require('discord.js')
+const { Client, User, UserResolvable } = require('discord.js')
 const CommandoRegistry = require('./registry')
 const CommandDispatcher = require('./dispatcher')
 const GuildSettingsHelper = require('./providers/helper')
 const SettingProvider = require('./providers/base')
 const { CommandoClientOptions } = require('./typings')
 const CommandoMessage = require('./extensions/message')
-const CommandoGuild = require('./extensions/guild')
 
 /**
  * Discord.js Client with a command framework
@@ -40,15 +39,6 @@ class CommandoClient extends Client {
 					null
 			})
 		}
-
-		// Creates CommandoGuilds when the client is ready
-		this.once('ready', client => {
-			const cache = new Collection(client.guilds.cache.map(g => ([g.id, g])))
-			for (const [, guild] of cache) {
-				client.guilds.cache.delete(guild.id)
-				client.guilds.cache.set(guild.id, new CommandoGuild(client, guild))
-			}
-		})
 
 		/**
 		 * The client's command registry
@@ -92,12 +82,6 @@ class CommandoClient extends Client {
 		this.on('messageUpdate', (oldMessage, newMessage) => {
 			const commando = new CommandoMessage(this, newMessage)
 			this.dispatcher.handleMessage(commando, oldMessage).catch(msgErr)
-		})
-
-		// Makes sure every new guild is a CommandoGuild
-		this.on('guildCreate', guild => {
-			this.guilds.cache.delete(guild.id)
-			this.guilds.cache.set(guild.id, new CommandoGuild(this, guild))
 		})
 
 		// Fetch the owner(s)
