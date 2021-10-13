@@ -27,7 +27,7 @@ async function bulkDelete(msg, messages) {
 
     const _msg = await msg.fetch().catch(() => null)
 
-    if (!_msg?.deleted) {
+    if (_msg && !_msg.deleted) {
         await msg.replyEmbed(embed)
         await msg.delete()
     }
