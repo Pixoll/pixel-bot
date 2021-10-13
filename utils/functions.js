@@ -828,7 +828,7 @@ async function pagedEmbed(message, data, template) {
         ].filter(c => c),
         ...noReplyInDMs(message)
     }
-    const msg = !isDMs ? await message.direct(msgOptions) : await message.reply(msgOptions)
+    const msg = data.toUser && !isDMs ? await message.direct(msgOptions) : await message.reply(msgOptions)
 
     if (data.total <= data.number && !data.components[0]) return
 
