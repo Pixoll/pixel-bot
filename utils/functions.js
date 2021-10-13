@@ -774,7 +774,7 @@ function docId() {
 async function pagedEmbed(message, data, template) {
     const { channel, author, id } = message
     const isDMs = channel.type === 'DM'
-    const targetChan = data.toUser ? author.dmChannel : channel
+    const targetChan = data.toUser ? await author.createDM() : channel
 
     if (!data.components) {
         data.components = []
