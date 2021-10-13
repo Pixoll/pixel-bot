@@ -76,9 +76,10 @@ module.exports = (client) => {
 
     client.on('messageUpdate', async (oldMessage, newMessage) => {
         const { content: content1 } = oldMessage
+        await newMessage.fetch()
         const { guild, channel, author, content: content2, url, id } = newMessage
 
-        if (channel.type === 'DM' || author.bot || content1 === content2) return
+        if (channel.type === 'DM' || author?.bot || content1 === content2) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
