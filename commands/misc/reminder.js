@@ -25,7 +25,7 @@ module.exports = class ReminderCommand extends Command {
                 {
                     key: 'time',
                     prompt: 'When would you like to be reminded?',
-                    type: ['date', 'duration']
+                    type: ['duration', 'date']
                 },
                 {
                     key: 'reminder',
