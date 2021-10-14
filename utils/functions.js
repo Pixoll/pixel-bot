@@ -1,6 +1,7 @@
 const {
-    MessageEmbed, GuildMember, User, Role, MessageOptions, PermissionResolvable, TextChannel,
-    GuildChannel, Message, ColorResolvable, AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu
+    MessageEmbed, GuildMember, User, Role, MessageOptions, PermissionResolvable, TextChannel, GuildChannel,
+    Message, ColorResolvable, AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu,
+    TextBasedChannels
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument } = require('../command-handler/typings')
 const { transform, isEqual, isArray, isObject } = require('lodash')
@@ -774,6 +775,7 @@ function docId() {
 async function pagedEmbed(message, data, template) {
     const { channel, author, id } = message
     const isDMs = channel.type === 'DM'
+    /** @type {TextBasedChannels} */
     const targetChan = data.toUser ? await author.createDM() : channel
 
     if (!data.components) {
@@ -828,7 +830,11 @@ async function pagedEmbed(message, data, template) {
         ].filter(c => c),
         ...noReplyInDMs(message)
     }
-    const msg = data.toUser && !isDMs ? await message.direct(msgOptions) : await message.reply(msgOptions)
+    /** @type {Message} */
+    const msg = data.toUser && !isDMs ?
+        await targetChan.send(msgOptions).catch(() => null) :
+        await message.reply(msgOptions)
+    if (!msg) return
 
     if (data.total <= data.number && !data.components[0]) return
 

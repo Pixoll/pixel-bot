@@ -1,4 +1,8 @@
-import { Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment, MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable, InviteGenerationOptions, GuildMember, ClientUser } from 'discord.js'
+import {
+	Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment,
+	MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable,
+	InviteGenerationOptions, GuildMember, ClientUser, CommandInteraction
+} from 'discord.js'
 
 /** A fancy argument */
 export class Argument {
@@ -553,7 +557,7 @@ export class CommandoClient extends Client {
 	/** Options for the client */
 	public options: CommandoClientOptions
 	/** Invite for the bot */
-	public botInvite?: string
+	public botInvite: string
 	/**
 	 * Owners of the bot, set by the {@link CommandoClientOptions#owner} option
 	 * - If you simply need to check if a user is an owner of the bot, please instead use {@link CommandoClient#isOwner}.
@@ -813,7 +817,7 @@ export class CommandoRegistry {
 	/**
 	 * Registers a single command
 	 * @param command Either a Command instance, or a constructor for one
-	 *  @see {@link CommandoRegistry#registerCommands}
+	 * @see {@link CommandoRegistry#registerCommands}
 	 */
 	public registerCommand(command: Command | Function): CommandoRegistry
 	/**

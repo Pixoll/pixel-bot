@@ -32,7 +32,7 @@ class CommandoClient extends Client {
 		 * Invite for the bot
 		 * @type {?string}
 		 */
-		this.botInvite = typeof this.options.inviteOptions === 'string' ? this.options.inviteOptions : null
+		this.botInvite = typeof options.inviteOptions === 'string' ? options.inviteOptions : null
 		if (!this.botInvite) {
 			this.once('ready', () => {
 				this.botInvite = this.options.inviteOptions ?
@@ -81,7 +81,7 @@ class CommandoClient extends Client {
 		 */
 		this._prefix = null
 
-		// Set up command handling
+		// Set up message command handling
 		const msgErr = err => {
 			this.emit('error', err)
 		}
