@@ -43,7 +43,8 @@ module.exports = (client) => {
 
     client.on('guildBanAdd', async banLog => {
         if (!banLog.guild.available) return
-        await banLog.fetch()
+        await banLog.fetch().catch(() => null)
+        if (!banLog) return
 
         const { user, guild, reason } = banLog
 
@@ -80,6 +81,8 @@ module.exports = (client) => {
 
     client.on('guildBanRemove', async unbanLog => {
         if (!unbanLog.guild.available) return
+        await unbanLog.fetch().catch(() => null)
+        if (!unbanLog) return
 
         const { user, guild } = unbanLog
 
