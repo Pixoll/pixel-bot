@@ -81,7 +81,9 @@ module.exports = class HelpCommand extends Command {
 
                     for (const group of commands) {
                         const { name } = group.first().group
-                        const commandList = group.map(c => `\`${c.name}\``).sort().join(', ')
+                        const commandList = group.map(c =>
+                            c.deprecated ? `~~\`${c.name}\`~~` : `\`${c.name}\``
+                        ).sort().join(', ')
 
                         embed.addField(name, commandList)
                     }
