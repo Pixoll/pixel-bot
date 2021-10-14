@@ -830,7 +830,11 @@ async function pagedEmbed(message, data, template) {
         ].filter(c => c),
         ...noReplyInDMs(message)
     }
-    const msg = data.toUser && !isDMs ? await targetChan.send(msgOptions) : await message.reply(msgOptions)
+    /** @type {Message} */
+    const msg = data.toUser && !isDMs ?
+        await targetChan.send(msgOptions).catch(() => null) :
+        await message.reply(msgOptions)
+    if (!msg) return
 
     if (data.total <= data.number && !data.components[0]) return
 
