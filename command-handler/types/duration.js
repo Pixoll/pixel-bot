@@ -15,12 +15,13 @@ class DurationArgumentType extends ArgumentType {
     validate(val, msg, arg) {
         /** @type {number} */
         const int = myMs(val, { number: true })
-        if (!int) {
+
+        if (!Boolean(int) || int < 1000) {
             return 'Please enter a valid duration format. Use the `help` command for more information.'
         }
 
-        if (int > myMs('5y')) {
-            return 'The max. usable duration is `5 years`. Please try again.'
+        if (int > myMs('1y')) {
+            return 'The max. usable duration is `1 year`. Please try again.'
         }
 
         if (arg.min !== null && typeof arg.min !== 'undefined' && int < arg.min) {
