@@ -30,7 +30,7 @@ module.exports = class RemindersCommand extends Command {
             }))
         }
 
-        const list = data.map(r => ({
+        const list = data.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
             reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`
         }))
