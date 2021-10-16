@@ -7,6 +7,7 @@ module.exports = class InviteCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'invite',
+            aliases: ['support'],
             group: 'info',
             description: 'Invite this bot to your server.',
             guarded: true
@@ -18,16 +19,24 @@ module.exports = class InviteCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const button = new MessageButton()
-            .setLabel('Invite')
+        const { botInvite, options } = this.client
+
+        const invite = new MessageButton()
+            .setEmoji('🔗')
+            .setLabel('Invite me')
             .setStyle('LINK')
-            .setURL(this.client.botInvite)
+            .setURL(botInvite)
+        const support = new MessageButton()
+            .setEmoji('🛠')
+            .setLabel('Support server')
+            .setStyle('LINK')
+            .setURL(options.serverInvite)
 
         const row = new MessageActionRow()
-            .addComponents(button)
+            .addComponents(invite, support)
 
         await message.reply({
-            content: 'Click the button below to invite the bot.',
+            content: '\u200B',
             components: [row]
         })
     }
