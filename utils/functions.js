@@ -770,6 +770,7 @@ function docId() {
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not.
  * @param {string} [data.dmMsg=''] Whether to send the embed to the user DMs or not.
  * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
+ * @param {boolean} [data.skipMaxButtons=false] Whether to skip the page start and page end buttons
  * @param {TemplateEmbedFunction} template The embed template to use.
  */
 async function pagedEmbed(message, data, template) {
@@ -826,7 +827,9 @@ async function pagedEmbed(message, data, template) {
         components: [
             ...data.components,
             new MessageActionRow()
-                .addComponents(pageStart, pageDown, pageUp, pageEnd)
+                .addComponents(data.skipMaxButtons ?
+                    [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
+                )
         ].filter(c => c),
         ...noReplyInDMs(message)
     }
@@ -897,7 +900,9 @@ async function pagedEmbed(message, data, template) {
                 components: [
                     ...data.components,
                     new MessageActionRow()
-                        .addComponents(pageStart, pageDown, pageUp, pageEnd)
+                        .addComponents(data.skipMaxButtons ?
+                            [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
+                        )
                 ].filter(c => c),
                 ...noReplyInDMs(msg)
             }).catch(() => null)
@@ -916,7 +921,9 @@ async function pagedEmbed(message, data, template) {
                 components: [
                     ...data.components,
                     new MessageActionRow()
-                        .addComponents(pageStart, pageDown, pageUp, pageEnd)
+                        .addComponents(data.skipMaxButtons ?
+                            [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
+                        )
                 ].filter(c => c),
                 ...noReplyInDMs(msg)
             }).catch(() => null)
@@ -925,7 +932,12 @@ async function pagedEmbed(message, data, template) {
 
     collector.on('end', async () => {
         await msg.edit({
-            components: [data.components[0] ? disabledFilterMenu : null, disabledPageButtons].filter(c => c)
+            components: [
+                data.components[0] ? disabledFilterMenu : null,
+                data.skipMaxButtons ?
+                    new MessageActionRow().addComponents(disabledPageButtons.components.slice(1, 3)) :
+                    disabledPageButtons
+            ].filter(c => c)
         })
     })
 }
@@ -937,7 +949,8 @@ async function pagedEmbed(message, data, template) {
  * @param {object} data Some extra data for the embed
  * @param {number} [data.number=6] The number of chunks to display per page
  * @param {string} [data.color='#4c9f4c'] The color of the embed
- * @param {string} data.authorName The name of the author
+ * @param {string} [data.embedTitle] The title of the embed
+ * @param {string} [data.authorName] The name of the author
  * @param {string} [data.authorIconURL=null] The icon URL of the author
  * @param {string} [data.title=''] The title of each section in the embed
  * @param {boolean} [data.useDescription=false] Whether to use `setDescription()` or not
@@ -945,6 +958,7 @@ async function pagedEmbed(message, data, template) {
  * @param {boolean} [data.inLine=false] Whether the data should be displayed inline in the embed
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not
  * @param {boolean} [data.dmMsg=''] The message to send to the user in DMs. Only if `toUser` is true
+ * @param {boolean} [data.skipMaxButtons=false] Whether to skip the page start and page end buttons
  * @param {boolean} [data.hasObjects] Whether `array` contains objects inside or not
  * @param {object} [data.keyTitle={}] A custom key data to use from the nested objects on the title
  * @param {string} [data.keyTitle.suffix] The name of the key to use as a suffix
@@ -958,7 +972,7 @@ async function generateEmbed(message, _array, data) {
     const {
         number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription = false,
         title = '', inLine = false, toUser = false, dmMsg = '', hasObjects = true, keyTitle = {},
-        keys, keysExclude = [], useDocId = false, components = []
+        keys, keysExclude = [], useDocId = false, components = [], embedTitle, skipMaxButtons = false
     } = data
 
     if (_array.length === 0) throw new Error('array cannot be empty')
@@ -982,6 +996,7 @@ async function generateEmbed(message, _array, data) {
             .setColor(color.toUpperCase())
             .setTimestamp()
 
+        if (embedTitle) embed.setTitle(embedTitle)
         if (authorName) embed.setAuthor(authorName, authorIconURL)
         if (pages > 1) embed.setFooter(`Page ${Math.round(start / number + 1)} of ${pages}`)
         if (useDescription) return {
@@ -1041,7 +1056,7 @@ async function generateEmbed(message, _array, data) {
         return { embed: embed, total: array.length }
     }
 
-    await pagedEmbed(message, { number, total: _array.length, toUser, dmMsg, components }, createEmbed)
+    await pagedEmbed(message, { number, total: _array.length, toUser, dmMsg, components, skipMaxButtons }, createEmbed)
 }
 
 /**
