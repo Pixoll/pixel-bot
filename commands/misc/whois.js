@@ -56,7 +56,6 @@ module.exports = class WhoIsCommand extends Command {
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatar)
             .setThumbnail(avatar)
             .setDescription(description.join(' '))
-            .setImage(user.bannerURL({ dynamic: true, size: 2048 }))
             .setTimestamp()
 
         if (member) {
@@ -94,7 +93,10 @@ module.exports = class WhoIsCommand extends Command {
             if (acknowledgement) userInfo.addField('Acknowledgement', acknowledgement, true)
         }
 
-        userInfo.addField('Banner', 'Look below:')
+        const banner = user.bannerURL({ dynamic: true, size: 2048 })
+        if (banner) {
+            userInfo.setImage(banner).addField('Banner', 'Look below:')
+        }
 
         await message.replyEmbed(userInfo)
     }

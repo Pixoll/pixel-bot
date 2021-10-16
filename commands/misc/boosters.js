@@ -3,13 +3,13 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, pluralize, abcOrder } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class BotListCommand extends Command {
+module.exports = class BoostersCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'botlist',
-            aliases: ['bots'],
+            name: 'boosters',
+            aliases: ['boosts'],
             group: 'misc',
-            description: 'Displays the bot list of the server.',
+            description: 'Displays a list of the members that have boosted the server.',
             guildOnly: true
         })
     }
@@ -20,13 +20,13 @@ module.exports = class BotListCommand extends Command {
      */
     async run(message) {
         const members = message.guild.members.cache
-        const botList = members.filter(m => m.user.bot)
+        const botList = members.filter(m => m.roles.premiumSubscriberRole)
             .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
-            .map(bot => `${bot.toString()} ${bot.user.tag}`)
+            .map(m => `${m.toString()} ${m.user.tag}`)
 
         await generateEmbed(message, botList, {
             number: 20,
-            authorName: `There's ${pluralize('bot', botList.length)}`,
+            authorName: `There's ${pluralize('booster', botList.length)}`,
             useDescription: true
         })
     }

@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, generateEmbed, pluralize } = require('../../utils')
+const { basicEmbed, generateEmbed, pluralize, abcOrder } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class DiscriminatorCommand extends Command {
@@ -35,6 +35,7 @@ module.exports = class DiscriminatorCommand extends Command {
     async run(message, { discriminator }) {
         const members = message.guild.members.cache
         const match = members.filter(m => m.user.discriminator === discriminator)
+            .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
             .map(m => `${m.toString()} ${m.user.tag}`)
 
         if (!match || match.length === 0) {
