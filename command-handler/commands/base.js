@@ -256,7 +256,7 @@ class Command {
 		}
 
 		if (channel.type !== 'DM' && this.userPermissions) {
-			const missing = channel.permissionsFor(author).missing(this.userPermissions)
+			const missing = channel.permissionsFor(author).missing(this.userPermissions, false)
 			if (missing.length > 0) {
 				return missing
 			}
