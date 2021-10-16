@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { Role } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, roleDetails } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, roleDetails, abcOrder } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class MembersCommand extends Command {
@@ -29,7 +29,9 @@ module.exports = class MembersCommand extends Command {
      * @param {Role} args.role The role to get the members from
      */
     async run(message, { role }) {
-        const members = role.members.map(m => `${m.toString()} ${m.user.tag}`)
+        const members = role.members.sort((a, b) => abcOrder(a.user.tag, b.user.tag))
+            .map(m => `${m.toString()} ${m.user.tag}`)
+
         if (members.length === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: `The \`${role.name}\` role has no members.`

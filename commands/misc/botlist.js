@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { generateEmbed, pluralize } = require('../../utils')
+const { generateEmbed, pluralize, abcOrder } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class BotListCommand extends Command {
@@ -21,6 +21,7 @@ module.exports = class BotListCommand extends Command {
     async run(message) {
         const members = message.guild.members.cache
         const botList = members.filter(m => m.user.bot)
+            .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
             .map(bot => `${bot.toString()} ${bot.user.tag}`)
 
         await generateEmbed(message, botList, {
