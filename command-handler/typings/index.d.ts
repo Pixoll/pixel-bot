@@ -1297,7 +1297,7 @@ export interface ArgumentResult {
 	answers: Message[]
 }
 
-export type ArgumentTypes = 'string' | 'integer' | 'float' | 'boolean' | 'duration' | 'date' | 'user' | 'member' |
+export type ArgumentTypes = 'string' | 'integer' | 'float' | 'boolean' | 'duration' | 'date' | 'time' | 'user' | 'member' |
 	'role' | 'channel' | 'text-channel' | 'thread-channel' | 'voice-channel' | 'stage-channel' | 'category-channel' |
 	'message' | 'invite' | 'custom-emoji' | 'default-emoji' | 'command' | 'group'
 
@@ -1571,6 +1571,11 @@ export interface DefaultTypesOptions {
 	 * @default true
 	 */
 	date?: boolean
+	/**
+	 * Whether to register the built-in time type
+	 * @default true
+	 */
+	time?: boolean
 	/**
 	 * Whether to register the built-in user type
 	 * @default true
