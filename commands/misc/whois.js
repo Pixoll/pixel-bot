@@ -56,6 +56,7 @@ module.exports = class WhoIsCommand extends Command {
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatar)
             .setThumbnail(avatar)
             .setDescription(description.join(' '))
+            .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
         if (member) {
