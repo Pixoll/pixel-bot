@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { docId, basicEmbed, userException } = require('../../utils')
+const { docId, basicEmbed, userException, modConfirmation } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { ModerationSchema } = require('../../mongo/typings')
@@ -54,6 +54,9 @@ module.exports = class warnCommand extends Command {
                 color: 'RED', emoji: 'cross', description: 'You can\'t warn a bot.'
             }))
         }
+
+        const confirm = await modConfirmation(message, 'warn', user, { reason })
+        if (!confirm) return
 
         await user.send(basicEmbed({
             color: 'GOLD', fieldName: `You have been warned on ${guild.name}`,

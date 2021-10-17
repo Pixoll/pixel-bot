@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User, TextChannel, GuildMember } = require('discord.js')
-const { docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge } = require('../../utils')
+const { docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge, modConfirmation } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { ModerationSchema } = require('../../mongo/typings')
@@ -66,6 +66,8 @@ module.exports = class SoftBanCommand extends Command {
         const member = await members.fetch(user).catch(() => null)
         const mExcept = memberException(member, this)
         if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
+        const confirm = await modConfirmation(message, 'soft-ban', user, { reason })
+        if (!confirm) return
 
         if (!user.bot && !!member) {
             const embed = basicEmbed({

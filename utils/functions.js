@@ -1060,6 +1060,71 @@ async function generateEmbed(message, _array, data) {
 }
 
 /**
+ * Creates and manages confirmation buttons (y/n) for moderation actions
+ * @param {CommandoMessage} message The message that triggers this confirmation
+ * @param {string} action The action for confirmation
+ * @param {User|string} target The target on which this action is being executed
+ * @param {object} [data] The data of this action
+ * @param {string} [data.reason] The reason of this action
+ * @param {string} [data.duration] The duration of this action
+ * @param {boolean} [sendCancelled=true] Whether to send 'Cancelled command.' or not
+ */
+async function modConfirmation(message, action, target, data = {}, sendCancelled) {
+    const { id, author, channel } = message
+    sendCancelled ??= true
+    data.reason ||= 'No reason given.'
+
+    const ids = {
+        yes: `${id}:yes`,
+        no: `${id}:no`,
+    }
+
+    const confirmEmbed = new MessageEmbed()
+        .setColor('GOLD')
+        .addField(
+            `Are you sure you want to ${action} ${target instanceof User ? target.tag : target}?`,
+            stripIndent`
+                ${target instanceof User ? stripIndent`
+                    **User:** ${target.toString()} ${target.tag}
+                    **Id:** ${target.id}
+                ` : `**Target:** ${target}`}
+                **Action:** ${action}
+                **Reason:** ${data.reason}
+                ${data.duration ? `**Duration:** ${data.duration}` : ''}
+            `
+        )
+        .setFooter('The command will automatically be cancelled in 30 seconds.')
+
+    const yesButton = new MessageButton()
+        .setStyle('SUCCESS')
+        .setCustomId(ids.yes)
+        .setEmoji(customEmoji('check'))
+    const noButton = new MessageButton()
+        .setStyle('DANGER')
+        .setCustomId(ids.no)
+        .setEmoji(customEmoji('cross'))
+
+    const msg = await message.replyEmbed(confirmEmbed, {
+        components: [new MessageActionRow().addComponents(yesButton, noButton)]
+    })
+
+    const pushed = await msg.awaitMessageComponent({
+        filter: int => int.user.id === author.id,
+        time: myMs('30s')
+    }).catch(() => null)
+
+    await msg.delete()
+
+    if (!pushed || pushed.customId === ids.no) {
+        if (sendCancelled) await message.reply('Cancelled command.')
+        return false
+    }
+
+    await channel.sendTyping().catch(() => null)
+    return true
+}
+
+/**
  * Creates an embed containing the information about the command.
  * @param {Command} cmd The command to get information from.
  * @param {CommandoGuild} guild The guild where the command is used.
@@ -1157,7 +1222,6 @@ module.exports = {
     findCommonElement,
     formatBytes,
     formatDate,
-    removeUnderscores,
     generateEmbed,
     getArgument,
     getDateDiff,
@@ -1166,14 +1230,16 @@ module.exports = {
     getLogsChannel,
     inviteButton,
     isMod,
+    isModuleEnabled,
     kick,
     memberException,
-    isModuleEnabled,
+    modConfirmation,
     mute,
     pagedEmbed,
     pluralize,
     remDiscFormat,
     removeDashes,
+    removeUnderscores,
     noReplyInDMs,
     sleep,
     sliceDots,

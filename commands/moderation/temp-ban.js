@@ -1,7 +1,7 @@
 const { User, GuildMember, TextChannel } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton } = require('../../utils')
+const { docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton, modConfirmation } = require('../../utils')
 const { moderations, active } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { myMs } = require('../../utils')
@@ -77,6 +77,8 @@ module.exports = class TempBanCommand extends Command {
         const member = await members.fetch(user).catch(() => null)
         const mExcept = memberException(member, this)
         if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
+        const confirm = await modConfirmation(message, 'temp-ban', user, { reason })
+        if (!confirm) return
 
         if (!user.bot && !!member) {
             const embed = basicEmbed({
