@@ -1,6 +1,6 @@
 const { User, GuildMember } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { docId, basicEmbed, userException, memberException, reasonDetails, userDetails } = require('../../utils')
+const { docId, basicEmbed, userException, memberException, reasonDetails, userDetails, modConfirmation } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
@@ -65,6 +65,8 @@ module.exports = class BanCommand extends Command {
         const member = await members.fetch(user).catch(() => null)
         const mExcept = memberException(member, this)
         if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
+        const confirm = await modConfirmation(message, 'ban', user, { reason })
+        if (!confirm) return
 
         if (!user.bot && !!member) {
             await user.send({

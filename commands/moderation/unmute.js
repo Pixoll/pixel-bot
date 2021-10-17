@@ -2,7 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { active, setup } = require('../../mongo/schemas')
-const { memberDetails, reasonDetails, basicEmbed } = require('../../utils')
+const { memberDetails, reasonDetails, basicEmbed, modConfirmation } = require('../../utils')
 const { SetupSchema } = require('../../mongo/typings')
 const { Document } = require('mongoose')
 
@@ -67,6 +67,9 @@ module.exports = class UnmuteCommand extends Command {
                 color: 'RED', emoji: 'cross', description: 'That user is not muted.'
             }))
         }
+
+        const confirm = await modConfirmation(message, 'unmute', member.user, { reason })
+        if (!confirm) return
 
         await roles.remove(role)
         this.client.emit('guildMemberUnmute', guild, author, user, reason)

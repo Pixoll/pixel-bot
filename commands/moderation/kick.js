@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { GuildMember, TextChannel } = require('discord.js')
-const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails } = require('../../utils')
+const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails, modConfirmation } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
@@ -53,9 +53,10 @@ module.exports = class KickCommand extends Command {
 
         const uExcept = userException(user, author, this)
         if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
-
         const mExcept = memberException(member, this)
         if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
+        const confirm = await modConfirmation(message, 'kick', user, { reason })
+        if (!confirm) return
 
         if (!user.bot) {
             const embed = basicEmbed({

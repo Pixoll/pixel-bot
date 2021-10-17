@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { basicEmbed, docId } = require('../../utils')
+const { basicEmbed, docId, modConfirmation } = require('../../utils')
 const { moderations, active } = require('../../mongo/schemas')
 const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
@@ -64,6 +64,9 @@ module.exports = class ReasonCommand extends Command {
 
         /** @type {ActiveSchema} */
         const activeLog = await active.findOne(query)
+
+        const confirm = await modConfirmation(message, 'update modlog reason', modlogId, { reason })
+        if (!confirm) return
 
         await modLog.updateOne({ reason })
         await activeLog?.updateOne({ reason })

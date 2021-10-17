@@ -2,7 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { docId, isMod, basicEmbed, memberDetails } = require('../../utils')
+const { docId, isMod, basicEmbed, memberDetails, modConfirmation } = require('../../utils')
 const { moderations } = require('../../mongo/schemas')
 const { ModerationSchema } = require('../../mongo/typings')
 
@@ -96,11 +96,16 @@ module.exports = class MultiBanCommand extends Command {
         const manager = guild.members
         const authorId = author.id
 
-        const toEdit = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Banning members...'
-        }))
+        const embed = n => basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: `Banned ${n}/${members.length} members...`
+        })
+        const toEdit = await message.replyEmbed(embed(0))
 
+        const banned = []
         for (const { user } of members) {
+            const confirm = await modConfirmation(message, 'ban', user, { reason }, false)
+            if (!confirm) continue
+
             if (!user.bot) {
                 await user.send({
                     embeds: [basicEmbed({
@@ -114,6 +119,8 @@ module.exports = class MultiBanCommand extends Command {
             }
 
             await manager.ban(user, { days: 7, reason })
+            banned.push(user)
+            await toEdit.edit({ embeds: [embed(banned.length)] })
 
             /** @type {ModerationSchema} */
             const doc = {
@@ -128,11 +135,13 @@ module.exports = class MultiBanCommand extends Command {
             await new moderations(doc).save()
         }
 
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', fieldName: `Banned the following users:`,
-                fieldValue: members.map(m => `"${m.user.tag}"`).join(', ')
-            })]
-        })
+        const options = banned.length !== 0 ? {
+            color: 'GREEN', emoji: 'check', fieldName: `Banned the following members:`,
+            fieldValue: banned.map(u => `"${u.tag}"`).join(', ')
+        } : {
+            color: 'RED', emoji: 'cross', description: 'No members were banned.'
+        }
+
+        await toEdit.edit({ embeds: [basicEmbed(options)] })
     }
 }

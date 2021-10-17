@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { myMs, basicEmbed, timeDetails, docId } = require('../../utils')
+const { myMs, basicEmbed, timeDetails, docId, modConfirmation } = require('../../utils')
 const { moderations, active } = require('../../mongo/schemas')
 const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
@@ -79,6 +79,8 @@ module.exports = class DurationCommand extends Command {
         /** @type {string} */
         const longTime = myMs(duration - Date.now(), { long: true })
 
+        const confirm = await modConfirmation(message, 'update modlog duration', modlogId, { duration: longTime })
+        if (!confirm) return
         await modLog.updateOne({ duration: longTime })
         await activeLog.updateOne({ duration })
 

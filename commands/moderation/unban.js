@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User } = require('discord.js')
-const { basicEmbed, userDetails, reasonDetails } = require('../../utils')
+const { basicEmbed, userDetails, reasonDetails, modConfirmation } = require('../../utils')
 const { active } = require('../../mongo/schemas')
 const { Document } = require('mongoose')
 
@@ -55,6 +55,9 @@ module.exports = class UnbanCommand extends Command {
                 color: 'RED', emoji: 'cross', description: 'That user is not banned.'
             }))
         }
+
+        const confirm = await modConfirmation(message, 'unban', user, { reason })
+        if (!confirm) return
 
         await members.unban(user, reason)
 
