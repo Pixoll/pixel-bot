@@ -166,8 +166,8 @@ class CommandoMessage extends Message {
 	 */
 	async run() { // eslint-disable-line complexity
 		// Checks if the client has permission to send messages
-		const clientPerms = this.clientMember.permissionsIn(this.channel).serialize()
-		if (!clientPerms.SEND_MESSAGES) {
+		const clientPerms = this.clientMember?.permissionsIn(this.channel).serialize()
+		if (clientPerms && !clientPerms.SEND_MESSAGES) {
 			this.direct(stripIndent`
 				It seems like the bot cannot send messages in this channel: ${this.channel.toString()}
 				Please try in another channel, or contact the admins of that server to solve this issue.
