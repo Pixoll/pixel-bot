@@ -1,6 +1,6 @@
 const { Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels } = require('discord.js')
 const { CommandoClient, StringResolvable, CommandoGuild, ClientGuildMember } = require('../typings')
-const { oneLine } = require('common-tags')
+const { oneLine, stripIndent } = require('common-tags')
 const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')
 const CommandFormatError = require('../errors/command-format')
@@ -165,6 +165,16 @@ class CommandoMessage extends Message {
 	 * @return {Promise<?Message|?Array<Message>>}
 	 */
 	async run() { // eslint-disable-line complexity
+		// Checks if the client has permission to send messages
+		const clientPerms = this.clientMember.permissionsIn(this.channel).serialize()
+		if (!clientPerms.SEND_MESSAGES) {
+			this.direct(stripIndent`
+				It seems like the bot cannot send messages in this channel: ${this.channel.toString()}
+				Please try in another channel, or contact the admins of that server to solve this issue.
+			`).catch(() => null)
+			return
+		}
+
 		// Obtain the member if we don't have it
 		if (this.channel.type !== 'DM' && !this.guild.members.cache.has(this.author.id) && !this.webhookId) {
 			this.member = await this.guild.members.fetch(this.author)
@@ -517,7 +527,7 @@ class CommandoMessage extends Message {
 		const result = []
 		let match = []
 		// Large enough to get all items
-		argCount = argCount || argStringModified.length
+		argCount ||= argStringModified.length
 		// Get match and push the capture group that is not null to the result
 		while (--argCount && (match = re.exec(argStringModified))) result.push(match[2] || match[3])
 		// If text remains, push it to the array as-is (except for wrapping quotes, which are removed)
