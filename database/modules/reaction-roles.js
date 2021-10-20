@@ -1,6 +1,6 @@
 const { TextChannel, Message, Role, GuildMember } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { findCommonElement } = require('../../utils')
+const { findCommonElement, fetchPartial } = require('../../utils')
 
 /**
  * This module manages reaction roles.
@@ -43,8 +43,8 @@ module.exports = async (client) => {
     await removeMissingData()
 
     client.on('messageReactionAdd', async (reaction, user) => {
-        reaction = await reaction.fetch()
-        user = await user.fetch()
+        reaction = await fetchPartial(reaction)
+        user = await fetchPartial(user)
 
         const { message, emoji } = reaction
         await message.fetch()
@@ -71,8 +71,9 @@ module.exports = async (client) => {
     })
 
     client.on('messageReactionRemove', async (reaction, user) => {
-        reaction = await reaction.fetch()
-        user = await user.fetch()
+        reaction = await reaction.fetch().catch(() => null)
+        user = await user.fetch().catch(() => null)
+        if (!reaction || !user) return
 
         const { message, emoji } = reaction
         await message.fetch()
