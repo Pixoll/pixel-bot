@@ -3,8 +3,6 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { oneLine } = require('common-tags')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class ModLogsCommand extends Command {
@@ -38,19 +36,11 @@ module.exports = class ModLogsCommand extends Command {
      * @param {User} args.user The user to get the mod logs from
      */
     async run(message, { user }) {
-        const { guild, guildId } = message
+        const { guild } = message
+        const db = guild.database.moderations
 
-        /** @type {ModerationSchema} */
-        const query = user ? {
-            guild: guildId,
-            mod: { id: user.id }
-        } : {
-            guild: guildId
-        }
-
-        /** @type {ModerationSchema[]} */
-        const modLogs = await moderations.find(query)
-        if (modLogs.length === 0) {
+        const modLogs = await db.fetchMany(user ? { mod: { id: user.id } } : {})
+        if (modLogs.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no moderation logs.'
             }))
@@ -74,10 +64,10 @@ module.exports = class ModLogsCommand extends Command {
 
         const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        await generateEmbed(message, modLogs, {
+        await generateEmbed(message, modLogs.toJSON(), {
             authorName: oneLine`
                 ${user ? `${user.username} has` : 'There\'s'}
-                ${pluralize('mod log', modLogs.length)}
+                ${pluralize('mod log', modLogs.size)}
             `,
             authorIconURL: avatarURL,
             title: ' |  Id:',

@@ -3,10 +3,11 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed } = require('../../utils')
 
 const timeZones = [
-    'Pacific/Pago_Pago', 'Pacific/Tahiti', 'America/Adak', 'America/Anchorage', 'America/Vancouver', 'America/Costa_Rica',
-    'America/Mexico_City', 'America/Toronto', 'America/Argentina/Buenos_Aires', 'Atlantic/South_Georgia',
-    'Atlantic/Cape_Verde', 'Africa/Monrovia', 'Europe/London', 'Europe/Paris', 'Europe/Moscow', 'Asia/Dubai', 'Asia/Karachi',
-    'Asia/Thimphu', 'Indian/Christmas', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Australia/Brisbane', 'Australia/Sydney', 'Pacific/Fiji'
+    'Pacific/Pago_Pago', 'Pacific/Honolulu', 'America/Adak', 'America/Anchorage', 'America/Phoenix',
+    'America/Costa_Rica', 'America/Mexico_City', 'America/St_Thomas', 'America/Argentina/Buenos_Aires',
+    'Atlantic/South_Georgia', 'Atlantic/Cape_Verde', 'Africa/Sao_Tome', 'Europe/London', 'Europe/Paris',
+    'Europe/Moscow', 'Asia/Dubai', 'Asia/Karachi', 'Indian/Chagos', 'Asia/Jakarta', 'Asia/Hong_Kong',
+    'Asia/Tokyo', 'Australia/Brisbane', 'Australia/Sydney', 'Pacific/Fiji', 'Pacific/Auckland'
 ]
 
 /** A command that can be run in a client */
@@ -48,7 +49,7 @@ module.exports = class TimeCommand extends Command {
         for (const tz of timeZones) times.push(timeZone(tz))
 
         await generateEmbed(message, times, {
-            number: 12,
+            number: Math.round((timeZones.length / 2) + 0.1),
             embedTitle: '\\🕒 Times around the world',
             useDescription: true,
             skipMaxButtons: true

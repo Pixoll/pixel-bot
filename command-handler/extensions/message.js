@@ -268,6 +268,7 @@ class CommandoMessage extends Message {
 		if (throttle) throttle.usages++
 		try {
 			this.client.emit('debug', `Running command ${this.command.groupId}:${this.command.memberName}.`)
+			await this.channel.sendTyping().catch(() => null)
 			const promise = this.command.run(this, args, fromPattern, collResult)
 
 			this.client.emit('commandRun', this.command, promise, this, args, fromPattern, collResult)

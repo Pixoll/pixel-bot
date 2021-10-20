@@ -1,10 +1,9 @@
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument } = require('../../utils')
-const { setup } = require('../../mongo/schemas')
 const { oneLine, stripIndent } = require('common-tags')
-const { SetupSchema } = require('../../mongo/typings')
+const { SetupSchema } = require('../../schemas/types')
 const TextChannelType = require('../../command-handler/types/text-channel')
 const RoleType = require('../../command-handler/types/role')
 
@@ -71,6 +70,9 @@ module.exports = class SetupCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<SetupSchema>} */
+        this.db = null
     }
 
     /**
@@ -86,10 +88,10 @@ module.exports = class SetupCommand extends Command {
      */
     async run(message, { subCommand, value }) {
         subCommand = subCommand.toLowerCase()
-        const { guildId } = message
+        const { guild } = message
+        this.db = guild.database.setup
 
-        /** @type {SetupSchema} */
-        const data = await setup.findOne({ guild: guildId })
+        const data = await this.db.fetch()
 
         switch (subCommand) {
             case 'view':
@@ -249,18 +251,14 @@ module.exports = class SetupCommand extends Command {
             return await message.reply('Cancelled command.')
         }
 
-        /** @type {SetupSchema} */
-        const toSave = {
+        await this.db.add({
             guild: guildId,
             logsChannel: logsChannel.id,
             memberRole: memberRole.id,
             botRole: botRole.id,
             mutedRole: mutedRole.id,
             lockChannels: lockChannels.map(c => c.id)
-        }
-
-        if (data) await data.updateOne(toSave)
-        else await new setup(toSave).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',
@@ -281,8 +279,7 @@ module.exports = class SetupCommand extends Command {
             channel = value
         }
 
-        if (data) await data.updateOne({ logsChannel: channel.id })
-        else await new setup(defaultDoc(message.guildId, 'logsChannel', channel.id)).save()
+        await this.db.add(defaultDoc(message.guildId, 'logsChannel', channel.id))
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -305,8 +302,7 @@ module.exports = class SetupCommand extends Command {
             role = value
         }
 
-        if (data) await data.updateOne({ mutedRole: role.id })
-        else await new setup(defaultDoc(message.guildId, 'mutedRole', role.id)).save()
+        await this.db.add(defaultDoc(message.guildId, 'mutedRole', role.id))
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -329,8 +325,7 @@ module.exports = class SetupCommand extends Command {
             role = value
         }
 
-        if (data) await data.updateOne({ memberRole: role.id })
-        else await new setup(defaultDoc(message.guildId, 'memberRole', role.id)).save()
+        await this.db.add(defaultDoc(message.guildId, 'memberRole', role.id))
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -353,8 +348,7 @@ module.exports = class SetupCommand extends Command {
             role = value
         }
 
-        if (data) await data.updateOne({ botRole: role.id })
-        else await new setup(defaultDoc(message.guildId, 'botRole', role.id)).save()
+        await this.db.add(defaultDoc(message.guildId, 'botRole', role.id))
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
@@ -377,7 +371,7 @@ module.exports = class SetupCommand extends Command {
             channelsStr = value
         }
 
-        const { guildId, client } = message
+        const { client } = message
         const { types } = client.registry
         /** @type {TextChannelType} */
         const textChanType = types.get('text-channel')
@@ -395,8 +389,8 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        if (data) await data.updateOne({ $push: { lockChannels: { $each: channels.map(c => c.id) } } })
-        else await new setup(defaultDoc(message.guildId, 'lockChannels', channels.map(c => c.id))).save()
+        if (data) await this.db.update(data, { $push: { lockChannels: { $each: channels.map(c => c.id) } } })
+        else await this.db.add(defaultDoc(message.guildId, 'lockChannels', channels.map(c => c.id)))
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`

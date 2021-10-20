@@ -1,10 +1,9 @@
 const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, myMs, getArgument, channelDetails } = require('../../utils')
-const { welcome } = require('../../mongo/schemas')
-const { WelcomeSchema } = require('../../mongo/typings')
+const { WelcomeSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class WelcomeCommand extends Command {
@@ -44,6 +43,9 @@ module.exports = class WelcomeCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<WelcomeSchema>} */
+        this.db = null
     }
 
     /**
@@ -55,10 +57,8 @@ module.exports = class WelcomeCommand extends Command {
      */
     async run(message, { subCommand, channel }) {
         subCommand = subCommand.toLowerCase()
-        const { guildId } = message
-
-        /** @type {WelcomeSchema} */
-        const data = await welcome.findOne({ guild: guildId })
+        this.db = message.guild.database.welcome
+        const data = await this.db.fetch()
 
         switch (subCommand) {
             case 'view':
@@ -105,14 +105,10 @@ module.exports = class WelcomeCommand extends Command {
         }, { time: myMs('2m') })
         if (!welcomeMsg) return
 
-        /** @type {WelcomeSchema} */
-        const doc = {
+        await this.db.add({
             guild: message.guildId,
             dms: welcomeMsg.content
-        }
-
-        if (!data) await data.updateOne(doc)
-        else await new welcome(doc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
@@ -137,15 +133,11 @@ module.exports = class WelcomeCommand extends Command {
         }, { time: myMs('2m') })
         if (!welcomeMsg) return
 
-        /** @type {WelcomeSchema} */
-        const doc = {
+        await this.db.add({
             guild: message.guildId,
             channel: channel.id,
             message: welcomeMsg.content
-        }
-
-        if (data) await data.updateOne(doc)
-        else await new welcome(doc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'

@@ -1,8 +1,13 @@
 import {
 	Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment,
 	MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable,
-	InviteGenerationOptions, GuildMember, ClientUser, CommandInteraction
+	InviteGenerationOptions, GuildMember, ClientUser, Snowflake, CachedManager, FetchGuildOptions, FetchGuildsOptions
 } from 'discord.js'
+import { ConnectOptions, FilterQuery, Model, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose'
+import {
+	ActiveSchema, AfkSchema, DisabledSchema, ErrorSchema, FaqSchema, McIpSchema, ModerationSchema, ModuleSchema, PollSchema, PrefixSchema,
+	ReactionRoleSchema, ReminderSchema, RuleSchema, SetupSchema, StickyRoleSchema, TodoSchema, WelcomeSchema
+} from '../../schemas/types'
 
 /** A fancy argument */
 export class Argument {
@@ -194,6 +199,27 @@ export class ArgumentUnionType extends ArgumentType {
 	 * @returns Whether the value is valid, or an error message
 	 */
 	public validate(val: string, msg: CommandoMessage, arg: Argument): string | boolean | Promise<string | boolean>
+}
+
+/** The client's database manager (MongoDB) */
+export class ClientDatabaseManager {
+	/**
+	 * @param client The client this database is for
+	 */
+	constructor(client: CommandoClient)
+
+	/** Client for this database */
+	public readonly client: CommandoClient
+
+	public disabled: DatabaseManager<DisabledSchema>
+	public errors: DatabaseManager<ErrorSchema>
+	public faq: DatabaseManager<FaqSchema>
+	public prefixes: DatabaseManager<PrefixSchema>
+	public reminders: DatabaseManager<ReminderSchema>
+	public todo: DatabaseManager<TodoSchema>
+
+	/** Initializes the caching of this guild's data */
+	private init(data: Collection<string, Collection<string, DataModel>>): Promise<this>
 }
 
 /** A command that can be run in a client */
@@ -510,6 +536,8 @@ export class CommandGroup {
 	 */
 	public constructor(client: CommandoClient, id: string, name?: string, guarded?: boolean)
 
+	/** Whether the group is enabled globally */
+	private _globalEnabled: boolean
 	/** Client that this group is for */
 	public readonly client: CommandoClient
 	/** The commands in this group (added upon their registration) */
@@ -567,8 +595,13 @@ export class CommandoClient extends Client {
 	public provider: SettingProvider
 	/** The client's command registry */
 	public registry: CommandoRegistry
+	/** The client's database manager */
+	public database: ClientDatabaseManager
+	/** The guilds' database manager, mapped by the guilds ids */
+	public databases: Collection<string, GuildDatabaseManager>
 	/** Shortcut to use setting provider methods for the global settings */
 	public settings: GuildSettingsHelper
+	public guilds: CommandoGuildManager
 
 	/**
 	 * Checks whether a user is an owner of the bot (in {@link CommandoClientOptions#owner})
@@ -590,6 +623,8 @@ export { CommandoClient as Client }
 
 /** A fancier Guild for fancier people. */
 export class CommandoGuild extends Guild {
+	/** The database manager for the guild */
+	public database: GuildDatabaseManager
 	/** Internal command prefix for the guild, controlled by the {@link CommandoGuild#prefix} getter/setter */
 	private _prefix: string
 	/** Map object of internal command statuses, mapped by command name */
@@ -635,6 +670,16 @@ export class CommandoGuild extends Guild {
 	 * @param enabled Whether the group should be enabled
 	 */
 	public setGroupEnabled(group: CommandGroupResolvable, enabled: boolean): void
+}
+
+export class CommandoGuildManager extends CachedManager<Snowflake, CommandoGuild, GuildResolvable> {
+	public create(name: string, options?: GuildCreateOptions): Promise<CommandoGuild>
+	public fetch(options: Snowflake | FetchGuildOptions): Promise<CommandoGuild>
+	public fetch(options?: FetchGuildsOptions): Promise<Collection<Snowflake, CommandoGuild>>
+}
+
+export class CommandoMember extends GuildMember {
+	public guild: CommandoGuild
 }
 
 /** An extension of the base Discord.js Message class to add command-related functionality. */
@@ -928,12 +973,101 @@ export class CommandoRegistry {
 	public unregisterCommand(command: Command): void
 }
 
+/** A database schema manager (MongoDB) */
+export class DatabaseManager<T> {
+	/**
+	 * @param client The client this manager is for
+	 * @param guild The guild this manager is for
+	 * @param schema The schema of this manager
+	 */
+	public constructor(client: CommandoClient, guild: CommandoGuild, schema: Model<T, {}, {}>)
+
+	/** Client for this database */
+	public readonly client: CommandoClient
+	/** Guild for this database */
+	public readonly guild: CommandoGuild
+	/** The name of the schema this manager is for */
+	public schema: DataModel<T>
+	/** The cache for this manager */
+	public cache: Collection<string, T>
+
+	/**
+	 * Add a single document to the database, or updates it if there's an existing one
+	 * @param doc The document to add
+	 * @returns The added document
+	 */
+	public add(doc: T): Promise<T>
+	/**
+	 * Delete a single document from the database
+	 * @param doc The document to delete or its id
+	 * @returns The deleted document
+	 */
+	public delete(doc: T | string): Promise<T>
+	/**
+	 * Update a single document of the database
+	 * @param toUpdate The document to update or its id
+	 * @param options The options for this update
+	 * @returns The updated document
+	 */
+	public update(toUpdate: T | string, options: UpdateWithAggregationPipeline | UpdateQuery<T>): Promise<T>
+	/**
+	 * Fetch a single document
+	 * @param filter The id or fetching filter for the document
+	 * @returns The fetched document
+	 */
+	public fetch(filter?: string | FilterQuery<T>): Promise<T>
+	/**
+	 * Fetch a multiple documents
+	 * @param filter The fetching filter for the documents
+	 * @returns The fetched documents
+	 */
+	public fetchMany(filter?: FilterQuery<T>): Promise<Collection<string, T>>
+}
+
+export interface DataModel<T> extends Model<T> {
+	public find(filter: FilterQuery<T>): Promise<T[]>
+	public findOne(filter: FilterQuery<T>): Promise<?T>
+	public findById(id: string): Promise<?T>
+	public updateOne(filter: FilterQuery<T>): Promise<T>
+}
+
 /** Has a message that can be considered user-friendly */
 export class FriendlyError extends Error {
 	/**
 	 * @param message The error message
 	 */
 	public constructor(message: string)
+}
+
+/** All guilds' database manager (MongoDB) */
+export class GuildDatabaseManager {
+	/**
+	 * @param client The client this database is for
+	 * @param guild The guild this database is for
+	 */
+	public constructor(client: CommandoClient, guild: CommandoGuild)
+
+	/** Client for this database */
+	public readonly client: CommandoClient
+	/** Guild for this database */
+	public readonly guild: CommandoGuild
+
+	public active: DatabaseManager<ActiveSchema>
+	public afk: DatabaseManager<AfkSchema>
+	public disabled: DatabaseManager<DisabledSchema>
+	public mcIps: DatabaseManager<McIpSchema>
+	public moderations: DatabaseManager<ModerationSchema>
+	public modules: DatabaseManager<ModuleSchema>
+	public polls: DatabaseManager<PollSchema>
+	public prefixes: DatabaseManager<PrefixSchema>
+	public reactionRoles: DatabaseManager<ReactionRoleSchema>
+	public rules: DatabaseManager<RuleSchema>
+	public setup: DatabaseManager<SetupSchema>
+	public stickyRoles: DatabaseManager<StickyRoleSchema>
+	public welcome: DatabaseManager<WelcomeSchema>
+
+	/** Initializes the caching of this guild's data */
+	private init(data: Collection<string, Collection<string, DataModel>>): Promise<this>
 }
 
 /** Helper class to use {@link SettingProvider} methods for a specific Guild */
@@ -1451,6 +1585,7 @@ export interface CommandoClientEvents extends ClientEvents {
 	commandUnregister: [command: Command]
 	cMessageCreate: [message: CommandoMessage]
 	cMessageUpdate: [oldMessage: Message, newMessage: CommandoMessage]
+	databaseOn: [client: CommandoClient]
 	groupRegister: [group: CommandGroup, registry: CommandoRegistry]
 	groupStatusChange: [guild?: CommandoGuild, group: CommandGroup, enabled: boolean]
 	guildMemberMute: [guild: CommandoGuild, moderator: User, user: User, reason: string, duration: number]
@@ -1479,7 +1614,7 @@ export interface CommandoClientOptions extends ClientOptions {
 	 * @default true
 	 */
 	nonCommandEditable?: boolean
-	/** id of the bot owner's Discord user, or multiple ids */
+	/** Id of the bot owner's Discord user, or multiple ids */
 	owner?: string | string[] | Set<string>
 	/** Invite URL to the bot's support server */
 	serverInvite?: string

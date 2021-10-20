@@ -1,10 +1,9 @@
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
 const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, isMod } = require('../../utils')
-const { reactionRoles } = require('../../mongo/schemas')
 const { stripIndent, oneLine } = require('common-tags')
-const { ReactionRoleSchema } = require('../../mongo/typings')
+const { ReactionRoleSchema } = require('../../schemas/types')
 const RoleArgumentType = require('../../command-handler/types/role')
 
 /**
@@ -78,6 +77,9 @@ module.exports = class ReactionRoleCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<ReactionRoleSchema>} */
+        this.db = null
     }
 
     /**
@@ -98,10 +100,8 @@ module.exports = class ReactionRoleCommand extends Command {
             msg = await channel.messages.fetch(value)
         }
 
-        const { guildId } = message
-
-        /** @type {ReactionRoleSchema} */
-        const data = await reactionRoles.findOne({ guild: guildId, channel: channel.id, message: msg.id })
+        this.db = message.guild.database.reactionRoles
+        const data = await this.db.fetch({ channel: channel.id, message: msg.id })
 
         switch (subCommand) {
             case 'create':
@@ -163,17 +163,13 @@ module.exports = class ReactionRoleCommand extends Command {
 
         for (const emoji of emojis) await msg.react(emoji)
 
-        /** @type {ReactionRoleSchema} */
-        const newDoc = {
+        await this.db.add({
             guild: guildId,
             channel: channel.id,
             message: msg.id,
             roles: roles.map(r => r.id),
             emojis: emojis
-        }
-
-        if (data) await data.updateOne(newDoc)
-        else await new reactionRoles(newDoc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',

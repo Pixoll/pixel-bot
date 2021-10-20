@@ -1,9 +1,9 @@
-const Command = require('../../command-handler/commands/base'),
-	{ prefixes } = require('../../mongo/schemas'),
-	{ stripIndent } = require('common-tags'),
-	{ basicEmbed } = require('../../utils'),
-	{ CommandoMessage } = require('../../command-handler/typings'),
-	{ PrefixSchema } = require('../../mongo/typings')
+const Command = require('../../command-handler/commands/base')
+const { prefixes } = require('../../schemas')
+const { stripIndent } = require('common-tags')
+const { basicEmbed } = require('../../utils')
+const { CommandoMessage } = require('../../command-handler/typings')
+const { PrefixSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class PrefixCommand extends Command {

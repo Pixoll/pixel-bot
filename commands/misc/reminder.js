@@ -1,8 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { reminders } = require('../../mongo/schemas')
 const { basicEmbed, customEmoji, timestamp, timeDetails } = require('../../utils')
-const { ReminderSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class ReminderCommand extends Command {
@@ -36,6 +34,8 @@ module.exports = class ReminderCommand extends Command {
                 }
             ]
         })
+
+        this.db = this.client.database.reminders
     }
 
     /**
@@ -52,17 +52,14 @@ module.exports = class ReminderCommand extends Command {
         const { author, id, channelId, url } = message
         const stamp = timestamp(time, 'R')
 
-        /** @type {ReminderSchema} */
-        const doc = {
+        await this.db.add({
             user: author.id,
             reminder,
             remindAt: time,
             message: id,
             msgURL: url,
             channel: channelId,
-        }
-
-        await new reminders(doc).save()
+        })
 
         await message.react(customEmoji('cross'))
         await message.replyEmbed(basicEmbed({

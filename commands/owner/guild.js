@@ -1,7 +1,8 @@
-const { stripIndent } = require('common-tags')
+const { stripIndent, oneLine } = require('common-tags')
+const { TextChannel, Invite, Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, sleep } = require('../../utils')
+const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
+const { basicEmbed, sleep, getArgument, embedColor, inviteButton, modConfirmation } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class GuildCommand extends Command {
@@ -9,11 +10,13 @@ module.exports = class GuildCommand extends Command {
         super(client, {
             name: 'guild',
             group: 'owner',
-            description: 'Displays information about a single guild, or you can get the invite, and also remove the bot from one.',
+            description:
+                'Displays information about a single guild, or you can get the invite, and also remove the bot from one.'
+            ,
             format: stripIndent`
-                guild info [id] - Get information of a guild.
-                guild invite [id] - Get the invite of a guild.
-                guild remove [id] - Remove the bot from a guild.
+                guild info [guild] - Get information of a guild.
+                guild invite [guild] - Get the invite of a guild.
+                guild remove [guild] <reason> - Remove the bot from a guild.
             `,
             ownerOnly: true,
             dmOnly: true,
@@ -26,8 +29,15 @@ module.exports = class GuildCommand extends Command {
                 },
                 {
                     key: 'guildId',
-                    prompt: 'What is the Id or name of the guild?',
+                    label: 'guild id or name',
+                    prompt: 'What is the id or name of the guild?',
                     type: 'string'
+                },
+                {
+                    key: 'reason',
+                    prompt: 'Why is the bot leaving that guild?',
+                    type: 'string',
+                    required: false
                 }
             ]
         })
@@ -37,64 +47,112 @@ module.exports = class GuildCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {string} args.subCommand The sub-command
-     * @param {string} args.guildId The guild Id or name
+     * @param {'info'|'invite'|'remove'} args.subCommand The sub-command
+     * @param {string} args.guildId The guild's id or name
+     * @param {string} args.reason Why the bot is leaving such guild
      */
-    async run(message, { subCommand, guildId }) {
-        return
+    async run(message, { subCommand, guildId, reason }) {
+        subCommand = subCommand.toLowerCase()
+        guildId = guildId.toLowerCase()
 
         const guilds = this.client.guilds.cache
-        const guild = guilds.get(guildId) || guilds.find(({ name }) => name.toLowerCase() === guildId.toLowerCase())
-        if (!guild) return message.reply(basicEmbed('red', 'cross', 'I couldn\'t find that guild.'))
+        const find = val => g => g.name.toLowerCase() === val || g.name.toLowerCase().includes(val)
+        let guild = guilds.get(guildId) || guilds.find(find(guildId))
 
-        const guildOwner = guild.owner.user
+        while (!guild || !guild._commando) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            guild = guilds.get(value) || guilds.find(find(value))
+        }
+
+        switch (subCommand) {
+            case 'info':
+                return await this.info(message, guild)
+            case 'invite':
+                return await this.invite(message, guild)
+            case 'remove':
+                return await this.remove(message, guild, reason)
+        }
+    }
+
+    /**
+     * The `info` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandoGuild} guild The guild to get information from
+     */
+    async info(message, guild) {
+        const serverInfo = this.client.registry.resolveCommand('serverinfo')
+        await serverInfo.run(message, guild)
+    }
+
+    /**
+     * The `invite` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandoGuild} guild The guild to get invite from
+     */
+    async invite(message, guild) {
+        /** @type {TextChannel} */
+        const channel = guild.channels.cache.filter(ch => ch.type === 'GUILD_TEXT').first()
+        /** @type {Collection<string, Invite>} */
+        const invites = await guild.invites.fetch().catch(() => null)
+        const invite = invites?.first() || await channel.createInvite({ maxUses: 1 })
+
+        await message.reply({
+            content: `Click the button bellow to join **${guild.name}**`,
+            components: [inviteButton(invite)]
+        })
+    }
+
+    /**
+     * The `remove` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandoGuild} guild The guild to remove from the bot
+     * @param {string} reason Why the bot is leaving such guild
+     */
+    async remove(message, guild, reason) {
+        const guildOwner = await guild.fetchOwner()
         const botOwner = this.client.owners[0]
-        const channel = guild.channels.cache.filter(({ type }) => type === 'text').first()
 
-        if (subCommand.toLowerCase() === 'info') {
-            const serverInfo = this.client.registry.commands.get('serverinfo')
-            return await serverInfo.run(message, guild)
+        const confirmed = await modConfirmation(
+            message, 'remove guild', guild, { reason: reason || 'No reason given.' }
+        )
+        if (!confirmed) return
+
+        await guildOwner.send({
+            embeds: [basicEmbed({
+                color: embedColor, fieldName: `Dear owner of ${guild.name}`,
+                fieldValue: stripIndent`
+                    The owner of this bot, ${botOwner.toString()}, has decided to remove the bot from your server.
+                    ${(reason ? `**Reason:** ${reason}\n` : '') +
+                    'If you want to know more information please contact him.'}
+
+                    **The bot will be removed from your server in 30 seconds.**
+                `
+            })]
+        })
+
+        let count = 30
+        const toEdit = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading',
+            description: `The bot will leave **${guild.name}** in ${count--} seconds...`
+        }))
+        await sleep(1)
+
+        while (count > 0) {
+            await toEdit.edit({
+                embeds: [basicEmbed({
+                    color: 'GOLD', emoji: 'loading',
+                    description: `The bot will leave **${guild.name}** in ${count--} seconds...`
+                })]
+            })
+            await sleep(1)
         }
 
-        if (subCommand.toLowerCase() === 'invite') {
-            const invites = await guild.fetchInvites().catch(() => null)
-            const invite = invites?.first() || await channel.createInvite({ maxUses: 1 })
-
-            return message.reply(basicEmbed('#4c9f4c', '', `You can join **${guild.name}** using [this link](${invite.toString()}).`))
-        }
-
-        const msg = await message.reply(basicEmbed('gold', '⚠', stripIndent`
-            Are you sure you want to remove the bot from **${guild.name}**?
-            You have 30 seconds to confirm...
-        `))
-
-        await msg.react('863118691808706580')
-        await msg.react('863118691917889556')
-
-        const collector = msg.createReactionCollector(({ emoji }, user) => {
-            return ['863118691808706580', '863118691917889556'].includes(emoji.id) && user.id === message.author.id
-        }, { time: 30 * 1000, max: 1 })
-
-        collector.on('end', async collected => {
-            await msg.delete()
-            const emoji = collected.first()?.emoji.name
-
-            if (!emoji) return message.reply(basicEmbed('red', 'cross', 'You didn\'t confirm in time.'))
-            if (emoji === 'cross') return message.reply(basicEmbed('green', 'check', 'The bot won\'t be removed from the guild.'))
-
-            await guildOwner.send(basicEmbed('#4c9f4c', '', `Dear owner of ${guild.name}`, stripIndent`
-                The owner of this bot, ${botOwner.toString()}, has decided to remove the bot from your server.
-                If you want to know more information, such as the reason behind this, please contact him.
-
-                **The bot will be removed from your server in 30 seconds.**
-            `))
-
-            const toEdit = await message.reply(basicEmbed('gold', 'loading', `The bot will be removed from **${guild.name}** in 30 seconds, please wait...`))
-
-            await sleep(30)
-
-            await guild.leave()
-            await toEdit.edit(basicEmbed('green', 'check', `The bot has been removed from **${guild.name}.**`))
+        await guild.leave()
+        await toEdit.edit({
+            embeds: [basicEmbed({
+                color: 'GREEN', emoji: 'check', description: `The bot has been removed from **${guild.name}.**`
+            })]
         })
     }
 }

@@ -1,11 +1,10 @@
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex } = require('../../utils')
-const { polls } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
-const { PollSchema } = require('../../mongo/typings')
+const { PollSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class PollCommand extends Command {
@@ -53,6 +52,9 @@ module.exports = class PollCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<PollSchema>} */
+        this.db = null
     }
 
     /**
@@ -66,6 +68,7 @@ module.exports = class PollCommand extends Command {
      */
     async run(message, { subCommand, channel, durationOrMsg }) {
         subCommand = subCommand.toLowerCase()
+        this.db = message.guild.database.polls
 
         switch (subCommand) {
             case 'create':
@@ -124,17 +127,14 @@ module.exports = class PollCommand extends Command {
         const sent = await channel.send(pollMsg.content)
         for (const emoji of emojis) await sent.react(emoji)
 
-        /** @type {PollSchema} */
-        const newDoc = {
+        await this.db.add({
             guild: guildId,
             channel: channel.id,
             message: sent.id,
             emojis,
             duration: myMs(duration, { long: true }),
             endsAt: duration
-        }
-
-        await new polls(newDoc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: `The poll was successfully created in ${channel}.`
@@ -157,21 +157,12 @@ module.exports = class PollCommand extends Command {
             }
         }
 
-        const { guild, guildId } = message
+        const { guild } = message
         const { channels } = guild
 
-        /** @type {PollSchema} */
-        const query = _msg ? {
-            guild: guildId,
-            channel: channel.id,
-            message: _msg.id
-        } : {
-            guild: guildId,
-            channel: channel.id
-        }
-
-        /** @type {PollSchema} */
-        const pollData = await polls.findOne(query)
+        const pollData = await this.db.fetch(
+            _msg ? {channel: channel.id, message: _msg.id } : { channel: channel.id }
+        )
         if (!pollData) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the poll you were looking for.'

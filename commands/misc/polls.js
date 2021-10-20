@@ -1,6 +1,5 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { polls } = require('../../mongo/schemas')
 const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
 
 /** A command that can be run in a client */
@@ -20,18 +19,19 @@ module.exports = class PollsCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const { guild, guildId } = message
+        const { guild } = message
+        const db = guild.database.polls
 
-        const pollsData = await polls.find({ guild: guildId })
-        if (pollsData.length === 0) {
+        const pollsData = await db.fetchMany()
+        if (pollsData.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no active polls.'
             }))
         }
 
-        await generateEmbed(message, pollsData, {
+        await generateEmbed(message, pollsData.toJSON(), {
             number: 5,
-            authorName: `There's ${pluralize('active poll', pollsData.length)}`,
+            authorName: `There's ${pluralize('active poll', pollsData.size)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Poll',
             keys: ['channel', 'duration', 'endsAt']

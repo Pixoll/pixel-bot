@@ -2,8 +2,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User } = require('discord.js')
 const { basicEmbed, userDetails, reasonDetails, modConfirmation } = require('../../utils')
-const { active } = require('../../mongo/schemas')
-const { Document } = require('mongoose')
 
 /** A command that can be run in a client */
 module.exports = class UnbanCommand extends Command {
@@ -47,7 +45,8 @@ module.exports = class UnbanCommand extends Command {
      * @param {string} args.reason The reason of the unban
      */
     async run(message, { user, reason }) {
-        const { members, bans } = message.guild
+        const { members, bans, database } = message.guild
+        const { active } = database
 
         const isBanned = await bans.fetch(user).catch(() => null)
         if (!isBanned) {
@@ -61,9 +60,8 @@ module.exports = class UnbanCommand extends Command {
 
         await members.unban(user, reason)
 
-        /** @type {Document} */
-        const data = await active.findOne({ type: 'temp-ban', user: { id: user.id } })
-        if (data) await data.deleteOne()
+        const data = await active.fetch({ type: 'temp-ban', user: { id: user.id } })
+        if (data) await active.delete(data)
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been unbanned`,

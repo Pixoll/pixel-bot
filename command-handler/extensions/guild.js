@@ -1,5 +1,6 @@
 const { Guild, User } = require('discord.js')
 const Command = require('../commands/base')
+const GuildDatabaseManager = require('../managers/GuildDatabaseManager')
 const GuildSettingsHelper = require('../providers/helper')
 const { CommandoClient, CommandResolvable, CommandGroupResolvable } = require('../typings')
 
@@ -20,6 +21,12 @@ class CommandoGuild extends Guild {
 		client.emit('debug', `Created new ${this.constructor.name} with id ${this.id}`)
 
 		this._commando = true
+
+		/**
+		 * The database manager for the guild
+		 * @type {GuildDatabaseManager}
+		 */
+		this.database = new GuildDatabaseManager(client, this)
 
 		/**
 		 * The client the guild is for

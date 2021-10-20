@@ -1,10 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { active, setup } = require('../../mongo/schemas')
 const { memberDetails, reasonDetails, basicEmbed, modConfirmation } = require('../../utils')
-const { SetupSchema } = require('../../mongo/typings')
-const { Document } = require('mongoose')
 
 /** A command that can be run in a client */
 module.exports = class UnmuteCommand extends Command {
@@ -48,11 +45,11 @@ module.exports = class UnmuteCommand extends Command {
      * @param {string} args.reason The reason of the unmute
      */
     async run(message, { member, reason }) {
-        const { guild, guildId, author } = message
+        const { guild, author } = message
+        const { active, setup } = guild.database
         const { user, roles } = member
 
-        /** @type {SetupSchema} */
-        const data = await setup.findOne({ guild: guildId })
+        const data = await setup.fetch()
         if (!data || !data.mutedRole) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross',
@@ -74,9 +71,8 @@ module.exports = class UnmuteCommand extends Command {
         await roles.remove(role)
         this.client.emit('guildMemberUnmute', guild, author, user, reason)
 
-        /** @type {Document} */
-        const mute = await active.findOne({ type: 'mute', user: { id: user.id } })
-        if (mute) await mute.deleteOne()
+        const mute = await active.fetch({ type: 'mute', user: { id: user.id } })
+        if (mute) await active.delete(mute)
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been unmuted`,

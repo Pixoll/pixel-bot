@@ -1,9 +1,9 @@
+const { Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs } = require('../../utils')
-const { faq } = require('../../mongo/schemas')
-const { FaqSchema } = require('../../mongo/typings')
+const { FaqSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class FaqCommand extends Command {
@@ -37,6 +37,8 @@ module.exports = class FaqCommand extends Command {
                 }
             ]
         })
+
+        this.db = this.client.database.faq
     }
 
     /**
@@ -48,7 +50,7 @@ module.exports = class FaqCommand extends Command {
      */
     async run(message, { subCommand, item }) {
         subCommand = subCommand.toLowerCase()
-        const FAQ = await faq.find({})
+        const FAQ = await this.db.fetchMany()
 
         switch (subCommand) {
             case 'view':
@@ -63,16 +65,16 @@ module.exports = class FaqCommand extends Command {
     /**
      * The `view` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {FaqSchema[]} faqData The faq data
+     * @param {Collection<string, FaqSchema>} faqData The faq data
      */
     async view(message, faqData) {
-        if (faqData.length === 0) {
+        if (faqData.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
             }))
         }
 
-        await generateEmbed(message, faqData, {
+        await generateEmbed(message, faqData.toJSON(), {
             number: 5,
             authorName: 'Frequently asked questions',
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
@@ -100,13 +102,10 @@ module.exports = class FaqCommand extends Command {
         }, { time: myMs('2m') })
         if (!answer) return
 
-        /** @type {FaqSchema} */
-        const newDoc = {
+        await this.db.add({
             question: question.content,
             answer: answer.content
-        }
-
-        await new faq(newDoc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The new question has been added to the FAQ list.'
@@ -117,7 +116,7 @@ module.exports = class FaqCommand extends Command {
      * The `remove` sub-command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {number} item The item you want to remove from the FAQ list
-     * @param {FaqSchema[]} faqData The faq data
+     * @param {Collection<string, FaqSchema>} faqData The faq data
      */
     async remove(message, item, faqData) {
         if (!this.client.isOwner(message)) {
@@ -130,21 +129,19 @@ module.exports = class FaqCommand extends Command {
             item = value
         }
 
-        if (faqData.length === 0) {
+        if (faqData.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
             }))
         }
 
-        if (item > faqData.length) {
+        const doc = faqData.first(item).pop()
+        if (!doc) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside the FAQ list.'
             }))
         }
-
-        item--
-        await faqData[item].deleteOne()
-        item++
+        await this.db.delete(doc)
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Removed question \`${item}\` from the FAQ list.`

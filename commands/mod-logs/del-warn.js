@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, docId } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
+const { moderations } = require('../../schemas')
 const { Document } = require('mongoose')
 const { oneLine } = require('common-tags')
 

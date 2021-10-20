@@ -1,7 +1,8 @@
+const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, generateEmbed } = require('../../utils')
-const { errors: errorDocs } = require('../../mongo/schemas')
+const { basicEmbed, generateEmbed, getArgument } = require('../../utils')
+const { ErrorSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class ErrorsCommand extends Command {
@@ -18,102 +19,114 @@ module.exports = class ErrorsCommand extends Command {
                     key: 'subCommand',
                     prompt: 'Do you want to filter or remove an error/bug?',
                     type: 'string',
-                    oneOf: ['filter', 'remove'],
-                    required: false
+                    oneOf: ['view', 'remove'],
+                    default: 'view'
                 },
                 {
-                    key: 'filter',
-                    prompt: 'What kind of errors do you want to filter? Or what specific error do you want to remove?',
+                    key: 'errorId',
+                    label: 'error id',
+                    prompt: 'What specific error do you want to remove?',
                     type: 'string',
                     required: false
                 }
             ]
         })
+
+        this.db = this.client.database.errors
     }
 
     /**
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {string} args.subCommand The sub-command
-     * @param {string} args.filter The filter to apply or the error to remove
+     * @param {'view'|'remove'} args.subCommand The sub-command
+     * @param {string} args.errorId The id of the error to remove
      */
-    async run(message, { subCommand, filter }) {
-        const Errors = await errorDocs.find({})
-        const errorsList = Errors.map(val => {
-            delete val.__v
-            delete val.updatedAt
-
-            const whatCommand = val.command ? ` at '${val.command}' command` : ''
-
-            const error = {
-                _id: val._id,
-                /** @type {string} */
-                type: val.type,
-                message: val.name + whatCommand + (val.message ? (': ' + '``' + val.message + '``') : ''),
-                /** @type {Date} */
-                createdAt: val.createdAt,
-                /** @type {string} */
-                files: val.files
-            }
-
-            return error
-        })
-
-        if (errorsList.length === 0) {
+    async run(message, { subCommand, errorId }) {
+        subCommand = subCommand.toLowerCase()
+        const errors = await this.db.fetchMany()
+        if (errors.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There have been no errors or bugs lately.'
             }))
         }
 
-        const displayData = {
+        switch (subCommand) {
+            case 'view':
+                return await this.view(message, errors)
+            case 'remove':
+                return await this.remove(message, errorId)
+        }
+    }
+
+    /**
+     * The `view` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {Collection<string, ErrorSchema>} errors The errors collection
+     */
+    async view(message, errors) {
+        const errorsList = errors.map(val => {
+            const whatCommand = val.command ? ` at '${val.command}' command` : ''
+
+            return {
+                _id: val._id,
+                type: val.type,
+                message: val.name + whatCommand + (val.message ? (': ' + '``' + val.message + '``') : ''),
+                createdAt: val.createdAt,
+                files: val.files
+            }
+        })
+
+        const filterMenu = new MessageActionRow().addComponents(
+            new MessageSelectMenu()
+                .setCustomId(`${message.id}:menu`)
+                .setMaxValues(1).setMinValues(1)
+                .setPlaceholder('Filter...')
+                .setOptions([
+                    { label: 'All', value: 'all'},
+                    { label: 'Command error', value: 'Command error'},
+                    { label: 'Client error', value: 'Client error'},
+                    { label: 'Unhandled rejection', value: 'Unhandled rejection'},
+                    { label: 'Uncaught exception', value: 'Uncaught exception'},
+                    { label: 'Uncaught exception monitor', value: 'Uncaught exception monitor'},
+                    { label: 'Process warning', value: 'Process warning'},
+                ])
+        )
+
+        await generateEmbed(message, errorsList, {
             number: 3,
             authorName: 'Errors and bugs list',
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             title: ' |  Id:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['type', '_id'],
-            useDocId: true
+            useDocId: true,
+            components: [filterMenu]
+        })
+    }
+
+    /**
+     * The `remove` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {string} errorId The id of the error to remove
+     */
+    async remove(message, errorId) {
+        if (!errorId) {
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+            if (cancelled) return
+            errorId = value
         }
 
-        if (!subCommand) {
-            return await generateEmbed(message, errorsList, displayData)
-        }
-
-        if (subCommand.toLowerCase() === 'filter') {
-            if (!filter) {
-                return await message.replyEmbed(basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please specify the filter to use.'
-                }))
-            }
-
-            const filtered = errorsList.filter(({ type }) => type === filter)
-            if (filtered.length === 0) {
-                return await message.replyEmbed(basicEmbed({
-                    color: 'BLUE', emoji: 'info', description: 'There are no errors matching the filter.'
-                }))
-            }
-
-            return await generateEmbed(message, filtered, displayData)
-        }
-
-        if (!filter) {
+        const doc = await this.db.fetch(errorId)
+        if (!doc) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'Please specify the error to remove.'
-            }))
-        }
-
-        const error = Errors.find(({ _id }) => _id === filter)
-        if (!error) {
-            return message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the error you were looking for.'
             }))
         }
-
-        await error.deleteOne()
+        await this.db.delete(doc)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Error with Id \`${error._id}\` has been successfully removed.`
+            color: 'GREEN', emoji: 'check', description: `Error with id \`${doc._id}\` has been successfully removed.`
         }))
     }
 }

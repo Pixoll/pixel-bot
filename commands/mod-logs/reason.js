@@ -2,8 +2,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
 const { basicEmbed, docId, modConfirmation } = require('../../utils')
-const { moderations, active } = require('../../mongo/schemas')
-const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class ReasonCommand extends Command {
@@ -46,30 +44,23 @@ module.exports = class ReasonCommand extends Command {
     * @param {number} args.reason The new reason
     */
     async run(message, { modlogId, reason }) {
-        const { guildId } = message
+        const { guild } = message
+        const { moderations, active } = guild.database
 
-        /** @type {ModerationSchema} */
-        const query = {
-            guild: guildId,
-            _id: modlogId
-        }
-
-        /** @type {ModerationSchema} */
-        const modLog = await moderations.findOne(query)
+        const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
             }))
         }
 
-        /** @type {ActiveSchema} */
-        const activeLog = await active.findOne(query)
+        const activeLog = await active.fetch(modlogId)
 
         const confirm = await modConfirmation(message, 'update modlog reason', modlogId, { reason })
         if (!confirm) return
 
-        await modLog.updateOne({ reason })
-        await activeLog?.updateOne({ reason })
+        await moderations.update(modLog, { reason })
+        if (activeLog) await active.update(activeLog, { reason })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',

@@ -2,10 +2,8 @@ const { User, GuildMember, TextChannel } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton, modConfirmation } = require('../../utils')
-const { moderations, active } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { myMs } = require('../../utils')
-const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class TempBanCommand extends Command {
@@ -61,7 +59,8 @@ module.exports = class TempBanCommand extends Command {
         if (duration instanceof Date) duration = duration.getTime()
 
         const { guild, author, guildId } = message
-        const { members, bans } = guild
+        const { members, bans, database } = guild
+        const { moderations, active } = database
 
         const uExcept = userException(user, author, this)
         if (uExcept) return await message.replyEmbed(uExcept)
@@ -105,8 +104,7 @@ module.exports = class TempBanCommand extends Command {
 
         const documentId = docId()
 
-        /** @type {ModerationSchema} */
-        const modDoc = {
+        await moderations.add({
             _id: documentId,
             type: 'temp-ban',
             guild: guildId,
@@ -114,20 +112,15 @@ module.exports = class TempBanCommand extends Command {
             mod: { id: author.id, tag: author.tag },
             reason,
             duration: myMs(Date.now() - duration, { long: true })
-        }
-
-        /** @type {ActiveSchema} */
-        const activeDoc = {
+        })
+        await active.add({
             _id: documentId,
             type: 'temp-ban',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             mod: { id: author.id, tag: author.tag },
             duration
-        }
-
-        await new moderations(modDoc).save()
-        await new active(activeDoc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been banned`,

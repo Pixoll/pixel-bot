@@ -1,8 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { rules } = require('../../mongo/schemas')
 const { generateEmbed, basicEmbed } = require('../../utils')
-const { RuleSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class RulesCommand extends Command {
@@ -22,10 +20,10 @@ module.exports = class RulesCommand extends Command {
      */
     async run(message) {
         const { guildId, guild } = message
+        const db = guild.database.rules
 
-        /** @type {RuleSchema} */
-        const rulesData = await rules.findOne({ guild: guildId })
-        const rulesList = rulesData ? Array(...rulesData.rules) : null
+        const rulesData = await db.fetch({ guild: guildId }, true)
+        const rulesList = rulesData ? [...rulesData.rules] : null
 
         if (!rulesList || rulesList.length === 0) {
             return await message.replyEmbed(basicEmbed({

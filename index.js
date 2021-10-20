@@ -1,14 +1,12 @@
 console.log('Starting bot...')
-// require('./command-handler/extensions')
+require('./command-handler/extensions')
 
 const { CommandoMessage, Command } = require('./command-handler/typings')
 const CommandoClient = require('./command-handler/client')
 const { MessageEmbed } = require('discord.js')
 const { customEmoji, docId, code } = require('./utils')
 const { stripIndent } = require('common-tags')
-const { errors } = require('./mongo/schemas')
-const { ErrorSchema } = require('./mongo/typings')
-const eventHandler = require('./events')
+const database = require('./database')
 const path = require('path')
 require('dotenv').config()
 
@@ -44,7 +42,7 @@ const client = new CommandoClient({
 })
 
 client.on('debug', msg => {
-    const exclude = ['Heartbeat', 'Registered', 'WS']
+    const exclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild']
     for (const word of exclude) if (msg.includes(word)) return
     console.log('debug >', msg)
 })
@@ -72,10 +70,9 @@ client.registry
     .client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
 
 client.on('ready', async () => {
-    await require('./mongo')(client)
-    await eventHandler(client, 'auto-punish', 'chat-filter')
+    await database(client, 'auto-punish', 'chat-filter')
 
-    await client.owners[0].send('**Debug message:** Bot is online.')
+    await client.owners[0].send('**Debug message:** Bot is fully online!')
     client.emit('debug', `${client.user.tag} is fully online!`)
 })
     .on('commandError', async (command, error, message) => {
@@ -137,17 +134,14 @@ async function errorHandler(error, type, message, command) {
 
         if (!files) return
 
-        /** @type {ErrorSchema} */
-        const doc = {
+        await client.database.errors.add({
             _id: docId(),
             type: type,
             name: error.name,
             message: error.message,
             command: command?.name,
             files: code(files)
-        }
-
-        await new errors(doc).save()
+        })
     }
 
     else {

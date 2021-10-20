@@ -3,9 +3,7 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, modConfirmation } = require('../../utils')
 const { docId, basicEmbed } = require('../../utils')
-const { moderations, active, setup } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { SetupSchema, ModerationSchema, ActiveSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class MuteCommand extends Command {
@@ -56,10 +54,10 @@ module.exports = class MuteCommand extends Command {
         if (duration instanceof Date) duration = duration.getTime()
 
         const { guild, author, guildId } = message
+        const { moderations, active, setup } = guild.database
         const { user, roles } = member
 
-        /** @type {SetupSchema} */
-        const data = await setup.findOne({ guild: guildId })
+        const data = await setup.fetch()
         if (!data || !data.mutedRole) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross',
@@ -100,8 +98,7 @@ module.exports = class MuteCommand extends Command {
 
         const documentId = docId()
 
-        /** @type {ModerationSchema} */
-        const modLog = {
+        await moderations.add({
             _id: documentId,
             type: 'mute',
             guild: guildId,
@@ -109,19 +106,14 @@ module.exports = class MuteCommand extends Command {
             mod: { id: author.id, tag: author.tag },
             reason,
             duration: myMs(duration - Date.now(), { long: true })
-        }
-
-        /** @type {ActiveSchema} */
-        const activeLog = {
+        })
+        await active.add({
             _id: documentId,
             type: 'mute',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             duration
-        }
-
-        await new moderations(modLog).save()
-        await new active(activeLog).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been muted`,

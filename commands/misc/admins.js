@@ -33,7 +33,7 @@ module.exports = class AdministratorsCommand extends Command {
             .map(mbr => ({
                 tag: mbr.user.tag,
                 list: mbr.roles.cache.filter(r => r.permissions.has('ADMINISTRATOR'))
-                    .sort((a, b) => b.position - a.position).map(r => r).map(r => r.name).join(', ') || 'None'
+                    .sort((a, b) => b.position - a.position).map(r => r.name).join(', ') || 'None'
             }))
 
         await generateEmbed(message, adminsList, {

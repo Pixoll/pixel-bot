@@ -9,9 +9,9 @@ const { stripIndent, oneLine } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
 const { disabledPageButtons, disabledFilterMenu } = require('./constants')
 const { version } = require('../package.json')
-const { moderations, active, modules, setup } = require('../mongo/schemas')
+const { moderations, active } = require('../schemas')
 const { permissions } = require('../command-handler/util')
-const { Module, AuditLog } = require('../mongo/typings')
+const { Module, AuditLog } = require('../schemas/types')
 
 /**
  * Pauses the command's execution
@@ -80,7 +80,7 @@ function removeDashes(str) {
  * @param {AuditLog} [subModule] The sub-module to check
  */
 async function isModuleEnabled(guild, module, subModule) {
-    const data = await modules.findOne({ guild: guild.id })
+    const data = await guild.database.modules.fetch()
     module = removeDashes(module)
     subModule = removeDashes(subModule)
     const check = subModule ? data?.[module]?.[subModule] : data?.[module]
@@ -102,7 +102,7 @@ async function isModuleEnabled(guild, module, subModule) {
  * @returns {Promise<?TextChannel>}
  */
 async function getLogsChannel(guild) {
-    const data = await setup.findOne({ guild: guild.id })
+    const data = await guild.database.setup.fetch()
     const channel = guild.channels.resolve(data?.logsChannel)
     return channel
 }
@@ -369,7 +369,7 @@ function getKeyPerms(roleOrMember) {
         'VIEW_GUILD_INSIGHTS', 'CONNECT', 'SPEAK', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'USE_VAD',
         'CHANGE_NICKNAME', 'MANAGE_WEBHOOKS', 'USE_APPLICATION_COMMANDS', 'REQUEST_TO_SPEAK', 'USE_EXTERNAL_STICKERS',
         'USE_PUBLIC_THREADS', 'USE_PRIVATE_THREADS', 'CREATE_PRIVATE_THREADS', 'CREATE_PUBLIC_THREADS',
-        'START_EMBEDDED_ACTIVITIES'
+        'START_EMBEDDED_ACTIVITIES', 'SEND_MESSAGES_IN_THREADS'
     ]
 
     const filtered = perms.toArray().filter(perm => !filter.includes(perm))
@@ -1063,7 +1063,7 @@ async function generateEmbed(message, _array, data) {
  * Creates and manages confirmation buttons (y/n) for moderation actions
  * @param {CommandoMessage} message The message that triggers this confirmation
  * @param {string} action The action for confirmation
- * @param {User|string} target The target on which this action is being executed
+ * @param {User|string|CommandoGuild} target The target on which this action is being executed
  * @param {object} [data] The data of this action
  * @param {string} [data.reason] The reason of this action
  * @param {string} [data.duration] The duration of this action
@@ -1072,24 +1072,22 @@ async function generateEmbed(message, _array, data) {
 async function modConfirmation(message, action, target, data = {}, sendCancelled) {
     const { id, author, channel } = message
     sendCancelled ??= true
-    data.reason ||= 'No reason given.'
 
-    const ids = {
-        yes: `${id}:yes`,
-        no: `${id}:no`,
-    }
+    const ids = { yes: `${id}:yes`, no: `${id}:no` }
+    const targetStr = target instanceof User ? target.tag :
+        typeof target === 'string' ? target : target.name
 
     const confirmEmbed = new MessageEmbed()
         .setColor('GOLD')
         .addField(
-            `Are you sure you want to ${action} ${target instanceof User ? target.tag : target}?`,
+            `Are you sure you want to ${action} ${targetStr}?`,
             stripIndent`
                 ${target instanceof User ? stripIndent`
                     **User:** ${target.toString()} ${target.tag}
                     **Id:** ${target.id}
-                ` : `**Target:** ${target}`}
+                ` : `**Target:** ${targetStr}`}
                 **Action:** ${action}
-                **Reason:** ${data.reason}
+                ${data.reason ? `**Reason:** ${data.reason}` : ''}
                 ${data.duration ? `**Duration:** ${data.duration}` : ''}
             `
         )

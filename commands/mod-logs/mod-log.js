@@ -3,8 +3,6 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { capitalize, basicEmbed, docId } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class ModLogCommand extends Command {
@@ -39,10 +37,10 @@ module.exports = class ModLogCommand extends Command {
      * @param {string} args.modlogId The mod log Id
      */
     async run(message, { modlogId }) {
-        const { guildId } = message
+        const { guild } = message
+        const db = guild.database.moderations
 
-        /** @type {ModerationSchema} */
-        const modLog = await moderations.findOne({ guild: guildId, _id: modlogId })
+        const modLog = await db.fetch(modlogId)
         if (!modLog) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'

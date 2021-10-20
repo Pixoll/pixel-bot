@@ -1,9 +1,8 @@
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, myMs, embedColor, getArgument } = require('../../utils')
-const { rules: rulesDocs } = require('../../mongo/schemas')
-const { RuleSchema } = require('../../mongo/typings')
+const { RuleSchema } = require('../../schemas/types')
 const { MessageEmbed } = require('discord.js')
 
 /** A command that can be run in a client */
@@ -37,6 +36,9 @@ module.exports = class RuleCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<RuleSchema>} */
+        this.db = null
     }
 
     /**
@@ -48,10 +50,8 @@ module.exports = class RuleCommand extends Command {
      */
     async run(message, { subCommand, rule }) {
         subCommand = subCommand.toLowerCase()
-        const { guildId } = message
-
-        /** @type {RuleSchema} */
-        const rulesData = await rulesDocs.findOne({ guild: guildId })
+        this.db = message.guild.database.rules
+        const rulesData = await this.db.fetch()
 
         switch (subCommand) {
             case 'view':
@@ -110,8 +110,8 @@ module.exports = class RuleCommand extends Command {
 
         const { guildId } = message
 
-        if (rulesData) await rulesData.updateOne({ $push: { rules: rule } })
-        else await new rulesDocs({ guild: guildId, rules: rule }).save()
+        if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })
+        else await this.db.add({ guild: guildId, rules: rule })
 
         const number = rulesData ? rulesData.rules.length + 1 : 1
 

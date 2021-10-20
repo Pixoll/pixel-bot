@@ -12,6 +12,9 @@ module.exports = {
 	ArgumentType: require('./types/base'),
 	FriendlyError: require('./errors/friendly'),
 	CommandFormatError: require('./errors/command-format'),
+	DatabaseManager: require('./managers/DatabaseManager'),
+	ClientDatabaseManager: require('./managers/ClientDatabaseManager'),
+	GuildDatabaseManager: require('./managers/GuildDatabaseManager'),
 
 	util: require('./util'),
 	version: '0.13.0',

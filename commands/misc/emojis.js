@@ -2,10 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
 
-/**
- * 
- * @param {string[]} arr 
- */
+/** @param {string[]} arr */
 function sliceEmojis(arr) {
     const dummy = [], normal = []
     for (const emoji of arr) {
@@ -18,6 +15,13 @@ function sliceEmojis(arr) {
     normal.push(dummy)
     return normal
 }
+
+const maxEmojisPerTier = new Map([
+    ['NONE', 50],
+    ['TIER_1', 100],
+    ['TIER_2', 150],
+    ['TIER_3', 250],
+])
 
 /** A command that can be run in a client */
 module.exports = class EmojisCommand extends Command {
@@ -38,6 +42,7 @@ module.exports = class EmojisCommand extends Command {
     async run(message) {
         const { guild } = message
         const _emojis = await guild.emojis.fetch()
+        const maxEmojis = maxEmojisPerTier.get(guild.premiumTier)
 
         const emojis = _emojis.map(emoji => ({
             animated: emoji.animated,
@@ -54,12 +59,18 @@ module.exports = class EmojisCommand extends Command {
         const normal = sliceEmojis(notAnimated)
         const animated = sliceEmojis(isAnimated)
 
-        embed.addField(`Normal emojis: ${notAnimated.length}`, normal.shift().join(' ') || 'No emojis found.')
+        embed.addField(
+            `Normal emojis: ${notAnimated.length}/${maxEmojis}`,
+            normal.shift().join(' ') || 'No emojis found.'
+        )
         while (normal.length !== 0) {
             embed.addField('ㅤ', normal.shift().join(' '))
         }
 
-        embed.addField(`Animated emojis: ${isAnimated.length}`, animated.shift().join(' ') || 'No emojis found.')
+        embed.addField(
+            `Animated emojis: ${isAnimated.length}/${maxEmojis}`,
+            animated.shift().join(' ') || 'No emojis found.'
+        )
         while (animated.length !== 0) {
             embed.addField('ㅤ', animated.shift().join(' '))
         }

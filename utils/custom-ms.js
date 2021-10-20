@@ -10,11 +10,12 @@ const mth = y / 12
  * Parses the milliseconds into a string, or a string into milliseconds
  * @param {number|string} val The amount of milliseconds or string to parse
  * @param {object} [options] Only appliable if the input is a number
- * @param {boolean} options.number Whether to force the returned value to be a number or not
- * @param {boolean} options.long If the string should return the whole words
- * @param {number} options.length How many parameters should the string return
- * @param {boolean} options.showMs If the string should show the `ms`
- * @param {boolean} options.showAnd If the string should show and before the last item
+ * @param {boolean} [options.number=false] Whether to force the returned value to be a number or not
+ * @param {boolean} [options.long=false] If the string should return the whole words
+ * @param {number} [options.length] How many parameters should the string return
+ * @param {boolean} [options.showMs=false] If the string should show the `ms`
+ * @param {boolean} [options.showAnd=false] If the string should show and before the last item
+ * @param {boolean} [options.noCommas=false] If the string should **not** have commas
  * @returns {string|number}
  */
 function myMs(val, options = {}) {
@@ -72,8 +73,9 @@ function myMs(val, options = {}) {
 
     const and = str => options.showAnd ? str.replace(/,(?=[^,]*$)/, ' and') : str
 
-    if (options.length) return and(arr.slice(0, options.length).join(', '))
-    return and(arr.join(', '))
+    const commas = options.noCommas ? '' : ', '
+    if (options.length) return and(arr.slice(0, options.length).join(commas))
+    return and(arr.join(commas))
 }
 
 /**

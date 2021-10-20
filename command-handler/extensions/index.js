@@ -13,6 +13,12 @@ Structures.extend('Guild', Guild => {
             this._commando = true
 
             /**
+             * The database manager for the guild
+             * @type {GuildDatabaseManager}
+             */
+            this.database = new GuildDatabaseManager(client, this)
+
+            /**
              * The client the guild is for
              * @type {CommandoClient}
              */
@@ -137,3 +143,4 @@ Structures.extend('Guild', Guild => {
 const { CommandResolvable, CommandGroupResolvable, CommandoClient } = require('../typings')
 const { Command } = require('../')
 const { User } = require('discord.js')
+const GuildDatabaseManager = require('../managers/GuildDatabaseManager')
