@@ -1,5 +1,5 @@
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
-const { isModuleEnabled } = require('../../utils')
+const { isModuleEnabled, fetchPartial } = require('../../utils')
 
 /**
  * Handles sticky roles for joining/leaving members.
@@ -22,7 +22,9 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberRemove', /** @param {CommandoMember} member */ async member => {
-        member = await member.fetch()
+        member = await fetchPartial(member)
+        if (!member) return
+
         const { guild, id, roles } = member
         if (id === botId) return
 

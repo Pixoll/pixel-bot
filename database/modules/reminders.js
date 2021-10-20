@@ -1,6 +1,6 @@
 const { MessageEmbed, User, TextBasedChannels, Message, MessageOptions, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { myMs, noReplyInDMs } = require('../../utils')
+const { myMs, noReplyInDMs, fetchPartial } = require('../../utils')
 const { basicEmbed } = require('../../utils')
 
 /**
@@ -60,8 +60,9 @@ module.exports = async (client) => {
 
     // Cancells the reminders
     client.on('messageReactionAdd', async (reaction, user) => {
-        await reaction.fetch()
-        await user.fetch()
+        reaction = await fetchPartial(reaction)
+        user = await fetchPartial(user)
+        if (!reaction || !user) return
 
         const { message, emoji } = reaction
         if (user.bot || emoji.id !== '802617654442852394') return
