@@ -37,7 +37,7 @@ async function bulkDelete(msg, messages) {
     }
 
     await sleep(10)
-    await toDelete.delete()
+    await toDelete.delete().catch(() => null)
 }
 
 /**
