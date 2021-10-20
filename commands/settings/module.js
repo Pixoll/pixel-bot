@@ -1,12 +1,11 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { basicEmbed, capitalize, getArgument, addDashes, removeDashes } = require('../../utils')
-const { modules: modulesDocs } = require('../../mongo/schemas')
-const { Module, AuditLog, ModuleSchema } = require('../../mongo/typings')
+const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 
-const Obj = modulesDocs.schema.obj
+const Obj = require('../../schemas').modules.schema.obj
 /** @type {string[]} */
 const modules = Object.keys(Obj).slice(1).map(addDashes)
 /** @type {string[]} */
@@ -88,6 +87,9 @@ module.exports = class ModuleCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<ModuleSchema>} */
+        this.db = null
     }
 
     /**
@@ -104,10 +106,10 @@ module.exports = class ModuleCommand extends Command {
         subModule = subModule?.toLowerCase()
         if (module !== 'audit-logs') subModule = null
 
-        const { guildId } = message
+        const { guild } = message
+        this.db = guild.database.modules
 
-        /** @type {ModuleSchema} */
-        const data = await modulesDocs.findOne({ guild: guildId })
+        const data = await this.db.fetch()
 
         switch (subCommand) {
             case 'diagnose':
@@ -173,8 +175,7 @@ module.exports = class ModuleCommand extends Command {
         if (!subModule) patch[removeDashes(module)] = !patch[removeDashes(module)]
         else patch[removeDashes(module)][removeDashes(subModule)] = !patch[removeDashes(module)][removeDashes(subModule)]
 
-        if (!data) await new modulesDocs(patch).save()
-        else await data.updateOne(patch)
+        await this.db.add(patch)
 
         const type = subModule ? 'sub-module' : 'module'
         const target = subModule ? `${module}/${subModule}` : module

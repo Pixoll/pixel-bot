@@ -1,10 +1,10 @@
 const Command = require('../../command-handler/commands/base')
 const CommandGroup = require('../../command-handler/commands/group')
 const { basicEmbed, getArgument } = require('../../utils')
-const { disabled } = require('../../mongo/schemas')
+const { disabled } = require('../../schemas')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { DisabledSchema } = require('../../mongo/typings')
+const { DisabledSchema } = require('../../schemas/types')
 const { UpdateQuery } = require('mongoose')
 
 /** A command that can be run in a client */

@@ -3,9 +3,12 @@ const CommandoRegistry = require('./registry')
 const CommandDispatcher = require('./dispatcher')
 const GuildSettingsHelper = require('./providers/helper')
 const SettingProvider = require('./providers/base')
-const { CommandoClientOptions } = require('./typings')
+const { CommandoClientOptions, GuildDatabaseManager, CommandoGuildManager } = require('./typings')
 const CommandoMessage = require('./extensions/message')
-const CommandoGuild = require('./extensions/guild')
+// const CommandoGuild = require('./extensions/guild')
+const { myMs } = require('../utils')
+const schemas = require('../schemas')
+const ClientDatabaseManager = require('./managers/ClientDatabaseManager')
 
 /**
  * Discord.js Client with a command framework
@@ -42,13 +45,18 @@ class CommandoClient extends Client {
 		}
 
 		// Creates CommandoGuilds when the client is ready
-		this.once('ready', client => {
-			const cache = new Collection(client.guilds.cache.map(g => ([g.id, g])))
-			for (const [, guild] of cache) {
-				client.guilds.cache.delete(guild.id)
-				client.guilds.cache.set(guild.id, new CommandoGuild(client, guild))
-			}
-		})
+		// this.once('ready', client => {
+		// 	const cache = new Collection(client.guilds.cache.map(g => ([g.id, g])))
+		// 	for (const [, guild] of cache) {
+		// 		client.guilds.cache.delete(guild.id)
+		// 		client.guilds.cache.set(guild.id, new CommandoGuild(client, guild))
+		// 	}
+		// })
+
+		/**
+		 * @type {CommandoGuildManager}
+		 */
+		this.guilds
 
 		/**
 		 * The client's command registry
@@ -61,6 +69,18 @@ class CommandoClient extends Client {
 		 * @type {CommandDispatcher}
 		 */
 		this.dispatcher = new CommandDispatcher(this, this.registry)
+
+		/**
+		 * The client's database manager
+		 * @type {ClientDatabaseManager}
+		 */
+		this.database = new ClientDatabaseManager(this)
+
+		/**
+		 * The guilds' database manager, mapped by the guilds ids
+		 * @type {Collection<string, GuildDatabaseManager>}
+		 */
+		this.databases = new Collection()
 
 		/**
 		 * The client's setting provider
@@ -87,6 +107,7 @@ class CommandoClient extends Client {
 		}
 		this.on('messageCreate', message => {
 			const commando = new CommandoMessage(this, message)
+			this.emit('cMessageCreate', commando)
 			this.dispatcher.handleMessage(commando).catch(msgErr)
 		})
 		this.on('messageUpdate', (oldMessage, newMessage) => {
@@ -95,10 +116,10 @@ class CommandoClient extends Client {
 		})
 
 		// Makes sure every new guild is a CommandoGuild
-		this.on('guildCreate', guild => {
-			this.guilds.cache.delete(guild.id)
-			this.guilds.cache.set(guild.id, new CommandoGuild(this, guild))
-		})
+		// this.on('guildCreate', guild => {
+		// 	this.guilds.cache.delete(guild.id)
+		// 	this.guilds.cache.set(guild.id, new CommandoGuild(this, guild))
+		// })
 
 		// Fetch the owner(s)
 		if (options.owner) {

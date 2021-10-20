@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, addDashes, removeDashes } = require('../../utils')
-const Database = require('../../mongo/schemas')
+const Database = require('../../schemas')
 
 /** A command that can be run in a client */
 module.exports = class DatabaseCommand extends Command {
@@ -33,7 +33,7 @@ module.exports = class DatabaseCommand extends Command {
     async run(message, { collection }) {
         const data = await Database[removeDashes(collection)].find({})
 
-        const array = Array(...data).map(({ _doc: val }) => {
+        const array = [...data].map(({ _doc: val }) => {
             delete val._id
             delete val.__v
             if (val.updatedAt) delete val.updatedAt

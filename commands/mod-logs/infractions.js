@@ -2,7 +2,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
 
 /** A command that can be run in a client */
 module.exports = class InfractionsCommand extends Command {
@@ -32,10 +31,11 @@ module.exports = class InfractionsCommand extends Command {
      * @param {User} args.user The user to get the infractions from
      */
     async run(message, { user }) {
-        const { guildId } = message
+        const { guild } = message
+        const db = guild.database.moderations
 
-        const mods = await moderations.find({ guild: guildId, user: { id: user.id } })
-        if (mods.length === 0) {
+        const mods = await db.fetchMany({ user: { id: user.id } })
+        if (mods.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no infractions.'
             }))
@@ -57,8 +57,8 @@ module.exports = class InfractionsCommand extends Command {
                 ])
         )
 
-        await generateEmbed(message, mods, {
-            authorName: `${user.username} has ${pluralize('infraction', mods.length)}`,
+        await generateEmbed(message, mods.toJSON(), {
+            authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             title: ' |  ID:',
             keyTitle: { prefix: 'type' },

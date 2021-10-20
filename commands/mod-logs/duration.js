@@ -2,8 +2,8 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
 const { myMs, basicEmbed, timeDetails, docId, modConfirmation } = require('../../utils')
-const { moderations, active } = require('../../mongo/schemas')
-const { ModerationSchema, ActiveSchema } = require('../../mongo/typings')
+const { moderations, active } = require('../../schemas')
+const { ModerationSchema, ActiveSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class DurationCommand extends Command {
@@ -49,24 +49,17 @@ module.exports = class DurationCommand extends Command {
      * @param {number|Date} args.duration The new duration
      */
     async run(message, { modlogId, duration }) {
-        const { guildId } = message
+        const { guild } = message
+        const { moderations, active } = guild.database
 
-        /** @type {ModerationSchema} */
-        const query = {
-            guild: guildId,
-            _id: modlogId
-        }
-
-        /** @type {ModerationSchema} */
-        const modLog = await moderations.findOne(query)
+        const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
             }))
         }
 
-        /** @type {ActiveSchema} */
-        const activeLog = await active.findOne(query)
+        const activeLog = await active.fetch(modlogId)
         if (!activeLog) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That punishment has expired.'
@@ -81,8 +74,8 @@ module.exports = class DurationCommand extends Command {
 
         const confirm = await modConfirmation(message, 'update modlog duration', modlogId, { duration: longTime })
         if (!confirm) return
-        await modLog.updateOne({ duration: longTime })
-        await activeLog.updateOne({ duration })
+        await moderations.update(modLog, { duration: longTime })
+        await active.update(activeLog, { duration })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',

@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js')
-const { validURL, basicEmbed, userDetails, getArgument } = require('../../utils')
+const { validURL, basicEmbed, userDetails, getArgument, sleep } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags'),
     /** @type {number} */
     days14 = require('../../utils').myMs('14d')
@@ -26,14 +26,18 @@ async function bulkDelete(msg, messages) {
     })
 
     const _msg = await msg.fetch().catch(() => null)
+    let toDelete
 
     if (_msg && !_msg.deleted) {
-        await msg.replyEmbed(embed)
+        toDelete = await msg.replyEmbed(embed)
         await msg.delete()
     }
     else {
-        await msg.embed(embed)
+        toDelete = await msg.embed(embed)
     }
+
+    await sleep(10)
+    await toDelete.delete()
 }
 
 /**

@@ -1,10 +1,8 @@
 const { User, GuildMember } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { docId, basicEmbed, userException, memberException, reasonDetails, userDetails, modConfirmation } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class BanCommand extends Command {
@@ -49,7 +47,7 @@ module.exports = class BanCommand extends Command {
      */
     async run(message, { user, reason }) {
         const { guild, author, guildId } = message
-        const { members, bans } = guild
+        const { members, bans, database } = guild
 
         const uExcept = userException(user, author, this)
         if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
@@ -82,17 +80,14 @@ module.exports = class BanCommand extends Command {
 
         await members.ban(user, { days: 7, reason })
 
-        /** @type {ModerationSchema} */
-        const doc = {
+        await database.moderations.add({
             _id: docId(),
             type: 'ban',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             mod: { id: author.id, tag: author.tag },
             reason
-        }
-
-        await new moderations(doc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',

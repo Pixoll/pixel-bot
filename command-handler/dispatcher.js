@@ -147,9 +147,8 @@ class CommandDispatcher {
 			if (!this.client.options.nonCommandEditable) this._results.delete(message.id)
 		}
 
-		if (cmdMsg) {
-			if (oldMessage) this.client.emit('cMessageUpdate', oldMessage, cmdMsg)
-			else this.client.emit('cMessageCreate', cmdMsg)
+		if (cmdMsg && oldMessage) {
+			this.client.emit('cMessageUpdate', oldMessage, cmdMsg)
 		}
 
 		this.cacheCommandoMessage(message, oldMessage, cmdMsg, responses)

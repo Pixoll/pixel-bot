@@ -86,6 +86,7 @@ const permissions = {
 	CREATE_PRIVATE_THREADS: 'Create private threads',
 	USE_EXTERNAL_STICKERS: 'Use external stickers',
 	START_EMBEDDED_ACTIVITIES: 'Start activities',
+	SEND_MESSAGES_IN_THREADS: 'Send messages in threads',
 }
 
 const { StringResolvable } = require('./typings')

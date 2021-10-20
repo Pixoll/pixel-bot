@@ -2,10 +2,8 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { Role, GuildMember } = require('discord.js')
 const { memberDetails, timeDetails, roleDetails, reasonDetails, timestamp } = require('../../utils')
-const { active } = require('../../mongo/schemas')
 const { basicEmbed, docId, isMod } = require('../../utils')
 const { stripIndent } = require('common-tags')
-const { ActiveSchema } = require('../../mongo/typings')
 
 /**
  * Validates a {@link Role}
@@ -117,17 +115,14 @@ module.exports = class TempRoleCommand extends Command {
             }).catch(() => null)
         }
 
-        /** @type {ActiveSchema} */
-        const doc = {
+        await guild.database.active.add({
             _id: docId(),
             type: 'temp-role',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             role: role.id,
             duration
-        }
-
-        await new active(doc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `Added role \`${role.name}\` to ${user.tag}`,

@@ -1,8 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { reminders } = require('../../mongo/schemas')
 const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
-const { ReminderSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class RemindersCommand extends Command {
@@ -13,6 +11,8 @@ module.exports = class RemindersCommand extends Command {
             description: 'Displays a list of all your active reminders.',
             throttling: { usages: 1, duration: 3 }
         })
+
+        this.db = this.client.database.reminders
     }
 
     /**
@@ -22,9 +22,8 @@ module.exports = class RemindersCommand extends Command {
     async run(message) {
         const { author } = message
 
-        /** @type {ReminderSchema[]} */
-        const data = await reminders.find({ user: author.id })
-        if (data.length === 0) {
+        const data = await this.db.fetchMany({ user: author.id })
+        if (data.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'You have no active reminders.'
             }))
@@ -36,7 +35,7 @@ module.exports = class RemindersCommand extends Command {
         }))
 
         await generateEmbed(message, list, {
-            authorName: `You have ${pluralize('reminder', data.length)}`,
+            authorName: `You have ${pluralize('reminder', data.size)}`,
             authorIconURL: author.displayAvatarURL({ dynamic: true }),
             title: 'Reminder set for',
             keyTitle: { suffix: 'remindAt' },

@@ -3,8 +3,6 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { docId, isMod, basicEmbed, memberDetails, modConfirmation } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /**
  * Validates a {@link GuildMember}
@@ -119,20 +117,18 @@ module.exports = class MultiBanCommand extends Command {
             }
 
             await manager.ban(user, { days: 7, reason })
-            banned.push(user)
-            await toEdit.edit({ embeds: [embed(banned.length)] })
 
-            /** @type {ModerationSchema} */
-            const doc = {
+            await guild.database.moderations.add({
                 _id: docId(),
                 type: 'ban',
                 guild: guildId,
                 user: { id: user.id, tag: user.tag },
                 mod: { id: authorId, tag: author.tag },
-                reason: reason
-            }
+                reason
+            })
 
-            await new moderations(doc).save()
+            banned.push(user)
+            await toEdit.edit({ embeds: [embed(banned.length)] })
         }
 
         const options = banned.length !== 0 ? {

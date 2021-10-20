@@ -1,12 +1,11 @@
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
 const { MessageEmbed, MessageAttachment, MessageOptions } = require('discord.js')
 const { status: statusJava, statusBedrock } = require('minecraft-server-util')
 const { StatusResponse, BedrockStatusResponse } = require('minecraft-server-util/dist/model/StatusResponse')
 const { basicEmbed, getArgument, remDiscFormat, noReplyInDMs } = require('../../utils')
-const { mcIp } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { McIpSchema } = require('../../mongo/typings')
+const { McIpSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class McStatusCommand extends Command {
@@ -54,6 +53,9 @@ module.exports = class McStatusCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<McIpSchema>} */
+        this.db = null
     }
 
     /**
@@ -66,9 +68,10 @@ module.exports = class McStatusCommand extends Command {
      */
     async run(message, { subCommand, ip, port }) {
         subCommand = subCommand.toLowerCase()
-        const { guildId } = message
+        const { guild } = message
+        this.db = guild.database.mcIps
 
-        const savedServer = await mcIp.findOne({ guild: guildId })
+        const savedServer = await this.db.fetch()
 
         switch (subCommand) {
             case 'check':
@@ -171,16 +174,12 @@ module.exports = class McStatusCommand extends Command {
             ip = value
         }
 
-        /** @type {McIpSchema} */
-        const newDoc = {
+        await this.db.add({
             guild: guildId,
             type: 'java',
             ip: ip,
             port: port
-        }
-
-        if (!savedServer) await new mcIp(newDoc).save()
-        else await savedServer.updateOne(newDoc)
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: stripIndent`
@@ -210,16 +209,12 @@ module.exports = class McStatusCommand extends Command {
             ip = value
         }
 
-        /** @type {McIpSchema} */
-        const newDoc = {
+        await this.db.add({
             guild: guildId,
             type: 'bedrock',
             ip: ip,
             port: port
-        }
-
-        if (!savedServer) await new mcIp(newDoc).save()
-        else await savedServer.updateOne(newDoc)
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: stripIndent`

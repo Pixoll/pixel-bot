@@ -2,9 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { docId, basicEmbed, userException, modConfirmation } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class warnCommand extends Command {
@@ -66,17 +64,14 @@ module.exports = class warnCommand extends Command {
             `
         })).catch(() => null)
 
-        /** @type {ModerationSchema} */
-        const doc = {
+        await guild.database.moderations.add({
             _id: docId(),
             type: 'warn',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             mod: { id: author.id, tag: author.tag },
             reason
-        }
-
-        await new moderations(doc).save()
+        })
         this.client.emit('guildMemberWarn', guild, author, user, reason)
 
         await message.replyEmbed(basicEmbed({

@@ -11,12 +11,12 @@ module.exports = class MsgInfoCommand extends Command {
             name: 'msginfo',
             group: 'owner',
             description: 'Gets info from a message.',
-            format: 'msginfo [message Id]',
+            format: 'msginfo [message id]',
             ownerOnly: true,
             args: [
                 {
                     key: 'msg',
-                    prompt: 'What is the Id of the message?',
+                    prompt: 'What is the id of the message?',
                     type: 'message'
                 },
                 {

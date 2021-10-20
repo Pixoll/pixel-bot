@@ -1,10 +1,9 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { MessageEmbed, User } = require('discord.js')
+const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { getDayDiff, code } = require('../../utils')
-const { ModerationSchema } = require('../../mongo/typings')
-const { moderations } = require('../../mongo/schemas')
+const { ModerationSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class ModStatsCommand extends Command {
@@ -40,10 +39,10 @@ module.exports = class ModStatsCommand extends Command {
      */
     async run(message, { user }) {
         const { guild, author } = message
+        const db = guild.database.moderations
         if (!user) user = author
 
-        /** @type {ModerationSchema[]} */
-        const stats = await moderations.find({ guild: guild.id, mod: { id: user.id } })
+        const stats = await db.fetchMany({ mod: { id: user.id } })
 
         const pad = 10
         const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'
@@ -68,7 +67,7 @@ module.exports = class ModStatsCommand extends Command {
 
     /**
      * Filters the stats by type
-     * @param {ModerationSchema[]} stats The stats to filter
+     * @param {Collection<string, ModerationSchema>} stats The stats to filter
      * @param {string|string[]} filter The type of the punishment
      * @param {string} row The name of the row
      * @param {number} pad The padding for the content
@@ -76,9 +75,9 @@ module.exports = class ModStatsCommand extends Command {
     getStats(stats, filter, row, pad) {
         if (typeof filter === 'string') filter = [filter]
 
-        const seven = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 7).length.toString()
-        const thirty = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 30).length.toString()
-        const all = stats.filter(m => filter.includes(m.type)).length.toString()
+        const seven = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 7).size.toString()
+        const thirty = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 30).size.toString()
+        const all = stats.filter(m => filter.includes(m.type)).size.toString()
 
         return row.padEnd(pad, ' ') + seven.padEnd(pad, ' ') + thirty.padEnd(pad, ' ') + all
     }

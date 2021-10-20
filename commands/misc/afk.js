@@ -1,9 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed } = require('../../utils')
-const { afk } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { AfkSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class AfkCommand extends Command {
@@ -39,10 +37,10 @@ module.exports = class AfkCommand extends Command {
      * @param {string} args.status The status to set or `off`
      */
     async run(message, { status }) {
-        const { author, guildId } = message
+        const { author, guildId, guild } = message
+        const db = guild.database.afk
 
-        /** @type {AfkSchema} */
-        const afkStatus = await afk.findOne({ guild: guildId, user: author.id })
+        const afkStatus = await db.fetch({ guild: guildId, user: author.id }, true)
 
         if (afkStatus) {
             if (status.toLowerCase() === 'off') {
@@ -67,14 +65,11 @@ module.exports = class AfkCommand extends Command {
             }))
         }
 
-        /** @type {AfkSchema} */
-        const doc = {
+        await db.add({
             guild: guildId,
             user: author.id,
             status
-        }
-
-        await new afk(doc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',

@@ -1,9 +1,8 @@
 const Command = require('../../command-handler/commands/base')
-const { setup } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { basicEmbed, generateEmbed, pluralize, getArgument, channelDetails } = require('../../utils')
-const { CommandoMessage } = require('../../command-handler/typings')
-const { SetupSchema } = require('../../mongo/typings')
+const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
 
 /** A command that can be run in a client */
@@ -67,6 +66,9 @@ module.exports = class LockdownCommand extends Command {
                 }
             ]
         })
+
+        /** @type {DatabaseManager<SetupSchema>} */
+        this.db = null
     }
 
     /**
@@ -77,16 +79,16 @@ module.exports = class LockdownCommand extends Command {
      * @param {string} args.channels The reason of the lockdown, or the channels to add/remove
      */
     async run(message, { subCommand, channels }) {
-        const { guild, guildId } = message
+        const { guild } = message
+        this.db = guild.database.setup
         const _channels = guild.channels.cache
         subCommand = subCommand.toLowerCase()
 
-        /** @type {SetupSchema} */
-        const data = await setup.findOne({ guild: guildId })
+        const data = await this.db.fetch()
 
         const savedChannels = []
         if (data) {
-            for (const channelId of Array(...data.lockChannels)) {
+            for (const channelId of [...data.lockChannels]) {
                 /** @type {TextChannel} */
                 const channel = _channels.get(channelId)
                 if (!channel) continue
@@ -124,6 +126,10 @@ module.exports = class LockdownCommand extends Command {
         const { guild, guildId } = message
         const { everyone } = guild.roles
 
+        const toDelete = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels...'
+        }))
+
         let amount = 0
         for (const channel of savedChannels) {
             const permsManager = channel.permissionOverwrites
@@ -139,6 +145,9 @@ module.exports = class LockdownCommand extends Command {
             })
             amount++
         }
+
+        await toDelete.delete()
+        await message.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
             return await message.replyEmbed(basicEmbed({
@@ -238,11 +247,12 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        if (!data) await new setup({
-            guild: message.guildId,
+        const { guildId } = message
+        if (!data) await this.db.add({
+            guild: guildId,
             lockChannels: channelsList.map(c => c.id)
-        }).save()
-        else await data.updateOne({
+        })
+        else await this.db.update(data, {
             $push: { lockChannels: { $each: channelsList.map(c => c.id) } }
         })
 
@@ -280,7 +290,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        await data.updateOne({
+        await this.db.update(data, {
             $pull: { lockChannels: { $in: channelsList.map(c => c.id) } }
         })
 

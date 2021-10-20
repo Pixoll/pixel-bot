@@ -3,8 +3,8 @@ const { CommandoMessage } = require('../../command-handler/typings')
 const { User } = require('discord.js')
 const { oneLine } = require('common-tags')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
-const { ModerationSchema } = require('../../mongo/typings')
+const { moderations } = require('../../schemas')
+const { ModerationSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class WarningsCommand extends Command {

@@ -1,8 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, docId, modConfirmation } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
-const { ModerationSchema } = require('../../mongo/typings')
 const { oneLine } = require('common-tags')
 
 /** A command that can be run in a client */
@@ -40,10 +38,10 @@ module.exports = class DelModLogCommand extends Command {
      */
     async run(message, { modlogId }) {
         modlogId = modlogId.toLowerCase()
-        const { guildId } = message
+        const { guild } = message
+        const db = guild.database.moderations
 
-        /** @type {ModerationSchema} */
-        const modLog = await moderations.findOne({ guild: guildId, _id: modlogId })
+        const modLog = await db.fetch(modlogId)
         if (!modLog) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
@@ -52,7 +50,7 @@ module.exports = class DelModLogCommand extends Command {
 
         const confirm = await modConfirmation(message, 'delete modlog', modlogId)
         if (!confirm) return
-        await modLog.deleteOne()
+        await db.delete(modLog)
 
         return await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Deleted mod log with id \`${modlogId}\``

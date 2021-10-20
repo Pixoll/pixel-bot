@@ -2,8 +2,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { modules: Modules } = require('../../mongo/schemas')
-const { ModuleSchema } = require('../../mongo/typings')
+const { ModuleSchema } = require('../../schemas/types')
 
 /**
  * Patches the data of a {@link ModuleSchema}
@@ -56,9 +55,9 @@ module.exports = class ModulesCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const { guild, guildId } = message
+        const { guild } = message
 
-        const data = await Modules.findOne({ guild: guildId })
+        const data = await guild.database.modules.fetch()
         const patch = patchData(data)
         const { auditLogs, /* autoMod, chatFilter, */ welcome, stickyRoles } = patch
         const {

@@ -38,7 +38,7 @@ module.exports = class ModeratorsCommand extends Command {
             .map(mbr => ({
                 tag: mbr.user.tag,
                 list: mbr.roles.cache.filter(m => isMod(m, true)).sort((a, b) => b.position - a.position)
-                    .map(r => r).map(r => r.name).join(', ') || 'None'
+                    .map(r => r.name).join(', ') || 'None'
             }))
 
         await generateEmbed(message, modsList, {

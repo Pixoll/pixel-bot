@@ -1,10 +1,8 @@
 const Command = require('../../command-handler/commands/base')
 const { GuildMember, TextChannel } = require('discord.js')
 const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails, modConfirmation } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class KickCommand extends Command {
@@ -80,21 +78,18 @@ module.exports = class KickCommand extends Command {
 
         await member.kick(reason)
 
-        await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: `${user.tag} has been kicked`, fieldValue: `**Reason:** ${reason}`
-        }))
-
-        /** @type {ModerationSchema} */
-        const doc = {
+        await guild.database.moderations.add({
             _id: docId(),
             type: 'kick',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             mod: { id: author.id, tag: author.tag },
             reason
-        }
+        })
 
-        await new moderations(doc).save()
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            fieldName: `${user.tag} has been kicked`, fieldValue: `**Reason:** ${reason}`
+        }))
     }
 }

@@ -2,9 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User, TextChannel, GuildMember } = require('discord.js')
 const { docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge, modConfirmation } = require('../../utils')
-const { moderations } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { ModerationSchema } = require('../../mongo/typings')
 
 /** A command that can be run in a client */
 module.exports = class SoftBanCommand extends Command {
@@ -50,7 +48,7 @@ module.exports = class SoftBanCommand extends Command {
      */
     async run(message, { user, reason }) {
         const { guild, author, guildId } = message
-        const { members, bans } = guild
+        const { members, bans, database } = guild
 
         const uExcept = userException(user, author, this)
         if (uExcept) return await message.replyEmbed(uExcept)
@@ -92,17 +90,14 @@ module.exports = class SoftBanCommand extends Command {
         await members.ban(user, { days: 7, reason })
         await members.unban(user, 'Soft-ban')
 
-        /** @type {ModerationSchema} */
-        const doc = {
+        await database.moderations.add({
             _id: docId(),
             type: 'soft-ban',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
             mod: { id: author.id, tag: author.tag },
             reason
-        }
-
-        await new moderations(doc).save()
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been soft-banned`,

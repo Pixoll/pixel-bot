@@ -1,9 +1,8 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, getArgument } = require('../../utils')
-const { todo } = require('../../mongo/schemas')
 const { stripIndent } = require('common-tags')
-const { TodoSchema } = require('../../mongo/typings')
+const { TodoSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class TodoCommand extends Command {
@@ -41,6 +40,8 @@ module.exports = class TodoCommand extends Command {
                 }
             ]
         })
+
+        this.db = this.client.database.todo
     }
 
     /**
@@ -54,9 +55,8 @@ module.exports = class TodoCommand extends Command {
         subCommand = subCommand.toLowerCase()
         const { id } = message.author
 
-        /** @type {TodoSchema} */
-        const TODO = await todo.findOne({ user: id })
-        const todoList = TODO ? Array(...TODO.list) : null
+        const TODO = await this.db.fetch({ user: id })
+        const todoList = TODO ? [...TODO.list] : null
 
         switch (subCommand) {
             case 'view':
@@ -106,14 +106,8 @@ module.exports = class TodoCommand extends Command {
             item = value
         }
 
-        /** @type {TodoSchema} */
-        const newDoc = {
-            user: message.author.id,
-            list: [item]
-        }
-
-        if (!todoData) await new todo(newDoc).save()
-        else await todoData.updateOne({ $push: { list: item } })
+        if (!todoData) this.db.add({ user: message.author.id, list: [item] })
+        else this.db.update(todoData, { $push: { list: item } })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check',
@@ -141,15 +135,12 @@ module.exports = class TodoCommand extends Command {
             }))
         }
 
-        if (item > todoList.length) {
+        if (!todoList[--item]) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside your to-do list.'
             }))
         }
-
-        item--
-        await todoData.updateOne({ $pull: { list: todoList[item] } })
-        item++
+        await this.db.update(todoData, { $pull: { list: todoList[item++] } })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Removed item \`${item}\` from your to-do list.`
