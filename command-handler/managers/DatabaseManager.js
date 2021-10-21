@@ -100,7 +100,6 @@ class DatabaseManager {
             throw new TypeError('toUpdate cannot be undefined or null.')
         }
         await toUpdate.updateOne(options)
-        this.cache.delete(`${toUpdate._id}`)
         const newDoc = await this.fetch(`${toUpdate._id}`)
         this.cache.set(`${newDoc._id}`, newDoc)
         return newDoc
@@ -127,18 +126,17 @@ class DatabaseManager {
             for (const p in filter) found = isEqual(doc[p], filter[p])
             return found
         })
-        return filtered.first()
-        // const existing = filtered.first()
-        // if (existing) return existing
+        const existing = filtered.first()
+        if (existing) return existing
 
-        // const data = await this.schema.find(filter)
-        // const fetched = new Collection()
-        // for (const doc of data) {
-        //     if (!this.guild && doc.guild) continue
-        //     this.cache.set(`${doc._id}`, doc)
-        //     fetched.set(`${doc._id}`, doc)
-        // }
-        // return fetched.first()
+        const data = await this.schema.find(filter)
+        const fetched = new Collection()
+        for (const doc of data) {
+            if (!this.guild && doc.guild) continue
+            this.cache.set(`${doc._id}`, doc)
+            fetched.set(`${doc._id}`, doc)
+        }
+        return fetched.first()
     }
 
     /**
@@ -154,18 +152,17 @@ class DatabaseManager {
             for (const p in filter) found = isEqual(doc[p], filter[p])
             return found
         })
-        return filtered
-        // const existing = filtered.first()
-        // if (existing) return filtered
+        const existing = filtered.first()
+        if (existing) return filtered
 
-        // const data = await this.schema.find(filter)
-        // const fetched = new Collection()
-        // for (const doc of data) {
-        //     if (!this.guild && doc.guild) continue
-        //     this.cache.set(`${doc._id}`, doc)
-        //     fetched.set(`${doc._id}`, doc)
-        // }
-        // return fetched
+        const data = await this.schema.find(filter)
+        const fetched = new Collection()
+        for (const doc of data) {
+            if (!this.guild && doc.guild) continue
+            this.cache.set(`${doc._id}`, doc)
+            fetched.set(`${doc._id}`, doc)
+        }
+        return fetched
     }
 }
 
