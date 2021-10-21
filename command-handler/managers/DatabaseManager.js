@@ -108,7 +108,7 @@ class DatabaseManager {
     /**
      * Fetch a single document
      * @param {string|object} [filter={}] The id or fetching filter for this document
-     * @returns {Promise<object>} The fetched document
+     * @returns {Promise<?object>} The fetched document
      */
     async fetch(filter = {}) {
         if (typeof filter === 'string') {
@@ -119,17 +119,20 @@ class DatabaseManager {
             return data
         }
 
-        const noKeys = Object.keys(filter).length === 0
+        if (this.cache.size === 0) return undefined
 
         if (this.guild) filter.guild ??= this.guild.id
         const filtered = this.cache.filter(doc => {
-            if (noKeys) return true
+            if (Object.keys(filter).length === 0) return true
             let found = false
-            for (const p in filter) found = isEqual(doc[p], filter[p])
+            for (const p in filter) {
+                found = isEqual(doc[p], filter[p])
+                delete filter[p]
+            }
             return found
         })
         const existing = filtered.first()
-        if (existing || noKeys) return existing
+        if (existing || Object.keys(filter).length === 0) return existing
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()
@@ -147,17 +150,20 @@ class DatabaseManager {
      * @returns {Promise<Collection<string, object>>} The fetched documents
      */
     async fetchMany(filter = {}) {
-        const noKeys = Object.keys(filter).length === 0
+        if (this.cache.size === 0) return this.cache
 
         if (this.guild) filter.guild ??= this.guild.id
         const filtered = this.cache.filter(doc => {
             if (Object.keys(filter).length === 0) return true
             let found = false
-            for (const p in filter) found = isEqual(doc[p], filter[p])
+            for (const p in filter) {
+                found = isEqual(doc[p], filter[p])
+                delete filter[p]
+            }
             return found
         })
         const existing = filtered.first()
-        if (existing || noKeys) return filtered
+        if (existing || Object.keys(filter).length === 0) return filtered
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()

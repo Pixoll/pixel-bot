@@ -55,7 +55,7 @@ module.exports = async (client) => {
             }
         }
 
-        setTimeout(checkPunishments, 5 * 1000)
+        setTimeout(checkPunishments, 15 * 1000)
     }
 
     await checkPunishments()

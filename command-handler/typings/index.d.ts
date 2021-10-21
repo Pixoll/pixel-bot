@@ -1015,7 +1015,7 @@ export class DatabaseManager<T> {
 	 * @param filter The id or fetching filter for the document
 	 * @returns The fetched document
 	 */
-	public fetch(filter?: string | FilterQuery<T>): Promise<T>
+	public fetch(filter?: string | FilterQuery<T>): Promise<?T>
 	/**
 	 * Fetch a multiple documents
 	 * @param filter The fetching filter for the documents
