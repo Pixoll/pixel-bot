@@ -46,12 +46,10 @@ class DatabaseManager {
         if (typeof doc !== 'object') {
             throw new TypeError('doc must me an object')
         }
-        if (doc._id) {
-            const existing = await this.schema.findById(`${doc._id}`)
-            if (existing) {
-                const updated = await this.update(existing, doc)
-                return updated
-            }
+        const existing = doc._id ? await this.schema.findById(`${doc._id}`) : await this.schema.findOne(doc)
+        if (existing) {
+            const updated = await this.update(existing, doc)
+            return updated
         }
         const added = await new this.schema(doc).save()
         this.cache.set(`${added._id}`, added)
@@ -100,7 +98,7 @@ class DatabaseManager {
             throw new TypeError('toUpdate cannot be undefined or null.')
         }
         await toUpdate.updateOne(options)
-        const newDoc = await this.fetch(`${toUpdate._id}`)
+        const newDoc = await this.schema.findById(`${toUpdate._id}`)
         this.cache.set(`${newDoc._id}`, newDoc)
         return newDoc
     }
@@ -122,26 +120,12 @@ class DatabaseManager {
         if (this.cache.size === 0) return undefined
 
         if (this.guild) filter.guild ??= this.guild.id
-        const filtered = this.cache.filter(doc => {
-            if (Object.keys(filter).length === 0) return true
-            let found = false
-            for (const p in filter) {
-                found = isEqual(doc[p], filter[p])
-                delete filter[p]
-            }
-            return found
-        })
-        const existing = filtered.first()
-        if (existing || Object.keys(filter).length === 0) return existing
+        const existing = this.cache.find(docsFilter(filter))
+        if (existing) return existing
 
-        const data = await this.schema.find(filter)
-        const fetched = new Collection()
-        for (const doc of data) {
-            if (!this.guild && doc.guild) continue
-            this.cache.set(`${doc._id}`, doc)
-            fetched.set(`${doc._id}`, doc)
-        }
-        return fetched.first()
+        const doc = await this.schema.findOne(filter)
+        this.cache.set(`${doc._id}`, doc)
+        return doc
     }
 
     /**
@@ -153,17 +137,8 @@ class DatabaseManager {
         if (this.cache.size === 0) return this.cache
 
         if (this.guild) filter.guild ??= this.guild.id
-        const filtered = this.cache.filter(doc => {
-            if (Object.keys(filter).length === 0) return true
-            let found = false
-            for (const p in filter) {
-                found = isEqual(doc[p], filter[p])
-                delete filter[p]
-            }
-            return found
-        })
-        const existing = filtered.first()
-        if (existing || Object.keys(filter).length === 0) return filtered
+        const filtered = this.cache.filter(docsFilter(filter))
+        if (filtered.size !== 0) return filtered
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()
@@ -177,3 +152,14 @@ class DatabaseManager {
 }
 
 module.exports = DatabaseManager
+
+function docsFilter(filter) {
+    return doc => {
+        if (Object.keys(filter).length === 0) return true
+        let found = false
+        for (const p in filter) {
+            found = isEqual(doc[p], filter[p])
+        }
+        return found
+    }
+}
