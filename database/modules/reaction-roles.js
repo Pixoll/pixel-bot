@@ -46,8 +46,9 @@ module.exports = async (client) => {
         reaction = await fetchPartial(reaction)
         user = await fetchPartial(user)
 
-        const { message, emoji } = reaction
-        await message.fetch()
+        let { message, emoji } = reaction
+        message = await message.fetch().catch(() => null)
+        if (!message) return
 
         /** @type {CommandoMessage} */
         const { guild } = message
