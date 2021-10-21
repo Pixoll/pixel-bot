@@ -119,15 +119,17 @@ class DatabaseManager {
             return data
         }
 
+        const noKeys = Object.keys(filter).length === 0
+
         if (this.guild) filter.guild ??= this.guild.id
         const filtered = this.cache.filter(doc => {
-            if (Object.keys(filter).length === 0) return true
+            if (noKeys) return true
             let found = false
             for (const p in filter) found = isEqual(doc[p], filter[p])
             return found
         })
         const existing = filtered.first()
-        if (existing) return existing
+        if (existing || noKeys) return existing
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()
@@ -145,6 +147,8 @@ class DatabaseManager {
      * @returns {Promise<Collection<string, object>>} The fetched documents
      */
     async fetchMany(filter = {}) {
+        const noKeys = Object.keys(filter).length === 0
+
         if (this.guild) filter.guild ??= this.guild.id
         const filtered = this.cache.filter(doc => {
             if (Object.keys(filter).length === 0) return true
@@ -153,7 +157,7 @@ class DatabaseManager {
             return found
         })
         const existing = filtered.first()
-        if (existing) return filtered
+        if (existing || noKeys) return filtered
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()
