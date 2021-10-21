@@ -120,14 +120,13 @@ class DatabaseManager {
         }
 
         if (this.guild) filter.guild ??= this.guild.id
-        if (Object.keys(filter).length !== 0) {
-            const filtered = this.cache.filter(doc => {
-                let found = false
-                for (const p in filter) found = isEqual(doc[p], filter[p])
-                return found
-            })
-            if (filtered.size !== 0) return filtered.first()
-        }
+        const filtered = this.cache.filter(doc => {
+            if (Object.keys(filter).length === 0) return true
+            let found = false
+            for (const p in filter) found = isEqual(doc[p], filter[p])
+            return found
+        })
+        if (filtered.size !== 0) return filtered.first()
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()
@@ -146,14 +145,13 @@ class DatabaseManager {
      */
     async fetchMany(filter = {}) {
         if (this.guild) filter.guild ??= this.guild.id
-        if (Object.keys(filter).length !== 0) {
-            const filtered = this.cache.filter(doc => {
-                let found = false
-                for (const p in filter) found = isEqual(doc[p], filter[p])
-                return found
-            })
-            if (filtered.size !== 0) return filtered
-        }
+        const filtered = this.cache.filter(doc => {
+            if (Object.keys(filter).length === 0) return true
+            let found = false
+            for (const p in filter) found = isEqual(doc[p], filter[p])
+            return found
+        })
+        if (filtered.size !== 0) return filtered
 
         const data = await this.schema.find(filter)
         const fetched = new Collection()
