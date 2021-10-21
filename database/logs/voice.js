@@ -26,18 +26,18 @@ module.exports = (client) => {
             .setFooter(`User id: ${id}`)
             .setTimestamp()
 
-        if (!channel1) {
+        if (!channel1 && channel2) {
             embed.setColor('GREEN')
                 .setDescription(
-                    `${user.toString()} joined  ${channelTypes[channel2.type].toLowerCase()} channel ${channel2.toString()}`
-                    )
+                    `${user.toString()} joined ${channelTypes[channel2.type].toLowerCase()} channel ${channel2.toString()}`
+                )
         }
 
-        if (!channel2) {
+        if (!channel2 && channel1) {
             embed.setColor('ORANGE')
                 .setDescription(
                     `${user.toString()} left ${channelTypes[channel1.type].toLowerCase()} channel ${channel1.toString()}`
-                    )
+                )
         }
 
         if (channel1 && channel2 && channel1.id !== channel2.id) {
@@ -48,11 +48,11 @@ module.exports = (client) => {
         }
 
         if (typeof mute1 === 'boolean' && typeof mute2 === 'boolean' && mute1 !== mute2) {
-            embed.setDescription(`${user.toString()} has been server ${mute2 ? 'muted': 'unmuted'}`)
+            embed.setDescription(`${user.toString()} has been server ${mute2 ? 'muted' : 'unmuted'}`)
         }
 
         if (typeof deaf1 === 'boolean' && typeof deaf2 === 'boolean' && deaf1 !== deaf2) {
-            embed.setDescription(`${user.toString()} has been server ${deaf2 ? 'deafened': 'undeafened'}`)
+            embed.setDescription(`${user.toString()} has been server ${deaf2 ? 'deafened' : 'undeafened'}`)
         }
 
         if (embed.description || embed.fields.length !== 0) {
