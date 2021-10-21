@@ -116,6 +116,7 @@ class DatabaseManager {
             const existing = this.cache.get(filter)
             if (existing) return existing
             const data = await this.schema.findById(filter)
+            this.cache.set(`${data._id}`, data)
             return data
         }
 
@@ -126,17 +127,18 @@ class DatabaseManager {
             for (const p in filter) found = isEqual(doc[p], filter[p])
             return found
         })
-        const existing = filtered.first()
-        if (existing) return existing
+        return filtered.first()
+        // const existing = filtered.first()
+        // if (existing) return existing
 
-        const data = await this.schema.find(filter)
-        const fetched = new Collection()
-        for (const doc of data) {
-            if (!this.guild && doc.guild) continue
-            this.cache.set(`${doc._id}`, doc)
-            fetched.set(`${doc._id}`, doc)
-        }
-        return fetched.first()
+        // const data = await this.schema.find(filter)
+        // const fetched = new Collection()
+        // for (const doc of data) {
+        //     if (!this.guild && doc.guild) continue
+        //     this.cache.set(`${doc._id}`, doc)
+        //     fetched.set(`${doc._id}`, doc)
+        // }
+        // return fetched.first()
     }
 
     /**
@@ -152,17 +154,18 @@ class DatabaseManager {
             for (const p in filter) found = isEqual(doc[p], filter[p])
             return found
         })
-        const existing = filtered.first()
-        if (existing) return filtered
+        return filtered
+        // const existing = filtered.first()
+        // if (existing) return filtered
 
-        const data = await this.schema.find(filter)
-        const fetched = new Collection()
-        for (const doc of data) {
-            if (!this.guild && doc.guild) continue
-            this.cache.set(`${doc._id}`, doc)
-            fetched.set(`${doc._id}`, doc)
-        }
-        return fetched
+        // const data = await this.schema.find(filter)
+        // const fetched = new Collection()
+        // for (const doc of data) {
+        //     if (!this.guild && doc.guild) continue
+        //     this.cache.set(`${doc._id}`, doc)
+        //     fetched.set(`${doc._id}`, doc)
+        // }
+        // return fetched
     }
 }
 
