@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { MessageEmbed } = require('discord.js')
-const { commandInfo, basicEmbed, pagedEmbed } = require('../../utils')
+const { commandInfo, pagedEmbed, getArgument } = require('../../utils')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandoMessage, Command: CommandType } = require('../../command-handler/typings')
@@ -17,7 +17,6 @@ module.exports = class HelpCommand extends Command {
             format: 'help <command>',
             examples: ['help ban'],
             guarded: true,
-            throttling: { usages: 1, duration: 3 },
             args: [{
                 key: 'cmd',
                 label: 'command',
@@ -35,127 +34,173 @@ module.exports = class HelpCommand extends Command {
      * @param {CommandType} args.cmd The command to get information from
      */
     async run(message, { cmd }) {
-        const { guild, client } = message
+        const { guild, client, author } = message
+        const { registry, user, owners } = client
+        const { groups } = registry
+        const owner = owners[0]
         const prefix = guild?.prefix || client.prefix
 
         if (!cmd) {
-            /**
-             * Creates a paged embed with a list of all the commands and relevant information of how to use the bot.
-             * @param {number} page the page of the embed
-             */
-            function helpEmbed(page) {
-                const { registry, user, owners } = client
-                const { groups } = registry
+            const commands = groups.map(g => g.commands.filter(cmd => {
+                const hasPermission = cmd.hasPermission(message) === true
+                const guildOnly = !guild ? !cmd.guildOnly : true
+                const dmOnly = guild ? !cmd.dmOnly : true
+                const shouldHide = author.id !== owner.id && cmd.hidden
 
-                /**
-                 * Filters the commands the user has permissions to
-                 * @param {CommandType} cmd The command to filter
-                 */
-                function filterCmd(cmd) {
-                    const hasPermission = cmd.hasPermission(message)
-                    const hasPerms = typeof hasPermission === 'boolean' ? hasPermission : false
-                    const guildOnly = !guild ? !cmd.guildOnly : true
-                    const dmOnly = guild ? !cmd.dmOnly : true
+                return !shouldHide && hasPermission && guildOnly && dmOnly
+            })).filter(g => g.size > 0)
 
-                    return !cmd.hidden && hasPerms && guildOnly && dmOnly
-                }
-
-                const commands = groups.map(g => g.commands.filter(filterCmd)).filter(g => g.size > 0)
-                const owner = owners[0].tag
-
-                const embed = new MessageEmbed()
-                    .setColor('#4c9f4c')
-                    .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
-                    .setFooter(
-                        `Page ${++page} of 4 | Version: ${version} | Developer: ${owner}`,
-                        user.displayAvatarURL({ dynamic: true })
-                    )
-
-                if (page === 1) {
-                    embed.setTitle('Commands list')
-                        .setDescription(stripIndent`
-                            To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`.
-                            You can also mention me to use a command, for example: \`@${user.tag} help\`.
-                            Type \`${prefix}help <command>\` for detailed information of a command.
-                        `)
-
-                    for (const group of commands) {
-                        const { name } = group.first().group
-                        const commandList = group.map(c =>
-                            c.deprecated ? `~~\`${c.name}\`~~` : `\`${c.name}\``
-                        ).sort().join(', ')
-
-                        embed.addField(name, commandList)
+            const commandList = []
+            for (const group of commands) {
+                const { name } = group.first().group
+                const list = group.map(c => {
+                    if (c.deprecated) return `~~\`${c.name}\`~~`
+                    if ((guild && !c.isEnabledIn(guild)) || !c._globalEnabled) {
+                        return `\`—${c.name}\``
                     }
-                }
-
-                if (page === 2) {
-                    embed.setTitle(`About ${user.username}`)
-                        .addField(
-                            '**Oops!** Seems like there\'s nothing to see here!',
-                            'This page is still a work in progress, please be patient.'
-                        )
-                }
-
-                if (page === 3) {
-                    embed.setTitle('Commands usage').setDescription(stripIndent`
-                        ${oneLine`
-                            Some commands will have their arguments surrounded by different types
-                            of paranthesisthem. The meaning of each one of these is listed below.
-                        `}
-
-                        **>** **Square paranthesis** \`[]\`: This argument is required.
-                        **>** **Arrow parenthesis** \`<>\`: This argument is optional.
-                    `)
-                }
-
-                if (page === 4) {
-                    embed.setTitle('Time formatting').setDescription(stripIndent`
-                        ${oneLine`
-                            Other commands will require the use of special formatting for time.
-                            It can either a number representing the amount of seconds, or a number
-                            followed by a letter (it\'s not case sensitive). The number can have
-                            decimals if you need them to. This are the letters that I support and
-                            their meanings:
-                        `}
-
-                        **>** **Letter** \`ms\`: milliseconds
-                        **>** **Letter** \`s\`: seconds
-                        **>** **Letter** \`m\`: minutes
-                        **>** **Letter** \`h\`: hours
-                        **>** **Letter** \`d\`: days
-                        **>** **Letter** \`w\`: weeks
-                        **>** **Letter** \`mth\`: months
-                        **>** **Letter** \`y\`: years
-
-                        ${oneLine`
-                            An example of this would be \`3d\`, which means \`3 days\`.
-                            Another one would be \`1.5y\`, which means \`1 year and a half\`.
-                            This also works: \`1d12h\`, which means \`1 day and 12 hours\`.
-                        `}
-                    `)
-                }
-
-                return { embed }
+                    return `\`${c.name}\``
+                }).sort().join(', ')
+                commandList.push({ name, value: list })
             }
+
+            const base = new MessageEmbed()
+                .setColor('#4c9f4c')
+                .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
+
+            const pages = [
+                new MessageEmbed(base)
+                    .setTitle('Commands list')
+                    .setDescription(stripIndent`
+                        To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`.
+                        You can also mention me to use a command, for example: \`@${user.tag} help\`.
+                        Type \`${prefix}help <command>\` for detailed information of a command.
+
+                        ${oneLine`
+                            Commands with a strikethrough (~~\`like this\`~~), mean they've been marked as deprecated,
+                            and the ones with a dash before their name (\`—like this\`), mean they've been disabled,
+                            either on the server you're in or everywhere.
+                        `}
+                    `)
+                    .addFields(commandList),
+                new MessageEmbed(base)
+                    .setTitle(`About ${user.username}`)
+                    .setDescription(oneLine`
+                        This bot provides a handful amount of moderation, management, information and some other
+                        misc commands, going from muting, banning, server information, setting reminders, etc.
+                    `)
+                    .addField('Current features', stripIndent`
+                        - Moderation
+                        - Welcome messages
+                        - Audit logs
+                        - Polls system
+                        - Reminders system
+                        - Reaction roles
+                    `, true)
+                    .addField('Upcoming features', stripIndent`
+                        - Slash commands
+                        - Tickets system
+                        - Giveaways system
+                        - Chat filtering
+                    `, true)
+                    .addField('\u200B', oneLine`
+                        *Note: Pixel is still in "early" development, some features, commands and data are subject
+                        to future change or removal.*
+                    `),
+                new MessageEmbed(base)
+                    .setTitle('Command usage')
+                    .addField('Arguments', stripIndent`
+                        ${oneLine`
+                            Arguments are extra information to pass for the command you want to use,
+                            some will be required and others not. You can send arguments surrounded by
+                            "double" or 'single' quotes (both work), and everything inside of that will count
+                            as a __single argument__.
+                        `}
+
+                        ${oneLine`
+                            If an argument is surrounded by quotes, it means you **must** put that
+                            argument with quotes for the command to work correctly.
+                        `}
+
+                        ${oneLine`
+                            Some commands will have their arguments surrounded by different types of
+                            paranthesis, meaning some are required, while others are not. Just like this:
+                        `}
+                        **Square paranthesis** \`[]\`: This argument is required.
+                        **Arrow parenthesis** \`<>\`: This argument is optional.
+                    `)
+                    .addField('Permissions', stripIndent`
+                        ${oneLine`
+                            Some commands will require you to have specific permissions, which has \`Ban members\`
+                            for \`${prefix}ban\`, or \`Administrator\` for \`${prefix}setup\`.
+                        `}
+
+                        ${oneLine`
+                            Others may just require you to be a "moderator", which means that you **must have
+                            at least one** of the following permissions: \`Ban members\`, \`Deafen members\`,
+                            \`Kick members\`, \`Manage channels\`, \`Manage emojis and stickers\`, \`Manage guild\`,
+                            \`Manage messages\`, \`Manage nicknames\`, \`Manage roles\`, \`Manage threads\`,
+                            \`Manage webhooks\`, \`Move members\`, \`Mute members\`.
+                        `}
+                    `),
+                new MessageEmbed(base)
+                    .setTitle('Time formatting')
+                    .setDescription(oneLine`
+                        Some commands will require the use of special formatting for time. It can either
+                        the amount of seconds, a number followed by a letter (relative time) or a specific
+                        date.
+                    `)
+                    .addField('Relative time', stripIndent`
+                        ${oneLine`
+                            Just specify the relative time with a number followed by a letter, like this:
+                            \`1d\`, \`1.5d\` or \`1d12h\`.
+                        `}
+
+                        ${oneLine`
+                            *Note: The greater the relative time you specify, the less accurate it'll be.
+                            If you need something for a specific time, it's recommended to set a date instead.*
+                        `}
+                    `, true)
+                    .addField('Allowed letters', stripIndent`
+                        **ms:** milliseconds
+                        **s:** seconds
+                        **m:** minutes
+                        **h:** hours
+                        **d:** days
+                        **w:** weeks
+                        **mth:** months
+                        **y:** years
+                    `, true)
+                    .addField('Specific date', oneLine`
+                        ${user.username} uses the **British English date format**, and supports both
+                        24-hour and 12-hour formats. E.g. this is right: \`21/10/2021\`, while this
+                        isn't: \`10/21/2021\`, and both of these cases work: \`11:30pm\`, \`23:30\`.
+                    `)
+            ]
+
+            const generate = page => ({
+                embed: pages[page].setFooter(
+                    `Page ${++page} of 4 | Version: ${version} | Developer: ${owner.tag}`,
+                    user.displayAvatarURL({ dynamic: true })
+                )
+            })
 
             return await pagedEmbed(message, {
                 number: 1, total: 4, toUser: true,
                 dmMsg: 'Check your DMs for a list of the commands and information about the bot.'
-            }, helpEmbed)
+            }, generate)
         }
 
-        if (cmd.hidden) {
-            return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That command is hidden.'
-            }))
+        if (author.id !== owner.id) {
+            while (cmd.hidden) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[0])
+                if (cancelled) return
+                cmd = value
+            }
         }
 
         const hasPermission = cmd.hasPermission(message)
-        if (hasPermission === false || hasPermission instanceof Array) {
-            if (!hasPermission) {
-                return await cmd.onBlock(message, 'ownerOnly')
-            }
+        if (hasPermission !== true) {
+            if (typeof hasPermission === 'string') return await cmd.onBlock(message, hasPermission)
             return await cmd.onBlock(message, 'userPermissions', { missing: hasPermission })
         }
 
