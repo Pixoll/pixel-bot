@@ -340,9 +340,9 @@ function isMod(roleOrMember, noAdmin) {
     if (!roleOrMember) return
 
     /** @type {PermissionResolvable} */
-    const condition = 'KICK_MEMBERS' || 'BAN_MEMBERS' || 'MANAGE_CHANNELS' || 'MANAGE_GUILD' || 'VIEW_AUDIT_LOG' ||
-        'MANAGE_MESSAGES' || 'VIEW_GUILD_INSIGHTS' || 'MUTE_MEMBERS' || 'MOVE_MEMBERS' || 'DEAFEN_MEMBERS' ||
-        'MANAGE_NICKNAMES' || 'MANAGE_ROLES' || 'MANAGE_WEBHOOKS' || 'MANAGE_EMOJIS'
+    const condition = 'BAN_MEMBERS' || 'DEAFEN_MEMBERS' || 'KICK_MEMBERS' || 'MANAGE_CHANNELS' ||
+        'MANAGE_EMOJIS_AND_STICKERS' || 'MANAGE_GUILD' || 'MANAGE_MESSAGES' || 'MANAGE_NICKNAMES' || 'MANAGE_ROLES' ||
+        'MANAGE_THREADS' || 'MANAGE_WEBHOOKS' || 'MOVE_MEMBERS' || 'MUTE_MEMBERS'
 
     if (noAdmin) {
         return !roleOrMember.permissions.has('ADMINISTRATOR') &&
@@ -1167,7 +1167,7 @@ function commandInfo(cmd, guild) {
         `)
         .addField('Usage', usage)
         .setFooter(
-            `Version: ${version} | Developers: ${owners.map(({ tag }) => tag).join(', ')}`,
+            `Version: ${version} | Developer: ${owners[0].tag}`,
             user.displayAvatarURL({ dynamic: true })
         )
 

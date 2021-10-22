@@ -9,7 +9,7 @@ module.exports = (client) => {
     client.on('messageDelete', async message => {
         if (message.partial) return
         const { guild, author, embeds, channelId } = message
-        if (client.user.id !== author.id) return
+        if (!guild || client.user.id !== author.id) return
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
