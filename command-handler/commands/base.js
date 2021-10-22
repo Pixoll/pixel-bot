@@ -248,18 +248,16 @@ class Command {
 		if (ownerOverride && this.client.isOwner(author)) return true
 
 		if (this.ownerOnly && (ownerOverride || !this.client.isOwner(author))) {
-			return false
+			return 'ownerOnly'
 		}
 
 		if (this.serverOwnerOnly && guild?.ownerId !== author.id) {
-			return false
+			return 'serverOwnerOnly'
 		}
 
 		if (channel.type !== 'DM' && this.userPermissions) {
 			const missing = channel.permissionsFor(author).missing(this.userPermissions, false)
-			if (missing.length > 0) {
-				return missing
-			}
+			if (missing.length > 0) return missing
 		}
 
 		return true
@@ -423,7 +421,7 @@ class Command {
 		if (!message) return this._globalEnabled
 		if (this.guildOnly && message && !message.guild) return false
 		const hasPermission = this.hasPermission(message)
-		return this.isEnabledIn(message.guild) && hasPermission && typeof hasPermission !== 'string'
+		return this.isEnabledIn(message.guild) && hasPermission === true
 	}
 
 	/**

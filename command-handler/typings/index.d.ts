@@ -357,7 +357,7 @@ export abstract class Command {
 	 * @param message The triggering command message
 	 * @param ownerOverride Whether the bot owner(s) will always have permission
 	 */
-	public hasPermission(message: CommandoMessage, ownerOverride?: boolean): boolean | PermissionString[]
+	public hasPermission(message: CommandoMessage, ownerOverride?: boolean): true | 'ownerOnly' | 'serverOwnerOnly' | PermissionString[]
 	/**
 	 * Checks if the command is enabled in a guild
 	 * @param guild Guild to check in

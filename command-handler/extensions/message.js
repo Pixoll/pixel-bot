@@ -205,17 +205,10 @@ class CommandoMessage extends Message {
 
 		// Ensure the user has permission to use the command
 		const hasPermission = this.command.hasPermission(this)
-		if (hasPermission === false || hasPermission instanceof Array) {
-			if (!hasPermission) {
-				if (this.command.ownerOnly && !this.client.isOwner(this.author)) {
-					this.client.emit('commandBlock', this, 'ownerOnly')
-					return this.command.onBlock(this, 'ownerOnly')
-				}
-
-				if (this.command.serverOwnerOnly && this.guild.ownerId !== this.author.id) {
-					this.client.emit('commandBlock', this, 'serverOwnerOnly')
-					return this.command.onBlock(this, 'serverOwnerOnly')
-				}
+		if (hasPermission !== true) {
+			if (typeof hasPermission === 'string') {
+				this.client.emit('commandBlock', this, hasPermission)
+				return this.command.onBlock(this, hasPermission)
 			}
 			const data = { missing: hasPermission }
 			this.client.emit('commandBlock', this, 'userPermissions', data)
