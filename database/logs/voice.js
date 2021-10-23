@@ -10,8 +10,8 @@ module.exports = (client) => {
     client.on('voiceStateUpdate', async (oldState, newState) => {
         const { guild, member, id } = oldState
 
-        const status = await isModuleEnabled(guild, 'audit-logs', 'voice')
-        if (!status) return
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'voice')
+        if (!isEnabled) return
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel) return

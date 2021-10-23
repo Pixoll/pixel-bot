@@ -81,13 +81,15 @@ export interface ModuleSchema extends BaseSchema {
         modules: boolean
         roles: boolean
         server: boolean
+        stickers: boolean
+        threads: boolean
         voice: boolean
     }
 }
 
 export type Module = 'auto-mod' | 'chat-filter' | 'sticky-roles' | 'welcome' | 'audit-logs'
 export type AuditLog = 'channels' | 'commands' | 'emojis' | 'invites' | 'members' |
-    'messages' | 'moderation' | 'modules' | 'roles' | 'server' | 'voice'
+    'messages' | 'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'voice'
 
 export interface PrefixSchema extends BaseSchema {
     global: boolean

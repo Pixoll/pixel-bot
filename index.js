@@ -100,6 +100,7 @@ async function errorHandler(error, type, message, command) {
     const owner = client.owners[0]
     if (error instanceof Error) {
         console.error(error)
+        return
 
         const lentgh = error.name.length + error.message.length + 3
         const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
