@@ -1,4 +1,4 @@
-const { Client, User, UserResolvable, Collection } = require('discord.js')
+const { Client, User, UserResolvable, Collection, Permissions } = require('discord.js')
 const CommandoRegistry = require('./registry')
 const CommandDispatcher = require('./dispatcher')
 const GuildSettingsHelper = require('./providers/helper')
@@ -6,8 +6,6 @@ const SettingProvider = require('./providers/base')
 const { CommandoClientOptions, GuildDatabaseManager, CommandoGuildManager } = require('./typings')
 const CommandoMessage = require('./extensions/message')
 // const CommandoGuild = require('./extensions/guild')
-const { myMs } = require('../utils')
-const schemas = require('../schemas')
 const ClientDatabaseManager = require('./managers/ClientDatabaseManager')
 
 /**
@@ -31,6 +29,11 @@ class CommandoClient extends Client {
 		 */
 		this.options
 
+		if (typeof options.inviteOptions === 'object') {
+			const invitePerms = options.inviteOptions.permissions
+			options.inviteOptions.permissions = Permissions.resolve(invitePerms)
+		}
+
 		/**
 		 * Invite for the bot
 		 * @type {?string}
@@ -43,15 +46,6 @@ class CommandoClient extends Client {
 					null
 			})
 		}
-
-		// Creates CommandoGuilds when the client is ready
-		// this.once('ready', client => {
-		// 	const cache = new Collection(client.guilds.cache.map(g => ([g.id, g])))
-		// 	for (const [, guild] of cache) {
-		// 		client.guilds.cache.delete(guild.id)
-		// 		client.guilds.cache.set(guild.id, new CommandoGuild(client, guild))
-		// 	}
-		// })
 
 		/**
 		 * @type {CommandoGuildManager}
@@ -114,12 +108,6 @@ class CommandoClient extends Client {
 			const commando = new CommandoMessage(this, newMessage)
 			this.dispatcher.handleMessage(commando, oldMessage).catch(msgErr)
 		})
-
-		// Makes sure every new guild is a CommandoGuild
-		// this.on('guildCreate', guild => {
-		// 	this.guilds.cache.delete(guild.id)
-		// 	this.guilds.cache.set(guild.id, new CommandoGuild(this, guild))
-		// })
 
 		// Fetch the owner(s)
 		if (options.owner) {
