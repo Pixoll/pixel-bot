@@ -92,8 +92,7 @@ async function isModuleEnabled(guild, module, subModule) {
         }
         return Boolean(status.filter(b => b)[0])
     }
-    const status = typeof check === 'boolean' && check
-    return status
+    return check !== false
 }
 
 /**
