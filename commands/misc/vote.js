@@ -22,7 +22,8 @@ module.exports = class VoteCommand extends Command {
             .addComponents(
                 new MessageButton()
                     .setStyle('LINK')
-                    .setLabel('Download')
+                    .setEmoji('👍')
+                    .setLabel('Vote me')
                     .setURL('https://top.gg/bot/802267523058761759/vote')
             )
 
