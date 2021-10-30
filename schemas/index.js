@@ -77,6 +77,8 @@ const modules = model('modules', Schema({
         modules: Boolean,
         roles: Boolean,
         server: Boolean,
+        threads: Boolean,
+        stickers: Boolean,
         voice: Boolean
     }
 }))
