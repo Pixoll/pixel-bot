@@ -1,6 +1,8 @@
-const { oneLine } = require('common-tags')
+const { oneLine, stripIndent } = require('common-tags')
+const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
+const { embedColor, basicEmbed } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class PingCommand extends Command {
@@ -18,14 +20,21 @@ module.exports = class PingCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const pingMsg = await message.reply('Pinging...')
+        const pingMsg = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Pinging...'
+        }))
 
         const roundtrip = pingMsg.createdTimestamp - message.createdTimestamp
         const heartbeat = Math.round(this.client.ws.ping || 0)
 
-        await pingMsg.edit(oneLine`
-			🏓 Pong! The message round-trip took ${roundtrip}ms.
-			${heartbeat ? `The heartbeat ping is ${heartbeat}ms.` : ''}
-		`)
+        const embed = new MessageEmbed()
+            .setColor(embedColor)
+            .setTitle('🏓 Pong!')
+            .setDescription(stripIndent`
+                **Your ping:** ${roundtrip}ms
+                **Bot's ping:** ${heartbeat}ms
+            `)
+
+        await pingMsg.edit({ embeds: [embed] }).catch(() => null)
     }
 }
