@@ -46,5 +46,7 @@ module.exports = class RestartCommand extends Command {
                 type: 'PLAYING'
             }]
         })
+
+        process.exit()
     }
 }
