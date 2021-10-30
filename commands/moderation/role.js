@@ -242,12 +242,16 @@ module.exports = class RoleCommand extends Command {
             color: 'GOLD', emoji: 'loading', description: 'Removing all roles...'
         }))
 
-        const memberRoles = roles.cache.filter(r => !r.managed && botRole.comparePositionTo(r) === 1)
+        const memberRoles = roles.cache.filter(r => {
+            if (r.id === message.guildId) return false
+            return !r.managed && botRole.comparePositionTo(r) > 0
+        })
         for (const [, role] of memberRoles) await roles.remove(role)
 
         await toEdit.edit({
             embeds: [basicEmbed({
-                color: 'RED', emoji: 'cross', description: `Removed every role from ${user.tag}.`
+                color: 'GREEN', emoji: 'check',
+                description: `Removed every role from ${user.toString()} (${user.tag}).`
             })]
         })
     }
@@ -292,8 +296,8 @@ module.exports = class RoleCommand extends Command {
 
         await toEdit.edit({
             embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', fieldName: `Toggled the following roles for ${user.tag}:`,
-                fieldValue: rolesStr
+                color: 'GREEN', emoji: 'check', fieldValue: rolesStr,
+                fieldName: `Toggled the following roles for ${user.tag}:`
             })]
         })
     }

@@ -93,11 +93,11 @@ module.exports = class ReactionRoleCommand extends Command {
     async run(message, { subCommand, channel, msgId }) {
         subCommand = subCommand.toLowerCase()
 
-        let msg = await channel.messages.fetch(msgId)
+        let msg = await channel.messages.fetch(msgId).catch(() => null)
         while (!(msg instanceof Message)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
-            msg = await channel.messages.fetch(value)
+            msg = await channel.messages.fetch(value).catch(() => null)
         }
 
         this.db = message.guild.database.reactionRoles

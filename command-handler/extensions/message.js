@@ -262,7 +262,7 @@ class CommandoMessage extends Message {
 		if (throttle) throttle.usages++
 		try {
 			this.client.emit('debug', oneLine`
-				Running command ${this.command.groupId}:${this.command.memberName}.
+				Running command "${this.command.groupId}:${this.command.memberName}" in channel "${this.channelId}".
 				Arguments: ${this.argString.trim() || 'None.'}
 			`)
 			await this.channel.sendTyping().catch(() => null)

@@ -47,7 +47,7 @@ client.on('rateLimit', data => {
     if (data.global) {
         return console.log(data)
     }
-    const isMessageCooldown = !!data.route.match(/\/channels\/\d{18}\/messages\/:id/)?.map(m => m)[0]
+    const isMessageCooldown = !!data.route.match(/\/channels\/\d{18}\/messages/)?.map(m => m)[0]
     const isTypingCooldown = !!data.route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0]
         && data.method === 'post'
     if (isMessageCooldown || isTypingCooldown) return
