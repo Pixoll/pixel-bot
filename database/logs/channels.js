@@ -1,5 +1,5 @@
 const { stripIndent, oneLine } = require('common-tags')
-const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
+const { MessageEmbed, GuildMember, Role, PermissionOverwrites, CategoryChannel } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { myMs, rtcRegions } = require('../../utils')
 const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, getLogsChannel, channelTypes } = require('../../utils')
@@ -260,6 +260,8 @@ module.exports = (client) => {
             }
         }
 
-        if (embed.fields.length > 0) logsChannel.send(embed).catch(() => null)
+        if (embed.fields.length !== 0) {
+            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        }
     })
 }

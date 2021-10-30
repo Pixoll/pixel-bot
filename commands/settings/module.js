@@ -177,7 +177,8 @@ module.exports = class ModuleCommand extends Command {
         if (!subModule) patch[removeDashes(module)] = !patch[removeDashes(module)]
         else patch[removeDashes(module)][removeDashes(subModule)] = !patch[removeDashes(module)][removeDashes(subModule)]
 
-        await this.db.add(patch)
+        if (data) await this.db.update(data, patch)
+        else await this.db.add(patch)
 
         const type = subModule ? 'sub-module' : 'module'
         const target = subModule ? `${module}/${subModule}` : module

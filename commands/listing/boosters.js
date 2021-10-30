@@ -8,7 +8,7 @@ module.exports = class BoostersCommand extends Command {
         super(client, {
             name: 'boosters',
             aliases: ['boosts'],
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of the members that have boosted the server.',
             guildOnly: true
         })

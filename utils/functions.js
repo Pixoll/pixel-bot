@@ -22,6 +22,15 @@ function sleep(s) {
 }
 
 /**
+ * Calculates the probability of something
+ * @param {number} n The probability (in decimals or percentage) to calculate
+ */
+function probability(n) {
+    if (n > 1) n /= 100
+    return !!n && Math.random() <= n
+}
+
+/**
  * Orders an array in alphabetical order
  * @param {string} str1 The first string
  * @param {string} str2 The seconds string
@@ -317,7 +326,7 @@ function memberException(member, { client, name }) {
 
 /**
  * Creates a {@link MessageActionRow} with a {@link MessageButton} with the provided invite
- * @param {Invite} invite The invite to user for the button
+ * @param {Invite|string} invite The invite to user for the button
  * @param {string} [label] The label of the button
  */
 function inviteButton(invite, label = 'Join back') {
@@ -1234,6 +1243,7 @@ module.exports = {
     mute,
     pagedEmbed,
     pluralize,
+    probability,
     remDiscFormat,
     removeDashes,
     removeUnderscores,

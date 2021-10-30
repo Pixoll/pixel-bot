@@ -8,7 +8,7 @@ module.exports = class DiscriminatorCommand extends Command {
         super(client, {
             name: 'discriminator',
             aliases: ['discrim'],
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of users with a discriminator.',
             details: '`discrim` has to be a number from 1 to 9999.',
             format: 'discriminator [discrim]',

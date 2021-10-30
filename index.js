@@ -27,33 +27,39 @@ const client = new CommandoClient({
         ]
     },
     intents: [
-        'DIRECT_MESSAGES', 'GUILDS', 'GUILD_BANS', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_INVITES', 'GUILD_MEMBERS',
-        'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES'
+        'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS', 'GUILDS', 'GUILD_BANS', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_INVITES',
+        'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES'
     ],
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
-    presence: {
-        activities: [{
-            name: 'for !help',
-            type: 'WATCHING'
-        }]
-    },
     failIfNotExists: false
 })
 
-client.on('debug', msg => {
+const { registry } = client
+
+client.on('debug', (...msgs) => {
+    const msg = msgs.join(' ')
     const exclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild']
     for (const word of exclude) if (msg.includes(word)) return
     console.log('debug >', msg)
 })
 client.emit('debug', 'Created client')
-client.on('rateLimit', console.log)
+client.on('rateLimit', data => {
+    if (data.global) {
+        return console.log(data)
+    }
+    const isMessageCooldown = !!data.route.match(/\/channels\/\d{18}\/messages\/:id/)?.map(m => m)[0]
+    const isTypingCooldown = !!data.route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0]
+        && data.method === 'post'
+    if (isMessageCooldown || isTypingCooldown) return
+    console.log(data)
+})
 
-client.registry
-    .registerDefaultTypes()
+registry.registerDefaultTypes()
     .registerGroups([
         { id: 'channels', name: '💬 Channels', guarded: true },
         { id: 'info', name: 'ℹ️ Information', guarded: true },
         // { id: 'fun', name: 'Fun commands' },
+        { id: 'lists', name: '📋 Listing' },
         { id: 'minecraft', name: '<:minecraft:897178717925834773> Minecraft' },
         { id: 'misc', name: '🎲 Miscellaneous' },
         { id: 'mod', name: '<:ban_hammer:822644311140204554> Moderation' },
@@ -62,14 +68,19 @@ client.registry
         { id: 'settings', name: '⚙ Settings', guarded: true },
         { id: 'utility', name: '🛠 Utility', guarded: true },
     ])
-    .client.emit('debug', `Loaded ${client.registry.groups.size} groups`)
+client.emit('debug', `Loaded ${registry.groups.size} groups`)
 
-client.registry
-    .registerCommandsIn(path.join(__dirname, '/commands'))
-    .client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
+registry.registerCommandsIn(path.join(__dirname, '/commands'))
+client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
     await database(client, 'auto-punish', 'chat-filter')
+    client.user.setPresence({
+        activities: [{
+            name: `for ${client.prefix}help`,
+            type: 'WATCHING'
+        }]
+    })
 
     await client.owners[0].send('**Debug message:** Bot is fully online!')
     client.emit('debug', `${client.user.tag} is fully online!`)
@@ -79,15 +90,14 @@ client.on('ready', async () => {
     })
     .on('error', error => errorHandler(error, 'Client error'))
     .on('warn', warn => errorHandler(warn, 'Client warn'))
+    .login().then(() =>
+        client.emit('debug', 'Logged in')
+    )
 
 process.on('unhandledRejection', error => errorHandler(error, 'Unhandled rejection'))
     .on('uncaughtException', error => errorHandler(error, 'Uncaught exception'))
     .on('uncaughtExceptionMonitor', error => errorHandler(error, 'Uncaught exception monitor'))
     .on('warning', error => errorHandler(error, 'Process warning'))
-
-client.login().then(() =>
-    client.emit('debug', 'Logged in')
-)
 
 /**
  * sends the error message to the bot owner
@@ -100,7 +110,6 @@ async function errorHandler(error, type, message, command) {
     const owner = client.owners[0]
     if (error instanceof Error) {
         console.error(error)
-        return
 
         const lentgh = error.name.length + error.message.length + 3
         const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')

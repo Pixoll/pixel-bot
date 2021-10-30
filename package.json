@@ -1,7 +1,7 @@
 {
   "name": "pixel",
-  "version": "1.6.5",
-  "description": "Multi-purpose Discord bot",
+  "version": "1.7.0",
+  "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
     "common-tags": "^1.8.0",

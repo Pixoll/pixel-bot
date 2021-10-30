@@ -89,19 +89,23 @@ module.exports = class HelpCommand extends Command {
                         misc commands, going from muting, banning, server information, setting reminders, etc.
                     `)
                     .addField('Current features', stripIndent`
-                        - Moderation
-                        - Welcome messages
-                        - Audit logs
-                        - Polls system
-                        - Reminders system
-                        - Reaction roles
-                    `, true)
+                        🔹 **Moderation:** warning, kicking, soft-banning, temp-banning, banning, muting, etc.
+                        🔹 **Welcome messages:** in DMs and in a server channel.
+                        🔹 **Audit logs:** ${oneLine`
+                            new joins, permissions update, channels/roles update, etc. Specific channel logging soon!
+                        `}
+                        🔹 **Polls system:** ${oneLine`
+                        custom messages and reactions, automatically ends and determines the results.
+                        `}
+                        🔹 **Reminders system:** with both relative time and a specific date.
+                        🔹 **Reaction roles:** soon with buttons!
+                    `)
                     .addField('Upcoming features', stripIndent`
-                        - Slash commands
-                        - Tickets system
-                        - Giveaways system
-                        - Chat filtering
-                    `, true)
+                        🔹 **Slash commands:** ETA ~2 months.
+                        🔹 **Tickets system:** ETA 2-3 months.
+                        🔹 **Giveaways system:** ETA 2-3 months.
+                        🔹 **Chat filtering:** ETA 4-5 months.
+                    `)
                     .addField('\u200B', oneLine`
                         *Note: Pixel is still in "early" development, some features, commands and data are subject
                         to future change or removal.*
@@ -146,8 +150,7 @@ module.exports = class HelpCommand extends Command {
                     .setTitle('Time formatting')
                     .setDescription(oneLine`
                         Some commands will require the use of special formatting for time. It can either
-                        the amount of seconds, a number followed by a letter (relative time) or a specific
-                        date.
+                        a number followed by a letter (relative time) or a specific date.
                     `)
                     .addField('Relative time', stripIndent`
                         ${oneLine`

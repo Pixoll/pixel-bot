@@ -437,8 +437,8 @@ export class CommandDispatcher {
 
 	/** Tuples in string form of user id and channel id that are currently awaiting messages from a user in a channel */
 	private _awaiting: Set<string>
-	/** Map object of {@link RegExp}s that match command messages, mapped by string prefix */
-	private _commandPatterns: object
+	/** Map of {@link RegExp}s that match command messages, mapped by string prefix */
+	private _commandPatterns: Map<string, RegExp>
 	/** Old command message results, mapped by original message id */
 	private _results: Map<string, CommandoMessage>
 

@@ -8,7 +8,7 @@ module.exports = class AdministratorsCommand extends Command {
         super(client, {
             name: 'administrators',
             aliases: ['admins'],
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of all administrators of the server with their admin roles.',
             guildOnly: true
         })

@@ -28,7 +28,7 @@ module.exports = class EmojisCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'emojis',
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of server emojis.',
             details: 'If the amount of emojis is too big, I will only display the maximum amount I\'m able to.',
             guildOnly: true

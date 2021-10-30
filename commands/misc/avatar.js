@@ -41,7 +41,6 @@ module.exports = class AvatarCommand extends Command {
                     .setURL(avatar)
             )
 
-        await message.channel.sendTyping().catch(() => null)
         await message.reply({ content: user.tag, files: [avatar], components: [row], ...noReplyInDMs(message) })
     }
 }

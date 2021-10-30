@@ -7,7 +7,7 @@ module.exports = class PollsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'polls',
-            group: 'misc',
+            group: 'lists',
             description: 'Displays all the on-going polls on this server.',
             throttling: { usages: 1, duration: 3 },
             guildOnly: true

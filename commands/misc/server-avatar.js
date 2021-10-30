@@ -46,7 +46,6 @@ module.exports = class ServerAvatarCommand extends Command {
         const text = displayName !== user.username ?
             `(${member.displayName}) ${user.tag}` : user.tag
 
-        await message.channel.sendTyping().catch(() => null)
         await message.reply({ content: text, files: [avatar], components: [row], ...noReplyInDMs(message) })
     }
 }

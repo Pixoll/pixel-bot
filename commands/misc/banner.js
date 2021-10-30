@@ -47,7 +47,6 @@ module.exports = class BannerCommand extends Command {
                     .setURL(banner)
             )
 
-        await message.channel.sendTyping().catch(() => null)
         await message.reply({ content: user.tag, files: [banner], components: [row], ...noReplyInDMs(message) })
     }
 }

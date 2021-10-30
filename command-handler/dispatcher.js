@@ -31,11 +31,11 @@ class CommandDispatcher {
 		this.inhibitors = new Set()
 
 		/**
-		 * Map object of {@link RegExp}s that match command messages, mapped by string prefix
-		 * @type {Object}
+		 * Map of {@link RegExp}s that match command messages, mapped by string prefix
+		 * @type {Map<string, RegExp>}
 		 * @private
 		 */
-		this._commandPatterns = {}
+		this._commandPatterns = new Map()
 
 		/**
 		 * Old command message results, mapped by original message id
@@ -233,7 +233,7 @@ class CommandDispatcher {
 
 	/**
 	 * Parses a message to find details about command usage in it
-	 * @param {Message} message The message
+	 * @param {CommandoMessage} message The message
 	 * @return {?CommandoMessage}
 	 * @private
 	 */
@@ -249,8 +249,8 @@ class CommandDispatcher {
 
 		// Find the command to run with default command handling
 		const prefix = message.guild?.prefix || this.client.prefix
-		if (!this._commandPatterns[prefix]) this.buildCommandPattern(prefix)
-		let cmdMsg = this.matchDefault(message, this._commandPatterns[prefix], 2)
+		if (!this._commandPatterns.get(prefix)) this.buildCommandPattern(prefix)
+		let cmdMsg = this.matchDefault(message, this._commandPatterns.get(prefix), 2)
 		if (!cmdMsg && !message.guild) cmdMsg = this.matchDefault(message, /^([^\s]+)/i, 1, true)
 		return cmdMsg
 	}
@@ -291,7 +291,7 @@ class CommandDispatcher {
 		} else {
 			pattern = new RegExp(`(^<@!?${this.client.user.id}>\\s+)([^\\s]+)`, 'i')
 		}
-		this._commandPatterns[prefix] = pattern
+		this._commandPatterns.set(prefix, pattern)
 		this.client.emit('debug', `Built command pattern for prefix "${prefix}": ${pattern}`)
 		return pattern
 	}

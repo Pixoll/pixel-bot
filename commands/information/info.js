@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
-const { version } = require('../../package.json')
+const { version, description } = require('../../package.json')
 const { myMs } = require('../../utils')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, version: djsVersion } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
 
@@ -10,6 +10,7 @@ module.exports = class InfoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'info',
+            aliases: ['about'],
             group: 'info',
             description: 'Displays some information about the bot.',
             guarded: true
@@ -21,25 +22,31 @@ module.exports = class InfoCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const { user, users, guilds, owners, options, botInvite, uptime: _uptime } = this.client
+        const { user, owners, options, uptime: _uptime } = this.client
+        const guilds = this.client.guilds.cache
 
         const uptime = myMs(_uptime, { long: true, length: 2, showMs: false })
-
-        const commandoLink = 'https://discord.js.org/#/docs/commando/master/general/welcome'
+        const topgg = 'https://top.gg/bot/802267523058761759'
+        const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString()
 
         const info = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${user.username}'s information`, user.displayAvatarURL({ dynamic: true }))
+            .setTitle(`About ${user.username}`)
             .setDescription(stripIndent`
-                Join the support server with [this link](${options.serverInvite}).
-                Invite the bot with [this link](${botInvite}).
-
-                **>** **Version:** ${version}
-                **>** **Library:** [discord.js-commando](${commandoLink})
-                **>** **Creator:** ${owners[0].tag}
-                **>** **Servers:** ${guilds.cache.size}
-                **>** **Users:** ${users.cache.filter(u => !u.bot).size}
+                **Serving ${users} users across ${guilds.size} servers!**
+                ${description}
             `)
+            .addField('Information', stripIndent`
+                **Version:** ${version}
+                **Library:** [discord.js v${djsVersion}](https://discord.js.org/#/)
+                **Developer:** ${owners[0].toString()} (${owners[0].tag})
+            `, true)
+            .addField('Links', stripIndent`
+                \\> [Top.gg page](${topgg})
+                \\> [Support server](${options.serverInvite})
+                \\> [Invite the bot to your server](${topgg}/invite)
+                \\> [Vote for the bot here](${topgg}/vote)
+            `, true)
             .setFooter(`Uptime: ${uptime}`)
             .setTimestamp()
 

@@ -78,5 +78,14 @@ module.exports = class PrefixCommand extends Command {
 		await message.replyEmbed(basicEmbed({
 			color: 'GREEN', emoji: 'check', description
 		}))
+
+		if (!guild) {
+			client.user.setPresence({
+				activities: [{
+					name: `for ${newPrefix}help`,
+					type: 'WATCHING'
+				}]
+			})
+		}
 	}
 }

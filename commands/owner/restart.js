@@ -40,6 +40,11 @@ module.exports = class RestartCommand extends Command {
             })]
         })
 
-        process.exit(1)
+        this.client.user.setPresence({
+            activities: [{
+                name: 'Restarting...',
+                type: 'PLAYING'
+            }]
+        })
     }
 }

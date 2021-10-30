@@ -10,7 +10,7 @@ module.exports = class TodoCommand extends Command {
         super(client, {
             name: 'todo',
             aliases: ['to-do'],
-            group: 'misc',
+            group: 'lists',
             description: 'View your to-do list, or add/remove an item.',
             format: stripIndent`
                 todo <view> - Display your to-do list.

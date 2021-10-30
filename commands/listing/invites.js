@@ -8,7 +8,7 @@ module.exports = class InvitesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'invites',
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of all the invites of this server, ordered by most to least used.',
             clientPermissions: ['MANAGE_GUILD'],
             guildOnly: true

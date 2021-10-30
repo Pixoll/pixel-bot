@@ -7,7 +7,7 @@ module.exports = class RemindersCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'reminders',
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of all your active reminders.',
             throttling: { usages: 1, duration: 3 }
         })

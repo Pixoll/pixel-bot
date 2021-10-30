@@ -143,4 +143,4 @@ Structures.extend('Guild', Guild => {
 const { CommandResolvable, CommandGroupResolvable, CommandoClient } = require('../typings')
 const { Command } = require('../')
 const { User } = require('discord.js')
-const GuildDatabaseManager = require('../managers/GuildDatabaseManager')
+const GuildDatabaseManager = require('../database/GuildDatabaseManager')

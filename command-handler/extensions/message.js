@@ -1,10 +1,11 @@
-const { Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels } = require('discord.js')
+const { Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels, MessageButton, MessageActionRow } = require('discord.js')
 const { CommandoClient, StringResolvable, CommandoGuild, ClientGuildMember } = require('../typings')
 const { oneLine, stripIndent } = require('common-tags')
 const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')
 const CommandFormatError = require('../errors/command-format')
 const { resolveString } = require('../util')
+const { embedColor } = require('../../utils')
 
 /**
  * An extension of the base Discord.js Message class to add command-related functionality.
@@ -260,7 +261,10 @@ class CommandoMessage extends Message {
 		// Run the command
 		if (throttle) throttle.usages++
 		try {
-			this.client.emit('debug', `Running command ${this.command.groupId}:${this.command.memberName}.`)
+			this.client.emit('debug', oneLine`
+				Running command ${this.command.groupId}:${this.command.memberName}.
+				Arguments: ${this.argString.trim() || 'None.'}
+			`)
 			await this.channel.sendTyping().catch(() => null)
 			const promise = this.command.run(this, args, fromPattern, collResult)
 
@@ -273,6 +277,37 @@ class CommandoMessage extends Message {
 					Command run methods must return a Promise that resolve with a Message, Array of Messages, or null/undefined.
 				`)
 			}
+
+			if (probability(2.5)) {
+				const { user, botInvite } = this.client
+
+				const embed = new MessageEmbed()
+					.setColor(embedColor)
+					.addField(
+						`Enjoying ${user.username}?`,
+						oneLine`
+							The please consider voting for it! It helps the bot to become more noticed
+							between other bots. And perhaps consider adding it to any of your own servers
+							as well!
+						`
+					)
+
+				const vote = new MessageButton()
+					.setEmoji('👍')
+					.setLabel('Vote me')
+					.setStyle('LINK')
+					.setURL('https://top.gg/bot/802267523058761759/vote')
+				const invite = new MessageButton()
+					.setEmoji('🔗')
+					.setLabel('Invite me')
+					.setStyle('LINK')
+					.setURL(botInvite)
+
+				const row = new MessageActionRow().addComponents(vote, invite)
+
+				await this.channel.send({ embeds: [embed], components: [row] }).catch(() => null)
+			}
+
 			return retVal
 		} catch (err) {
 			this.client.emit('commandError', this.command, err, this, args, fromPattern, collResult)
@@ -565,6 +600,15 @@ function noReplyInDMs(msg) {
 	} : {}
 
 	return options
+}
+
+/**
+ * Calculates the probability of something
+ * @param {number} n The probability (in decimals or percentage) to calculate
+ */
+function probability(n) {
+	if (n > 1) n /= 100
+	return !!n && Math.random() <= n
 }
 
 module.exports = CommandoMessage

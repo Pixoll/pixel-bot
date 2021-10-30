@@ -8,7 +8,7 @@ module.exports = class BotListCommand extends Command {
         super(client, {
             name: 'botlist',
             aliases: ['bots'],
-            group: 'misc',
+            group: 'lists',
             description: 'Displays the bot list of the server.',
             guildOnly: true
         })

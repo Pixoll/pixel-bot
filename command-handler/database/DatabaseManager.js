@@ -46,6 +46,7 @@ class DatabaseManager {
         if (typeof doc !== 'object') {
             throw new TypeError('doc must me an object')
         }
+        if (this.guild) doc.guild ||= this.guild.id
         const existing = doc._id ? await this.schema.findById(`${doc._id}`) : await this.schema.findOne(doc)
         if (existing) {
             const updated = await this.update(existing, doc)

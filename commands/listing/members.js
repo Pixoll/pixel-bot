@@ -8,7 +8,7 @@ module.exports = class MembersCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'members',
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of members in a role.',
             details: roleDetails(),
             format: 'members [role]',

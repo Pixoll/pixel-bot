@@ -6,7 +6,7 @@ const SettingProvider = require('./providers/base')
 const { CommandoClientOptions, GuildDatabaseManager, CommandoGuildManager } = require('./typings')
 const CommandoMessage = require('./extensions/message')
 // const CommandoGuild = require('./extensions/guild')
-const ClientDatabaseManager = require('./managers/ClientDatabaseManager')
+const ClientDatabaseManager = require('./database/ClientDatabaseManager')
 
 /**
  * Discord.js Client with a command framework

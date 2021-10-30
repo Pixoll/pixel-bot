@@ -9,7 +9,7 @@ module.exports = class ModeratorsCommand extends Command {
         super(client, {
             name: 'moderators',
             aliases: ['mods'],
-            group: 'misc',
+            group: 'lists',
             description: oneLine`
                 Displays a list of all moderators (excluding administrators, use the \`admins\`
                 command for a list of the server's admins) of this server with their mod roles.

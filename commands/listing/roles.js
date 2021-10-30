@@ -8,7 +8,7 @@ module.exports = class RolesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'roles',
-            group: 'misc',
+            group: 'lists',
             description: 'Displays a list of roles in the server, or the roles of a specific member.',
             details: memberDetails(),
             format: 'roles <member>',
@@ -45,7 +45,7 @@ module.exports = class RolesCommand extends Command {
         const name = member?.user.username || guild.name
         const avatar = member?.user.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        const roles = !!rolesCache?.size ?
+        const roles = !!rolesCache.size ?
             rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) :
             'This member has no roles.'
 

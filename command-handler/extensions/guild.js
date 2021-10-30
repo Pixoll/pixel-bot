@@ -1,6 +1,6 @@
 const { Guild, User } = require('discord.js')
 const Command = require('../commands/base')
-const GuildDatabaseManager = require('../managers/GuildDatabaseManager')
+const GuildDatabaseManager = require('../database/GuildDatabaseManager')
 const GuildSettingsHelper = require('../providers/helper')
 const { CommandoClient, CommandResolvable, CommandGroupResolvable } = require('../typings')
 
