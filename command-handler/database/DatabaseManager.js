@@ -125,8 +125,11 @@ class DatabaseManager {
         if (existing) return existing
 
         const doc = await this.schema.findOne(filter)
-        this.cache.set(`${doc._id}`, doc)
-        return doc
+        if (doc) {
+            this.cache.set(`${doc._id}`, doc)
+            return doc
+        }
+        return null
     }
 
     /**
