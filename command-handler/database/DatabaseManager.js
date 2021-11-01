@@ -159,11 +159,13 @@ module.exports = DatabaseManager
 
 function docsFilter(filter) {
     return doc => {
-        if (Object.keys(filter).length === 0) return true
-        let found = false
+        const objKeys = Object.keys(filter).length
+        if (objKeys === 0) return true
+        let found = []
         for (const p in filter) {
-            found = isEqual(doc[p], filter[p])
+            found.push(isEqual(doc[p], filter[p]))
         }
-        return found
+        const matchesAll = found.filter(b => b === true).length === objKeys
+        return matchesAll
     }
 }
