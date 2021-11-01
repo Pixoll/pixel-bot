@@ -240,8 +240,8 @@ module.exports = class McStatusCommand extends Command {
         const { description, samplePlayers, onlinePlayers, maxPlayers, version, favicon, roundTripLatency, host } = status
 
         // Server favicon
-        const buffer = new Buffer.from(favicon.split(',')[1], 'base64')
-        const icon = new MessageAttachment(buffer, 'icon.png')
+        const buffer = favicon ? new Buffer.from(favicon.split(',')[1], 'base64') : null
+        const icon = buffer ? new MessageAttachment(buffer, 'icon.png') : null
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -264,7 +264,7 @@ module.exports = class McStatusCommand extends Command {
         /** @type {MessageOptions} */
         const options = {
             embeds: [serverInfo],
-            files: [icon]
+            files: [icon].filter(a => a)
         }
 
         return options
