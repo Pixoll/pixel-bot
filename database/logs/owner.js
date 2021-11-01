@@ -1,3 +1,4 @@
+const { oneLine } = require('common-tags')
 const { MessageEmbed, ColorResolvable } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 
@@ -13,14 +14,20 @@ module.exports = (client) => {
      * @param {CommandoGuild} guild the guild to get info of
      */
     async function guildInfo(color, message, guild) {
+        const { ownerId, name, id } = guild
         const owner = await guild.fetchOwner()
 
         const info = new MessageEmbed()
             .setColor(color)
             .setAuthor(message, guild.iconURL({ dynamic: true }))
             .setThumbnail(guild.iconURL({ dynamic: true, size: 2048 }))
-            .setDescription(`**${guild.name}** is owned by ${owner.user.toString()} ${owner.user.tag}`)
-            .setFooter(`Guild id: ${guild.id} | Owner id: ${owner.id}`)
+            .setDescription(oneLine`
+                **${name}** is owned by ${owner.user || owner ?
+                    `${owner.toString()} ${owner.user?.tag || ''}`
+                    : ownerId
+                }
+            `)
+            .setFooter(`Guild id: ${id} | Owner id: ${ownerId}`)
             .setTimestamp()
 
         await client.owners[0].send({ embeds: [info] })
@@ -39,10 +46,5 @@ module.exports = (client) => {
     client.on('guildUnavailable', async guild => {
         await guildInfo('GOLD', 'A guild has become unavailable', guild)
         client.emit('debug', 'The guild', guild.name, 'has become unavailable')
-    })
-
-    client.on('invalidated', () => {
-        client.emit('debug', 'The client\'s session has become invalidated, restarting the bot...')
-        process.exit(1)
     })
 }

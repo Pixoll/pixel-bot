@@ -60,13 +60,13 @@ module.exports = class NicknameCommand extends Command {
         if (nickname.toLowerCase() === 'remove') {
             await member.setNickname(username)
             return await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Removed ${tag}'s nickname.`
+                color: 'GREEN', emoji: 'check', description: `Removed \`${tag}\`'s nickname.`
             }))
         }
 
         await member.setNickname(nickname)
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Changed ${tag}'s nickname to ${nickname}`
+            color: 'GREEN', emoji: 'check', description: `Changed \`${tag}\`'s nickname to \`${nickname}\``
         }))
     }
 }

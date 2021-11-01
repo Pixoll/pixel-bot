@@ -8,7 +8,7 @@ module.exports = class PollsCommand extends Command {
         super(client, {
             name: 'polls',
             group: 'lists',
-            description: 'Displays all the on-going polls on this server.',
+            description: 'Displays all the on-going polls on this server. Use the `poll` command to add polls.',
             throttling: { usages: 1, duration: 3 },
             guildOnly: true
         })

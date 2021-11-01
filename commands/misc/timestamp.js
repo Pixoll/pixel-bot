@@ -23,7 +23,7 @@ module.exports = class TimestampCommand extends Command {
             args: [{
                 key: 'time',
                 prompt: 'What time should the timestamp have?',
-                type: ['duration', 'date']
+                type: ['date', 'duration']
             }]
         })
     }

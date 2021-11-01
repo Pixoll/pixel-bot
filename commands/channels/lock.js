@@ -45,8 +45,8 @@ module.exports = class LockCommand extends Command {
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles
 
-        const perms = permissions.cache.find(p => p.id === guildId)
-        if (perms.deny.has('SEND_MESSAGES')) {
+        const perms = permissions.resolve(guildId)
+        if (perms && perms.deny.has('SEND_MESSAGES')) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already locked.`
             }))

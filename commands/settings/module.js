@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, capitalize, getArgument, addDashes, removeDashes } = require('../../utils')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 
@@ -89,9 +89,6 @@ module.exports = class ModuleCommand extends Command {
                 }
             ]
         })
-
-        /** @type {DatabaseManager<ModuleSchema>} */
-        this.db = null
     }
 
     /**

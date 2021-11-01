@@ -23,7 +23,7 @@ module.exports = class AfkCommand extends Command {
             guildOnly: true,
             args: [{
                 key: 'status',
-                prompt: 'What is the status you want to set? Responf with `off` to remove it (if existent).',
+                prompt: 'What is the status you want to set? Respond with `off` to remove it (if existent).',
                 type: 'string',
                 max: 512
             }]

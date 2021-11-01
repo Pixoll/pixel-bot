@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
-const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, isMod } = require('../../utils')
+const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, isMod, getArgument } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
 const { ReactionRoleSchema } = require('../../schemas/types')
 const RoleArgumentType = require('../../command-handler/types/role')
@@ -77,9 +77,6 @@ module.exports = class ReactionRoleCommand extends Command {
                 }
             ]
         })
-
-        /** @type {DatabaseManager<ReactionRoleSchema>} */
-        this.db = null
     }
 
     /**

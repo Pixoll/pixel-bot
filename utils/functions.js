@@ -4,6 +4,7 @@ const {
     TextBasedChannels
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument } = require('../command-handler/typings')
+const CGuildClass = require('../command-handler/extensions/guild')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent, oneLine } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
@@ -817,10 +818,10 @@ async function pagedEmbed(message, data, template) {
         .setCustomId(ids.end)
         .setEmoji('⏩')
 
-    if (data.total <= data.number) {
-        pageUp.setDisabled()
-        pageEnd.setDisabled()
-    }
+    const buttons = data.total <= data.number ? disabledPageButtons : new MessageActionRow()
+        .addComponents(data.skipMaxButtons ?
+            [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
+        )
 
     if (data.toUser && !isDMs) await message.reply(stripIndent`
         ${data.dmMsg || ''}
@@ -832,13 +833,7 @@ async function pagedEmbed(message, data, template) {
     const first = await template(0)
     const msgOptions = {
         embeds: [first.embed],
-        components: [
-            ...data.components,
-            new MessageActionRow()
-                .addComponents(data.skipMaxButtons ?
-                    [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
-                )
-        ].filter(c => c),
+        components: [...data.components, buttons].filter(c => c),
         ...noReplyInDMs(message)
     }
     /** @type {Message} */
@@ -1071,26 +1066,25 @@ async function generateEmbed(message, _array, data) {
  * Creates and manages confirmation buttons (y/n) for moderation actions
  * @param {CommandoMessage} message The message that triggers this confirmation
  * @param {string} action The action for confirmation
- * @param {User|string|CommandoGuild} target The target on which this action is being executed
+ * @param {User|string|CommandoGuild} [target] The target on which this action is being executed
  * @param {object} [data] The data of this action
  * @param {string} [data.reason] The reason of this action
  * @param {string} [data.duration] The duration of this action
  * @param {boolean} [sendCancelled=true] Whether to send 'Cancelled command.' or not
  */
-async function modConfirmation(message, action, target, data = {}, sendCancelled) {
+async function modConfirmation(message, action, target, data = {}, sendCancelled = true) {
     const { id, author, channel } = message
-    sendCancelled ??= true
 
     const ids = { yes: `${id}:yes`, no: `${id}:no` }
     const targetStr = target instanceof User ? target.tag :
-        typeof target === 'string' ? target : target.name
+        target instanceof CGuildClass ? target.name : target || null
 
     const confirmEmbed = new MessageEmbed()
         .setColor('GOLD')
         .addField(
-            `Are you sure you want to ${action} ${targetStr}?`,
+            `Are you sure you want to ${action}${targetStr ? ` ${targetStr}` : ''}?`,
             stripIndent`
-                ${target instanceof User ? stripIndent`
+                ${!targetStr ? '' : target instanceof User ? stripIndent`
                     **User:** ${target.toString()} ${target.tag}
                     **Id:** ${target.id}
                 ` : `**Target:** ${targetStr}`}

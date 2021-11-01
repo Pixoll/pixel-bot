@@ -25,7 +25,7 @@ module.exports = async (client) => {
 
     const day = new Date().getUTCDate()
 
-    if (day === 1) {
+    if (day === -1) {
         client.emit('debug', 'Cleaning up database...')
 
         const guilds = client.guilds.cache.map(d => d.id)

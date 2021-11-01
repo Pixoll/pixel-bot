@@ -1,9 +1,7 @@
 const Command = require('../../command-handler/commands/base')
-const { prefixes } = require('../../schemas')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { PrefixSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class PrefixCommand extends Command {
@@ -28,6 +26,8 @@ module.exports = class PrefixCommand extends Command {
 				required: false
 			}]
 		})
+
+        this.globalDb = this.client.database.prefixes
 	}
 
 	/**
@@ -57,20 +57,29 @@ module.exports = class PrefixCommand extends Command {
 			return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
 		}
 
+		const current = guild?.prefix || client?.prefix
+		if (current === newPrefix) {
+			return await message.replyEmbed(basicEmbed({
+				color: 'RED', emoji: 'cross', description: `The current prefix is already \`${newPrefix}\``
+			}))
+		}
+
 		if (guild) guild.prefix = newPrefix
 		else client.prefix = newPrefix
 
-		const getPrefix = await prefixes.findOne({ guild: guild?.id, global: !guild })
+		const targetDb = guild ? guild.database.prefixes : this.globalDb
+		const doc = await targetDb.fetch()
 
-		/** @type {PrefixSchema} */
-		const newDoc = {
-			global: !guild,
-			guild: guild?.id,
-			prefix: newPrefix
+		if (client.prefix === guild?.prefix) {
+			await targetDb.delete(doc)
+		} else {
+			if (doc) await targetDb.update(doc, { prefix: newPrefix })
+			else await targetDb.add({
+				global: !guild,
+				guild: guild?.id,
+				prefix: newPrefix
+			})
 		}
-
-		if (getPrefix) await getPrefix.updateOne({ prefix: newPrefix })
-		else await new prefixes(newDoc).save()
 
 		const description = guild ? `Changed the bot prefix of this server to \`${newPrefix}\`` :
 			`Changed the global bot prefix to \`${newPrefix}\``

@@ -56,8 +56,8 @@ module.exports = class DiagnoseCommand extends Command {
         subCommand = subCommand.toLowerCase()
 
         switch (subCommand) {
-            case 'check':
-                return await this.check(message)
+            case 'all':
+                return await this.all(message)
             case 'command':
                 return await this.command(message, cmdOrGroup)
             case 'group':
@@ -66,10 +66,10 @@ module.exports = class DiagnoseCommand extends Command {
     }
 
     /**
-     * The `check` sub-command
+     * The `all` sub-command
      * @param {CommandoMessage} message The message the command is being run for
      */
-    async check(message) {
+    async all(message) {
         const { guild, client } = message
         const { user, registry } = client
         const { commands, groups } = registry

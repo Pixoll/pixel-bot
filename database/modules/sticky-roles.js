@@ -26,29 +26,25 @@ module.exports = (client) => {
         if (!member) return
 
         const { guild, id, roles } = member
-        if (id === botId) return
+        if (id === botId || !guild.available) return
 
         const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
         if (!isEnabled) return
 
-        const { database } = guild
+        const { setup, stickyRoles } = guild.database
+        const data = await setup.fetch()
 
-        const data = await database.setup.fetch()
-        const rolesData = await database.stickyRoles.fetch({ user: id })
+        const rolesArray = roles.cache.filter(role => {
+            if (role.id === guild.id) return false
+            if (guild.me.roles.highest.comparePositionTo(role) < 1) return false
+            if ([data?.memberRole, data?.botRole].includes(role.id)) return false
+            return true
+        })
 
-        const rolesArray = roles.cache.filter(async role => {
-            const first = role.id !== guild.id
-            const second = ![data?.memberRole, data?.botRole].includes(role.id)
-            const third = role.position < guild.me?.roles.highest.position
-
-            return first && second && third
-        }).map(r => r.id)
-
-        if (!rolesData) await database.stickyRoles.add({
+        await stickyRoles.add({
             guild: guild.id,
             user: id,
-            roles: rolesArray
+            roles: rolesArray.map(r => r.id)
         })
-        else await database.stickyRoles.update(rolesData, { roles: rolesArray })
     })
 }

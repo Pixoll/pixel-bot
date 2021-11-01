@@ -20,13 +20,19 @@ module.exports = class BoostersCommand extends Command {
      */
     async run(message) {
         const members = message.guild.members.cache
-        const botList = members.filter(m => m.roles.premiumSubscriberRole)
+        const boosters = members.filter(m => m.roles.premiumSubscriberRole)
             .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
             .map(m => `${m.toString()} ${m.user.tag}`)
 
-        await generateEmbed(message, botList, {
+        if (boosters.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: `There are no boosters in this server.`
+            }))
+        }
+
+        await generateEmbed(message, boosters, {
             number: 20,
-            authorName: `There's ${pluralize('booster', botList.length)}`,
+            authorName: `There's ${pluralize('booster', boosters.length)}`,
             useDescription: true
         })
     }

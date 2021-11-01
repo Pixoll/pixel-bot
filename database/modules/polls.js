@@ -47,7 +47,7 @@ module.exports = async (client) => {
 
                 const pollEmbed = new MessageEmbed()
                     .setColor('#4c9f4c')
-                    .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), msg.url)
+                    .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), message.url)
                     .setDescription(winner || noVotes || draw)
                     .setTimestamp()
 
@@ -56,7 +56,7 @@ module.exports = async (client) => {
                     results.map(d => `**>** Choice ${d.emoji} with \`${d.votes}\` votes.`).join('\n')
                 )
 
-                await channel.send({ embeds: [pollEmbed] })
+                await message.reply({ embeds: [pollEmbed] })
             }
 
             for (const [, poll] of pollsData) {

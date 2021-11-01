@@ -278,7 +278,7 @@ class CommandoMessage extends Message {
 				`)
 			}
 
-			if (probability(2.5)) {
+			if (probability(2)) {
 				const { user, botInvite } = this.client
 
 				const embed = new MessageEmbed()

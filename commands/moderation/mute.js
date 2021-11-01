@@ -73,6 +73,12 @@ module.exports = class MuteCommand extends Command {
         if (!confirm) return
 
         const role = await guild.roles.fetch(data.mutedRole)
+        if (!role) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross',
+                description: 'No mute role found in this server, please use the `setup` command before using this.'
+            }))
+        }
 
         if (roles.cache.has(role.id)) {
             return await message.replyEmbed(basicEmbed({

@@ -1,10 +1,9 @@
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
-const { PollSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class PollCommand extends Command {
@@ -46,15 +45,12 @@ module.exports = class PollCommand extends Command {
                 {
                     key: 'durationOrMsg',
                     label: 'duration or message',
-                    prompt: 'How long should the mute last? Or what\'s the message id of the poll you want to end?',
+                    prompt: 'How long should the poll last? Or what\'s the message id of the poll you want to end?',
                     type: ['date', 'duration', 'string'],
                     required: false
                 }
             ]
         })
-
-        /** @type {DatabaseManager<PollSchema>} */
-        this.db = null
     }
 
     /**
@@ -97,9 +93,6 @@ module.exports = class PollCommand extends Command {
             duration = value
         }
 
-        if (typeof duration === 'number') duration = duration + Date.now()
-        if (duration instanceof Date) duration = duration.getTime()
-
         const { guildId, client } = message
 
         const pollMsg = await basicCollector(message, {
@@ -111,7 +104,7 @@ module.exports = class PollCommand extends Command {
         const emojis = []
         while (emojis.length < 2) {
             const emojisMsg = await basicCollector(message, {
-                fieldName: 'Now, what emojis should the bot react with in the poll message?'
+                fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**'
             }, { time: myMs('2m') })
             if (!emojisMsg) return
 
@@ -132,7 +125,7 @@ module.exports = class PollCommand extends Command {
             channel: channel.id,
             message: sent.id,
             emojis,
-            duration: myMs(duration, { long: true }),
+            duration: myMs(duration - Date.now(), { long: true }),
             endsAt: duration
         })
 
@@ -213,6 +206,6 @@ module.exports = class PollCommand extends Command {
         )
 
         await pollChannel.send({ embeds: [pollEmbed] })
-        await pollData.deleteOne()
+        await this.db.delete(pollData)
     }
 }

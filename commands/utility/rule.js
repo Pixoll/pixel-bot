@@ -1,6 +1,6 @@
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, myMs, embedColor, getArgument } = require('../../utils')
 const { RuleSchema } = require('../../schemas/types')
 const { MessageEmbed } = require('discord.js')
@@ -14,7 +14,7 @@ module.exports = class RuleCommand extends Command {
             description: 'Add or remove a rule from the server.',
             format: stripIndent`
                 rule view [number] - View a single rule.
-                rule add - Add a new rule (server owner only).
+                rule add - Add a new rule (max. 512 characters) (server owner only).
                 rule remove [number] - Remove a rule (server owner only).
             `,
             throttling: { usages: 1, duration: 3 },
@@ -29,16 +29,12 @@ module.exports = class RuleCommand extends Command {
                 },
                 {
                     key: 'rule',
-                    prompt: 'What rule do you want to remove?',
-                    type: 'integer',
-                    min: 1,
+                    prompt: 'What rule do you want to remove/add?',
+                    type: 'string',
                     required: false
                 }
             ]
         })
-
-        /** @type {DatabaseManager<RuleSchema>} */
-        this.db = null
     }
 
     /**
@@ -57,7 +53,7 @@ module.exports = class RuleCommand extends Command {
             case 'view':
                 return await this.view(message, rulesData, rule)
             case 'add':
-                return await this.add(message, rulesData)
+                return await this.add(message, rulesData, rule)
             case 'remove':
                 return await this.remove(message, rulesData, rule)
         }
@@ -97,10 +93,10 @@ module.exports = class RuleCommand extends Command {
      * The `add` sub-command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {RuleSchema} rulesData The rules data
+     * @param {string} rule The rule to add
      */
-    async add(message, rulesData) {
-        let rule
-        while (!rule || rule.length > 512) {
+    async add(message, rulesData, rule) {
+        while (!rule || rule.length > 512 || typeof rule === 'number') {
             const ruleMsg = await basicCollector(message, {
                 fieldName: 'What rule do you want to add?'
             }, { time: myMs('2m') })
@@ -127,6 +123,14 @@ module.exports = class RuleCommand extends Command {
      * @param {number} rule The rule to remove from the rules list
      */
     async remove(message, rulesData, rule) {
+        while (typeof rule !== 'number' || rule < 1) {
+            const ruleMsg = await basicCollector(message, {
+                fieldName: 'What rule do you want to remove?'
+            }, { time: myMs('2m') })
+            if (!ruleMsg) return
+            rule = ruleMsg.content
+        }
+
         const { guild, author } = message
 
         if (guild.ownerId !== author.id) {

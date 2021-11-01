@@ -35,14 +35,15 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
+const debugExclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild']
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
-    const exclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild']
-    for (const word of exclude) if (msg.includes(word)) return
+    for (const word of debugExclude) if (msg.includes(word)) return
     console.log('debug >', msg)
 })
 client.emit('debug', 'Created client')
+
 client.on('rateLimit', data => {
     if (data.global) {
         return console.log(data)
@@ -90,6 +91,10 @@ client.on('ready', async () => {
     })
     .on('error', error => errorHandler(error, 'Client error'))
     .on('warn', warn => errorHandler(warn, 'Client warn'))
+    .on('invalidated', () => {
+        client.emit('debug', 'The client\'s session has become invalidated, restarting the bot...')
+        process.exit(1)
+    })
     .login().then(() =>
         client.emit('debug', 'Logged in')
     )
@@ -109,6 +114,7 @@ process.on('unhandledRejection', error => errorHandler(error, 'Unhandled rejecti
 async function errorHandler(error, type, message, command) {
     const owner = client.owners[0]
     if (error instanceof Error) {
+        if (error.stack?.includes('eval.js')) return
         console.error(error)
 
         const lentgh = error.name.length + error.message.length + 3
@@ -119,7 +125,6 @@ async function errorHandler(error, type, message, command) {
             !str.includes('node_modules') &&
             !str.includes('(internal') &&
             !str.includes('(<anonymous>)') &&
-            !str.includes('eval.js') &&
             str.includes(root)
         ).map(str =>
             '>' + str.replace('at ', '')

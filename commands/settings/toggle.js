@@ -1,11 +1,9 @@
 const Command = require('../../command-handler/commands/base')
 const CommandGroup = require('../../command-handler/commands/group')
 const { basicEmbed, getArgument } = require('../../utils')
-const { disabled } = require('../../schemas')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { DisabledSchema } = require('../../schemas/types')
-const { UpdateQuery } = require('mongoose')
 
 /** A command that can be run in a client */
 module.exports = class ToggleCommand extends Command {
@@ -53,14 +51,10 @@ module.exports = class ToggleCommand extends Command {
      */
     async run(message, { subCommand, cmdOrGroup }) {
         subCommand = subCommand.toLowerCase()
-        const { guildId } = message
+        const { guildId, guild } = message
+        this.db = guild?.database.disabled || this.client.database.disabled
 
-        const query = guildId ?
-            { guild: guildId } :
-            { global: true }
-
-        /** @type {DisabledSchema} */
-        const data = await disabled.findOne(query)
+        const data = await this.db.fetch(guildId ? {} : { global: true })
 
         switch (subCommand) {
             case 'command':
@@ -91,24 +85,16 @@ module.exports = class ToggleCommand extends Command {
         if (guildId) command.setEnabledIn(guildId, !isEnabled)
         else command._globalEnabled = !isEnabled
 
-        if (data) {
-            /** @type {UpdateQuery<DisabledSchema>} */
-            const doc = isEnabled ?
-                { $push: { commands: command.name } } :
-                { $pull: { commands: command.name } }
-
-            await data.updateOne(doc)
-        } else {
-            /** @type {DisabledSchema} */
-            const doc = {
-                guild: guildId,
-                global: !guildId,
-                commands: isEnabled ? [command.name] : [],
-                groups: []
-            }
-
-            await new disabled(doc).save()
-        }
+        if (data) await this.db.update(data, isEnabled ?
+            { $push: { commands: command.name } } :
+            { $pull: { commands: command.name } }
+        )
+        else await this.db.add({
+            guild: guildId,
+            global: !guildId,
+            commands: isEnabled ? [command.name] : [],
+            groups: []
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `Toggled the \`${command.name}\` command${global}`,
@@ -137,24 +123,16 @@ module.exports = class ToggleCommand extends Command {
         if (guildId) group.setEnabledIn(guildId, !isEnabled)
         else group._globalEnabled = !isEnabled
 
-        if (data) {
-            /** @type {UpdateQuery<DisabledSchema>} */
-            const doc = !isEnabled ?
-                { $push: { groups: group.name } } :
-                { $pull: { groups: group.name } }
-
-            await data.updateOne(doc)
-        } else {
-            /** @type {DisabledSchema} */
-            const doc = {
-                guild: guildId,
-                global: !guildId,
-                commands: [],
-                groups: !isEnabled ? [group.name] : []
-            }
-
-            await new disabled(doc).save()
-        }
+        if (data) await this.db.update(data, isEnabled ?
+            { $push: { groups: group.name } } :
+            { $pull: { groups: group.name } }
+        )
+        else await this.db.add({
+            guild: guildId,
+            global: !guildId,
+            commands: [],
+            groups: !isEnabled ? [group.name] : []
+        })
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: `Toggled the \`${group.name}\` group${global}`,

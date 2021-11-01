@@ -2,8 +2,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
 const { myMs, basicEmbed, timeDetails, docId, modConfirmation } = require('../../utils')
-const { moderations, active } = require('../../schemas')
-const { ModerationSchema, ActiveSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
 module.exports = class DurationCommand extends Command {

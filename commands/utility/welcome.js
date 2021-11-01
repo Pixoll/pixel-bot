@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, myMs, getArgument, channelDetails } = require('../../utils')
 const { WelcomeSchema } = require('../../schemas/types')
 
@@ -43,9 +43,6 @@ module.exports = class WelcomeCommand extends Command {
                 }
             ]
         })
-
-        /** @type {DatabaseManager<WelcomeSchema>} */
-        this.db = null
     }
 
     /**

@@ -8,7 +8,7 @@ module.exports = class RulesCommand extends Command {
         super(client, {
             name: 'rules',
             group: 'lists',
-            description: 'Displays all the rules of this server.',
+            description: 'Displays all the rules of this server. Use the `rule` command to add rules.',
             guildOnly: true,
             throttling: { usages: 1, duration: 3 }
         })

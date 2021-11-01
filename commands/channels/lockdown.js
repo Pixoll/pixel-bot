@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
-const { stripIndent } = require('common-tags')
-const { basicEmbed, generateEmbed, pluralize, getArgument, channelDetails } = require('../../utils')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { stripIndent, oneLine } = require('common-tags')
+const { basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, modConfirmation, reasonDetails } = require('../../utils')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
 
@@ -12,10 +12,10 @@ module.exports = class LockdownCommand extends Command {
             name: 'lockdown',
             group: 'channels',
             description: 'Lock every text channel that was specified when using the `setup` command',
-            details: channelDetails('text-channels', true),
+            details: `${reasonDetails()}\n${channelDetails('text-channels', true)}`,
             format: stripIndent`
-                lockdown start - Start the lockdown.
-                lockdown end - End the lockdown.
+                lockdown start <reason> - Start the lockdown.
+                lockdown end <reason> - End the lockdown.
                 lockdown channels - Display the lockdown channels.
                 lockdown add [text-channels] - Add lockdown channels (max. 30 at once).
                 lockdown remove [text-channels] - Remove lockdown channels (max. 30 at once).
@@ -38,11 +38,14 @@ module.exports = class LockdownCommand extends Command {
                 },
                 {
                     key: 'channels',
-                    prompt: 'What channels do you want to add or remove? (max. 30 at once)',
+                    prompt: oneLine`
+                        Why are you starting/ending the lockdown? Or
+                        what channels do you want to add or remove? (max. 30 at once)
+                    `,
                     type: 'string',
                     validate: async (val, msg, arg) => {
                         const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                        if (!['add', 'remove'].includes(sc)) return true
+                        if (!['add', 'remove', 'channels'].includes(sc)) return true
                         const type = msg.client.registry.types.get('text-channel')
                         const array = val.split(/ +/).slice(0, 30)
                         const valid = []
@@ -53,6 +56,8 @@ module.exports = class LockdownCommand extends Command {
                         return wrong[0] === undefined
                     },
                     parse: async (val, msg) => {
+                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
+                        if (!['add', 'remove', 'channels'].includes(sc)) return val || 'No reason given.'
                         const type = msg.client.registry.types.get('text-channel')
                         const array = val.split(/ +/).slice(0, 30)
                         const valid = []
@@ -66,9 +71,6 @@ module.exports = class LockdownCommand extends Command {
                 }
             ]
         })
-
-        /** @type {DatabaseManager<SetupSchema>} */
-        this.db = null
     }
 
     /**
@@ -98,9 +100,9 @@ module.exports = class LockdownCommand extends Command {
 
         switch (subCommand) {
             case 'start':
-                return await this.start(message, savedChannels)
+                return await this.start(message, savedChannels, channels)
             case 'end':
-                return await this.end(message, savedChannels)
+                return await this.end(message, savedChannels, channels)
             case 'channels':
                 return await this.channels(message, savedChannels)
             case 'add':
@@ -114,8 +116,9 @@ module.exports = class LockdownCommand extends Command {
      * The `start` sub-command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {TextChannel[]} savedChannels The saved lockdown channels of the server
+     * @param {string} reason The reason of the lockdown
      */
-    async start(message, savedChannels) {
+    async start(message, savedChannels, reason) {
         if (savedChannels.length === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info',
@@ -123,11 +126,14 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
+        const confirmed = await modConfirmation(message, 'start lockdown', null, { reason })
+        if (!confirmed) return
+
         const { guild, guildId } = message
         const { everyone } = guild.roles
 
         const toDelete = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels...'
+            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
         }))
 
         let amount = 0
@@ -136,17 +142,17 @@ module.exports = class LockdownCommand extends Command {
             const perms = permsManager.cache.get(guildId)
             if (perms?.deny.has('SEND_MESSAGES')) continue
 
-            await permsManager.edit(everyone, { SEND_MESSAGES: false }, { reason: 'Lockdown started.', type: 0 })
+            await permsManager.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 })
             await channel.send({
                 embeds: [basicEmbed({
                     emoji: '\\🔒', fieldName: 'This channel has been locked',
-                    fieldValue: 'A lockdown has been started.'
+                    fieldValue: reason
                 })]
             })
             amount++
         }
 
-        await toDelete.delete()
+        await toDelete.delete().catch(() => null)
         await message.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
@@ -165,8 +171,9 @@ module.exports = class LockdownCommand extends Command {
      * The `end` sub-command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {TextChannel[]} savedChannels The saved lockdown channels of the server
+     * @param {string} reason The reason of the lockdown
      */
-    async end(message, savedChannels) {
+    async end(message, savedChannels, reason) {
         if (savedChannels.length === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info',
@@ -174,8 +181,15 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
+        const confirmed = await modConfirmation(message, 'end lockdown', null, { reason })
+        if (!confirmed) return
+
         const { guild, guildId } = message
         const { everyone } = guild.roles
+
+        const toDelete = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
+        }))
 
         let amount = 0
         for (const channel of savedChannels) {
@@ -183,15 +197,18 @@ module.exports = class LockdownCommand extends Command {
             const perms = permsManager.cache.get(guildId)
             if (!perms?.deny.has('SEND_MESSAGES')) continue
 
-            await permsManager.edit(everyone, { SEND_MESSAGES: null }, { reason: 'Lockdown ended.', type: 0 })
+            await permsManager.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })
             await channel.send({
                 embeds: [basicEmbed({
                     emoji: '\\🔓', fieldName: 'This channel has been unlocked',
-                    fieldValue: 'The lockdown has ended.'
+                    fieldValue: reason
                 })]
             })
             amount++
         }
+
+        await toDelete.delete().catch(() => null)
+        await message.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
             return await message.replyEmbed(basicEmbed({

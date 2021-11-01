@@ -1,6 +1,6 @@
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument } = require('../../utils')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
@@ -70,9 +70,6 @@ module.exports = class SetupCommand extends Command {
                 }
             ]
         })
-
-        /** @type {DatabaseManager<SetupSchema>} */
-        this.db = null
     }
 
     /**
@@ -99,13 +96,13 @@ module.exports = class SetupCommand extends Command {
             case 'full':
                 return await this.full(message, data)
             case 'audit-logs':
-                return await this.auditLogs(message, data, value)
+                return await this.auditLogs(message, value)
             case 'muted-role':
-                return await this.mutedRole(message, data, value)
+                return await this.mutedRole(message, value)
             case 'member-role':
-                return await this.memberRole(message, data, value)
+                return await this.memberRole(message, value)
             case 'bot-role':
-                return await this.botRole(message, data, value)
+                return await this.botRole(message, value)
             case 'lockdown-channels':
                 return await this.lockdownChannels(message, data, value)
         }
@@ -140,6 +137,12 @@ module.exports = class SetupCommand extends Command {
             { key: 'Muted members role', value: mutedRole?.name || null },
             { key: 'Lockdown channels', value: lockdownChannels.join(', ') || null },
         ].filter(obj => obj.value).map(obj => `**>** **${obj.key}:** ${obj.value}`)
+
+        if (toDisplay.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
+            }))
+        }
 
         const embed = new MessageEmbed()
             .setColor(embedColor)
@@ -269,10 +272,9 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `audit-logs` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {SetupSchema} data The setup data
      * @param {TextChannel} channel The channel for the audit logs
      */
-    async auditLogs(message, data, channel) {
+    async auditLogs(message, channel) {
         while (!(channel instanceof TextChannel)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
@@ -292,10 +294,9 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `muted-role` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {SetupSchema} data The setup data
      * @param {Role} role The role for the muted members
      */
-    async mutedRole(message, data, role) {
+    async mutedRole(message, role) {
         while (!(role instanceof Role)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
@@ -315,10 +316,9 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `member-role` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {SetupSchema} data The setup data
      * @param {Role} role The default role for all members
      */
-    async memberRole(message, data, role) {
+    async memberRole(message, role) {
         while (!(role instanceof Role)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
@@ -338,10 +338,9 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `bot-role` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {SetupSchema} data The setup data
      * @param {Role} role The default role for all bots
      */
-    async botRole(message, data, role) {
+    async botRole(message, role) {
         while (!(role instanceof Role)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
@@ -362,7 +361,7 @@ module.exports = class SetupCommand extends Command {
      * The `lockdown-channels` sub-command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {SetupSchema} data The setup data
-     * @param {string} channelsStr All the lockdown channels for the server
+     * @param {string|TextChannel} channelsStr All the lockdown channels for the server
      */
     async lockdownChannels(message, data, channelsStr) {
         while (channelsStr instanceof Role) {
@@ -377,12 +376,22 @@ module.exports = class SetupCommand extends Command {
         const textChanType = types.get('text-channel')
 
         const channels = []
+        if (typeof channelsStr === 'string') {
+            for (const val of channelsStr.split(/ +/)) {
+                if (channels.length === 30) break
+                const chan = textChanType.parse(val, message)
+                if (chan) channels.push(chan)
+            }
+        } else {
+            channels.push(channelsStr)
+        }
+
         while (channels.length === 0) {
             const msg = await basicCollector(message, {
                 fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
             }, { time: myMs('2m') }, true)
             if (!msg) return
-            for (const val of channelsStr.split(/ +/)) {
+            for (const val of msg.content.split(/ +/)) {
                 if (channels.length === 30) break
                 const chan = textChanType.parse(val, message)
                 if (chan) channels.push(chan)

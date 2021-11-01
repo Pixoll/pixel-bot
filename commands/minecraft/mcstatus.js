@@ -1,5 +1,5 @@
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, DatabaseManager } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, MessageAttachment, MessageOptions } = require('discord.js')
 const { status: statusJava, statusBedrock } = require('minecraft-server-util')
 const { StatusResponse, BedrockStatusResponse } = require('minecraft-server-util/dist/model/StatusResponse')
@@ -53,9 +53,6 @@ module.exports = class McStatusCommand extends Command {
                 }
             ]
         })
-
-        /** @type {DatabaseManager<McIpSchema>} */
-        this.db = null
     }
 
     /**
@@ -182,9 +179,10 @@ module.exports = class McStatusCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: stripIndent`
-                **>** IP: \`${ip}\`
-                **>** Port: \`${port}\`
+            color: 'GREEN', emoji: 'check', fieldName: 'Saved Minecraft server data',
+            fieldValue: stripIndent`
+                **IP:** \`${ip}\`
+                **Port:** \`${port}\`
             `
         }))
     }
@@ -217,9 +215,10 @@ module.exports = class McStatusCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: stripIndent`
-                **>** IP: \`${ip}\`
-                **>** Port: \`${port}\`
+            color: 'GREEN', emoji: 'check', fieldName: 'Saved Minecraft server data',
+            fieldValue: stripIndent`
+                **IP:** \`${ip}\`
+                **Port:** \`${port}\`
             `
         }))
     }
