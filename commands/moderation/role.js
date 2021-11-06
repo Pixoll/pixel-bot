@@ -1,34 +1,8 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { Role, GuildMember, Collection } = require('discord.js')
-const { isMod, basicEmbed, roleDetails, memberDetails } = require('../../utils')
+const { basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated } = require('../../utils')
 const { stripIndent } = require('common-tags')
-
-/**
- * Validates a {@link Role}
- * @param {CommandoMessage} msg The member to validate
- * @param {Role} role The role to validate
- */
-function validRole(msg, role) {
-    if (!(role instanceof Role)) return false
-    if (!role) return false
-    if (role.managed) return false
-
-    const { member, client, author, clientMember } = msg
-    const botId = client.user.id
-
-    const botManagable = clientMember.roles.highest.comparePositionTo(role)
-    if (botManagable < 1) return false
-
-    const isOwner = author.id === botId
-    if (isOwner) return true
-
-    const memberManagable = member.roles.highest.comparePositionTo(role)
-    if (memberManagable < 1) return false
-    if (isMod(role)) return false
-
-    return true
-}
 
 /** A command that can be run in a client */
 module.exports = class RoleCommand extends Command {
@@ -82,7 +56,7 @@ module.exports = class RoleCommand extends Command {
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
-                            const con2 = validRole(msg, con1 === true ? await type.parse(str, msg) : null)
+                            const con2 = isValidRole(msg, con1 === true ? await type.parse(str, msg) : null)
                             valid.push(con1 && con2)
                         }
                         const wrong = valid.filter(b => b !== true)
@@ -95,7 +69,7 @@ module.exports = class RoleCommand extends Command {
                         for (const str of array) {
                             valid.push(await type.parse(str, msg))
                         }
-                        return valid
+                        return removeDuplicated(valid)
                     },
                     required: false,
                     error: 'At least one of the roles you specified was invalid, please try again.'
@@ -134,7 +108,7 @@ module.exports = class RoleCommand extends Command {
      * @param {Role} role The role to toggle in all members
      */
     async all(message, role) {
-        while (!(role instanceof Role) && !validRole(message, role)) {
+        while (!(role instanceof Role) && !isValidRole(message, role)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             role = value

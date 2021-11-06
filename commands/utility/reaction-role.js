@@ -1,36 +1,10 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
-const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, isMod, getArgument } = require('../../utils')
+const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, getArgument, isValidRole } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
 const { ReactionRoleSchema } = require('../../schemas/types')
 const RoleArgumentType = require('../../command-handler/types/role')
-
-/**
- * Validates a {@link Role}
- * @param {CommandoMessage} msg The member to validate
- * @param {Role} role The role to validate
- */
-function validRole(msg, role) {
-    if (!(role instanceof Role)) return false
-    if (!role) return false
-    if (role.managed) return false
-
-    const { member, client, author, clientMember } = msg
-    const botId = client.user.id
-
-    const botManagable = clientMember.roles.highest.comparePositionTo(role)
-    if (botManagable < 1) return false
-
-    const isOwner = author.id === botId
-    if (isOwner) return true
-
-    const memberManagable = member.roles.highest.comparePositionTo(role)
-    if (memberManagable < 1) return false
-    if (isMod(role)) return false
-
-    return true
-}
 
 /** A command that can be run in a client */
 module.exports = class ReactionRoleCommand extends Command {
@@ -56,6 +30,8 @@ module.exports = class ReactionRoleCommand extends Command {
             userPermissions: ['MANAGE_ROLES'],
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
+            deprecated: true,
+            replacing: 'button-role',
             args: [
                 {
                     key: 'subCommand',
@@ -90,7 +66,7 @@ module.exports = class ReactionRoleCommand extends Command {
     async run(message, { subCommand, channel, msgId }) {
         subCommand = subCommand.toLowerCase()
 
-        let msg = await channel.messages.fetch(msgId).catch(() => null)
+        let msg = await channel?.messages.fetch(msgId).catch(() => null)
         while (!(msg instanceof Message)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
@@ -102,7 +78,7 @@ module.exports = class ReactionRoleCommand extends Command {
 
         switch (subCommand) {
             case 'create':
-                return await this.create(message, channel, msg, data)
+                return await this.create(message, channel, msg)
             case 'remove':
                 return await this.remove(message, msg, data)
         }
@@ -113,9 +89,8 @@ module.exports = class ReactionRoleCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      * @param {TextChannel} channel The text channel of the reaction roles to create
      * @param {Message} msg The message of the reaction roles to create
-     * @param {ReactionRoleSchema} data The data of the reaction roles
      */
-    async create(message, channel, msg, data) {
+    async create(message, channel, msg) {
         const { client, guildId } = message
         /** @type {RoleArgumentType} */
         const roleType = client.registry.types.get('role')
@@ -129,7 +104,7 @@ module.exports = class ReactionRoleCommand extends Command {
 
             for (const str of rolesMsg.content.split(/\s*,\s*/).slice(0, 30)) {
                 const con1 = roleType.validate(str, message)
-                const con2 = validRole(message, con1 === true ? roleType.parse(str, message) : null)
+                const con2 = isValidRole(message, con1 === true ? roleType.parse(str, message) : null)
                 if (!con1 && !con2) continue
 
                 const role = roleType.parse(str, message)

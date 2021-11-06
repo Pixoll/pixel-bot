@@ -14,15 +14,15 @@ const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.
 
 const userDetails = '`user` has to be a user\'s username, id or mention.'
 
-/** @param {string} [tag] @param {boolean} [plural] */
-const memberDetails = (tag, plural = false) => !plural ?
+/** @param {string} [tag] @param {boolean} [plural] @param {number} max */
+const memberDetails = (tag, plural = false,  max = 30) => !plural ?
     `\`${tag || 'member'}\` can be either a member's name, mention or id.` :
-    `\`${tag || 'members'}\` to be all the members' names, mentions or ids, separated by commas (max. 30 at once).`
+    `\`${tag || 'members'}\` to be all the members' names, mentions or ids, separated by commas (max. ${max} at once).`
 
-/** @param {string} [tag] @param {boolean} [plural] */
-const roleDetails = (tag, plural = false) => !plural ?
+/** @param {string} [tag] @param {boolean} [plural] @param {number} max */
+const roleDetails = (tag, plural = false, max = 30) => !plural ?
     `\`${tag || 'role'}\` can be either a role's name, mention or id.` :
-    `\`${tag || 'roles'}\` to be all the roles' names, mentions or ids, separated by commas (max. 30 at once).`
+    `\`${tag || 'roles'}\` to be all the roles' names, mentions or ids, separated by commas (max. ${max} at once).`
 
 /** @param {string} [tag] @param {boolean} [plural] */
 const channelDetails = (tag, plural = false) => !plural ?
@@ -46,8 +46,8 @@ const randomDate = Math.trunc(Date.now() / 1000000) * 1000 + 10 ** 5
 const inviteMaxAge = 604800
 
 const defaultEmojiRegex = require('emoji-regex')()
-const gEmojiIdRegex = /\d{18}/g
-const guildEmojiRegex = /<a?:(\w+):(\d{18})>/g
+const gEmojiIdRegex = /\d{17,19}/g
+const guildEmojiRegex = /<a?:(?:\w+):(?:\d{17,19})>/g
 const emojiRegex = new RegExp(`${defaultEmojiRegex.source}|${gEmojiIdRegex.source}`, 'g')
 
 const embedColor = '#4c9f4c'

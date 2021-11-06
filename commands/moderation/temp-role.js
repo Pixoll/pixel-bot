@@ -1,34 +1,9 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { Role, GuildMember } = require('discord.js')
-const { memberDetails, timeDetails, roleDetails, reasonDetails, timestamp } = require('../../utils')
-const { basicEmbed, docId, isMod } = require('../../utils')
+const { memberDetails, timeDetails, roleDetails, reasonDetails, timestamp, isValidRole } = require('../../utils')
+const { basicEmbed, docId } = require('../../utils')
 const { stripIndent } = require('common-tags')
-
-/**
- * Validates a {@link Role}
- * @param {CommandoMessage} msg The member to validate
- * @param {Role} role The role to validate
- */
-function validRole(msg, role) {
-    if (!role) return false
-    if (role.managed) return false
-
-    const { member, client, author, clientMember } = msg
-    const botId = client.user.id
-
-    const botManagable = clientMember.roles.highest.comparePositionTo(role)
-    if (botManagable < 1) return false
-
-    const isOwner = author.id === botId
-    if (isOwner) return true
-
-    const memberManagable = member.roles.highest.comparePositionTo(role)
-    if (memberManagable < 1) return false
-    if (isMod(role)) return false
-
-    return true
-}
 
 /** A command that can be run in a client */
 module.exports = class TempRoleCommand extends Command {
@@ -85,7 +60,7 @@ module.exports = class TempRoleCommand extends Command {
         if (typeof duration === 'number') duration = duration + Date.now()
         if (duration instanceof Date) duration = duration.getTime()
 
-        while (!validRole(message, role)) {
+        while (!isValidRole(message, role)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
             if (cancelled) return
             role = value

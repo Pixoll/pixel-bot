@@ -35,7 +35,7 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
-const debugExclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild']
+const debugExclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild', 'Garbage collection completed']
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
@@ -46,13 +46,13 @@ client.emit('debug', 'Created client')
 
 client.on('rateLimit', data => {
     if (data.global) {
-        return console.log(data)
+        return console.log('rateLimit >', data)
     }
     const isMessageCooldown = !!data.route.match(/\/channels\/\d{18}\/messages/)?.map(m => m)[0]
     const isTypingCooldown = !!data.route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0]
         && data.method === 'post'
     if (isMessageCooldown || isTypingCooldown) return
-    console.log(data)
+    console.log('rateLimit >', data)
 })
 
 registry.registerDefaultTypes()

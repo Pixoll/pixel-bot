@@ -8,7 +8,6 @@ const CGuildClass = require('../command-handler/extensions/guild')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent, oneLine } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
-const { disabledPageButtons, disabledFilterMenu } = require('./constants')
 const { version } = require('../package.json')
 const { moderations, active } = require('../schemas')
 const { permissions } = require('../command-handler/util')
@@ -546,6 +545,14 @@ function findCommonElement(first, second) {
 }
 
 /**
+ * Removes all duplicated items in an array
+ * @param {any[]} arr The array to filter
+ */
+function removeDuplicated(arr) {
+    return [...new Set(arr)]
+}
+
+/**
  * Compares if two objects are equal and returns the differences.
  * @param {object} first The first object.
  * @param {object} second The second object.
@@ -758,6 +765,32 @@ async function mute(guild, bot, member, role, time, reason = 'No reason given.')
 }
 
 /**
+ * Validates a {@link Role} to be used in commands
+ * @param {CommandoMessage} msg The message instance
+ * @param {Role} role The role to validate
+ */
+function isValidRole(msg, role) {
+    if (!(role instanceof Role)) return false
+    if (!role) return false
+    if (role.managed) return false
+
+    const { member, client, author, clientMember } = msg
+    const botId = client.user.id
+
+    const botManagable = clientMember.roles.highest.comparePositionTo(role)
+    if (botManagable < 1) return false
+
+    const isOwner = author.id === botId
+    if (isOwner) return true
+
+    const memberManagable = member.roles.highest.comparePositionTo(role)
+    if (memberManagable < 1) return false
+    if (isMod(role)) return false
+
+    return true
+}
+
+/**
  * Creates a random Mongo document id.
  * @returns {string}
  */
@@ -785,7 +818,6 @@ function docId() {
 async function pagedEmbed(message, data, template) {
     const { channel, author, id } = message
     const isDMs = channel.type === 'DM'
-    /** @type {TextBasedChannels} */
     const targetChan = data.toUser ? await author.createDM() : channel
 
     if (!data.components) {
@@ -818,7 +850,7 @@ async function pagedEmbed(message, data, template) {
         .setCustomId(ids.end)
         .setEmoji('⏩')
 
-    const buttons = data.total <= data.number ? disabledPageButtons : new MessageActionRow()
+    const buttons = data.total <= data.number ? null : new MessageActionRow()
         .addComponents(data.skipMaxButtons ?
             [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
         )
@@ -847,8 +879,14 @@ async function pagedEmbed(message, data, template) {
     let index = 0
     const collector = targetChan.createMessageComponentCollector({
         filter: int => int.user.id === author.id,
-        time: myMs('1m')
+        time: 60 * 1000,
     })
+
+    const disableButton = (target, disabled = true) => {
+        const button = buttons.components.find(b => b.customId.endsWith(target))
+        if (!button) return
+        button.setDisabled(disabled)
+    }
 
     /** @type {?string[]} */
     const menuOptions = data.components[0] ?
@@ -865,48 +903,42 @@ async function pagedEmbed(message, data, template) {
 
             if (int.customId === ids.start) {
                 index = 0
-                pageUp.setDisabled(false)
-                pageEnd.setDisabled(false)
-                pageDown.setDisabled()
-                pageStart.setDisabled()
+                disableButton('up', false)
+                disableButton('end', false)
+                disableButton('down')
+                disableButton('start')
             }
             if (int.customId === ids.down) {
                 index -= data.number
-                pageUp.setDisabled(false)
-                pageEnd.setDisabled(false)
+                disableButton('up', false)
+                disableButton('end', false)
                 if (index === 0) {
-                    pageDown.setDisabled()
-                    pageStart.setDisabled()
+                    disableButton('down')
+                    disableButton('start')
                 }
             }
             if (int.customId === ids.up) {
                 index += data.number
-                pageDown.setDisabled(false)
-                pageStart.setDisabled(false)
+                disableButton('down', false)
+                disableButton('start', false)
                 if (index >= oldData.total - data.number) {
-                    pageUp.setDisabled()
-                    pageEnd.setDisabled()
+                    disableButton('up')
+                    disableButton('end')
                 }
             }
             if (int.customId === ids.end) {
                 const newIndex = oldData.total - (oldData.total % data.number)
                 index = oldData.total === newIndex ? newIndex - 1 : newIndex
-                pageDown.setDisabled(false)
-                pageStart.setDisabled(false)
-                pageUp.setDisabled()
-                pageEnd.setDisabled()
+                disableButton('down', false)
+                disableButton('start', false)
+                disableButton('up')
+                disableButton('end')
             }
             const templateData = await template(index, option)
 
             return await int.update({
                 embeds: [templateData.embed],
-                components: [
-                    ...data.components,
-                    new MessageActionRow()
-                        .addComponents(data.skipMaxButtons ?
-                            [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
-                        )
-                ].filter(c => c),
+                components: [...data.components, buttons].filter(c => c),
                 ...noReplyInDMs(msg)
             }).catch(() => null)
         }
@@ -914,34 +946,21 @@ async function pagedEmbed(message, data, template) {
         if (int.isSelectMenu()) {
             option = menuOptions.find(op => op === int.values[0])
             const templateData = await template(0, option)
-            pageUp.setDisabled(templateData.total <= data.number)
-            pageEnd.setDisabled(templateData.total <= data.number)
-            pageDown.setDisabled()
-            pageStart.setDisabled()
+            disableButton('up', templateData.total <= data.number)
+            disableButton('end', templateData.total <= data.number)
+            disableButton('down')
+            disableButton('start')
 
             return await int.update({
                 embeds: [templateData.embed],
-                components: [
-                    ...data.components,
-                    new MessageActionRow()
-                        .addComponents(data.skipMaxButtons ?
-                            [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
-                        )
-                ].filter(c => c),
+                components: [...data.components, buttons].filter(c => c),
                 ...noReplyInDMs(msg)
             }).catch(() => null)
         }
     })
 
     collector.on('end', async () => {
-        await msg.edit({
-            components: [
-                data.components[0] ? disabledFilterMenu : null,
-                data.skipMaxButtons ?
-                    new MessageActionRow().addComponents(disabledPageButtons.components.slice(1, 3)) :
-                    disabledPageButtons
-            ].filter(c => c)
-        })
+        await msg.edit({ components: [] }).catch(() => null)
     })
 }
 
@@ -1231,6 +1250,7 @@ module.exports = {
     inviteButton,
     isMod,
     isModuleEnabled,
+    isValidRole,
     kick,
     memberException,
     modConfirmation,
@@ -1240,6 +1260,7 @@ module.exports = {
     probability,
     remDiscFormat,
     removeDashes,
+    removeDuplicated,
     removeUnderscores,
     noReplyInDMs,
     sleep,
