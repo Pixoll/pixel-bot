@@ -23,7 +23,7 @@ module.exports = async (client) => {
             }
         }
 
-        setTimeout(sendLogs, 1000)
+        setTimeout(sendLogs, 3000)
     }
 
     await sendLogs()
