@@ -23,7 +23,7 @@ module.exports = class PingCommand extends Command {
         const pingMsg = await message.replyEmbed(basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Pinging...'
         }))
-        console.log(e)
+
         const roundtrip = pingMsg.createdTimestamp - message.createdTimestamp
         const heartbeat = Math.round(this.client.ws.ping || 0)
 
