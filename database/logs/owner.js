@@ -70,9 +70,9 @@ module.exports = async (client) => {
                 \`@${user.tag} <command>\`. For a list of all commands or general information, run \`${prefix}help\`.
             `)
             .addField('⚙ Setting up the bot', oneLine`
-                To setup the bot just run \`${prefix}setup full\`, this will setup every core setting
-                for all modules of the bot. If you want to setup an specific module, just run \`${prefix}setup [module]\`,
-                you can see the full list using \`${prefix}help setup\`.
+                To setup the bot just run \`${prefix}setup\`, this will setup every core setting for all modules of
+                the bot. If you want to setup an specific module, just run \`${prefix}setup [module]\`, you can see
+                the full list using \`${prefix}help setup\`.
             `)
             .addField('🕒 Note about times and dates', oneLine`
                 The bot runs based off **London's time zone (UTC±0).** This means that when you used time-based commands,

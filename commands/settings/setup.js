@@ -41,8 +41,8 @@ module.exports = class SetupCommand extends Command {
             `,
             details: `${channelDetails('text-channel')}\n${roleDetails()}\n${channelDetails('text-channels', true)}`,
             format: stripIndent`
-                setup <view> - View the current setup data of the server.
-                setup full - Setup the bot completely.
+                setup <full> - Setup the bot completely to its core.
+                setup info - View the current setup data of the server.
                 setup audit-logs [text-channel] - Setup the audit logs channel.
                 setup muted-role [role] - Setup the role for muted people.
                 setup member-role [role] - Setup the role given to all members upon joining.
@@ -59,8 +59,8 @@ module.exports = class SetupCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['view', 'full', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'],
-                    default: 'view'
+                    oneOf: ['info', 'full', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'],
+                    default: 'full'
                 },
                 {
                     key: 'value',
@@ -91,10 +91,10 @@ module.exports = class SetupCommand extends Command {
         const data = await this.db.fetch()
 
         switch (subCommand) {
-            case 'view':
-                return await this.view(message, data)
             case 'full':
                 return await this.full(message, data)
+            case 'info':
+                return await this.info(message, data)
             case 'audit-logs':
                 return await this.auditLogs(message, value)
             case 'muted-role':
@@ -106,50 +106,6 @@ module.exports = class SetupCommand extends Command {
             case 'lockdown-channels':
                 return await this.lockdownChannels(message, data, value)
         }
-    }
-
-    /**
-     * The `view` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
-     * @param {SetupSchema} data The setup data
-     */
-    async view(message, data) {
-        if (!data) {
-            return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
-            }))
-        }
-
-        const { guild } = message
-        const { roles, channels } = guild
-
-        const logsChannel = channels.resolve(data.logsChannel)
-        const memberRole = await roles.fetch(data.memberRole)
-        const botRole = await roles.fetch(data.botRole)
-        const mutedRole = await roles.fetch(data.mutedRole)
-        const lockdownChannels = data.lockChannels.map(c => channels.resolve(c)?.toString())
-            .slice(0, 78).filter(c => c)
-
-        const toDisplay = [
-            { key: 'Audit logs channel', value: logsChannel?.toString() || null },
-            { key: 'Default members role', value: memberRole?.name || null },
-            { key: 'Default bots role', value: botRole?.name || null },
-            { key: 'Muted members role', value: mutedRole?.name || null },
-            { key: 'Lockdown channels', value: lockdownChannels.join(', ') || null },
-        ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`)
-
-        if (toDisplay.length === 0) {
-            return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
-            }))
-        }
-
-        const embed = new MessageEmbed()
-            .setColor(embedColor)
-            .setAuthor(`${guild.name}'s setup data`, guild.iconURL({ dynamic: true }))
-            .setDescription(toDisplay.join('\n'))
-
-        await message.replyEmbed(embed)
     }
 
     /**
@@ -267,6 +223,51 @@ module.exports = class SetupCommand extends Command {
             color: 'GREEN', emoji: 'check',
             description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.'
         }))
+    }
+
+    /**
+     * The `info` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {SetupSchema} data The setup data
+     */
+    async info(message, data) {
+        if (!data) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', fieldName: 'There is no saved data for this server yet.',
+                fieldValue: 'Please run the `setup full` command first.'
+            }))
+        }
+
+        const { guild } = message
+        const { roles, channels } = guild
+
+        const logsChannel = channels.resolve(data.logsChannel)
+        const memberRole = await roles.fetch(data.memberRole)
+        const botRole = await roles.fetch(data.botRole)
+        const mutedRole = await roles.fetch(data.mutedRole)
+        const lockdownChannels = data.lockChannels.map(c => channels.resolve(c)?.toString())
+            .slice(0, 78).filter(c => c)
+
+        const toDisplay = [
+            { key: 'Audit logs channel', value: logsChannel?.toString() || null },
+            { key: 'Default members role', value: memberRole?.name || null },
+            { key: 'Default bots role', value: botRole?.name || null },
+            { key: 'Muted members role', value: mutedRole?.name || null },
+            { key: 'Lockdown channels', value: lockdownChannels.join(', ') || null },
+        ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`)
+
+        if (toDisplay.length === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
+            }))
+        }
+
+        const embed = new MessageEmbed()
+            .setColor(embedColor)
+            .setAuthor(`${guild.name}'s setup data`, guild.iconURL({ dynamic: true }))
+            .setDescription(toDisplay.join('\n'))
+
+        await message.replyEmbed(embed)
     }
 
     /**

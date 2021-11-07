@@ -1,6 +1,6 @@
 {
   "name": "pixel",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
