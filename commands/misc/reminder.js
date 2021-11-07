@@ -46,7 +46,7 @@ module.exports = class ReminderCommand extends Command {
      * @param {string} args.reminder What to remind the user about
      */
     async run(message, { time, reminder }) {
-        if (typeof time === 'number') time = time + Date.now()
+        if (typeof time === 'number') time += Date.now()
         if (time instanceof Date) time = time.getTime()
 
         const { author, id, channelId, url } = message

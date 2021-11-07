@@ -31,7 +31,7 @@ module.exports = class ReactionRoleCommand extends Command {
             throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             deprecated: true,
-            replacing: 'button-role',
+            replacing: 'buttonrole',
             args: [
                 {
                     key: 'subCommand',

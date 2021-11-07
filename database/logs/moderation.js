@@ -16,8 +16,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         /** @type {GuildAuditLogs} */
         const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -38,7 +38,8 @@ module.exports = (client) => {
             .setFooter(`User id: ${id} | Mod id: ${executor.id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('guildBanAdd', async banLog => {
@@ -51,8 +52,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         /** @type {GuildAuditLogs} */
         const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -76,7 +77,8 @@ module.exports = (client) => {
             .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('guildBanRemove', async unbanLog => {
@@ -89,8 +91,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         /** @type {GuildAuditLogs} */
         const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -114,15 +116,16 @@ module.exports = (client) => {
             .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('guildMemberMute', async (guild, mod, user, reason, duration) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
@@ -136,15 +139,16 @@ module.exports = (client) => {
             .setFooter(`User id: ${user.id} | Mod id: ${mod.id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('guildMemberUnmute', async (guild, mod, user, reason, expired) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const description = expired ?
             `${user.toString()}'s mute has expired.` :
@@ -164,15 +168,16 @@ module.exports = (client) => {
             .setFooter(footer)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('guildMemberWarn', async (guild, mod, user, reason) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
@@ -185,6 +190,7 @@ module.exports = (client) => {
             .setFooter(`User id: ${user.id} | Mod id: ${mod.id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 }

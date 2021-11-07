@@ -43,8 +43,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -74,7 +74,8 @@ module.exports = (client) => {
             embed.addField('Tags', tagsArr.join('\n'))
         }
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('roleDelete', async role => {
@@ -84,8 +85,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -115,7 +116,8 @@ module.exports = (client) => {
             embed.addField('Tags', tagsArr.join('\n'))
         }
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('roleUpdate', async (oldRole, newRole) => {
@@ -124,8 +126,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const {
             name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1,
@@ -168,7 +170,8 @@ module.exports = (client) => {
         if (removed.length !== 0) embed.addField(`${customEmoji('cross')} Denied permissions`, removed.join(', '))
 
         if (embed.fields.length !== 0) {
-            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            guild.queuedLogs.push(embed)
         }
     })
 }

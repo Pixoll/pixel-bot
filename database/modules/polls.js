@@ -64,7 +64,7 @@ module.exports = async (client) => {
             }
         }
 
-        setTimeout(endPolls, 30 * 1000)
+        setTimeout(endPolls, 1000)
     }
 
     await endPolls()

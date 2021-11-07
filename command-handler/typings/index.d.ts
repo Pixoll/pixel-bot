@@ -36,7 +36,12 @@ export class Argument {
 	 * Whether the argument is required or not
 	 * @default true
 	 */
-	public required?: boolean
+	public required: boolean
+	 /**
+	  * Whether the argument's validation is skipped or not
+	  * @default false
+	  */
+	public skipValidation: boolean
 	/** The default value for the argument */
 	public default: ArgumentDefault
 	/** Function to check whether a raw value is considered empty */
@@ -619,7 +624,7 @@ export class CommandoClient extends Client {
 	public emit<K extends keyof CommandoClientEvents>(event: K, ...args: CommandoClientEvents[K]): boolean
 }
 
-export { CommandoClient as Client }
+// export { CommandoClient as Client }
 
 /** A fancier Guild for fancier people. */
 export class CommandoGuild extends Guild {
@@ -639,6 +644,8 @@ export class CommandoGuild extends Guild {
 	 * Setting to `null` means that the prefix from {@link CommandoClient#prefix} will be used instead.
 	 */
 	public prefix: string
+	/** The queued logs for this guild */
+	public queuedLogs: MessageEmbed[]
 	/** Shortcut to use setting provider methods for this guild */
 	public readonly settings: GuildSettingsHelper
 
@@ -1394,6 +1401,11 @@ export interface ArgumentInfo {
 	 * @default true
 	 */
 	required?: boolean
+	/**
+	 * Whether the argument's validation is skipped or not
+	 * @default false
+	 */
+	skipValidation?: boolean
 	/** An array of values that are allowed to be used */
 	default?: ArgumentDefault
 	/**

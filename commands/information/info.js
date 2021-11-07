@@ -2,7 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { version, description } = require('../../package.json')
 const { myMs } = require('../../utils')
 const { MessageEmbed, version: djsVersion } = require('discord.js')
-const { stripIndent } = require('common-tags')
+const { stripIndent, oneLine } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
 
 /** A command that can be run in a client */
@@ -41,11 +41,11 @@ module.exports = class InfoCommand extends Command {
                 **Library:** [discord.js v${djsVersion}](https://discord.js.org/#/)
                 **Developer:** ${owners[0].toString()} (${owners[0].tag})
             `, true)
-            .addField('Links', stripIndent`
-                \\> [Top.gg page](${topgg})
-                \\> [Support server](${options.serverInvite})
-                \\> [Invite the bot to your server](${topgg}/invite)
-                \\> [Vote for the bot here](${topgg}/vote)
+            .addField('Links', oneLine`
+                [Top.gg page](${topgg}) -
+                [Support server](${options.serverInvite}) -
+                [Invite the bot](${topgg}/invite) -
+                [Vote here](${topgg}/vote)
             `, true)
             .setFooter(`Uptime: ${uptime}`)
             .setTimestamp()

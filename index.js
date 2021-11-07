@@ -1,13 +1,10 @@
 console.log('Starting bot...')
 require('./command-handler/extensions')
 
-const { CommandoMessage, Command } = require('./command-handler/typings')
 const CommandoClient = require('./command-handler/client')
-const { MessageEmbed } = require('discord.js')
-const { customEmoji, docId, code } = require('./utils')
-const { stripIndent } = require('common-tags')
 const database = require('./database')
 const path = require('path')
+const errors = require('./errors')
 require('dotenv').config()
 
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
@@ -44,17 +41,6 @@ client.on('debug', (...msgs) => {
 })
 client.emit('debug', 'Created client')
 
-client.on('rateLimit', data => {
-    if (data.global) {
-        return console.log('rateLimit >', data)
-    }
-    const isMessageCooldown = !!data.route.match(/\/channels\/\d{18}\/messages/)?.map(m => m)[0]
-    const isTypingCooldown = !!data.route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0]
-        && data.method === 'post'
-    if (isMessageCooldown || isTypingCooldown) return
-    console.log('rateLimit >', data)
-})
-
 registry.registerDefaultTypes()
     .registerGroups([
         { id: 'channels', name: '💬 Channels', guarded: true },
@@ -75,6 +61,7 @@ registry.registerCommandsIn(path.join(__dirname, '/commands'))
 client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
+    await errors(client)
     await database(client, 'auto-punish', 'chat-filter')
     client.user.setPresence({
         activities: [{
@@ -86,86 +73,7 @@ client.on('ready', async () => {
     await client.owners[0].send('**Debug message:** Bot is fully online!')
     client.emit('debug', `${client.user.tag} is fully online!`)
 })
-    .on('commandError', async (command, error, message) => {
-        await errorHandler(error, 'Command error', message, command)
-    })
-    .on('error', error => errorHandler(error, 'Client error'))
-    .on('warn', warn => errorHandler(warn, 'Client warn'))
-    .on('invalidated', () => {
-        client.emit('debug', 'The client\'s session has become invalidated, restarting the bot...')
-        process.exit(1)
-    })
-    .login().then(() =>
-        client.emit('debug', 'Logged in')
-    )
 
-process.on('unhandledRejection', error => errorHandler(error, 'Unhandled rejection'))
-    .on('uncaughtException', error => errorHandler(error, 'Uncaught exception'))
-    .on('uncaughtExceptionMonitor', error => errorHandler(error, 'Uncaught exception monitor'))
-    .on('warning', error => errorHandler(error, 'Process warning'))
-
-/**
- * sends the error message to the bot owner
- * @param {Error|string} error the error
- * @param {string} type the type of error
- * @param {CommandoMessage} message the message
- * @param {Command} command the command
- */
-async function errorHandler(error, type, message, command) {
-    const owner = client.owners[0]
-    if (error instanceof Error) {
-        if (error.stack?.includes('eval.js')) return
-        console.error(error)
-
-        const lentgh = error.name.length + error.message.length + 3
-        const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
-        const root = __dirname.split(/[\\/]/g).pop()
-
-        const files = stack.filter(str =>
-            !str.includes('node_modules') &&
-            !str.includes('(internal') &&
-            !str.includes('(<anonymous>)') &&
-            str.includes(root)
-        ).map(str =>
-            '>' + str.replace('at ', '')
-                .replace(__dirname, root)
-                .replace(/([\\]+)/g, '/')
-        ).join('\n')
-
-        const messageLink = message ? `Please go to [this message](${message.url}) for more information.` : ''
-        const whatCommand = command ? ` at '${command.name}' command` : ''
-
-        const toOwner = new MessageEmbed()
-            .setColor('RED')
-            .setTitle(type)
-            .setDescription(stripIndent`
-                ${customEmoji('cross')} **An unexpected error happened**
-                ${messageLink}
-            `)
-            .addField(error.name + whatCommand + ': ' + error.message, code(files || 'No files.'))
-
-        await owner?.send({ embeds: [toOwner] })
-
-        if (!files) return
-
-        await client.database.errors.add({
-            _id: docId(),
-            type: type,
-            name: error.name,
-            message: error.message,
-            command: command?.name,
-            files: code(files)
-        })
-    }
-
-    else {
-        console.warn(error)
-
-        const toOwner = new MessageEmbed()
-            .setColor('RED')
-            .setTitle(type)
-            .setDescription(error)
-
-        await owner?.send({ embeds: [toOwner] })
-    }
-}
+client.login().then(() =>
+    client.emit('debug', 'Logged in')
+)

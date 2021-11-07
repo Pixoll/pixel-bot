@@ -38,6 +38,12 @@ Structures.extend('Guild', Guild => {
              * @private
              */
             this._prefix = null
+
+            /**
+             * The queued logs for this server
+             * @type {MessageEmbed[]}
+             */
+            this.queuedLogs = new Array()
         }
 
         /**
@@ -142,5 +148,5 @@ Structures.extend('Guild', Guild => {
 
 const { CommandResolvable, CommandGroupResolvable, CommandoClient } = require('../typings')
 const { Command } = require('../')
-const { User } = require('discord.js')
+const { User, MessageEmbed } = require('discord.js')
 const GuildDatabaseManager = require('../database/GuildDatabaseManager')

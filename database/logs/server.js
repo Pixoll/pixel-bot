@@ -79,7 +79,8 @@ module.exports = (client) => {
                 **>** **After:** ${imageLink(newGuild.iconURL(imgOptions))}
             `).setThumbnail(newGuild.iconURL(imgOptions))
 
-            await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            guild.queuedLogs.push(imagesEmbed)
         }
 
         if (ownerId1 !== ownerId2) {
@@ -137,7 +138,8 @@ module.exports = (client) => {
                 `
             }]).setThumbnail(newGuild.bannerURL(imgOptions))
 
-            await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            guild.queuedLogs.push(imagesEmbed)
         }
 
         if (splash1 !== splash2) {
@@ -148,7 +150,8 @@ module.exports = (client) => {
                 `
             }]).setThumbnail(newGuild.splashURL(imgOptions))
 
-            await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            guild.queuedLogs.push(imagesEmbed)
         }
 
         if (url1 !== url2) embed.addField('Vanity URL code', `${url1 || 'None'} ➜ ${url2 || 'None'}`)
@@ -214,7 +217,8 @@ module.exports = (client) => {
                 `
             }]).setThumbnail(newGuild.discoverySplashURL(imgOptions))
 
-            await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
+            guild.queuedLogs.push(imagesEmbed)
         }
 
         if (updateChan1 !== updateChan2) {
@@ -234,7 +238,8 @@ module.exports = (client) => {
         if (lang1 !== lang2) embed.addField('Primary language', `${locales.get(lang1)} ➜ ${locales.get(lang2)}`)
 
         if (embed.fields.length !== 0 || embed.description) {
-            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            guild.queuedLogs.push(embed)
         }
     })
 }

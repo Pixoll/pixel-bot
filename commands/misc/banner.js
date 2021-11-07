@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { User, MessageActionRow, MessageButton } = require('discord.js')
-const { userDetails, noReplyInDMs, basicEmbed } = require('../../utils')
+const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
+const { userDetails, noReplyInDMs, basicEmbed, embedColor } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class BannerCommand extends Command {
@@ -39,6 +39,12 @@ module.exports = class BannerCommand extends Command {
             }))
         }
 
+        const embed = new MessageEmbed()
+            .setColor(embedColor)
+            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
+            .setImage(banner)
+            .setTimestamp()
+
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -47,6 +53,6 @@ module.exports = class BannerCommand extends Command {
                     .setURL(banner)
             )
 
-        await message.reply({ content: user.tag, files: [banner], components: [row], ...noReplyInDMs(message) })
+        await message.reply({ embeds: [embed], components: [row], ...noReplyInDMs(message) })
     }
 }

@@ -65,11 +65,19 @@ class Argument {
 		this.default = typeof info.default !== 'undefined' ? info.default : null
 
 		/**
-		 * The default value for the argument
+		 * Whether the argument is required or not
 		 * @type {boolean}
 		 * @default true
 		 */
-		this.required = typeof info.required === 'boolean' ? info.required : !Boolean(this.default)
+		this.required = typeof info.required === 'boolean' ? info.required :
+			(this.default === undefined || this.default === null)
+
+		/**
+		 * Whether the argument's validation is skipped or not
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.skipValidation = typeof info.skipValidation === 'boolean' ? info.skipValidation : false
 
 		/**
 		 * Values the user can choose from

@@ -57,16 +57,22 @@ module.exports = class NicknameCommand extends Command {
             }))
         }
 
-        if (nickname.toLowerCase() === 'remove') {
-            await member.setNickname(username)
+        const isRemove = nickname.toLowerCase() === 'remove'
+
+        const toApply = isRemove ? username : nickname
+        const wasApplied = await member.setNickname(toApply).catch(() => null)
+        if (!wasApplied) {
             return await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Removed \`${tag}\`'s nickname.`
+                color: 'RED', emoji: 'cross',
+                description: 'An error occurred when trying to change that member\'s nickname. Please try again.'
             }))
         }
 
-        await member.setNickname(nickname)
+        const description = isRemove ? `Removed \`${tag}\`'s nickname.` :
+            `Changed \`${tag}\`'s nickname to \`${nickname}\``
+
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Changed \`${tag}\`'s nickname to \`${nickname}\``
+            color: 'GREEN', emoji: 'check', description
         }))
     }
 }

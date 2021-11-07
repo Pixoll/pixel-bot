@@ -1,4 +1,4 @@
-const { Guild, User } = require('discord.js')
+const { Guild, User, MessageEmbed } = require('discord.js')
 const Command = require('../commands/base')
 const GuildDatabaseManager = require('../database/GuildDatabaseManager')
 const GuildSettingsHelper = require('../providers/helper')
@@ -48,6 +48,12 @@ class CommandoGuild extends Guild {
 		 * @private
 		 */
 		this._prefix = null
+
+		/**
+		 * The queued logs for this guild
+		 * @type {MessageEmbed[]}
+		 */
+		this.queuedLogs = new Array()
 	}
 
 	/**

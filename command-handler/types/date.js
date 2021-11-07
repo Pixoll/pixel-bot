@@ -1,13 +1,12 @@
 const { myMs } = require('../../utils')
+const { Argument } = require('../typings')
 const ArgumentType = require('./base')
-const regex = /^([1-3]?\d[\/\-\.,][01]?\d[\/\-\.,]\d{2}(?:\d{2})?)?(?:[^\d]+)?([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?$/
+const regex = /^([1-3]?\d[\/\-\.,][01]?\d(?:[\/\-\.,]\d{2})?(?:\d{2})?)?(?:[^\d]+)?([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?([+-]\d)?$/
 const timeParser = new Map([
     ['am', 0],
     ['a.m.', 0],
     ['pm', 12],
-    ['p.m.', 12],
-    [undefined, 0],
-    [null, 0],
+    ['p.m.', 12]
 ])
 const tzOffset = new Date().getTimezoneOffset() / 60
 
@@ -18,13 +17,15 @@ class DateArgumentType extends ArgumentType {
 
     /**
      * @param {string} val Value to validate
+     * @param {Argument} arg Argument the value was obtained from
      * @return Whether the value is valid
      */
-    validate(val) {
+    validate(val, _, arg) {
         const date = this._parseDate(val.match(regex)?.slice(1, 4))
         if (!Boolean(date)) {
             return 'Please enter a valid date format. Use the `help` command for more information.'
         }
+        if (arg.skipValidation) return true
 
         const int = date.getTime()
         if (int <= Date.now()) {
@@ -55,20 +56,27 @@ class DateArgumentType extends ArgumentType {
         const defDate = new Date()
 
         const dateNums = matches[0]?.split(/[\/\-\.,]/g).map((s, i) => {
-            if (i === 1) return Number.parseInt(s) - 1
-            if (i === 2) return (s.length === 2 ? Number.parseInt(s) + 2000 : Number.parseInt(s))
-            return Number.parseInt(s)
-        }).reverse() || [defDate.getUTCFullYear(), defDate.getUTCMonth(), defDate.getUTCDate()]
+            const parsed = Number.parseInt(s)
+            if (i === 0) return parsed
+            if (i === 1) return parsed - 1
+            return (s.length === 2 ? parsed + 2000 : parsed)
+        }) || [defDate.getUTCDate(), defDate.getUTCMonth(), defDate.getUTCFullYear()]
+        if (dateNums.length === 2) {
+            dateNums.push(defDate.getUTCFullYear())
+        }
+        dateNums.reverse()
+
         const timeNums = matches[1]?.split(':').map((s, i) => {
+            const parsed = Number.parseInt(s)
             if (i === 0) {
-                const formatter = timeParser.get(matches[2]?.toLowerCase())
-                const parsed = Number.parseInt(s)
+                const offset = Number.parseInt(matches[3] ?? tzOffset)
+                const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
                 if (formatter === 12 && parsed === 12) {
-                    return parsed - tzOffset
+                    return parsed - offset
                 }
-                return parsed + formatter - tzOffset
+                return parsed + formatter - offset
             }
-            return Number.parseInt(s)
+            return parsed
         }) || [defDate.getUTCHours(), defDate.getUTCMinutes()]
         const arr = [...dateNums, ...timeNums].filter(n => n !== undefined)
         const date = new Date(...arr)

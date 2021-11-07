@@ -39,8 +39,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -74,7 +74,8 @@ module.exports = (client) => {
             for (const perm of perms) embed.addField('\u2800', perm)
         }
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('channelDelete', async channel => {
@@ -84,8 +85,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -96,7 +97,8 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('channelPinsUpdate', async channel => {
@@ -106,8 +108,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -116,7 +118,8 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('channelUpdate', async (oldChannel, newChannel) => {
@@ -127,8 +130,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const { name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, id } = oldChannel
         const { name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2 } = newChannel
@@ -235,7 +238,8 @@ module.exports = (client) => {
             }
 
             if (embed.fields.length !== 0) {
-                return await logsChannel.send({ embeds: [embed] }).catch(() => null)
+                // return await logsChannel.send({ embeds: [embed] }).catch(() => null)
+                return guild.queuedLogs.push(embed)
             }
         }
 
@@ -256,12 +260,14 @@ module.exports = (client) => {
             }
 
             if (embed.fields.length !== 0) {
-                return await logsChannel.send({ embeds: [embed] }).catch(() => null)
+                // return await logsChannel.send({ embeds: [embed] }).catch(() => null)
+                return guild.queuedLogs.push(embed)
             }
         }
 
         if (embed.fields.length !== 0) {
-            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            guild.queuedLogs.push(embed)
         }
     })
 }

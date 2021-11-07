@@ -76,8 +76,9 @@ module.exports = async (client) => {
         user = await user.fetch().catch(() => null)
         if (!reaction || !user) return
 
-        const { message, emoji } = reaction
-        await message.fetch()
+        let { message, emoji } = reaction
+        message = await message.fetch().catch(() => null)
+        if (!message) return
 
         /** @type {CommandoMessage} */
         const { guild } = message

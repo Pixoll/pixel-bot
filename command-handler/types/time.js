@@ -1,13 +1,11 @@
 const { myMs } = require('../../utils')
 const ArgumentType = require('./base')
-const regex = /^([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?$/
+const regex = /^([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?([+-]\d)?$/
 const timeParser = new Map([
     ['am', 0],
     ['a.m.', 0],
     ['pm', 12],
-    ['p.m.', 12],
-    [undefined, 0],
-    [null, 0],
+    ['p.m.', 12]
 ])
 const tzOffset = new Date().getTimezoneOffset() / 60
 
@@ -48,15 +46,16 @@ class TimeArgumentType extends ArgumentType {
 
         const dateNums = [defDate.getUTCFullYear(), defDate.getUTCMonth(), defDate.getUTCDate()]
         const timeNums = matches[0]?.split(':').map((s, i) => {
+            const parsed = Number.parseInt(s)
             if (i === 0) {
-                const formatter = timeParser.get(matches[1]?.toLowerCase())
-                const parsed = Number.parseInt(s)
+                const offset = Number.parseInt(matches[3] ?? tzOffset)
+                const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
                 if (formatter === 12 && parsed === 12) {
-                    return parsed - tzOffset
+                    return parsed - offset
                 }
-                return parsed + formatter - tzOffset
+                return parsed + formatter - offset
             }
-            return Number.parseInt(s)
+            return parsed
         }) || [defDate.getUTCHours(), defDate.getUTCMinutes()]
         const arr = [...dateNums, ...timeNums].filter(n => n !== undefined)
         const date = new Date(...arr)

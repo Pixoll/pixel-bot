@@ -13,8 +13,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'voice')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const { channel: channel1, serverMute: mute1, serverDeaf: deaf1 } = oldState
         const { channel: channel2, serverMute: mute2, serverDeaf: deaf2 } = newState
@@ -56,7 +56,8 @@ module.exports = (client) => {
         }
 
         if (embed.description || embed.fields.length !== 0) {
-            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            guild.queuedLogs.push(embed)
         }
     })
 }

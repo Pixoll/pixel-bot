@@ -18,8 +18,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const content = sliceDots(cleanContent, 1016)
 
@@ -34,7 +34,8 @@ module.exports = (client) => {
             .setFooter(`Author id: ${author.id} | Message id: ${id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('commandPrefixChange', async (guild, prefix) => {
@@ -43,8 +44,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -52,7 +53,8 @@ module.exports = (client) => {
             .setDescription(`**New prefix:** ${prefix}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('commandStatusChange', async (guild, command, enabled) => {
@@ -61,8 +63,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -70,6 +72,7 @@ module.exports = (client) => {
             .setDescription(`The \`${command.name}\` command has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 }

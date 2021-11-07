@@ -14,8 +14,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const deleted = sliceDots(content, 1024)
 
@@ -49,7 +49,8 @@ module.exports = (client) => {
             embed.addField('Stickers', sticks.join('\n'))
         }
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('messageDeleteBulk', async messages => {
@@ -61,8 +62,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -71,7 +72,8 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${channel.id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('messageUpdate', async (oldMessage, newMessage) => {
@@ -86,8 +88,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const oldContent = content1 !== null ?
             sliceDots(content1, 1024) || '`Empty`' :
@@ -103,6 +105,7 @@ module.exports = (client) => {
             .setFooter(`Author id: ${author.id} | Message id: ${id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 }

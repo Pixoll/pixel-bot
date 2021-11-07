@@ -68,31 +68,30 @@ module.exports = class McStatusCommand extends Command {
         const { guild } = message
         this.db = guild.database.mcIps
 
-        const savedServer = await this.db.fetch()
-
         switch (subCommand) {
             case 'check':
-                return await this.check(message, savedServer)
+                return await this.check(message)
             case 'java':
                 return await this.java(message, ip, port || 25565)
             case 'bedrock':
                 return await this.bedrock(message, ip, port || 19132)
             case 'save:java':
-                return await this.saveJava(message, ip, port || 25565, savedServer)
+                return await this.saveJava(message, ip, port || 25565)
             case 'save:bedrock':
-                return await this.saveBedrock(message, ip, port || 19132, savedServer)
+                return await this.saveBedrock(message, ip, port || 19132)
         }
     }
 
     /**
      * The `check` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {McIpSchema} savedServer The saved Minecraft server data
      */
-    async check(message, savedServer) {
+    async check(message) {
         if (!message.guild) {
             return await this.onBlock(message, 'guildOnly')
         }
+
+        const savedServer = await this.db.fetch()
 
         if (!savedServer) {
             return await message.replyEmbed(basicEmbed({
@@ -155,13 +154,12 @@ module.exports = class McStatusCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      * @param {string} ip The IP of the Java server to save
      * @param {number} port The port of the Java server to save
-     * @param {McIpSchema} savedServer The saved Minecraft server data
      */
-    async saveJava(message, ip, port, savedServer) {
+    async saveJava(message, ip, port) {
         const { guildId, member } = message
         const { permissions } = member
 
-        if (!permissions.has('ADMINISTRATOR')) {
+        if (!this.client.isOwner(message) && !permissions.has('ADMINISTRATOR')) {
             return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
 
@@ -192,12 +190,11 @@ module.exports = class McStatusCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      * @param {string} ip The IP of the Bedrock server to save
      * @param {number} port The port of the Bedrock server to save
-     * @param {McIpSchema} savedServer The saved Minecraft server data
      */
-    async saveBedrock(message, ip, port, savedServer) {
+    async saveBedrock(message, ip, port) {
         const { permissions } = message.member
 
-        if (!permissions.has('ADMINISTRATOR')) {
+        if (!this.client.isOwner(message) && !permissions.has('ADMINISTRATOR')) {
             return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
 

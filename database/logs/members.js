@@ -25,8 +25,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const { tag, id, createdAt } = user
 
@@ -39,7 +39,8 @@ module.exports = (client) => {
             .setFooter(`User id: ${id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
 
         // if (Date.now() - createdTimestamp < myMs('3d')) {
         //     const autoMod = await isModuleEnabled(guild, 'audit-logs', 'autoMod')
@@ -58,8 +59,8 @@ module.exports = (client) => {
         const status = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!status) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const { tag } = user
 
@@ -75,7 +76,8 @@ module.exports = (client) => {
             .setFooter(`User id: ${id}`)
             .setTimestamp()
 
-        await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+        guild.queuedLogs.push(embed)
     })
 
     client.on('guildMemberUpdate', async (oldMember, newMember) => {
@@ -85,8 +87,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(guild)
-        if (!logsChannel) return
+        // const logsChannel = await getLogsChannel(guild)
+        // if (!logsChannel) return
 
         const { roles: roles1, nickname: nick1, avatar: avatar1 } = oldMember
         const { roles: roles2, nickname: nick2, avatar: avatar2, user, id } = newMember
@@ -113,7 +115,8 @@ module.exports = (client) => {
         }
 
         if (embed.fields.length !== 0) {
-            await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
+            guild.queuedLogs.push(embed)
         }
     })
 }

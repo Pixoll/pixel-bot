@@ -42,7 +42,7 @@ module.exports = class RuleCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
      * @param {'view'|'add'|'remove'} args.subCommand The sub-command to use
-     * @param {number} args.rule The number of the rule you want to remove
+     * @param {string} args.rule The number of the rule you want to remove
      */
     async run(message, { subCommand, rule }) {
         subCommand = subCommand.toLowerCase()
@@ -104,7 +104,11 @@ module.exports = class RuleCommand extends Command {
             rule = ruleMsg.content
         }
 
-        const { guildId } = message
+        const { guildId, guild, author, client } = message
+
+        if (!client.isOwner(message) && guild.ownerId !== author.id) {
+            return await this.onBlock(message, 'serverOwnerOnly')
+        }
 
         if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })
         else await this.db.add({ guild: guildId, rules: rule })
@@ -123,17 +127,19 @@ module.exports = class RuleCommand extends Command {
      * @param {number} rule The rule to remove from the rules list
      */
     async remove(message, rulesData, rule) {
+        rule = Number(rule) ?? null
+
         while (typeof rule !== 'number' || rule < 1) {
             const ruleMsg = await basicCollector(message, {
                 fieldName: 'What rule do you want to remove?'
             }, { time: myMs('2m') })
             if (!ruleMsg) return
-            rule = ruleMsg.content
+            rule = Number(ruleMsg.content)
         }
 
-        const { guild, author } = message
+        const { guild, author, client } = message
 
-        if (guild.ownerId !== author.id) {
+        if (!client.isOwner(message) && guild.ownerId !== author.id) {
             return await this.onBlock(message, 'serverOwnerOnly')
         }
 

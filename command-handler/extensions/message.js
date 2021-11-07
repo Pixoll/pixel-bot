@@ -205,8 +205,9 @@ class CommandoMessage extends Message {
 		}
 
 		// Ensure the user has permission to use the command
+		const isOwner = this.client.isOwner(this.author)
 		const hasPermission = this.command.hasPermission(this)
-		if (hasPermission !== true) {
+		if (!isOwner && hasPermission !== true) {
 			if (typeof hasPermission === 'string') {
 				this.client.emit('commandBlock', this, hasPermission)
 				return this.command.onBlock(this, hasPermission)
@@ -233,6 +234,17 @@ class CommandoMessage extends Message {
 			const data = { throttle, remaining }
 			this.client.emit('commandBlock', this, 'throttling', data)
 			return this.command.onBlock(this, 'throttling', data)
+		}
+
+		if (this.command.deprecated) {
+			const embed = new MessageEmbed()
+				.setColor('GOLD')
+				.addField(
+					`The \`${this.command.name}\` command has been marked as deprecated!`,
+					`Please start using the \`${this.command.replacing}\` command from now on.`
+				)
+
+			await this.replyEmbed(embed)
 		}
 
 		// Figure out the command arguments

@@ -22,7 +22,8 @@ module.exports = class TimeCommand extends Command {
                 key: 'time',
                 prompt: 'What time would you like to check?',
                 type: 'time',
-                required: false
+                required: false,
+                skipValidation: true
             }]
         })
     }

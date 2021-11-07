@@ -136,7 +136,7 @@ module.exports = class SetupCommand extends Command {
             { key: 'Default bots role', value: botRole?.name || null },
             { key: 'Muted members role', value: mutedRole?.name || null },
             { key: 'Lockdown channels', value: lockdownChannels.join(', ') || null },
-        ].filter(obj => obj.value).map(obj => `**>** **${obj.key}:** ${obj.value}`)
+        ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`)
 
         if (toDisplay.length === 0) {
             return await message.replyEmbed(basicEmbed({

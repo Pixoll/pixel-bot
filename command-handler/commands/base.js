@@ -342,6 +342,7 @@ class Command {
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
 	onError(err, message, args, fromPattern, result) {
+		return
 		const owner = message.client.owners[0]
 		const { serverInvite } = message.client.options
 		const emoji = '<:cross:802617654442852394>'

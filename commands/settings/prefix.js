@@ -53,7 +53,7 @@ module.exports = class PrefixCommand extends Command {
 			return await this.onBlock(message, 'ownerOnly')
 		}
 
-		if (guild && !member.permissions.has('ADMINISTRATOR')) {
+		if (guild && !client.isOwner(message) && !member.permissions.has('ADMINISTRATOR')) {
 			return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
 		}
 

@@ -1,7 +1,6 @@
 const {
-    MessageEmbed, GuildMember, User, Role, MessageOptions, PermissionResolvable, TextChannel, GuildChannel,
-    Message, ColorResolvable, AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu,
-    TextBasedChannels
+    MessageEmbed, GuildMember, User, Role, MessageOptions, TextChannel, GuildChannel, Message, ColorResolvable,
+    AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu,
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument } = require('../command-handler/typings')
 const CGuildClass = require('../command-handler/extensions/guild')
@@ -346,18 +345,28 @@ function inviteButton(invite, label = 'Join back') {
  */
 function isMod(roleOrMember, noAdmin) {
     if (!roleOrMember) return
+    const { permissions } = roleOrMember
 
-    /** @type {PermissionResolvable} */
-    const condition = 'BAN_MEMBERS' || 'DEAFEN_MEMBERS' || 'KICK_MEMBERS' || 'MANAGE_CHANNELS' ||
-        'MANAGE_EMOJIS_AND_STICKERS' || 'MANAGE_GUILD' || 'MANAGE_MESSAGES' || 'MANAGE_NICKNAMES' || 'MANAGE_ROLES' ||
-        'MANAGE_THREADS' || 'MANAGE_WEBHOOKS' || 'MOVE_MEMBERS' || 'MUTE_MEMBERS'
+    const conditions = [
+        'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
+        'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
+        'MUTE_MEMBERS'
+    ]
 
+    const values = []
     if (noAdmin) {
-        return !roleOrMember.permissions.has('ADMINISTRATOR') &&
-            roleOrMember.permissions.has(condition)
+        for (const condition of conditions) {
+            values.push(permissions.has(condition))
+        }
+        const isTrue = values.filter(b => b === true)[0] ?? false
+        return !permissions.has('ADMINISTRATOR') && isTrue
     }
 
-    return roleOrMember.permissions.has(condition)
+    for (const condition of conditions) {
+        values.push(permissions.has(condition))
+    }
+    const isTrue = values.filter(b => b === true)[0] ?? false
+    return isTrue
 }
 
 /**
@@ -370,17 +379,13 @@ function getKeyPerms(roleOrMember) {
 
     if (perms.has('ADMINISTRATOR')) return 'Administrator'
 
-    /** @type {PermissionResolvable} */
     const filter = [
-        'CREATE_INSTANT_INVITE', 'ADD_REACTIONS', 'VIEW_AUDIT_LOG', 'PRIORITY_SPEAKER', 'STREAM', 'VIEW_CHANNEL',
-        'SEND_MESSAGES', 'SEND_TTS_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'READ_MESSAGE_HISTORY', 'USE_EXTERNAL_EMOJIS',
-        'VIEW_GUILD_INSIGHTS', 'CONNECT', 'SPEAK', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'USE_VAD',
-        'CHANGE_NICKNAME', 'MANAGE_WEBHOOKS', 'USE_APPLICATION_COMMANDS', 'REQUEST_TO_SPEAK', 'USE_EXTERNAL_STICKERS',
-        'USE_PUBLIC_THREADS', 'USE_PRIVATE_THREADS', 'CREATE_PRIVATE_THREADS', 'CREATE_PUBLIC_THREADS',
-        'START_EMBEDDED_ACTIVITIES', 'SEND_MESSAGES_IN_THREADS'
+        'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
+        'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
+        'MUTE_MEMBERS'
     ]
 
-    const filtered = perms.toArray().filter(perm => !filter.includes(perm))
+    const filtered = perms.toArray().filter(perm => filter.includes(perm))
     if (filtered.length === 0) return 'None'
 
     return filtered.map(perm => permissions[perm.toString()]).join(', ')

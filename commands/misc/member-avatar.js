@@ -1,19 +1,19 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { MessageActionRow, MessageButton, GuildMember } = require('discord.js')
-const { noReplyInDMs, memberDetails } = require('../../utils')
+const { MessageActionRow, MessageButton, GuildMember, MessageEmbed } = require('discord.js')
+const { noReplyInDMs, memberDetails, embedColor } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class ServerAvatarCommand extends Command {
+module.exports = class MemberAvatarCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'serveravatar',
-            aliases: ['savatar', 'sav'],
+            name: 'memberavatar',
+            aliases: ['mavatar', 'mav'],
             group: 'misc',
             description: 'Displays a member\'s server avatar, or yours if you don\'t specify any.',
             details: memberDetails() + '\nIf no server avatar was found, it will display the user\'s avatar instead.',
-            format: 'savatar <member>',
-            examples: ['savatar Pixoll'],
+            format: 'mavatar <member>',
+            examples: ['mavatar Pixoll'],
             guildOnly: true,
             args: [{
                 key: 'member',
@@ -35,6 +35,13 @@ module.exports = class ServerAvatarCommand extends Command {
         const { user, displayName } = member
 
         const avatar = member.displayAvatarURL({ dynamic: true, size: 2048 })
+
+        const embed = new MessageEmbed()
+            .setColor(embedColor)
+            .setAuthor(`${user.tag} | AKA. ${displayName}`, user.displayAvatarURL({ dynamic: true }))
+            .setImage(avatar)
+            .setTimestamp()
+
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -43,9 +50,6 @@ module.exports = class ServerAvatarCommand extends Command {
                     .setURL(avatar)
             )
 
-        const text = displayName !== user.username ?
-            `(${member.displayName}) ${user.tag}` : user.tag
-
-        await message.reply({ content: text, files: [avatar], components: [row], ...noReplyInDMs(message) })
+        await message.reply({ embeds: [embed], components: [row], ...noReplyInDMs(message) })
     }
 }

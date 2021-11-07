@@ -1,12 +1,12 @@
 {
   "name": "pixel",
-  "version": "1.7.6",
+  "version": "1.8.0",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
     "common-tags": "^1.8.0",
     "discord.js-structures": "^1.0.3",
-    "discord.js": "^13.2.0",
+    "discord.js": "^13.3.1",
     "dotenv": "^10.0.0",
     "emoji-regex": "^10.0.0",
     "is-promise": "^4.0.0",
@@ -27,7 +27,7 @@
     "url": "git+https://github.com/Pixoll/pixel-bot"
   },
   "author": "Pixoll",
-  "license": "ISC",
+  "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/Pixoll/pixel-bot/issues"
   },

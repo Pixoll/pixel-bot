@@ -35,7 +35,7 @@ module.exports = class HelpCommand extends Command {
      */
     async run(message, { cmd }) {
         const { guild, client, author } = message
-        const { registry, user, owners } = client
+        const { registry, user, owners, options } = client
         const { groups } = registry
         const owner = owners[0]
         const prefix = guild?.prefix || client.prefix
@@ -59,9 +59,20 @@ module.exports = class HelpCommand extends Command {
                         return `\`—${c.name}\``
                     }
                     return `\`${c.name}\``
-                }).sort().join(', ')
+                }).sort().join(' ')
                 commandList.push({ name, value: list })
             }
+
+            const topgg = 'https://top.gg/bot/802267523058761759'
+            commandList.push({
+                name: '🔗 Useful links',
+                value: oneLine`
+                    [Top.gg page](${topgg}) -
+                    [Support server](${options.serverInvite}) -
+                    [Invite the bot](${topgg}/invite) -
+                    [Vote here](${topgg}/vote)
+                `
+            })
 
             const base = new MessageEmbed()
                 .setColor('#4c9f4c')
@@ -173,10 +184,17 @@ module.exports = class HelpCommand extends Command {
                         **mth:** months
                         **y:** years
                     `, true)
-                    .addField('Specific date', oneLine`
-                        ${user.username} uses the **British English date format**, and supports both
-                        24-hour and 12-hour formats. E.g. this is right: \`21/10/2021\`, while this
-                        isn't: \`10/21/2021\`, and both of these cases work: \`11:30pm\`, \`23:30\`.
+                    .addField('Specific date', stripIndent`
+                        ${oneLine`
+                            ${user.username} uses the **British English date format**, and supports both
+                            24-hour and 12-hour formats. E.g. this is right: \`21/10/2021\`, while this
+                            isn't: \`10/21/2021\`, and both of these cases work: \`11:30pm\`, \`23:30\`.
+                        `}
+                        ${oneLine`
+                            You can also specify the time zone offset by adding a \`+\` or \`-\` sign followed
+                            by a number, like this: \`12am-3\`. This means that time will be used as if it's
+                            from UTC-3.
+                        `}
                     `)
             ]
 

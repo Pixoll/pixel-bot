@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { User, MessageActionRow, MessageButton } = require('discord.js')
-const { userDetails, noReplyInDMs } = require('../../utils')
+const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
+const { userDetails, noReplyInDMs, embedColor } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class AvatarCommand extends Command {
@@ -33,6 +33,13 @@ module.exports = class AvatarCommand extends Command {
         if (!user) user = message.author
 
         const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 })
+
+        const embed = new MessageEmbed()
+            .setColor(embedColor)
+            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
+            .setImage(avatar)
+            .setTimestamp()
+
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -41,6 +48,6 @@ module.exports = class AvatarCommand extends Command {
                     .setURL(avatar)
             )
 
-        await message.reply({ content: user.tag, files: [avatar], components: [row], ...noReplyInDMs(message) })
+        await message.reply({ embeds: [embed], components: [row], ...noReplyInDMs(message) })
     }
 }
