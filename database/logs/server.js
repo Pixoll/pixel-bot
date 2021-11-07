@@ -239,7 +239,7 @@ module.exports = (client) => {
 
         if (embed.fields.length !== 0 || embed.description) {
             // await logsChannel.send({ embeds: [embed] }).catch(() => null)
-            guild.queuedLogs.push(embed)
+            newGuild.queuedLogs.push(embed)
         }
     })
 }

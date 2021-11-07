@@ -77,6 +77,7 @@ module.exports = async (client) => {
             .addField('🕒 Note about times and dates', oneLine`
                 The bot runs based off **London's time zone (UTC±0).** This means that when you used time-based commands,
                 like \`timestamp\`, \`reminder\` or \`time\`, all of the times you specify will be based on London's time.
+                For more information about the time system, please check **page 4** of the \`help\` command.
             `)
             .addField('🔗 Useful links', oneLine`
                 [Top.gg page](${topgg}) -

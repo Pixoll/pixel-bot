@@ -1,5 +1,5 @@
 const { Util: { escapeMarkdown }, MessageEmbed } = require('discord.js')
-const { oneLine } = require('common-tags')
+const { oneLine, stripIndent } = require('common-tags')
 const isPromise = require('is-promise')
 const ArgumentUnionType = require('../types/union')
 const { ArgumentInfo, ArgumentDefault, ArgumentType, CommandoClient, ArgumentResult, CommandoMessage } = require('../typings')
@@ -149,7 +149,7 @@ class Argument {
 		const answers = []
 		let valid = !empty ? await this.validate(val, msg) : false
 
-		while (!valid || typeof valid === 'string') {
+		while (valid || typeof valid === 'string') {
 			/* eslint-disable no-await-in-loop */
 			if (prompts.length >= promptLimit) {
 				return {
@@ -163,10 +163,14 @@ class Argument {
 			const prompt = new MessageEmbed()
 				.setColor(empty && this.prompt ? 'BLUE' : 'RED')
 				.setFooter(wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : '')
+				.addField(this.prompt, stripIndent`
+					**Don't type the whole command again!** Only what I ask for.
+					Respond with \`cancel\` to cancel the command.
+				`)
 
-			if (empty) prompt.addField(this.prompt, 'Respond with `cancel` to cancel the command.')
-			else prompt.setDescription(valid || `You provided an invalid ${this.label}. Please try again.`)
-				.addField(this.prompt, 'Respond with `cancel` to cancel the command.')
+			if (!empty) prompt.setDescription(
+				valid ? `**${valid}**` : `You provided an invalid ${this.label}. Please try again.`
+			)
 
 			// Prompt the user for a new value
 			prompts.push(await msg.replyEmbed(prompt))
@@ -259,7 +263,10 @@ class Argument {
 						`)
 						.addField(
 							this.prompt,
-							'Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry up to this point.'
+							stripIndent`
+								**Don't type the whole command again!** Only what I ask for.
+								Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry up to this point.
+							`
 						)
 						.setFooter(wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : '')
 
@@ -269,7 +276,10 @@ class Argument {
 						.setColor('BLUE')
 						.addField(
 							this.prompt,
-							'Respond with `cancel` to cancel the command, or `finish` to finish entry.'
+							stripIndent`
+								**Don't type the whole command again!** Only what I ask for.
+								Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry.
+							`
 						)
 						.setFooter(wait ?
 							`The command will automatically be cancelled in ${this.wait} seconds, unless you respond.` : ''
