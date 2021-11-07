@@ -149,7 +149,7 @@ class Argument {
 		const answers = []
 		let valid = !empty ? await this.validate(val, msg) : false
 
-		while (valid || typeof valid === 'string') {
+		while (!valid || typeof valid === 'string') {
 			/* eslint-disable no-await-in-loop */
 			if (prompts.length >= promptLimit) {
 				return {
