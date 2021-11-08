@@ -1,7 +1,7 @@
 const { myMs } = require('../../utils')
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
-const regex = /^([1-3]?\d[\/\-\.,][01]?\d(?:[\/\-\.,]\d{2})?(?:\d{2})?)?(?:[^\d]+)?([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?([+-]\d)?$/
+const regex = /^([1-3]?\d[\/\-\.,][01]?\d(?:[\/\-\.,]\d{2})?(?:\d{2})?)?(?:[^\d]+)?([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?([+-]\d\d?)?$/
 const timeParser = new Map([
     ['am', 0],
     ['a.m.', 0],
@@ -69,7 +69,7 @@ class DateArgumentType extends ArgumentType {
         const timeNums = matches[1]?.split(':').map((s, i) => {
             const parsed = Number.parseInt(s)
             if (i === 0) {
-                const offset = Number.parseInt(matches[3] ?? tzOffset)
+                const offset = tzOffset + Number.parseInt(matches[3] ?? 0)
                 const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
                 if (formatter === 12 && parsed === 12) {
                     return parsed - offset
