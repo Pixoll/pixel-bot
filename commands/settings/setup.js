@@ -43,6 +43,7 @@ module.exports = class SetupCommand extends Command {
             format: stripIndent`
                 setup <full> - Setup the bot completely to its core.
                 setup info - View the current setup data of the server.
+                setup reload - Reloads the data of the server.
                 setup audit-logs [text-channel] - Setup the audit logs channel.
                 setup muted-role [role] - Setup the role for muted people.
                 setup member-role [role] - Setup the role given to all members upon joining.
@@ -59,7 +60,9 @@ module.exports = class SetupCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['info', 'full', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'],
+                    oneOf: [
+                        'info', 'full', 'reload', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'
+                    ],
                     default: 'full'
                 },
                 {
@@ -73,7 +76,7 @@ module.exports = class SetupCommand extends Command {
     }
 
     /**
-     * @typedef {'view'|'full'|'audit-logs'|'muted-role'|'member-role'|'bot-role'|'lockdown-channels'} SubCommand
+     * @typedef {'view'|'full'|'audit-logs'|'muted-role'|'member-role'|'bot-role'|'lockdown-channels'|'reload'} SubCommand
      */
 
     /**
@@ -95,6 +98,8 @@ module.exports = class SetupCommand extends Command {
                 return await this.full(message, data)
             case 'info':
                 return await this.info(message, data)
+            case 'reload':
+                return await this._reload(message, data)
             case 'audit-logs':
                 return await this.auditLogs(message, value)
             case 'muted-role':
@@ -241,12 +246,11 @@ module.exports = class SetupCommand extends Command {
         const { guild } = message
         const { roles, channels } = guild
 
-        const logsChannel = channels.resolve(data.logsChannel)
+        const logsChannel = await channels.fetch(data.logsChannel)
         const memberRole = await roles.fetch(data.memberRole)
         const botRole = await roles.fetch(data.botRole)
         const mutedRole = await roles.fetch(data.mutedRole)
-        const lockdownChannels = data.lockChannels.map(c => channels.resolve(c)?.toString())
-            .slice(0, 78).filter(c => c)
+        const lockdownChannels = data.lockChannels.map(c => `<#${c}>`).slice(0, 78)
 
         const toDisplay = [
             { key: 'Audit logs channel', value: logsChannel?.toString() || null },
@@ -266,8 +270,65 @@ module.exports = class SetupCommand extends Command {
             .setColor(embedColor)
             .setAuthor(`${guild.name}'s setup data`, guild.iconURL({ dynamic: true }))
             .setDescription(toDisplay.join('\n'))
+            .setFooter('Missing or wrong data? Try using the "reload" sub-command!')
 
         await message.replyEmbed(embed)
+    }
+
+    /**
+     * The `reload` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {SetupSchema} data The setup data
+     */
+    async _reload(message, data) {
+        if (!data) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'RED', emoji: 'cross', fieldName: 'There is no saved data for this server yet.',
+                fieldValue: 'Please run the `setup full` command first.'
+            }))
+        }
+
+        const toDelete = await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Reloading setup data...'
+        }))
+
+        const { guild, guildId } = message
+        const newDoc = { guild: guildId }
+
+        if (data.logsChannel) {
+            const logsChannel = await guild.channels.fetch(data.logsChannel).catch(() => null)
+            if (logsChannel) newDoc.logsChannel = logsChannel.id
+        }
+
+        if (data.memberRole) {
+            const memberRole = await guild.roles.fetch(data.memberRole).catch(() => null)
+            if (memberRole) newDoc.memberRole = memberRole.id
+        }
+
+        if (data.botRole) {
+            const botRole = await guild.roles.fetch(data.botRole).catch(() => null)
+            if (botRole) newDoc.botRole = botRole.id
+        }
+
+        if (data.mutedRole) {
+            const mutedRole = await guild.roles.fetch(data.mutedRole).catch(() => null)
+            if (mutedRole) newDoc.mutedRole = mutedRole.id
+        }
+
+        if (data.lockChannels?.length !== 0) {
+            newDoc.lockChannels = []
+            for (const chanId of data.lockChannels) {
+                const channel = await guild.channels.fetch(chanId).catch(() => null)
+                if (channel) newDoc.lockChannels.push(channel.id)
+            }
+        }
+
+        await this.db.update(data, newDoc)
+
+        await toDelete.delete().catch(() => null)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: 'Reloaded data.'
+        }))
     }
 
     /**
