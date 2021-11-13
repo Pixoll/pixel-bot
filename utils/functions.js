@@ -1105,7 +1105,12 @@ async function modConfirmation(message, action, target, data = {}, sendCancelled
 
     const confirmEmbed = new MessageEmbed()
         .setColor('GOLD')
-        .addField(
+        .setFooter('The command will automatically be cancelled in 30 seconds.')
+
+    if (!targetStr && Object.keys(data).length === 0) {
+        confirmEmbed.setDescription(`**Are you sure you want to ${action}?**`)
+    } else {
+        confirmEmbed.addField(
             `Are you sure you want to ${action}${targetStr ? ` ${targetStr}` : ''}?`,
             stripIndent`
                 ${!targetStr ? '' : target instanceof User ? stripIndent`
@@ -1117,7 +1122,7 @@ async function modConfirmation(message, action, target, data = {}, sendCancelled
                 ${data.duration ? `**Duration:** ${data.duration}` : ''}
             `
         )
-        .setFooter('The command will automatically be cancelled in 30 seconds.')
+    }
 
     const yesButton = new MessageButton()
         .setStyle('SUCCESS')
@@ -1129,7 +1134,8 @@ async function modConfirmation(message, action, target, data = {}, sendCancelled
         .setEmoji(customEmoji('cross'))
 
     const msg = await message.replyEmbed(confirmEmbed, {
-        components: [new MessageActionRow().addComponents(yesButton, noButton)]
+        components: [new MessageActionRow().addComponents(yesButton, noButton)],
+        ...noReplyInDMs(message)
     })
 
     const pushed = await msg.awaitMessageComponent({
@@ -1140,7 +1146,7 @@ async function modConfirmation(message, action, target, data = {}, sendCancelled
     await msg.delete()
 
     if (!pushed || pushed.customId === ids.no) {
-        if (sendCancelled) await message.reply('Cancelled command.')
+        if (sendCancelled) await message.reply({ content: 'Cancelled command.', ...noReplyInDMs(message) })
         return false
     }
 

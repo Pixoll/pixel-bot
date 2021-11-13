@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, sleep } = require('../../utils')
+const { basicEmbed, sleep, modConfirmation } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class RestartCommand extends Command {
@@ -19,26 +19,12 @@ module.exports = class RestartCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        let count = 10
-        const toEdit = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: `The bot will restart in ${count--} seconds...`
+        const confirmed = await modConfirmation(message, 'restart the bot')
+        if (!confirmed) return
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Restarting...'
         }))
-        await sleep(1)
-
-        while (count > 0) {
-            await toEdit.edit({
-                embeds: [basicEmbed({
-                    color: 'GOLD', emoji: 'loading', description: `The bot will restart in ${count--} seconds...`
-                })]
-            })
-            await sleep(1)
-        }
-
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GOLD', emoji: 'loading', description: 'Restarting...'
-            })]
-        })
 
         this.client.user.setPresence({
             activities: [{

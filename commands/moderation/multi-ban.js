@@ -128,7 +128,7 @@ module.exports = class MultiBanCommand extends Command {
             })
 
             banned.push(user)
-            await toEdit.edit({ embeds: [embed(banned.length)] })
+            await toEdit.edit({ embeds: [embed(banned.length)] }).catch(() => null)
         }
 
         const options = banned.length !== 0 ? {
@@ -138,6 +138,7 @@ module.exports = class MultiBanCommand extends Command {
             color: 'RED', emoji: 'cross', description: 'No members were banned.'
         }
 
-        await toEdit.edit({ embeds: [basicEmbed(options)] })
+        await toEdit.delete().catch(() => null)
+        await message.replyEmbed(basicEmbed(options))
     }
 }

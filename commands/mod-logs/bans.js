@@ -9,7 +9,7 @@ module.exports = class BansCommand extends Command {
         super(client, {
             name: 'bans',
             group: 'mod-logs',
-            description: 'Displays all the bans of this server, or look for a specific ban.',
+            description: 'Displays all the bans of the server.',
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             guildOnly: true

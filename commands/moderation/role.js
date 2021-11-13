@@ -143,7 +143,7 @@ module.exports = class RoleCommand extends Command {
         const members = await message.guild.members.fetch().catch(() => null)
         const bots = members.filter(m => m.user.bot)
 
-        const toEdit = await message.replyEmbed(basicEmbed({
+        const toDelete = await message.replyEmbed(basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling role in all bots...'
         }))
 
@@ -152,11 +152,10 @@ module.exports = class RoleCommand extends Command {
             else await roles.add(role)
         }
 
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all bots.`
-            })]
-        })
+        await toDelete.delete(() => null)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all bots.`
+        }))
     }
 
     /**
@@ -175,7 +174,7 @@ module.exports = class RoleCommand extends Command {
         const members = await message.guild.members.fetch().catch(() => null)
         const users = members.filter(m => !m.user.bot)
 
-        const toEdit = await message.replyEmbed(basicEmbed({
+        const toDelete = await message.replyEmbed(basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members...'
         }))
 
@@ -184,11 +183,10 @@ module.exports = class RoleCommand extends Command {
             else await roles.add(role)
         }
 
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members.`
-            })]
-        })
+        await toDelete.delete(() => null)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members.`
+        }))
     }
 
     /**
@@ -212,7 +210,7 @@ module.exports = class RoleCommand extends Command {
 
         const botRole = message.clientMember.roles.highest
 
-        const toEdit = await message.replyEmbed(basicEmbed({
+        const toDelete = await message.replyEmbed(basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Removing all roles...'
         }))
 
@@ -222,12 +220,11 @@ module.exports = class RoleCommand extends Command {
         })
         for (const [, role] of memberRoles) await roles.remove(role)
 
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check',
-                description: `Removed every role from ${user.toString()} (${user.tag}).`
-            })]
-        })
+        await toDelete.delete(() => null)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            description: `Removed every role from ${user.toString()} (${user.tag}).`
+        }))
     }
 
     /**
@@ -254,7 +251,7 @@ module.exports = class RoleCommand extends Command {
         const alreadyHas = roles.filter(r => _roles.cache.has(r.id))
         const doesntHas = roles.filter(r => !_roles.cache.has(r.id))
 
-        const toEdit = await message.replyEmbed(basicEmbed({
+        const toDelete = await message.replyEmbed(basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling all roles...'
         }))
 
@@ -268,11 +265,10 @@ module.exports = class RoleCommand extends Command {
         const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesntHas.map(r => '+' + r.name)]
             .filter(s => s).join(', ')
 
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', fieldValue: rolesStr,
-                fieldName: `Toggled the following roles for ${user.tag}:`
-            })]
-        })
+        await toDelete.delete(() => null)
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', fieldValue: rolesStr,
+            fieldName: `Toggled the following roles for ${user.tag}:`
+        }))
     }
 }

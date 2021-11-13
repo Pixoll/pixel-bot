@@ -37,10 +37,10 @@ export class Argument {
 	 * @default true
 	 */
 	public required: boolean
-	 /**
-	  * Whether the argument's validation is skipped or not
-	  * @default false
-	  */
+	/**
+	 * Whether the argument's validation is skipped or not
+	 * @default false
+	 */
 	public skipValidation: boolean
 	/** The default value for the argument */
 	public default: ArgumentDefault
@@ -336,7 +336,7 @@ export abstract class Command {
 	 * Whether the command can only be run by the server's owner
 	 * @default false
 	 */
-	public serverOwnerOnly: boolean
+	public guildOwnerOnly: boolean
 	/** Options for throttling command usages */
 	public throttling: ThrottlingOptions
 	/**
@@ -362,7 +362,7 @@ export abstract class Command {
 	 * @param message The triggering command message
 	 * @param ownerOverride Whether the bot owner(s) will always have permission
 	 */
-	public hasPermission(message: CommandoMessage, ownerOverride?: boolean): true | 'ownerOnly' | 'serverOwnerOnly' | PermissionString[]
+	public hasPermission(message: CommandoMessage, ownerOverride?: boolean): true | 'ownerOnly' | 'guildOwnerOnly' | PermissionString[]
 	/**
 	 * Checks if the command is enabled in a guild
 	 * @param guild Guild to check in
@@ -1506,7 +1506,7 @@ export interface CommandInfo {
 	 * Whether or not the command is usable only by a server owner
 	 * @default false
 	 */
-	serverOwnerOnly?: boolean
+	guildOwnerOnly?: boolean
 	/**
 	 * Whether or not the command is usable only by an owner
 	 * @default false
@@ -1658,7 +1658,7 @@ export type CommandBlockReason =
 	'guildOnly' |
 	'nsfw' |
 	'dmOnly' |
-	'serverOwnerOnly' |
+	'guildOwnerOnly' |
 	'ownerOnly' |
 	'userPermissions' |
 	'clientPermissions' |

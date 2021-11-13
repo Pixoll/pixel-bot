@@ -193,7 +193,7 @@ class CommandoMessage extends Message {
 		}
 
 		// Make sure the command is usable in this context
-		if ((this.command.guildOnly || this.command.serverOwnerOnly) && !this.guild) {
+		if ((this.command.guildOnly || this.command.guildOwnerOnly) && !this.guild) {
 			this.client.emit('commandBlock', this, 'guildOnly')
 			return this.command.onBlock(this, 'guildOnly')
 		}

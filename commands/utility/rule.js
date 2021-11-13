@@ -107,7 +107,7 @@ module.exports = class RuleCommand extends Command {
         const { guildId, guild, author, client } = message
 
         if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock(message, 'serverOwnerOnly')
+            return await this.onBlock(message, 'guildOwnerOnly')
         }
 
         if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })
@@ -140,7 +140,7 @@ module.exports = class RuleCommand extends Command {
         const { guild, author, client } = message
 
         if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock(message, 'serverOwnerOnly')
+            return await this.onBlock(message, 'guildOwnerOnly')
         }
 
         if (!rule) {

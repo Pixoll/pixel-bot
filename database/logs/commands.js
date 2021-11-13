@@ -11,7 +11,7 @@ module.exports = (client) => {
     client.on('commandRun', async (command, _, message) => {
         const { guild, author, channel, id, url, cleanContent } = message
         const isModCommand = !!command.userPermissions || command.ownerOnly ||
-            command.serverOwnerOnly || command.name === 'prefix'
+            command.guildOwnerOnly || command.name === 'prefix'
 
         if (channel.type === 'DM' || command.hidden || !isModCommand) return
 
@@ -31,7 +31,7 @@ module.exports = (client) => {
                 [Jump to message](${url})
             `)
             .addField('Message', code(content))
-            .setFooter(`Author id: ${author.id} | Message id: ${id}`)
+            .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 
         // await logsChannel.send({ embeds: [embed] }).catch(() => null)

@@ -23,7 +23,7 @@ module.exports = (client) => {
             .setColor('ORANGE')
             .setAuthor('Deleted message', author.displayAvatarURL({ dynamic: true }))
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()}`)
-            .setFooter(`Author id: ${author.id} | Message id: ${id}`)
+            .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 
         if (deleted) embed.addField('Message', deleted)
@@ -102,7 +102,7 @@ module.exports = (client) => {
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()} [Jump to message](${url})`)
             .addField('Before', oldContent)
             .addField('After', newContent)
-            .setFooter(`Author id: ${author.id} | Message id: ${id}`)
+            .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 
         // await logsChannel.send({ embeds: [embed] }).catch(() => null)

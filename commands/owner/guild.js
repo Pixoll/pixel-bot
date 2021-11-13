@@ -131,28 +131,9 @@ module.exports = class GuildCommand extends Command {
             })]
         })
 
-        let count = 30
-        const toEdit = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading',
-            description: `The bot will leave **${guild.name}** in ${count--} seconds...`
-        }))
-        await sleep(1)
-
-        while (count > 0) {
-            await toEdit.edit({
-                embeds: [basicEmbed({
-                    color: 'GOLD', emoji: 'loading',
-                    description: `The bot will leave **${guild.name}** in ${count--} seconds...`
-                })]
-            })
-            await sleep(1)
-        }
-
         await guild.leave()
-        await toEdit.edit({
-            embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `The bot has been removed from **${guild.name}.**`
-            })]
-        })
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `The bot has been removed from **${guild.name}.**`
+        }))
     }
 }

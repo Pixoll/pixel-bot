@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, GuildMember } = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial, getLogsChannel, timestamp } = require('../../utils')
+const { isModuleEnabled, getLogsChannel, timestamp } = require('../../utils')
 
 /**
  * Returns a clickable link to the image. `None` if the link is invald
@@ -50,10 +50,11 @@ module.exports = (client) => {
         // }
     })
 
-    client.on('guildMemberRemove', async _member => {
-        /** @type {GuildMember} */
-        const { guild, user, roles, id } = await fetchPartial(_member)
+    client.on('guildMemberRemove', async member => {
+        member = await member.fetch().catch(() => null)
+        if (!member) return
 
+        const { guild, user, roles, id } = member
         if (!guild.available || id === client.user.id) return
 
         const status = await isModuleEnabled(guild, 'audit-logs', 'members')

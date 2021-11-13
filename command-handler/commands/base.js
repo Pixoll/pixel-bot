@@ -102,7 +102,7 @@ class Command {
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.serverOwnerOnly = Boolean(info.serverOwnerOnly)
+		this.guildOwnerOnly = Boolean(info.guildOwnerOnly)
 
 		/**
 		 * Whether the command can only be used by an owner
@@ -244,15 +244,15 @@ class Command {
 	hasPermission(message, ownerOverride = true) {
 		const { author, channel, guild } = message
 
-		if (!this.serverOwnerOnly && !this.ownerOnly && !this.userPermissions) return true
+		if (!this.guildOwnerOnly && !this.ownerOnly && !this.userPermissions) return true
 		if (ownerOverride && this.client.isOwner(author)) return true
 
 		if (this.ownerOnly && (ownerOverride || !this.client.isOwner(author))) {
 			return 'ownerOnly'
 		}
 
-		if (this.serverOwnerOnly && guild?.ownerId !== author.id) {
-			return 'serverOwnerOnly'
+		if (this.guildOwnerOnly && guild?.ownerId !== author.id) {
+			return 'guildOwnerOnly'
 		}
 
 		if (channel.type !== 'DM' && this.userPermissions) {
@@ -301,7 +301,7 @@ class Command {
 				return message.replyEmbed(embed(
 					`The \`${this.name}\` command can only be used in a server channel.`
 				))
-			case 'serverOwnerOnly':
+			case 'guildOwnerOnly':
 				return message.replyEmbed(embed(
 					`The \`${this.name}\` command can only be used by the server's owner.`
 				))

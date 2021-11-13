@@ -93,7 +93,13 @@ function myMs(val, options = {}) {
 function timestamp(time, format = 'f') {
     if (!time) return
     if (time instanceof Date) time = time.getTime()
-    return `<t:${Math.trunc(time / 1000)}:${format}>`
+
+    const trunc = Math.trunc(time / 1000)
+    const rem = trunc % 60
+    const roundUp = rem >= 20
+    const epoch = trunc - rem + (roundUp ? 60 : 0)
+
+    return `<t:${epoch}:${format}>`
 }
 
 /** Converts ms and strings into future dates */
