@@ -1,49 +1,14 @@
-const { CommandoClient } = require('./command-handler/typings');
+const { CommandoClient } = require('./command-handler/typings')
+const { CommandoMessage, Command } = require('./command-handler/typings')
+const { MessageEmbed, TextChannel, Util } = require('discord.js')
+const { customEmoji, docId, code } = require('./utils')
+const { stripIndent } = require('common-tags')
 
 /**
  * A manager for all errors of the process and client
  * @param {CommandoClient} client The client instance
  */
-module.exports = async (client) => {
-    const { CommandoMessage, Command } = require('./command-handler/typings')
-    const CommandoClient = require('./command-handler/client')
-    const { MessageEmbed, TextChannel, Util } = require('discord.js')
-    const { customEmoji, docId, code, timestamp } = require('./utils')
-    const { stripIndent, oneLine } = require('common-tags')
-
-    client.on('rateLimit', async data => {
-        const { route, path, method, limit, timeout, global } = data
-
-        const isMessageCooldown = !!route.match(/\/channels\/\d{18}\/messages/)?.map(m => m)[0]
-        const isPost = method === 'post'
-
-        if (global) {
-            console.log('rateLimit >', data)
-            if (isPost && isMessageCooldown) return
-
-            /** @type {TextChannel} */
-            const errorsChannel = await client.channels.fetch('906740370304540702')
-
-            const embed = new MessageEmbed()
-                .setColor('GOLD')
-                .setTitle('Global rate limit reached')
-                .setDescription(oneLine`
-                    Reached limit of \`${limit}\`. Timeout ${timestamp(Date.now() + timeout)}.
-                `)
-                .addField('Information', stripIndent`
-                    **Path:** ${path}
-                    **Route:** ${route}
-                    **Method:** ${method}
-                `)
-                .setTimestamp()
-
-            return await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] })
-        }
-        const isTypingCooldown = !!route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0] && isPost
-        if (isMessageCooldown || isTypingCooldown) return
-        console.log('rateLimit >', data)
-    })
-
+module.exports = (client) => {
     client.on('commandError', async (command, error, message) => {
         const owner = client.owners[0]
         const { serverInvite } = client.options
@@ -84,12 +49,13 @@ module.exports = async (client) => {
      * @param {string} [id] the error id to use
      */
     async function errorHandler(error, type, message, command, id) {
-        /** @type {TextChannel} */
-        const errorsChannel = await client.channels.fetch('906740370304540702')
-
         if (error instanceof Error) {
             if (command?.name === 'eval') return
             console.error(error)
+
+            /** @type {TextChannel} */
+            const errorsChannel = await client.channels.fetch('906740370304540702').catch(() => null)
+            if (!errorsChannel) return
 
             const lentgh = error.name.length + error.message.length + 3
             const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')

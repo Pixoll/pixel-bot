@@ -5,6 +5,7 @@ const CommandoClient = require('./command-handler/client')
 const database = require('./database')
 const path = require('path')
 const errors = require('./errors')
+const rateLimit = require('./rateLimit')
 require('dotenv').config()
 
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
@@ -32,13 +33,16 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
-const debugExclude = ['Heartbeat', 'Registered', 'WS', 'Loaded feature', 'for guild', 'Garbage collection completed']
+const debugExclude = new RegExp('Heartbeat|Registered|WS|Loaded feature|for guild|Garbage collection completed')
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
-    for (const word of debugExclude) if (msg.includes(word)) return
+    const shouldExclude = !!msg.match(debugExclude)?.map(m => m)[0]
+    if (shouldExclude) return
     console.log('debug >', msg)
 })
+errors(client)
+rateLimit(client)
 client.emit('debug', 'Created client')
 
 registry.registerDefaultTypes()
@@ -61,7 +65,6 @@ registry.registerCommandsIn(path.join(__dirname, '/commands'))
 client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
-    await errors(client)
     await database(client, 'auto-punish', 'chat-filter')
     client.user.setPresence({
         activities: [{
