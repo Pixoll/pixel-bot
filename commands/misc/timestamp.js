@@ -12,10 +12,17 @@ module.exports = class TimestampCommand extends Command {
             aliases: ['tstamp'],
             group: 'misc',
             description: 'Get the Discord timestamp of any time you want.',
-            details: timeDetails('time'),
+            details: timeDetails('date'),
+            format: 'timestamp <date>',
+            examples: [
+                'timestamp 3pm',
+                'timestamp 22/10/2021',
+                'timestamp 24/12/2022 23:59',
+                'timestamp 2/2 10pm -3'
+            ],
             args: [{
-                key: 'time',
-                prompt: 'What time should the timestamp have?',
+                key: 'date',
+                prompt: 'What date should the timestamp have?',
                 type: ['date', 'duration'],
                 skipValidation: true,
                 default: 0
@@ -27,15 +34,15 @@ module.exports = class TimestampCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {number|Date} args.time The time when the user should be reminder
+     * @param {number|Date} args.date The date for the timestamp
      */
-    async run(message, { time }) {
-        if (typeof time === 'number') time += Date.now()
-        if (time instanceof Date) time = time.getTime()
+    async run(message, { date }) {
+        if (typeof date === 'number') date += Date.now()
+        if (date instanceof Date) date = date.getTime()
 
         const timestamps = []
         for (const letter of letters) {
-            const string = timestamp(time, letter)
+            const string = timestamp(date, letter)
             timestamps.push(`\`${string}\` ${string}`)
         }
 

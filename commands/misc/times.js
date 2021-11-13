@@ -2,7 +2,7 @@ const { stripIndent } = require('common-tags')
 const { Collection, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { timeDetails, abcOrder, pagedEmbed } = require('../../utils')
+const { timeDetails, abcOrder, pagedEmbed, embedColor } = require('../../utils')
 
 const timeZones = new Collection([
     ['Pacific/Apia', 'Samoa'],
@@ -47,8 +47,6 @@ const timeZones = new Collection([
 
 const cities = timeZones.map(t => t).sort()
 
-// todo in cmd details: \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}
-
 /** A command that can be run in a client */
 module.exports = class TimesCommand extends Command {
     constructor(client) {
@@ -57,7 +55,10 @@ module.exports = class TimesCommand extends Command {
             aliases: ['time'],
             group: 'misc',
             description: 'Displays the time in multiple timezones.',
-            details: timeDetails('hour'),
+            details: stripIndent`
+                ${timeDetails('hour')} Type \`now\` to get the current time.
+                \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}
+            `,
             format: 'times <hour>',
             args: [
                 {
@@ -67,13 +68,13 @@ module.exports = class TimesCommand extends Command {
                     required: false,
                     skipValidation: true
                 },
-                // {
-                //     key: 'place',
-                //     prompt: 'What place would you like to check its time?',
-                //     type: 'string',
-                //     oneOf: cities,
-                //     required: false
-                // }
+                {
+                    key: 'place',
+                    prompt: 'What place would you like to check its time?',
+                    type: 'string',
+                    oneOf: cities,
+                    required: false
+                }
             ]
         })
     }
@@ -83,40 +84,56 @@ module.exports = class TimesCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
      * @param {Date} args.hour The hour to check
+     * @param {string} args.place The place to check
      */
-    async run(message, { hour }) {
+    async run(message, { hour, place }) {
         const date = hour || new Date()
+        const is12Hour = !!message.parseArgs().trim().match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0]
 
         const times = []
         /** @param {string} city */
         const timeZone = (tz, city) => {
             const format = new Intl.DateTimeFormat('en-GB', {
-                hour: 'numeric', minute: 'numeric', timeZone: tz, timeZoneName: 'short'
+                hour: 'numeric', minute: 'numeric', timeZone: tz, timeZoneName: 'short', hour12: is12Hour
             }).format(date)
-            const [time, offset] = format.match(/(\d+:\d+) ([\w\W]+)/).slice(1, 3)
+            const sliced = format.split(/ /g)
+            const offset = sliced.pop()
+            const time = sliced.join(' ')
             return { offset, time, city }
+        }
+
+        if (place) {
+            const tz = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase())
+            const city = timeZones.get(tz)
+            const { offset, time } = timeZone(tz, city)
+
+            const embed = new MessageEmbed()
+                .setColor(embedColor)
+                .setTitle(`🕒 Time in ${city}`)
+                .setDescription(stripIndent`
+                    **Time:** ${time}
+                    **Time zone:** ${offset}
+                `)
+                .setTimestamp()
+
+            return await message.replyEmbed(embed)
         }
 
         for (const data of timeZones) times.push(timeZone(...data))
 
-        const sorted = times.sort((a, b) => abcOrder(a.time, b.time))
-        const first = sorted.find(t => t.offset === 'GMT-10')
-        const index = sorted.indexOf(first)
+        const sorted = times.sort((a, b) => abcOrder(a.city, b.city))
+        const divisor = Math.round((sorted.length / 3) + 0.1)
 
-        const otherHalf = sorted.splice(0, index)
-        const final = [...sorted, ...otherHalf]
-        const divisor = Math.round((final.length / 3) + 0.1)
-
-        const firstPart = final.splice(0, divisor)
-        const secondPart = final.splice(0, divisor)
-        const thirdPart = final.splice(0, divisor)
+        const firstPart = sorted.splice(0, divisor)
+        const secondPart = sorted.splice(0, divisor)
+        const thirdPart = sorted.splice(0, divisor)
 
         const base = new MessageEmbed()
-            .setColor('#4c9f4c')
+            .setColor(embedColor)
             .setTitle('🕒 Times around the world')
             .setTimestamp()
 
-        const timesEmbed = /** @param {final} data */ data => {
+        const timesEmbed = /** @param {sorted} data */ data => {
             return new MessageEmbed(base)
                 .addField('City', data.map(d => d.city).join('\n'), true)
                 .addField('Time', data.map(d => d.time).join('\n'), true)

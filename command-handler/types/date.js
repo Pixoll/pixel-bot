@@ -1,7 +1,13 @@
 const { myMs } = require('../../utils')
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
-const regex = /^([1-3]?\d[\/\-\.,][01]?\d(?:[\/\-\.,]\d{2})?(?:\d{2})?)?(?:[^\d]+)?([0-2]?\d(?::[0-5]?\d)?)?([aApP]\.?[mM]\.?)?([+-]\d\d?)?$/
+
+const dateMatcher = '([1-3]?\\d[\\/\\-\\.,][01]?\\d(?:[\\/\\-\\.,]\\d{2})?(?:\\d{2})?)'
+const timeMatcher = '([0-2]?\\d(?::[0-5]?\\d)?)'
+const formatMatcher = '([aApP]\\.?[mM]\\.?)'
+const offsetMatcher = '([+-]\\d\\d?)'
+const regex = new RegExp(`^${dateMatcher}?(?: +)?${timeMatcher}?${formatMatcher}?(?: +)?${offsetMatcher}?$`)
+
 const timeParser = new Map([
     ['am', 0],
     ['a.m.', 0],
@@ -21,7 +27,7 @@ class DateArgumentType extends ArgumentType {
      * @return Whether the value is valid
      */
     validate(val, _, arg) {
-        const date = this._parseDate(val.match(regex)?.slice(1, 4))
+        const date = this._parseDate(val.match(regex)?.slice(1, 5), val)
         if (!Boolean(date)) {
             return 'Please enter a valid date format. Use the `help` command for more information.'
         }
@@ -43,14 +49,17 @@ class DateArgumentType extends ArgumentType {
      * @return Usable value
      */
     parse(val) {
-        return this._parseDate(val.match(regex)?.slice(1, 4))
+        return this._parseDate(val.match(regex)?.slice(1, 5), val)
     }
 
     /**
      * @param {string[]} matches
+     * @param {string} val
      * @private
      */
-    _parseDate(matches) {
+    _parseDate(matches, val) {
+        if (val.toLowerCase() === 'now') return new Date()
+
         if (!matches) return null
         if (matches.length === 0) return null
         const defDate = new Date()
@@ -68,15 +77,14 @@ class DateArgumentType extends ArgumentType {
 
         const timeNums = matches[1]?.split(':').map((s, i) => {
             const parsed = Number.parseInt(s)
-            if (i === 0) {
-                const offset = tzOffset + Number.parseInt(matches[3] ?? 0)
-                const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
-                if (formatter === 12 && parsed === 12) {
-                    return parsed - offset
-                }
-                return parsed + formatter - offset
+            if (i !== 0) return parsed
+
+            const offset = tzOffset + Number.parseInt(matches[3] ?? 0)
+            const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
+            if (formatter === 12 && parsed === 12) {
+                return parsed - offset
             }
-            return parsed
+            return parsed + formatter - offset
         }) || [defDate.getUTCHours(), defDate.getUTCMinutes()]
         const arr = [...dateNums, ...timeNums].filter(n => n !== undefined)
         const date = new Date(...arr)
