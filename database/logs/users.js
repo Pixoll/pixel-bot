@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, userFlags, compareArrays } = require('../../utils')
+const { isModuleEnabled, userFlags, compareArrays, customEmoji } = require('../../utils')
 
 /**
  * Returns a clickable link to the image. `None` if the link is invald
