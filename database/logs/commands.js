@@ -1,7 +1,7 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, getLogsChannel, sliceDots, code } = require('../../utils')
+const { isModuleEnabled, sliceDots, code } = require('../../utils')
 
 /**
  * Handles all of the command logs.
@@ -18,9 +18,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const content = sliceDots(cleanContent, 1016)
 
         const embed = new MessageEmbed()
@@ -34,7 +31,6 @@ module.exports = (client) => {
             .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -44,16 +40,12 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated command prefix', guild.iconURL({ dynamic: true }))
             .setDescription(`**New prefix:** ${prefix}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -63,16 +55,12 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated command status', guild.iconURL({ dynamic: true }))
             .setDescription(`The \`${command.name}\` command has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 }

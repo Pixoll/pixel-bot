@@ -15,9 +15,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const { guildMember } = await thread.fetchOwner()
         const chanType = channelTypes[type].toLowerCase()
         const parentType = channelTypes[parent.type].toLowerCase()
@@ -35,7 +32,6 @@ module.exports = (client) => {
             .setFooter(`Thread id: ${id} | Channel id: ${parent.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -44,9 +40,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const chanType = channelTypes[type].toLowerCase()
         const parentType = channelTypes[parent.type].toLowerCase()
@@ -61,7 +54,6 @@ module.exports = (client) => {
             .setFooter(`Thread id: ${id} | Channel id: ${parent.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -70,9 +62,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const {
             autoArchiveDuration: autoArchive1, archived: archived1, name: name1, locked: locked1,
@@ -109,9 +98,6 @@ module.exports = (client) => {
             embed.addField('Slowmode', `${slowmo1} ➜ ${slowmo2}`)
         }
 
-        if (embed.fields.length !== 0) {
-            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
-            guild.queuedLogs.push(embed)
-        }
+        if (embed.fields.length !== 0) guild.queuedLogs.push(embed)
     })
 }

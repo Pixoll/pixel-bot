@@ -1,6 +1,6 @@
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, getLogsChannel } = require('../../utils')
+const { isModuleEnabled } = require('../../utils')
 
 /**
  * Handles all of the emoji logs.
@@ -13,9 +13,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         /** @type {User} */
         const author = await emoji.fetchAuthor().catch(() => null)
 
@@ -27,7 +24,6 @@ module.exports = (client) => {
             .setFooter(`Emoji id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -37,9 +33,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted emoji', guild.iconURL({ dynamic: true }))
@@ -48,7 +41,6 @@ module.exports = (client) => {
             .setFooter(`Emoji id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -58,9 +50,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated emoji', guild.iconURL({ dynamic: true }))
@@ -69,7 +58,6 @@ module.exports = (client) => {
             .setFooter(`Emoji id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 }

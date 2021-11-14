@@ -106,10 +106,12 @@ module.exports = class TimesCommand extends Command {
             const tz = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase())
             const city = timeZones.get(tz)
             const { offset, time } = timeZone(tz, city)
+            const hour = Number.parseInt(time.split(':').shift())
+            const clock = hour - (hour > 12 ? 12 : 0)
 
             const embed = new MessageEmbed()
                 .setColor(embedColor)
-                .setTitle(`🕒 Time in ${city}`)
+                .setTitle(`:clock${clock}: Time in ${city}`)
                 .setDescription(stripIndent`
                     **Time:** ${time}
                     **Time zone:** ${offset}
@@ -128,9 +130,13 @@ module.exports = class TimesCommand extends Command {
         const secondPart = sorted.splice(0, divisor)
         const thirdPart = sorted.splice(0, divisor)
 
+        const hours = date.getUTCHours()
+        const clock = hours - (hours > 12 ? 12 : 0)
+        console.log(date, hours, clock)
+
         const base = new MessageEmbed()
             .setColor(embedColor)
-            .setTitle('🕒 Times around the world')
+            .setTitle(`:clock${clock}: Times around the world`)
             .setTimestamp()
 
         const timesEmbed = /** @param {sorted} data */ data => {

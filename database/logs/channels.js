@@ -1,8 +1,8 @@
 const { stripIndent, oneLine } = require('common-tags')
-const { MessageEmbed, GuildMember, Role, PermissionOverwrites, CategoryChannel } = require('discord.js')
+const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { myMs, rtcRegions } = require('../../utils')
-const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, getLogsChannel, channelTypes } = require('../../utils')
+const { myMs, rtcRegions, compareArrays } = require('../../utils')
+const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes } = require('../../utils')
 const { permissions } = require('../../command-handler/util')
 
 /**
@@ -18,17 +18,6 @@ function format(perms) {
 }
 
 /**
- * Compares and returns the difference between the set of permissions
- * @param {string[]} Old The old permissions
- * @param {string[]} New The new permissions
- */
-function comparePerms(Old = [], New = []) {
-    const arr1 = New.filter(perm => !Old.includes(perm))
-    const arr2 = Old.filter(perm => !New.includes(perm))
-    return [arr1, arr2]
-}
-
-/**
  * Handles all of the channel logs.
  * @param {CommandoClient} client
  */
@@ -38,9 +27,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -74,7 +60,6 @@ module.exports = (client) => {
             for (const perm of perms) embed.addField('\u2800', perm)
         }
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -85,9 +70,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
         const embed = new MessageEmbed()
@@ -97,7 +79,6 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -108,9 +89,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated channel pins', channel.guild.iconURL({ dynamic: true }))
@@ -118,7 +96,6 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -129,9 +106,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const { name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, id } = oldChannel
         const { name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2 } = newChannel
@@ -179,11 +153,11 @@ module.exports = (client) => {
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)
 
-            const [denied, removed1] = comparePerms(deny1, deny2)
-            const [allowed, removed2] = comparePerms(allow1, allow2)
+            const [denied, removed1] = compareArrays(deny1, deny2)
+            const [allowed, removed2] = compareArrays(allow1, allow2)
 
-            const [neutral1] = comparePerms(denied, removed2)
-            const [neutral2] = comparePerms(allowed, removed1)
+            const [neutral1] = compareArrays(denied, removed2)
+            const [neutral2] = compareArrays(allowed, removed1)
             const neutral = [...neutral1, ...neutral2]
 
             embed.addField('Updated permissions', `**${capitalize(perms1.type)}:** ${mention} ${name}\n`)
@@ -237,10 +211,7 @@ module.exports = (client) => {
                 }
             }
 
-            if (embed.fields.length !== 0) {
-                // return await logsChannel.send({ embeds: [embed] }).catch(() => null)
-                return guild.queuedLogs.push(embed)
-            }
+            if (embed.fields.length !== 0) return guild.queuedLogs.push(embed)
         }
 
         if (oldChannel.isVoice() && newChannel.isVoice()) {
@@ -259,15 +230,9 @@ module.exports = (client) => {
                 embed.addField('User limit', `${limitStr1} ➜ ${limitStr2}`)
             }
 
-            if (embed.fields.length !== 0) {
-                // return await logsChannel.send({ embeds: [embed] }).catch(() => null)
-                return guild.queuedLogs.push(embed)
-            }
+            if (embed.fields.length !== 0) return guild.queuedLogs.push(embed)
         }
 
-        if (embed.fields.length !== 0) {
-            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
-            guild.queuedLogs.push(embed)
-        }
+        if (embed.fields.length !== 0) guild.queuedLogs.push(embed)
     })
 }

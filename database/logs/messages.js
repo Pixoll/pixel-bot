@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots, isModuleEnabled, pluralize, getLogsChannel, formatBytes } = require('../../utils')
+const { sliceDots, isModuleEnabled, pluralize, formatBytes } = require('../../utils')
 
 /**
  * Handles all of the message logs.
@@ -13,9 +13,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const deleted = sliceDots(content, 1024)
 
@@ -49,7 +46,6 @@ module.exports = (client) => {
             embed.addField('Stickers', sticks.join('\n'))
         }
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -62,9 +58,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted multiple messages', guild.iconURL({ dynamic: true }))
@@ -72,7 +65,6 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${channel.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -88,9 +80,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const oldContent = content1 !== null ?
             sliceDots(content1, 1024) || '`Empty`' :
             '`Couldn\'t get old message content.`'
@@ -105,7 +94,6 @@ module.exports = (client) => {
             .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 }

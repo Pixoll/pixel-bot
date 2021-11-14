@@ -75,11 +75,10 @@ module.exports = (client) => {
 
         if (icon1 !== icon2) {
             imagesEmbed.addField('Icon', stripIndent`
-                **>** **Before:** ${imageLink(oldGuild.iconURL(imgOptions), true)}
-                **>** **After:** ${imageLink(newGuild.iconURL(imgOptions))}
+                **Before:** ${imageLink(oldGuild.iconURL(imgOptions), true)}
+                **After:** ${imageLink(newGuild.iconURL(imgOptions))}
             `).setThumbnail(newGuild.iconURL(imgOptions))
 
-            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
             guild.queuedLogs.push(imagesEmbed)
         }
 
@@ -133,24 +132,22 @@ module.exports = (client) => {
         if (banner1 !== banner2) {
             imagesEmbed.spliceFields(0, 1, [{
                 name: 'Banner', value: stripIndent`
-                    **>** **Before:** ${imageLink(oldGuild.bannerURL(imgOptions), true)}
-                    **>** **After:** ${imageLink(newGuild.bannerURL(imgOptions))}
+                    **Before:** ${imageLink(oldGuild.bannerURL(imgOptions), true)}
+                    **After:** ${imageLink(newGuild.bannerURL(imgOptions))}
                 `
             }]).setThumbnail(newGuild.bannerURL(imgOptions))
 
-            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
             guild.queuedLogs.push(imagesEmbed)
         }
 
         if (splash1 !== splash2) {
             imagesEmbed.spliceFields(0, 1, [{
                 name: 'Invite splash image', value: stripIndent`
-                    **>** **Before:** ${imageLink(oldGuild.splashURL(imgOptions), true)}
-                    **>** **After:** ${imageLink(newGuild.splashURL(imgOptions))}
+                    **Before:** ${imageLink(oldGuild.splashURL(imgOptions), true)}
+                    **After:** ${imageLink(newGuild.splashURL(imgOptions))}
                 `
             }]).setThumbnail(newGuild.splashURL(imgOptions))
 
-            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
             guild.queuedLogs.push(imagesEmbed)
         }
 
@@ -212,12 +209,11 @@ module.exports = (client) => {
         if (discSplash1 !== discSplash2) {
             imagesEmbed.spliceFields(0, 1, [{
                 name: 'Discovery splash image', value: stripIndent`
-                    **>** **Before:** ${imageLink(oldGuild.discoverySplashURL(imgOptions), true)}
-                    **>** **After:** ${imageLink(newGuild.discoverySplashURL(imgOptions))}
+                    **Before:** ${imageLink(oldGuild.discoverySplashURL(imgOptions), true)}
+                    **After:** ${imageLink(newGuild.discoverySplashURL(imgOptions))}
                 `
             }]).setThumbnail(newGuild.discoverySplashURL(imgOptions))
 
-            // await logsChannel.send({ embeds: [imagesEmbed] }).catch(() => null)
             guild.queuedLogs.push(imagesEmbed)
         }
 
@@ -238,7 +234,6 @@ module.exports = (client) => {
         if (lang1 !== lang2) embed.addField('Primary language', `${locales.get(lang1)} ➜ ${locales.get(lang2)}`)
 
         if (embed.fields.length !== 0 || embed.description) {
-            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
             newGuild.queuedLogs.push(embed)
         }
     })

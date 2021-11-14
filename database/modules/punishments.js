@@ -15,12 +15,10 @@ module.exports = async (client) => {
             const db = database.active
 
             const docs = await db.fetchMany({ duration: { $lte: Date.now() } })
-            for (const [, doc] of docs) {
-                /** @type {User} */
-                const mod = await users.fetch(doc.mod.id).catch(() => null)
+            for (const doc of docs.toJSON()) {
                 /** @type {User} */
                 const user = await users.fetch(doc.user.id).catch(() => null)
-                if (!user || !mod) continue
+                if (!user) continue
 
                 if (doc.type === 'temp-ban') {
                     const ban = await bans.fetch(user).catch(() => null)
@@ -39,7 +37,7 @@ module.exports = async (client) => {
                     if (!data) continue
                     if (member.roles.cache.has(data.mutedRole)) {
                         await member.roles.remove(data.mutedRole)
-                        client.emit('guildMemberUnmute', guild, mod, user, null, true)
+                        client.emit('guildMemberUnmute', guild, client.user, user, 'Mute has expired.', true)
                     }
                     continue
                 }
@@ -50,7 +48,7 @@ module.exports = async (client) => {
                 }
             }
 
-            for (const [, doc] of docs) {
+            for (const doc of docs.toJSON()) {
                 await db.delete(doc)
             }
         }

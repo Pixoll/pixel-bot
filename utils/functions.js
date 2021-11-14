@@ -535,6 +535,17 @@ function arrayEquals(first, second) {
 }
 
 /**
+ * Compares and returns the difference between a set of arrays
+ * @param {any[]} Old The old array
+ * @param {any[]} New The new array
+ */
+function compareArrays(oldArr = [], newArr = []) {
+    const arr1 = newArr.filter(val => !oldArr.includes(val))
+    const arr2 = oldArr.filter(val => !newArr.includes(val))
+    return [arr1, arr2]
+}
+
+/**
  * Loops over every element contained on both arrays and checks wether they have common elements.
  * @param {array} first The first array.
  * @param {array} second The second array.
@@ -1245,6 +1256,7 @@ module.exports = {
     capitalize,
     code,
     commandInfo,
+    compareArrays,
     customEmoji,
     difference,
     docId,

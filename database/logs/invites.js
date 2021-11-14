@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Invite, Collection } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, validURL, getLogsChannel, timestamp } = require('../../utils')
+const { isModuleEnabled, validURL, timestamp } = require('../../utils')
 
 /**
  * Handles all of the invite logs.
@@ -13,9 +13,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -31,7 +28,6 @@ module.exports = (client) => {
             .setFooter(`Inviter id: ${inviter.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -40,9 +36,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -54,7 +47,6 @@ module.exports = (client) => {
             .setFooter(`Channel id: ${channel.id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -65,13 +57,9 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         /** @type {Collection<string,Invite>} */
         const invites = await guild.invites.fetch().catch(() => null)
 
-        // const embeds = []
         for (const link of content.split(/ +/)) {
             const isLink = validURL(link)
             if (!isLink) continue
@@ -101,13 +89,7 @@ module.exports = (client) => {
                 .setFooter(`Server id: ${invGuild.id}`)
                 .setTimestamp()
 
-            // embeds.push(embed)
             guild.queuedLogs.push(embed)
         }
-
-        // while (embeds.length !== 0) {
-        //     const toSend = embeds.splice(0, 10).filter(e => e)
-        //     await logsChannel.send({ embeds: toSend }).catch(() => null)
-        // }
     })
 }

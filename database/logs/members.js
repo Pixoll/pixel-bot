@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, getLogsChannel, timestamp } = require('../../utils')
+const { isModuleEnabled, timestamp } = require('../../utils')
 
 /**
  * Returns a clickable link to the image. `None` if the link is invald
@@ -25,9 +25,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const { tag, id, createdAt } = user
 
         const embed = new MessageEmbed()
@@ -39,7 +36,6 @@ module.exports = (client) => {
             .setFooter(`User id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
 
         // if (Date.now() - createdTimestamp < myMs('3d')) {
@@ -60,9 +56,6 @@ module.exports = (client) => {
         const status = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!status) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const { tag } = user
 
         const rolesList = roles.cache.filter(r => r.id !== guild.id)
@@ -77,7 +70,6 @@ module.exports = (client) => {
             .setFooter(`User id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -87,9 +79,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const { roles: roles1, nickname: nick1, avatar: avatar1 } = oldMember
         const { roles: roles2, nickname: nick2, avatar: avatar2, user, id } = newMember
@@ -106,8 +95,8 @@ module.exports = (client) => {
         if (nick1 !== nick2) embed.addField('Nickname', `${nick1 || 'None'} ➜ ${nick2 || 'None'}`)
 
         if (avatar1 !== avatar2) embed.addField('Server avatar', stripIndent`
-            **>** **Before:** ${imageLink(oldMember.displayAvatarURL(imgOptions))}
-            **>** **After:** ${imageLink(newMember.displayAvatarURL(imgOptions))}
+            **Before:** ${imageLink(oldMember.displayAvatarURL(imgOptions))}
+            **After:** ${imageLink(newMember.displayAvatarURL(imgOptions))}
         `).setThumbnail(newMember.displayAvatarURL(imgOptions))
 
         if (role) {
@@ -115,9 +104,6 @@ module.exports = (client) => {
             embed.addField(`${action} role`, `${role.toString()}`)
         }
 
-        if (embed.fields.length !== 0) {
-            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
-            guild.queuedLogs.push(embed)
-        }
+        if (embed.fields.length !== 0) guild.queuedLogs.push(embed)
     })
 }

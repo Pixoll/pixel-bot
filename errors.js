@@ -98,7 +98,6 @@ module.exports = (client) => {
             embed.addField(error.name + whatCommand + ': ' + error.message, code(files || 'No files.'))
 
             await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] })
-            return
 
             if (!files) return
 

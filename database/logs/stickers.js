@@ -14,9 +14,6 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
-
         const user = await sticker.fetchUser()
 
         const embed = new MessageEmbed()
@@ -31,7 +28,6 @@ module.exports = (client) => {
             .setFooter(`Sticker id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -40,9 +36,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -56,7 +49,6 @@ module.exports = (client) => {
             .setFooter(`Sticker id: ${id}`)
             .setTimestamp()
 
-        // await logsChannel.send({ embeds: [embed] }).catch(() => null)
         guild.queuedLogs.push(embed)
     })
 
@@ -65,9 +57,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
-
-        // const logsChannel = await getLogsChannel(guild)
-        // if (!logsChannel) return
 
         const { name: name1, description: description1, tags: tags1 } = oldSticker
         const { name: name2, description: description2, tags: tags2 } = newSticker
@@ -93,9 +82,6 @@ module.exports = (client) => {
             `${tags1.map(s => `:${s}:`).join(' ')} ➜ ${tags2.map(s => `:${s}:`).join(' ')}`
         )
 
-        if (embed.fields.length !== 0) {
-            // await logsChannel.send({ embeds: [embed] }).catch(() => null)
-            guild.queuedLogs.push(embed)
-        }
+        if (embed.fields.length !== 0) guild.queuedLogs.push(embed)
     })
 }

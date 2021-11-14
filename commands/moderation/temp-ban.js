@@ -118,7 +118,6 @@ module.exports = class TempBanCommand extends Command {
             type: 'temp-ban',
             guild: guildId,
             user: { id: user.id, tag: user.tag },
-            mod: { id: author.id, tag: author.tag },
             duration
         })
 

@@ -148,7 +148,9 @@ class DatabaseManager {
         const fetched = new Collection()
         for (const doc of data) {
             if (!this.guild && doc.guild) continue
-            this.cache.set(`${doc._id}`, doc)
+            if (!this.cache.get(`${doc._id}`)) {
+                this.cache.set(`${doc._id}`, doc)
+            }
             fetched.set(`${doc._id}`, doc)
         }
         return fetched
