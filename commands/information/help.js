@@ -101,7 +101,7 @@ module.exports = class HelpCommand extends Command {
                     `)
                     .addField('Current features', stripIndent`
                         🔹 **Moderation:** warning, kicking, soft-banning, temp-banning, banning, muting, etc.
-                        🔹 **Welcome messages:** in DMs and in a server channel.
+                        🔹 **Welcome messages:** in a server channel.
                         🔹 **Audit logs:** ${oneLine`
                             new joins, permissions update, channels/roles update, etc. Specific channel logging soon!
                         `}

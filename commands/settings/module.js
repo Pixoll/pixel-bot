@@ -36,6 +36,7 @@ function patchData(data) {
             server: _patch(data?.auditLogs?.server),
             stickers: _patch(data?.auditLogs?.stickers),
             threads: _patch(data?.auditLogs?.threads),
+            users: _patch(data?.auditLogs?.users),
             voice: _patch(data?.auditLogs?.voice)
         }
     }

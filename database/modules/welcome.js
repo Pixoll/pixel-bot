@@ -32,11 +32,6 @@ module.exports = (client) => {
             .setFooter('Enjoy your stay')
             .setTimestamp()
 
-        if (data.dms) {
-            embed.setDescription(format(data.dms))
-            await user.send({ embeds: [embed] }).catch(() => null)
-        }
-
         if (channel && data.message) {
             embed.setDescription(format(data.message))
             await channel.send({ content: user.toString(), embeds: [embed] })

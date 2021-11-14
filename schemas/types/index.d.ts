@@ -16,8 +16,6 @@ export interface ActiveSchema extends BaseSchema {
     type: TimeBasedModeration | 'temp-role'
     guild: string
     user: SchemaUser
-    mod: SchemaUser
-    reason: string
     role: string
     duration: number
 }
@@ -83,13 +81,14 @@ export interface ModuleSchema extends BaseSchema {
         server: boolean
         stickers: boolean
         threads: boolean
+        users: boolean
         voice: boolean
     }
 }
 
 export type Module = 'auto-mod' | 'chat-filter' | 'sticky-roles' | 'welcome' | 'audit-logs'
-export type AuditLog = 'channels' | 'commands' | 'emojis' | 'invites' | 'members' |
-    'messages' | 'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'voice'
+export type AuditLog = 'channels' | 'commands' | 'emojis' | 'invites' | 'members' | 'messages' |
+    'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'users' | 'voice'
 
 export interface PrefixSchema extends BaseSchema {
     global: boolean
@@ -150,7 +149,6 @@ export interface TodoSchema extends BaseSchema {
 
 export interface WelcomeSchema extends BaseSchema {
     guild: string
-    dms: string
     channel: string
     message: string
 }

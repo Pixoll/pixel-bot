@@ -29,6 +29,7 @@ function patchData(data) {
             server: _patch(data?.auditLogs?.server),
             stickers: _patch(data?.auditLogs?.stickers),
             threads: _patch(data?.auditLogs?.threads),
+            users: _patch(data?.auditLogs?.users),
             voice: _patch(data?.auditLogs?.voice)
         }
     }
@@ -63,8 +64,8 @@ module.exports = class ModulesCommand extends Command {
         const patch = patchData(data)
         const { auditLogs, /* autoMod, chatFilter, */ welcome, stickyRoles } = patch
         const {
-            channels, commands, emojis, invites, members, messages,
-            moderation, modules, roles, server, stickers, threads, voice
+            channels, commands, emojis, invites, members, messages, moderation,
+            modules, roles, server, stickers, threads, users, voice
         } = auditLogs
 
         // **>** **Automatic moderation:** ${autoMod}
@@ -89,6 +90,7 @@ module.exports = class ModulesCommand extends Command {
                 \u2800 ⤷ **Server:** ${server}
                 \u2800 ⤷ **Stickers:** ${stickers}
                 \u2800 ⤷ **Threads:** ${threads}
+                \u2800 ⤷ **Users:** ${users}
                 \u2800 ⤷ **Voice:** ${voice}
             `)
             .setTimestamp()

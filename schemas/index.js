@@ -10,8 +10,6 @@ const active = model('active', Schema({
     type: String,
     guild: String,
     user: schemaUser,
-    mod: schemaUser,
-    reason: String,
     role: String,
     duration: Number
 }, { timestamps: true }), 'active')
@@ -77,8 +75,9 @@ const modules = model('modules', Schema({
         modules: Boolean,
         roles: Boolean,
         server: Boolean,
-        threads: Boolean,
         stickers: Boolean,
+        threads: Boolean,
+        users: Boolean,
         voice: Boolean
     }
 }))
@@ -142,7 +141,6 @@ const todo = model('todo', Schema({
 
 const welcome = model('welcome', Schema({
     guild: String,
-    dms: String,
     channel: String,
     message: String
 }), 'welcome')
