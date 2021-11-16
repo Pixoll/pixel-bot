@@ -9,13 +9,12 @@ module.exports = class ButtonRoleCommand extends Command {
         super(client, {
             name: 'buttonrole',
             aliases: ['brole', 'button-role'],
-            group: 'utility',
+            group: 'managing',
             description: 'Create or remove button roles.',
             details: `${channelDetails()}\n${roleDetails(null, true, 10)}`,
             format: 'buttonrole [channel] [roles]',
             examples: ['buttonrole #roles Giveaways, Polls'],
             userPermissions: ['MANAGE_ROLES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {

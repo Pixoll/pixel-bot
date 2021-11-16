@@ -2,7 +2,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { docId, isMod, basicEmbed, memberDetails, modConfirmation } = require('../../utils')
+const { docId, isMod, basicEmbed, memberDetails, confirmButtons } = require('../../utils')
 
 /**
  * Validates a {@link GuildMember}
@@ -42,7 +42,6 @@ module.exports = class MultiBanCommand extends Command {
             examples: ['multi-ban "Raid" Pixoll, 801615120027222016'],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -101,7 +100,7 @@ module.exports = class MultiBanCommand extends Command {
 
         const banned = []
         for (const { user } of members) {
-            const confirm = await modConfirmation(message, 'ban', user, { reason }, false)
+            const confirm = await confirmButtons(message, 'ban', user, { reason }, false)
             if (!confirm) continue
 
             if (!user.bot) {

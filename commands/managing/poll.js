@@ -10,7 +10,7 @@ module.exports = class PollCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'poll',
-            group: 'utility',
+            group: 'managing',
             description: 'Create or end a poll.',
             details: stripIndent`
                 ${channelDetails()}\n${timeDetails('duration')}
@@ -26,7 +26,6 @@ module.exports = class PollCommand extends Command {
                 'poll end polls 890317796221792336'
             ],
             userPermissions: ['MANAGE_MESSAGES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -154,7 +153,7 @@ module.exports = class PollCommand extends Command {
         const { channels } = guild
 
         const pollData = await this.db.fetch(
-            _msg ? {channel: channel.id, message: _msg.id } : { channel: channel.id }
+            _msg ? { channel: channel.id, message: _msg.id } : { channel: channel.id }
         )
         if (!pollData) {
             return await message.replyEmbed(basicEmbed({

@@ -18,7 +18,6 @@ module.exports = class ModLogsCommand extends Command {
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],
             userPermissions: ['MANAGE_MESSAGES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [{
                 key: 'user',

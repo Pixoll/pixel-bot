@@ -18,7 +18,6 @@ module.exports = class TempRoleCommand extends Command {
             examples: ['temprole Pixoll 1d Moderator'],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {

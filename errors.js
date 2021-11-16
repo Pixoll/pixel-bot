@@ -54,8 +54,7 @@ module.exports = (client) => {
             console.error(error)
 
             /** @type {TextChannel} */
-            const errorsChannel = await client.channels.fetch('906740370304540702').catch(() => null)
-            if (!errorsChannel) return
+            const errorsChannel = await client.channels.fetch('906740370304540702')
 
             const lentgh = error.name.length + error.message.length + 3
             const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')

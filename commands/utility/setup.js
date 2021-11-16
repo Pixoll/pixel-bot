@@ -34,7 +34,7 @@ module.exports = class SetupCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setup',
-            group: 'settings',
+            group: 'utility',
             description: oneLine`
                 Setup the bot to it\'s core. The data collected from this command is never deleted,
                 so you don\'t have to worry about doing this twice if I ever leave the server and rejoin.
@@ -51,7 +51,6 @@ module.exports = class SetupCommand extends Command {
                 setup lockdown-channels [text-channels] - Setup all the lockdown channels used in the \`lockdown\` command.
             `,
             userPermissions: ['ADMINISTRATOR'],
-            throttling: { usages: 3, duration: 60 },
             guildOnly: true,
             guarded: true,
             args: [

@@ -9,7 +9,7 @@ module.exports = class WelcomeCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'welcome',
-            group: 'utility',
+            group: 'managing',
             description: 'Setup welcoming messages that can be sent in DMs and in a specific channel of your server.',
             details: stripIndent`
                 ${channelDetails('text-channel')}

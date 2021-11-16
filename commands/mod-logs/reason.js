@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { basicEmbed, docId, modConfirmation } = require('../../utils')
+const { basicEmbed, docId, confirmButtons } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class ReasonCommand extends Command {
@@ -17,7 +17,6 @@ module.exports = class ReasonCommand extends Command {
             format: 'reason [modlog Id] [new reason]',
             examples: [`reason ${docId()} Post NSFW and being racist`],
             userPermissions: ['ADMINISTRATOR'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -56,7 +55,7 @@ module.exports = class ReasonCommand extends Command {
 
         const activeLog = await active.fetch(modlogId)
 
-        const confirm = await modConfirmation(message, 'update modlog reason', modlogId, { reason })
+        const confirm = await confirmButtons(message, 'update modlog reason', modlogId, { reason })
         if (!confirm) return
 
         await moderations.update(modLog, { reason })

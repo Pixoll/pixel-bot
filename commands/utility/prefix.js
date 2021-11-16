@@ -8,7 +8,7 @@ module.exports = class PrefixCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: 'prefix',
-			group: 'settings',
+			group: 'utility',
 			description: 'Get or change the prefix of the bot.',
 			details: stripIndent`
 				If \`new prefix\` is not defined, it will send the current prefix.
@@ -17,7 +17,6 @@ module.exports = class PrefixCommand extends Command {
 			format: 'prefix <new prefix>',
 			examples: ['prefix ?'],
 			guarded: true,
-			throttling: { usages: 1, duration: 3 },
 			args: [{
 				key: 'newPrefix',
 				label: 'new prefix',
@@ -27,7 +26,7 @@ module.exports = class PrefixCommand extends Command {
 			}]
 		})
 
-        this.globalDb = this.client.database.prefixes
+		this.globalDb = this.client.database.prefixes
 	}
 
 	/**

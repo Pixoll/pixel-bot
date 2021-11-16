@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { docId, basicEmbed, userException, modConfirmation } = require('../../utils')
+const { docId, basicEmbed, userException, confirmButtons } = require('../../utils')
 const { stripIndent } = require('common-tags')
 
 /** A command that can be run in a client */
@@ -15,7 +15,6 @@ module.exports = class warnCommand extends Command {
             format: 'warn [member] [reason]',
             examples: ['warn Pixoll Stop posting NSFW'],
             userPermissions: ['MANAGE_MESSAGES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -53,7 +52,7 @@ module.exports = class warnCommand extends Command {
             }))
         }
 
-        const confirm = await modConfirmation(message, 'warn', user, { reason })
+        const confirm = await confirmButtons(message, 'warn', user, { reason })
         if (!confirm) return
 
         await user.send(basicEmbed({

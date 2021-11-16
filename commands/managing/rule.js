@@ -10,14 +10,13 @@ module.exports = class RuleCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'rule',
-            group: 'utility',
+            group: 'managing',
             description: 'Add or remove a rule from the server.',
             format: stripIndent`
                 rule view [number] - View a single rule.
                 rule add - Add a new rule (max. 512 characters) (server owner only).
                 rule remove [number] - Remove a rule (server owner only).
             `,
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -96,18 +95,18 @@ module.exports = class RuleCommand extends Command {
      * @param {string} rule The rule to add
      */
     async add(message, rulesData, rule) {
+        const { guildId, guild, author, client } = message
+
+        if (!client.isOwner(message) && guild.ownerId !== author.id) {
+            return await this.onBlock(message, 'guildOwnerOnly')
+        }
+
         while (!rule || rule.length > 512 || typeof rule === 'number') {
             const ruleMsg = await basicCollector(message, {
                 fieldName: 'What rule do you want to add?'
             }, { time: myMs('2m') })
             if (!ruleMsg) return
             rule = ruleMsg.content
-        }
-
-        const { guildId, guild, author, client } = message
-
-        if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock(message, 'guildOwnerOnly')
         }
 
         if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })
@@ -127,6 +126,12 @@ module.exports = class RuleCommand extends Command {
      * @param {number} rule The rule to remove from the rules list
      */
     async remove(message, rulesData, rule) {
+        const { guild, author, client } = message
+
+        if (!client.isOwner(message) && guild.ownerId !== author.id) {
+            return await this.onBlock(message, 'guildOwnerOnly')
+        }
+
         rule = Number(rule) ?? null
 
         while (typeof rule !== 'number' || rule < 1) {
@@ -135,12 +140,6 @@ module.exports = class RuleCommand extends Command {
             }, { time: myMs('2m') })
             if (!ruleMsg) return
             rule = Number(ruleMsg.content)
-        }
-
-        const { guild, author, client } = message
-
-        if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock(message, 'guildOwnerOnly')
         }
 
         if (!rule) {

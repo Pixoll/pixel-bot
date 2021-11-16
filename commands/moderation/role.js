@@ -28,7 +28,6 @@ module.exports = class RoleCommand extends Command {
             ],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {

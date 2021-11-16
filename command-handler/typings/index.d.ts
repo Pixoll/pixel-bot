@@ -224,7 +224,7 @@ export class ClientDatabaseManager {
 	public todo: DatabaseManager<TodoSchema>
 
 	/** Initializes the caching of this guild's data */
-	private init(data: Collection<string, Collection<string, DataModel>>): Promise<this>
+	private init(data: Collection<string, Collection<string, DataModel>>): this
 }
 
 /** A command that can be run in a client */
@@ -992,7 +992,7 @@ export class DatabaseManager<T> {
 	/** Client for this database */
 	public readonly client: CommandoClient
 	/** Guild for this database */
-	public readonly guild: CommandoGuild
+	public readonly guild?: CommandoGuild
 	/** The name of the schema this manager is for */
 	public schema: DataModel<T>
 	/** The cache for this manager */
@@ -1074,7 +1074,7 @@ export class GuildDatabaseManager {
 	public welcome: DatabaseManager<WelcomeSchema>
 
 	/** Initializes the caching of this guild's data */
-	private init(data: Collection<string, Collection<string, DataModel>>): Promise<this>
+	private init(data: Collection<string, Collection<string, DataModel>>): this
 }
 
 /** Helper class to use {@link SettingProvider} methods for a specific Guild */

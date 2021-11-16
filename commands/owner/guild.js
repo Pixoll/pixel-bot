@@ -2,7 +2,7 @@ const { stripIndent, oneLine } = require('common-tags')
 const { TextChannel, Invite, Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
-const { basicEmbed, sleep, getArgument, embedColor, inviteButton, modConfirmation } = require('../../utils')
+const { basicEmbed, sleep, getArgument, embedColor, inviteButton, confirmButtons } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class GuildCommand extends Command {
@@ -113,7 +113,7 @@ module.exports = class GuildCommand extends Command {
         const guildOwner = await guild.fetchOwner()
         const botOwner = this.client.owners[0]
 
-        const confirmed = await modConfirmation(
+        const confirmed = await confirmButtons(
             message, 'remove guild', guild, { reason: reason || 'No reason given.' }
         )
         if (!confirmed) return

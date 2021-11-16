@@ -41,22 +41,19 @@ client.on('debug', (...msgs) => {
     if (shouldExclude) return
     console.log('debug >', msg)
 })
-errors(client)
-rateLimit(client)
 client.emit('debug', 'Created client')
 
 registry.registerDefaultTypes()
     .registerGroups([
-        { id: 'channels', name: '💬 Channels', guarded: true },
         { id: 'info', name: 'ℹ️ Information', guarded: true },
         // { id: 'fun', name: 'Fun commands' },
         { id: 'lists', name: '📋 Listing' },
-        { id: 'minecraft', name: '<:minecraft:897178717925834773> Minecraft' },
+        { id: 'managing', name: '💼 Managing', guarded: true },
+        // { id: 'minecraft', name: '<:minecraft:897178717925834773> Minecraft' },
         { id: 'misc', name: '🎲 Miscellaneous' },
-        { id: 'mod', name: '<:ban_hammer:822644311140204554> Moderation' },
+        { id: 'mod', name: '🛡️ Moderation' },
         { id: 'mod-logs', name: '🗃 Moderation logs' },
         { id: 'owner', name: '<a:owner_crown:806558872440930425> Owner only', guarded: true },
-        { id: 'settings', name: '⚙ Settings', guarded: true },
         { id: 'utility', name: '🛠 Utility', guarded: true },
     ])
 client.emit('debug', `Loaded ${registry.groups.size} groups`)
@@ -66,6 +63,9 @@ client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
     await database(client, 'auto-punish', 'chat-filter')
+    errors(client)
+    rateLimit(client)
+
     client.user.setPresence({
         activities: [{
             name: `for ${client.prefix}help`,

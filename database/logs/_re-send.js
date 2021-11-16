@@ -27,9 +27,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
 
-        const embeds = []
-        for (const [, msg] of notPartial) embeds.push(...msg.embeds)
-
+        const embeds = notPartial.reduce((acc, msg) => acc.concat(msg.embeds), [])
         while (embeds.length !== 0) {
             const toSend = embeds.splice(0, 10)
             await logsChannel.send({ embeds: toSend }).catch(() => null)

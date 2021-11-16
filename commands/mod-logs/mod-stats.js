@@ -20,7 +20,6 @@ module.exports = class ModStatsCommand extends Command {
             format: 'modstats <user>',
             examples: ['modstats Pixoll'],
             userPermissions: ['MANAGE_MESSAGES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [{
                 key: 'user',

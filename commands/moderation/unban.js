@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User } = require('discord.js')
-const { basicEmbed, userDetails, reasonDetails, modConfirmation } = require('../../utils')
+const { basicEmbed, userDetails, reasonDetails, confirmButtons } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class UnbanCommand extends Command {
@@ -18,7 +18,6 @@ module.exports = class UnbanCommand extends Command {
             ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -55,7 +54,7 @@ module.exports = class UnbanCommand extends Command {
             }))
         }
 
-        const confirm = await modConfirmation(message, 'unban', user, { reason })
+        const confirm = await confirmButtons(message, 'unban', user, { reason })
         if (!confirm) return
 
         await members.unban(user, reason)

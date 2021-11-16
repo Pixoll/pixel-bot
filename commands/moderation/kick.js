@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { GuildMember, TextChannel } = require('discord.js')
-const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails, modConfirmation } = require('../../utils')
+const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails, confirmButtons } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
 
@@ -19,7 +19,6 @@ module.exports = class KickCommand extends Command {
             ],
             clientPermissions: ['KICK_MEMBERS'],
             userPermissions: ['KICK_MEMBERS'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -53,7 +52,7 @@ module.exports = class KickCommand extends Command {
         if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
         const mExcept = memberException(member, this)
         if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
-        const confirm = await modConfirmation(message, 'kick', user, { reason })
+        const confirm = await confirmButtons(message, 'kick', user, { reason })
         if (!confirm) return
 
         if (!user.bot) {

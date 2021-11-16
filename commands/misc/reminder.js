@@ -17,7 +17,6 @@ module.exports = class ReminderCommand extends Command {
                 'remindme 1d Do some coding',
                 'remind 2w',
             ],
-            throttling: { usages: 1, duration: 3 },
             guarded: true,
             args: [
                 {

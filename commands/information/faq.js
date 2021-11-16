@@ -2,7 +2,7 @@ const { Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs } = require('../../utils')
+const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs, confirmButtons } = require('../../utils')
 const { FaqSchema } = require('../../schemas/types')
 
 /** A command that can be run in a client */
@@ -12,28 +12,38 @@ module.exports = class FaqCommand extends Command {
             name: 'faq',
             group: 'info',
             description: 'Displays the frequently asked questions (FAQ) related to the bot\'s functionality and support.',
+            details: '`items` can be different **positive** numbers, separated by spaces.',
             format: stripIndent`
                 faq <view> - Display the FAQ list.
-                faq add - Add a new question to the FAQ list (bot's owner only).
-                faq remove [item] - Remove a question from the FAQ list (bot's owner only).
+                faq add - Add a new entry to the FAQ list (bot's owner only).
+                faq remove [items] - Remove entries from the FAQ list (bot's owner only).
+                faq clear - Remove every entry in the FAQ list (bot's owner only).
             `,
+            examples: [
+                'faq remove 2',
+                'faq remove 3 8 1'
+            ],
             guarded: true,
-            throttling: { usages: 1, duration: 3 },
             args: [
                 {
                     key: 'subCommand',
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['view', 'add', 'remove'],
+                    oneOf: ['view', 'add', 'remove', 'clear'],
                     default: 'view'
                 },
                 {
-                    key: 'item',
-                    prompt: 'What item do you want to remove from the FAQ list?',
-                    type: 'integer',
-                    min: 1,
-                    required: false
+                    key: 'items',
+                    prompt: 'What items do you want to remove from the FAQ list?',
+                    type: 'string',
+                    validate: val => {
+                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => n !== NaN || n < 1))]
+                        return array.length !== 0
+                    },
+                    parse: val => [...new Set(val.split(/ +/).map(Number).sort())],
+                    required: false,
+                    error: 'None of the items you specified are correct. Please try again.'
                 }
             ]
         })
@@ -45,20 +55,22 @@ module.exports = class FaqCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {'add'|'remove'|'view'} args.subCommand The sub-command
-     * @param {number} args.item The item you want to add or remove from the FAQ list
+     * @param {'add'|'remove'|'view'|'clear'} args.subCommand The sub-command to use
+     * @param {number[]} args.items The items you want to add or remove from the FAQ list
      */
-    async run(message, { subCommand, item }) {
+    async run(message, { subCommand, items }) {
         subCommand = subCommand.toLowerCase()
-        const FAQ = await this.db.fetchMany()
+        const faqData = await this.db.fetchMany()
 
         switch (subCommand) {
             case 'view':
-                return await this.view(message, FAQ)
+                return await this.view(message, faqData)
             case 'add':
                 return await this.add(message)
             case 'remove':
-                return await this.remove(message, item, FAQ)
+                return await this.remove(message, items, faqData)
+            case 'clear':
+                return await this.clear(message, faqData)
         }
     }
 
@@ -79,7 +91,8 @@ module.exports = class FaqCommand extends Command {
             authorName: 'Frequently asked questions',
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             keys: ['answer'],
-            keyTitle: { suffix: 'question' }
+            keyTitle: { suffix: 'question' },
+            numbered: true
         })
     }
 
@@ -108,25 +121,25 @@ module.exports = class FaqCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'The new question has been added to the FAQ list.'
+            color: 'GREEN', emoji: 'check', description: 'The new entry has been added to the FAQ list.'
         }))
     }
 
     /**
      * The `remove` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {number} item The item you want to remove from the FAQ list
+     * @param {number[]} items The items you want to remove from the FAQ list
      * @param {Collection<string, FaqSchema>} faqData The faq data
      */
-    async remove(message, item, faqData) {
+    async remove(message, items, faqData) {
         if (!this.client.isOwner(message)) {
             return await this.onBlock(message, 'ownerOnly')
         }
 
-        if (!item) {
+        if (!items) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
-            item = value
+            items = value
         }
 
         if (faqData.size === 0) {
@@ -135,16 +148,49 @@ module.exports = class FaqCommand extends Command {
             }))
         }
 
-        const doc = faqData.first(item).pop()
-        if (!doc) {
+        const deleted = []
+        for (const item of items) {
+            const doc = faqData.first(item).pop()
+            if (!doc) continue
+            await this.db.delete(doc)
+            faqData.set(`${doc._id}`, false)
+            deleted.push(item)
+        }
+
+        if (deleted.length === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside the FAQ list.'
+                color: 'RED', emoji: 'cross', description: 'None of the items are valid inside the FAQ list.'
             }))
         }
-        await this.db.delete(doc)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Removed question \`${item}\` from the FAQ list.`
+            color: 'GREEN', emoji: 'check',
+            description: `Removed entries ${deleted.map(d => `\`${d}\``).join(', ')} from the FAQ list.`
+        }))
+    }
+
+    /**
+     * The `clear` sub-command
+     * @param {CommandoMessage} message The message the command is being run for
+     * @param {Collection<string, FaqSchema>} faqData The faq data
+     */
+    async clear(message, faqData) {
+        if (faqData.size === 0) {
+            return await message.replyEmbed(basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
+            }))
+        }
+
+        const confirmed = await confirmButtons(message, 'clear the FAQ list')
+        if (!confirmed) return
+
+        for (const doc of faqData.toJSON()) {
+            await this.db.delete(doc)
+        }
+
+        await message.replyEmbed(basicEmbed({
+            color: 'GREEN', emoji: 'check',
+            description: 'The FAQ list has been cleared.'
         }))
     }
 }

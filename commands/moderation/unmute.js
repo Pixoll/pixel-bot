@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { memberDetails, reasonDetails, basicEmbed, modConfirmation } = require('../../utils')
+const { memberDetails, reasonDetails, basicEmbed, confirmButtons } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class UnmuteCommand extends Command {
@@ -18,7 +18,6 @@ module.exports = class UnmuteCommand extends Command {
             ],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -65,7 +64,7 @@ module.exports = class UnmuteCommand extends Command {
             }))
         }
 
-        const confirm = await modConfirmation(message, 'unmute', member.user, { reason })
+        const confirm = await confirmButtons(message, 'unmute', member.user, { reason })
         if (!confirm) return
 
         await roles.remove(role)

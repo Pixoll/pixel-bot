@@ -12,7 +12,7 @@ module.exports = class McStatusCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'mcstatus',
-            group: 'minecraft',
+            group: 'misc',
             description: 'Displays information of a Java/Bedrock Minecraft server.',
             details: '`ip` has to be a valid server IP, and `port` a valid server port.',
             format: stripIndent`
@@ -27,7 +27,6 @@ module.exports = class McStatusCommand extends Command {
                 'mcstatus bedrock play.hyperlandsmc.net',
                 'mcstatus save:java play.hypixel.net'
             ],
-            throttling: { usages: 1, duration: 3 },
             args: [
                 {
                     key: 'subCommand',

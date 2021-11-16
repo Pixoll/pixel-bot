@@ -12,7 +12,7 @@ module.exports = class ReactionRoleCommand extends Command {
         super(client, {
             name: 'reactionrole',
             aliases: ['reactrole', 'rrole', 'reaction-role', 'react-role'],
-            group: 'utility',
+            group: 'managing',
             description: 'Create or remove reaction roles.',
             details: stripIndent`
                 ${channelDetails()}
@@ -28,7 +28,6 @@ module.exports = class ReactionRoleCommand extends Command {
             ],
             clientPermissions: ['ADD_REACTIONS'],
             userPermissions: ['MANAGE_ROLES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             deprecated: true,
             replacing: 'buttonrole',

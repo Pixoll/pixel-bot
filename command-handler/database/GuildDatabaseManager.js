@@ -57,7 +57,7 @@ class GuildDatabaseManager {
      * @param {Collection<string, Collection<string, object>>} data The data to assignate to the guild
      * @private
      */
-    async init(data) {
+    init(data) {
         for (const [name, schema] of data) {
             if (!this[name]) continue
             this[name].cache = schema

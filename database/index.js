@@ -32,11 +32,11 @@ module.exports = async (client, ...exclude) => {
     }
 
     const forClient = data.mapValues(arr => arr.filter(doc => typeof doc.guild !== 'string'))
-    await client.database.init(forClient)
+    client.database.init(forClient)
 
     for (const [, guild] of client.guilds.cache) {
         const filtered = data.mapValues(arr => arr.filter(doc => doc.guild === guild.id))
-        await guild.database.init(filtered)
+        guild.database.init(filtered)
         client.databases.set(guild.id, guild.database)
     }
 

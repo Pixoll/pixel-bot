@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, sleep, modConfirmation } = require('../../utils')
+const { basicEmbed, sleep, confirmButtons } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class RestartCommand extends Command {
@@ -19,7 +19,7 @@ module.exports = class RestartCommand extends Command {
      * @param {CommandoMessage} message The message the command is being run for
      */
     async run(message) {
-        const confirmed = await modConfirmation(message, 'restart the bot')
+        const confirmed = await confirmButtons(message, 'restart the bot')
         if (!confirmed) return
 
         await message.replyEmbed(basicEmbed({

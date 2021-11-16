@@ -1,33 +1,33 @@
 const Command = require('../../command-handler/commands/base')
-const { TextChannel } = require('discord.js')
-const { basicEmbed, reasonDetails, channelDetails } = require('../../utils')
 const { CommandoMessage } = require('../../command-handler/typings')
+const { TextChannel } = require('discord.js')
+const { basicEmbed, channelDetails, reasonDetails } = require('../../utils')
 
 /** A command that can be run in a client */
-module.exports = class LockCommand extends Command {
+module.exports = class UnlockCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'lock',
-            group: 'channels',
-            description: 'Locks a channel, revoking the `Send Messages` permission from @everyone.',
-            details: `${channelDetails()}\n${reasonDetails('We\'ll be back shortly')}`,
+            name: 'unlock',
+            group: 'managing',
+            description: 'Unlock a channel, granting the `Send Messages` permission from @everyone.',
+            details: `${channelDetails()}\n${reasonDetails('Thanks for waiting')}`,
             format: 'lock [channel] <reason>',
-            examples: ['lock #chat We\'ll be back shortly'],
+            examples: ['unlock #chat Thanks for waiting'],
             clientPermissions: ['MANAGE_CHANNELS'],
             userPermissions: ['MANAGE_CHANNELS'],
             guildOnly: true,
             args: [
                 {
                     key: 'channel',
-                    prompt: 'What channel do you want to lock?',
-                    type: 'text-channel',
+                    prompt: 'What channel do you want to unlock?',
+                    type: 'text-channel'
                 },
                 {
                     key: 'reason',
-                    prompt: 'What message do you want to send when the channel get\'s locked?',
+                    prompt: 'What message do you want to send when the channel get\'s unlocked?',
                     type: 'string',
                     max: 512,
-                    default: 'We\'ll be back shortly.'
+                    default: 'Thanks for waiting.'
                 }
             ]
         })
@@ -45,23 +45,23 @@ module.exports = class LockCommand extends Command {
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles
 
-        const perms = permissions.resolve(guildId)
-        if (perms && perms.deny.has('SEND_MESSAGES')) {
+        const perms = permissions.cache.find(p => p.id === guildId)
+        if (!perms.deny.has('SEND_MESSAGES')) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: `${channel} is already locked.`
+                color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
             }))
         }
 
-        await permissions.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 })
+        await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })
         await channel.send({
             embeds: [basicEmbed({
-                emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason
+                emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason
             })]
         })
 
         if (channelId !== channel.id) {
             await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`
+                color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
             }))
         }
     }

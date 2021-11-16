@@ -59,7 +59,12 @@ module.exports = class TimesCommand extends Command {
                 ${timeDetails('hour')} Type \`now\` to get the current time.
                 \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}
             `,
-            format: 'times <hour>',
+            format: 'times <hour> <place>',
+            examples: [
+                'times 10am',
+                'time "13:00 -5" London',
+                'time now New York'
+            ],
             args: [
                 {
                     key: 'hour',

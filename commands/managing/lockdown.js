@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, modConfirmation, reasonDetails } = require('../../utils')
+const { basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails } = require('../../utils')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
@@ -10,7 +10,7 @@ module.exports = class LockdownCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'lockdown',
-            group: 'channels',
+            group: 'managing',
             description: 'Lock every text channel that was specified when using the `setup` command',
             details: `${reasonDetails()}\n${channelDetails('text-channels', true)}`,
             format: stripIndent`
@@ -26,7 +26,6 @@ module.exports = class LockdownCommand extends Command {
             ],
             clientPermissions: ['MANAGE_CHANNELS'],
             userPermissions: ['ADMINISTRATOR'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -126,7 +125,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        const confirmed = await modConfirmation(message, 'start lockdown', null, { reason })
+        const confirmed = await confirmButtons(message, 'start lockdown', null, { reason })
         if (!confirmed) return
 
         const { guild, guildId } = message
@@ -181,7 +180,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        const confirmed = await modConfirmation(message, 'end lockdown', null, { reason })
+        const confirmed = await confirmButtons(message, 'end lockdown', null, { reason })
         if (!confirmed) return
 
         const { guild, guildId } = message

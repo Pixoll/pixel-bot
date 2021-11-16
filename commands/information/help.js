@@ -78,6 +78,17 @@ module.exports = class HelpCommand extends Command {
                 .setColor('#4c9f4c')
                 .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
 
+            const strikethrough = 'with a strikethrough (~~`like this`~~), mean they\'ve been marked as deprecated'
+            const dash = oneLine`
+                with a dash before their name (\`—like this\`), mean they've been disabled,
+                either on the server you're in or everywhere
+            `
+            const hasDeprecated = commandList.some(val => val.value.includes('~~'))
+            const hasDash = commandList.some(val => val.value.includes('—'))
+            const page1 = hasDeprecated && hasDash ?
+                `${strikethrough}, and those ${dash}` :
+                hasDeprecated ? strikethrough : hasDash ? dash : ''
+
             const pages = [
                 new MessageEmbed(base)
                     .setTitle('Commands list')
@@ -86,11 +97,7 @@ module.exports = class HelpCommand extends Command {
                         You can also mention me to use a command, for example: \`@${user.tag} help\`.
                         Type \`${prefix}help <command>\` for detailed information of a command.
 
-                        ${oneLine`
-                            Commands with a strikethrough (~~\`like this\`~~), mean they've been marked as deprecated,
-                            and the ones with a dash before their name (\`—like this\`), mean they've been disabled,
-                            either on the server you're in or everywhere.
-                        `}
+                        ${page1 ? `Commands ${page1}.` : ''}
                     `)
                     .addFields(commandList),
                 new MessageEmbed(base)
@@ -100,7 +107,7 @@ module.exports = class HelpCommand extends Command {
                         misc commands, going from muting, banning, server information, setting reminders, etc.
                     `)
                     .addField('Current features', stripIndent`
-                        🔹 **Moderation:** warning, kicking, soft-banning, temp-banning, banning, muting, etc.
+                        🔹 **Moderation:** warning, kicking, temp-banning, banning, muting, logging, etc.
                         🔹 **Welcome messages:** in a server channel.
                         🔹 **Audit logs:** ${oneLine`
                             new joins, permissions update, channels/roles update, etc. Specific channel logging soon!
@@ -123,34 +130,21 @@ module.exports = class HelpCommand extends Command {
                     `),
                 new MessageEmbed(base)
                     .setTitle('Command usage')
-                    .addField('Arguments', stripIndent`
+                    .addField('Arguments tips', stripIndent`
                         ${oneLine`
-                            Arguments are extra information to pass for the command you want to use,
-                            some will be required and others not. You can send arguments surrounded by
-                            "double" or 'single' quotes (both work), and everything inside of that will count
-                            as a __single argument__.
+                            If an argument contains spaces, you can use "double" or 'single'
+                            quotes, and everything inside of that will count as a __single argument__.
                         `}
 
-                        ${oneLine`
-                            If an argument is surrounded by quotes, it means you **must** put that
-                            argument with quotes for the command to work correctly.
-                        `}
+                        **Argument types:**
+                        **1. Square paranthesis** \`[]\`: Required.
+                        **2. Arrow parenthesis** \`<>\`: Optional.
 
-                        ${oneLine`
-                            Some commands will have their arguments surrounded by different types of
-                            paranthesis, meaning some are required, while others are not. Just like this:
-                        `}
-                        **Square paranthesis** \`[]\`: This argument is required.
-                        **Arrow parenthesis** \`<>\`: This argument is optional.
+                        *Note: Don't include these brakets (\`[]\` or \`<>\`) in the argument.*
                     `)
-                    .addField('Permissions', stripIndent`
+                    .addField('Moderator permissions', stripIndent`
                         ${oneLine`
-                            Some commands will require you to have specific permissions, which has \`Ban members\`
-                            for \`${prefix}ban\`, or \`Administrator\` for \`${prefix}setup\`.
-                        `}
-
-                        ${oneLine`
-                            Others may just require you to be a "moderator", which means that you **must have
+                            Some commands require you to be a "moderator", which means that you **must have
                             at least one** of the following permissions: \`Ban members\`, \`Deafen members\`,
                             \`Kick members\`, \`Manage channels\`, \`Manage emojis and stickers\`, \`Manage guild\`,
                             \`Manage messages\`, \`Manage nicknames\`, \`Manage roles\`, \`Manage threads\`,
@@ -159,10 +153,6 @@ module.exports = class HelpCommand extends Command {
                     `),
                 new MessageEmbed(base)
                     .setTitle('Time formatting')
-                    .setDescription(oneLine`
-                        Some commands will require the use of special formatting for time. It can either
-                        a number followed by a letter (relative time) or a specific date.
-                    `)
                     .addField('Relative time', stripIndent`
                         ${oneLine`
                             Just specify the relative time with a number followed by a letter, like this:
@@ -188,25 +178,26 @@ module.exports = class HelpCommand extends Command {
                         ${oneLine`
                             ${user.username} uses the **British English date format**, and supports both
                             24-hour and 12-hour formats. E.g. this is right: \`21/10/2021\`, while this
-                            isn't: \`10/21/2021\`, and both of these cases work: \`11:30pm\`, \`23:30\`.
+                            isn't: \`10/21/2021\`, while both of these cases work: \`11:30pm\`, \`23:30\`.
                         `}
+
                         ${oneLine`
                             You can also specify the time zone offset by adding a \`+\` or \`-\` sign followed
-                            by a number, like this: \`12am-3\`. This means that time will be used as if it's
-                            from UTC-3.
+                            by a number, like this: \`1pm -4\`. This means that time will be used as if it's
+                            from UTC-4.
                         `}
                     `)
             ]
 
             const generate = page => ({
                 embed: pages[page].setFooter(
-                    `Page ${++page} of 4 | Version: ${version} | Developer: ${owner.tag}`,
+                    `Page ${++page} of ${pages.length} | Version: ${version} | Developer: ${owner.tag}`,
                     user.displayAvatarURL({ dynamic: true })
                 )
             })
 
             return await pagedEmbed(message, {
-                number: 1, total: 4, toUser: true,
+                number: 1, total: pages.length, toUser: true,
                 dmMsg: 'Check your DMs for a list of the commands and information about the bot.'
             }, generate)
         }

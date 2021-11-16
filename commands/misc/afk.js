@@ -19,7 +19,6 @@ module.exports = class AfkCommand extends Command {
                 'afk Coding',
                 'afk off'
             ],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [{
                 key: 'status',
@@ -40,7 +39,7 @@ module.exports = class AfkCommand extends Command {
         const { author, guildId, guild } = message
         const db = guild.database.afk
 
-        const afkStatus = await db.fetch({ guild: guildId, user: author.id }, true)
+        const afkStatus = await db.fetch({ guild: guildId, user: author.id })
 
         if (afkStatus) {
             if (status.toLowerCase() === 'off') {

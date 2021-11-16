@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent } = require('common-tags')
-const { myMs, basicEmbed, timeDetails, docId, modConfirmation } = require('../../utils')
+const { myMs, basicEmbed, timeDetails, docId, confirmButtons } = require('../../utils')
 
 /** A command that can be run in a client */
 module.exports = class DurationCommand extends Command {
@@ -20,7 +20,6 @@ module.exports = class DurationCommand extends Command {
                 `duration ${docId()} 30d`
             ],
             userPermissions: ['ADMINISTRATOR'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -70,7 +69,7 @@ module.exports = class DurationCommand extends Command {
         /** @type {string} */
         const longTime = myMs(duration - Date.now(), { long: true })
 
-        const confirm = await modConfirmation(message, 'update modlog duration', modlogId, { duration: longTime })
+        const confirm = await confirmButtons(message, 'update modlog duration', modlogId, { duration: longTime })
         if (!confirm) return
         await moderations.update(modLog, { duration: longTime })
         await active.update(activeLog, { duration })

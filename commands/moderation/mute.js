@@ -1,7 +1,7 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, modConfirmation } = require('../../utils')
+const { myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, confirmButtons } = require('../../utils')
 const { docId, basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
 
@@ -17,7 +17,6 @@ module.exports = class MuteCommand extends Command {
             examples: ['mute Pixoll 2h', 'mute Pixoll 6h Excessive swearing'],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [
                 {
@@ -69,7 +68,7 @@ module.exports = class MuteCommand extends Command {
         if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
         const mExcept = memberException(member, this)
         if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
-        const confirm = await modConfirmation(message, 'mute', member.user, { reason })
+        const confirm = await confirmButtons(message, 'mute', member.user, { reason })
         if (!confirm) return
 
         const role = await guild.roles.fetch(data.mutedRole)

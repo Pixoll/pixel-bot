@@ -18,7 +18,6 @@ module.exports = class ModLogCommand extends Command {
             format: 'modlog [modlog id]',
             examples: [`modlog ${docId()}`],
             userPermissions: ['MANAGE_MESSAGES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [{
                 key: 'modlogId',

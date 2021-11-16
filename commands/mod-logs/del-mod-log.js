@@ -1,6 +1,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, docId, modConfirmation } = require('../../utils')
+const { basicEmbed, docId, confirmButtons } = require('../../utils')
 const { oneLine } = require('common-tags')
 
 /** A command that can be run in a client */
@@ -18,7 +18,6 @@ module.exports = class DelModLogCommand extends Command {
             format: 'delmodlog [modlog id]',
             examples: [`delmodlog ${docId()}`],
             userPermissions: ['MANAGE_MESSAGES'],
-            throttling: { usages: 1, duration: 3 },
             guildOnly: true,
             args: [{
                 key: 'modlogId',
@@ -48,7 +47,7 @@ module.exports = class DelModLogCommand extends Command {
             }))
         }
 
-        const confirm = await modConfirmation(message, 'delete modlog', modlogId)
+        const confirm = await confirmButtons(message, 'delete modlog', modlogId)
         if (!confirm) return
         await db.delete(modLog)
 

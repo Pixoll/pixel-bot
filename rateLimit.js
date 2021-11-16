@@ -30,10 +30,6 @@ module.exports = (client) => {
     async function manager(data) {
         const { global, limit, method, path, route, timeout } = data
 
-        const isMessageCooldown = !!route.match(/\/channels\/\d{18}\/messages/)?.map(m => m)[0]
-        const isPost = method === 'post'
-        if (isPost && isMessageCooldown) return
-
         if (global) {
             console.log('rateLimit >', data)
 
@@ -57,7 +53,10 @@ module.exports = (client) => {
             return
         }
 
-        const isTypingCooldown = !!route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0] && isPost
+        const isMessageCooldown = !!route.match(/\/channels\/\d+\/messages/)?.map(m => m)[0]
+        if (isMessageCooldown) return
+
+        const isTypingCooldown = !!route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0] && method === 'post'
         if (isTypingCooldown) return
 
         console.log('rateLimit >', data)

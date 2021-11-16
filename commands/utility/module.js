@@ -49,7 +49,7 @@ module.exports = class ModuleCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'module',
-            group: 'settings',
+            group: 'utility',
             description: 'Diagnose the status of a module or sub-module, or toggle it on/off.',
             details: stripIndent`
                 \`module\` can be either: ${modules.map(m => `\`${m}\``).join(', ').replace(/,(?=[^,]*$)/, ' or')}.
