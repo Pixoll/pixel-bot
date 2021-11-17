@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-unused-vars */
 const {
 	Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels, MessageButton,
@@ -33,29 +34,26 @@ class CommandoMessage extends Message {
 		 * The client the message is for
 		 * @type {CommandoClient}
 		 */
-		this.client = client
+		this.client
 
 		/**
 		 * The channel the message is for
 		 * @type {TextBasedChannels}
 		 */
-		this.channel = data.channel
-		this.channelId = data.channelId
-
-		this.type = data.type
+		this.channel
+		this.channelId
 
 		/**
 		 * The author of the message
 		 * @type {User}
 		 */
-		this.author = data.channel
+		this.author
 
 		/**
 		 * The guild this message is for
 		 * @type {CommandoGuild}
 		 */
-		this.guild = data.guild
-		this.guildId = this.guild?.id || null
+		this.guild
 
 		/**
 		 * The client member this message is for

@@ -22,7 +22,8 @@ Structures.extend('Guild', Guild => {
              * The client the guild is for
              * @type {CommandoClient}
              */
-            this.client = client
+            // eslint-disable-next-line no-unused-expressions
+            this.client
 
             /**
              * Shortcut to use setting provider methods for this guild

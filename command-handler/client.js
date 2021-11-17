@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-unused-vars */
 const { Client, User, UserResolvable, Collection, Permissions } = require('discord.js')
 const CommandoRegistry = require('./registry')
@@ -29,7 +30,7 @@ class CommandoClient extends Client {
 		 * Options for the client
 		 * @type {CommandoClientOptions}
 		 */
-		this.options = options
+		this.options
 
 		if (typeof options.inviteOptions === 'object') {
 			const invitePerms = options.inviteOptions.permissions
@@ -52,7 +53,7 @@ class CommandoClient extends Client {
 		/**
 		 * @type {CommandoGuildManager}
 		 */
-		this.guilds = super.guilds
+		this.guilds
 
 		/**
 		 * The client's command registry
