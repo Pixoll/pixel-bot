@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { TextChannel, Message, Role, GuildMember } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
 const { findCommonElement, fetchPartial } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * This module manages reaction roles.

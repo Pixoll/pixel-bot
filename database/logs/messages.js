@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { sliceDots, isModuleEnabled, pluralize, formatBytes } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the message logs.
@@ -8,7 +10,7 @@ const { sliceDots, isModuleEnabled, pluralize, formatBytes } = require('../../ut
  */
 module.exports = (client) => {
     client.on('messageDelete', async message => {
-        const { guild, author, content, attachments, channel, id, partial, stickers } = message
+        const { guild, author, content, attachments, channel, partial, stickers } = message
         if (partial || channel.type === 'DM' || author.bot) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
@@ -73,7 +75,7 @@ module.exports = (client) => {
         await newMessage.fetch().catch(() => null)
         if (!newMessage) return
 
-        const { guild, channel, author, content: content2, url, id } = newMessage
+        const { guild, channel, author, content: content2, url } = newMessage
 
         if (channel.type === 'DM' || author?.bot || content1 === content2) return
 

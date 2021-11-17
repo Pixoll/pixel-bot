@@ -89,6 +89,7 @@ const permissions = {
 	SEND_MESSAGES_IN_THREADS: 'Send messages in threads',
 }
 
+// eslint-disable-next-line no-unused-vars
 const { StringResolvable } = require('./typings')
 
 /**

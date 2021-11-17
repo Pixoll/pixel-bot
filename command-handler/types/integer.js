@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
+/* eslint-enable no-unused-vars */
 
 class IntegerArgumentType extends ArgumentType {
 	constructor(client) {

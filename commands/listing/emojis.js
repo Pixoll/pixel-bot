@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
+/* eslint-enable no-unused-vars */
 
 /** @param {string[]} arr */
 function sliceEmojis(arr) {
-    const dummy = [], normal = []
+    const dummy = []
+    const normal = []
     for (const emoji of arr) {
         if (dummy.join(' ').length + emoji.length + 1 > 1024) {
             normal.push([...dummy])

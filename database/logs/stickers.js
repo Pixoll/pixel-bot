@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, getLogsChannel } = require('../../utils')
+const { isModuleEnabled } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the sticker logs.
@@ -70,17 +72,21 @@ module.exports = (client) => {
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)
 
-        if (description1 !== description2) embed.addField('Description', stripIndent`
-            **Before**
-            ${description1 || 'No description.'}
-            **After**
-            ${description2 || 'No description.'}
-        `)
+        if (description1 !== description2) {
+            embed.addField('Description', stripIndent`
+                **Before**
+                ${description1 || 'No description.'}
+                **After**
+                ${description2 || 'No description.'}
+            `)
+        }
 
-        if (tags1 !== tags2) embed.addField(
-            'Related emoji',
-            `${tags1.map(s => `:${s}:`).join(' ')} ➜ ${tags2.map(s => `:${s}:`).join(' ')}`
-        )
+        if (tags1 !== tags2) {
+            embed.addField(
+                'Related emoji',
+                `${tags1.map(s => `:${s}:`).join(' ')} ➜ ${tags2.map(s => `:${s}:`).join(' ')}`
+            )
+        }
 
         if (embed.fields.length !== 0) guild.queuedLogs.push(embed)
     })

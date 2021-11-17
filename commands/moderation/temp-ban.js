@@ -1,9 +1,14 @@
+/* eslint-disable no-unused-vars */
 const { User, GuildMember, TextChannel } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton, confirmButtons } = require('../../utils')
+const {
+    docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp,
+    inviteButton, confirmButtons
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { myMs } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class TempBanCommand extends Command {
@@ -31,7 +36,6 @@ module.exports = class TempBanCommand extends Command {
                 {
                     key: 'duration',
                     prompt: 'How long should the ban last?',
-                    type: 'string',
                     type: ['date', 'duration']
                 },
                 {
@@ -80,7 +84,8 @@ module.exports = class TempBanCommand extends Command {
 
         if (!user.bot && !!member) {
             const embed = basicEmbed({
-                color: 'GOLD', fieldName: `You have been temp-banned from ${guild.name}`,
+                color: 'GOLD',
+                fieldName: `You have been temp-banned from ${guild.name}`,
                 fieldValue: stripIndent`
                     **Expires:** ${timestamp(duration, 'R')}
                     **Reason:** ${reason}
@@ -121,7 +126,9 @@ module.exports = class TempBanCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been banned`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been banned`,
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}

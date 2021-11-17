@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
 const { connect } = require('mongoose')
 const { isAsyncFunction } = require('util/types')
 const { CommandoClient } = require('../command-handler/typings')
 const schemas = require('../schemas')
 const { myMs, removeDashes } = require('../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handlers for the whole database of the client.

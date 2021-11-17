@@ -1,8 +1,11 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags')
 const { TextChannel, Invite, Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
-const { basicEmbed, sleep, getArgument, embedColor, inviteButton, confirmButtons } = require('../../utils')
+const { basicEmbed, getArgument, embedColor, inviteButton, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class GuildCommand extends Command {
@@ -10,9 +13,9 @@ module.exports = class GuildCommand extends Command {
         super(client, {
             name: 'guild',
             group: 'owner',
-            description:
-                'Displays information about a single guild, or you can get the invite, and also remove the bot from one.'
-            ,
+            description: oneLine`
+                Displays information about a single guild, or you can get the invite, and also remove the bot from one.
+            `,
             format: stripIndent`
                 guild info [guild] - Get information of a guild.
                 guild invite [guild] - Get the invite of a guild.
@@ -120,7 +123,8 @@ module.exports = class GuildCommand extends Command {
 
         await guildOwner.send({
             embeds: [basicEmbed({
-                color: embedColor, fieldName: `Dear owner of ${guild.name}`,
+                color: embedColor,
+                fieldName: `Dear owner of ${guild.name}`,
                 fieldValue: stripIndent`
                     The owner of this bot, ${botOwner.toString()}, has decided to remove the bot from your server.
                     ${(reason ? `**Reason:** ${reason}\n` : '') +

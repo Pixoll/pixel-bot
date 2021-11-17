@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
 const { MessageEmbed, PremiumTier } = require('discord.js')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 const ownerCrown = '<a:owner_crown:806558872440930425>'
 const boost = '<a:boost:806364586231595028>'

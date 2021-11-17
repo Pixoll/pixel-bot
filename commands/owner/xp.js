@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { myMs, code } = require('../../utils')
+const { myMs, code, abcOrder } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class xpCommand extends Command {
@@ -27,7 +29,7 @@ module.exports = class xpCommand extends Command {
         const week = content.split('\n').shift()
         const table = content.replace(/ +/g, ' ').split('\n').slice(4)
 
-        var XP = 0
+        let XP = 0
         const tasks = []
         for (const row of table) {
             const [, , val, ..._task] = row.split(' ')
@@ -37,6 +39,7 @@ module.exports = class xpCommand extends Command {
 
             XP += Number(last)
 
+            // eslint-disable-next-line no-var
             var task = _task.join(' ').toLowerCase()
             while (task.endsWith('/')) task = task.split(' ').slice(0, -2).join(' ')
 
@@ -57,15 +60,7 @@ module.exports = class xpCommand extends Command {
 
         if (!XP) return message.reply('you got no XP. :c')
 
-        const command = tasks
-            .sort((a, b) => {
-                var taskA = a.task.toUpperCase()
-                var taskB = b.task.toUpperCase()
-
-                if (taskA < taskB) return -1
-                if (taskA > taskB) return 1
-                return 0
-            })
+        const command = tasks.sort((a, b) => abcOrder(a.task, b.task))
             .map(({ amount, task }) => {
                 const _suffix = () => {
                     const str = task.toLowerCase()

@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { noReplyInDMs, timeDetails, timestamp } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 const letters = ['t', 'T', 'd', 'D', 'f', 'F', 'R']
 

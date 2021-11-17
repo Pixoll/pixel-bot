@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { Message } = require('discord.js')
 const { CommandoMessage } = require('../typings')
 const ArgumentType = require('./base')
+/* eslint-enable no-unused-vars */
 
 class MessageArgumentType extends ArgumentType {
 	constructor(client) {

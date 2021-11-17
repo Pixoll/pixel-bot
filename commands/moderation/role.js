@@ -1,8 +1,11 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { Role, GuildMember, Collection } = require('discord.js')
-const { basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated } = require('../../utils')
+const { basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument } = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class RoleCommand extends Command {
@@ -221,8 +224,7 @@ module.exports = class RoleCommand extends Command {
 
         await toDelete.delete(() => null)
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            description: `Removed every role from ${user.toString()} (${user.tag}).`
+            color: 'GREEN', emoji: 'check', description: `Removed every role from ${user.toString()} (${user.tag}).`
         }))
     }
 
@@ -266,7 +268,9 @@ module.exports = class RoleCommand extends Command {
 
         await toDelete.delete(() => null)
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldValue: rolesStr,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldValue: rolesStr,
             fieldName: `Toggled the following roles for ${user.tag}:`
         }))
     }

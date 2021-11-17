@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildAuditLogs, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial, getLogsChannel, timestamp } = require('../../utils')
+const { isModuleEnabled, fetchPartial, timestamp } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the moderation logs.

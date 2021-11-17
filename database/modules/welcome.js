@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel } = require('discord.js')
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
 const { isModuleEnabled } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * This module manages welcome messages.

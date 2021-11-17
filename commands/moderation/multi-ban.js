@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { docId, isMod, basicEmbed, memberDetails, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Validates a {@link GuildMember}
@@ -106,7 +108,8 @@ module.exports = class MultiBanCommand extends Command {
             if (!user.bot) {
                 await user.send({
                     embeds: [basicEmbed({
-                        color: 'GOLD', fieldName: `You have been banned from ${guild.name}`,
+                        color: 'GOLD',
+                        fieldName: `You have been banned from ${guild.name}`,
                         fieldValue: stripIndent`
                             **Reason:** ${reason}
                             **Moderator:** ${author.toString()}
@@ -131,7 +134,9 @@ module.exports = class MultiBanCommand extends Command {
         }
 
         const options = banned.length !== 0 ? {
-            color: 'GREEN', emoji: 'check', fieldName: `Banned the following members:`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: 'Banned the following members:',
             fieldValue: banned.map(u => `"${u.tag}"`).join(', ')
         } : {
             color: 'RED', emoji: 'cross', description: 'No members were banned.'

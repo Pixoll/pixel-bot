@@ -1,4 +1,6 @@
-const { CommandoClient, CommandoMessage, Argument, ArgumentInfo } = require("../typings")
+/* eslint-disable no-unused-vars */
+const { CommandoClient, CommandoMessage, Argument, ArgumentInfo } = require('../typings')
+/* eslint-enable no-unused-vars */
 
 /** A type for command arguments */
 class ArgumentType {
@@ -25,7 +27,6 @@ class ArgumentType {
 		this.id = id
 	}
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Validates a value string against the type
 	 * @param {string} val Value to validate
@@ -35,11 +36,10 @@ class ArgumentType {
 	 * @return {boolean|string|Promise<boolean|string>} Whether the value is valid, or an error message
 	 * @abstract
 	 */
-	validate(val, originalMsg, arg, currentMsg = originalMsg) { // eslint-disable-line no-unused-vars
+	validate(val, originalMsg, arg, currentMsg = originalMsg) {
 		throw new Error(`${this.constructor.name} doesn't have a validate() method.`)
 	}
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Parses the raw value string into a usable value
 	 * @param {string} val Value to parse
@@ -49,7 +49,7 @@ class ArgumentType {
 	 * @return {*|Promise<*>} Usable value
 	 * @abstract
 	 */
-	parse(val, originalMsg, arg, currentMsg = originalMsg) { // eslint-disable-line no-unused-vars
+	parse(val, originalMsg, arg, currentMsg = originalMsg) {
 		throw new Error(`${this.constructor.name} doesn't have a parse() method.`)
 	}
 
@@ -62,7 +62,7 @@ class ArgumentType {
 	 * @param {?CommandoMessage} [currentMsg=originalMsg] Current response message
 	 * @return {boolean} Whether the value is empty
 	 */
-	isEmpty(val, originalMsg, arg, currentMsg = originalMsg) { // eslint-disable-line no-unused-vars
+	isEmpty(val, originalMsg, arg, currentMsg = originalMsg) {
 		if (Array.isArray(val)) return val.length === 0
 		return !val
 	}

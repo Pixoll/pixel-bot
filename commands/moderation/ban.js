@@ -1,8 +1,12 @@
+/* eslint-disable no-unused-vars */
 const { User, GuildMember } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { docId, basicEmbed, userException, memberException, reasonDetails, userDetails, confirmButtons } = require('../../utils')
+const {
+    docId, basicEmbed, userException, memberException, reasonDetails, userDetails, confirmButtons
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class BanCommand extends Command {
@@ -68,7 +72,8 @@ module.exports = class BanCommand extends Command {
         if (!user.bot && !!member) {
             await user.send({
                 embeds: [basicEmbed({
-                    color: 'GOLD', fieldName: `You have been banned from ${guild.name}`,
+                    color: 'GOLD',
+                    fieldName: `You have been banned from ${guild.name}`,
                     fieldValue: stripIndent`
                         **Reason:** ${reason}
                         **Moderator:** ${author.toString()}
@@ -89,8 +94,10 @@ module.exports = class BanCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: `${user.tag} has been banned`, fieldValue: `**Reason:** ${reason}`
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been banned`,
+            fieldValue: `**Reason:** ${reason}`
         }))
     }
 }

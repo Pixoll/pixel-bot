@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { oneLine } = require('common-tags')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ModLogsCommand extends Command {
@@ -11,9 +13,7 @@ module.exports = class ModLogsCommand extends Command {
             name: 'modlogs',
             aliases: ['mod-logs'],
             group: 'mod-logs',
-            description:
-                'Displays all moderator logs of the server of a specific user, or all if none is specified'
-            ,
+            description: 'Displays all moderator logs of the server of a specific user, or all if none is specified',
             details: userDetails,
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],

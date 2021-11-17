@@ -1,10 +1,14 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js')
 const { validURL, basicEmbed, userDetails, getArgument, sleep } = require('../../utils')
-const { stripIndent, oneLine } = require('common-tags'),
-    /** @type {number} */
-    days14 = require('../../utils').myMs('14d')
+const { stripIndent, oneLine } = require('common-tags')
+/* eslint-enable no-unused-vars */
+
+/** @type {number} */
+const days14 = require('../../utils').myMs('14d')
 
 /**
  * Bulk deletes the provided messages
@@ -31,8 +35,7 @@ async function bulkDelete(msg, messages) {
     if (_msg && !_msg.deleted) {
         toDelete = await msg.replyEmbed(embed)
         await msg.delete()
-    }
-    else {
+    } else {
         toDelete = await msg.embed(embed)
     }
 
@@ -278,6 +281,7 @@ module.exports = class PurgeCommand extends Command {
             for (const str of msg.content.split(/ +/)) {
                 if (validURL(str)) return true
             }
+            return false
         })
         await bulkDelete(message, filtered)
     }

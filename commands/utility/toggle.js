@@ -1,9 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const CommandGroup = require('../../command-handler/commands/group')
 const { basicEmbed, getArgument } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { DisabledSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ToggleCommand extends Command {
@@ -85,19 +88,24 @@ module.exports = class ToggleCommand extends Command {
         if (guildId) command.setEnabledIn(guildId, !isEnabled)
         else command._globalEnabled = !isEnabled
 
-        if (data) await this.db.update(data, isEnabled ?
-            { $push: { commands: command.name } } :
-            { $pull: { commands: command.name } }
-        )
-        else await this.db.add({
-            guild: guildId,
-            global: !guildId,
-            commands: isEnabled ? [command.name] : [],
-            groups: []
-        })
+        if (data) {
+            await this.db.update(data, isEnabled ?
+                { $push: { commands: command.name } } :
+                { $pull: { commands: command.name } }
+            )
+        } else {
+            await this.db.add({
+                guild: guildId,
+                global: !guildId,
+                commands: isEnabled ? [command.name] : [],
+                groups: []
+            })
+        }
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `Toggled the \`${command.name}\` command${global}`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Toggled the \`${command.name}\` command${global}`,
             fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`
         }))
     }
@@ -123,19 +131,24 @@ module.exports = class ToggleCommand extends Command {
         if (guildId) group.setEnabledIn(guildId, !isEnabled)
         else group._globalEnabled = !isEnabled
 
-        if (data) await this.db.update(data, isEnabled ?
-            { $push: { groups: group.name } } :
-            { $pull: { groups: group.name } }
-        )
-        else await this.db.add({
-            guild: guildId,
-            global: !guildId,
-            commands: [],
-            groups: !isEnabled ? [group.name] : []
-        })
+        if (data) {
+            await this.db.update(data, isEnabled ?
+                { $push: { groups: group.name } } :
+                { $pull: { groups: group.name } }
+            )
+        } else {
+            await this.db.add({
+                guild: guildId,
+                global: !guildId,
+                commands: [],
+                groups: !isEnabled ? [group.name] : []
+            })
+        }
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `Toggled the \`${group.name}\` group${global}`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Toggled the \`${group.name}\` group${global}`,
             fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`
         }))
     }

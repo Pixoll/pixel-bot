@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { capitalize, basicEmbed, docId } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ModLogCommand extends Command {
@@ -33,7 +35,7 @@ module.exports = class ModLogCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {string} args.modlogId The mod log Id
+     * @param {string} args.modlogId The mod log id
      */
     async run(message, { modlogId }) {
         const { guild } = message

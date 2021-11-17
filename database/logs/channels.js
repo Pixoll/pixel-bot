@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { myMs, rtcRegions, compareArrays } = require('../../utils')
 const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes } = require('../../utils')
 const { permissions } = require('../../command-handler/util')
+/* eslint-enable no-unused-vars */
 
 /**
  * Formats the {@link PermissionOverwrites} into an array of string

@@ -1,8 +1,13 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { GuildMember, TextChannel } = require('discord.js')
-const { docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails, memberDetails, confirmButtons } = require('../../utils')
+const {
+    docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails,
+    memberDetails, confirmButtons
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class KickCommand extends Command {
@@ -57,7 +62,8 @@ module.exports = class KickCommand extends Command {
 
         if (!user.bot) {
             const embed = basicEmbed({
-                color: 'GOLD', fieldName: `You have been kicked from ${guild.name}`,
+                color: 'GOLD',
+                fieldName: `You have been kicked from ${guild.name}`,
                 fieldValue: stripIndent`
                     **Reason:** ${reason}
                     **Moderator:** ${author.toString()}
@@ -87,8 +93,10 @@ module.exports = class KickCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: `${user.tag} has been kicked`, fieldValue: `**Reason:** ${reason}`
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been kicked`,
+            fieldValue: `**Reason:** ${reason}`
         }))
     }
 }

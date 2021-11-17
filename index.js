@@ -33,7 +33,7 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
-const debugExclude = new RegExp('Heartbeat|Registered|WS|Loaded feature|for guild|Garbage collection completed')
+const debugExclude = /'Heartbeat|Registered|WS|Loaded feature|for guild|Garbage collection completed'/
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')

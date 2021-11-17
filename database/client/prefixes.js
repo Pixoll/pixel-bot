@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /**
  * Applies all saved prefixes in all servers.

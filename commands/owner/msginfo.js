@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { get } = require('lodash')
 const { sliceDots, code } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class MsgInfoCommand extends Command {

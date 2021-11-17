@@ -1,9 +1,13 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, confirmButtons } = require('../../utils')
+const {
+    myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, confirmButtons
+} = require('../../utils')
 const { docId, basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class MuteCommand extends Command {
@@ -59,7 +63,8 @@ module.exports = class MuteCommand extends Command {
         const data = await setup.fetch()
         if (!data || !data.mutedRole) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross',
+                color: 'RED',
+                emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
             }))
         }
@@ -74,7 +79,8 @@ module.exports = class MuteCommand extends Command {
         const role = await guild.roles.fetch(data.mutedRole)
         if (!role) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross',
+                color: 'RED',
+                emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
             }))
         }
@@ -91,7 +97,8 @@ module.exports = class MuteCommand extends Command {
         if (!user.bot) {
             await user.send({
                 embeds: [basicEmbed({
-                    color: 'GOLD', fieldName: `You have been muted on ${guild.name}`,
+                    color: 'GOLD',
+                    fieldName: `You have been muted on ${guild.name}`,
                     fieldValue: stripIndent`
                         **Expires:** ${timestamp(duration, 'R')}
                         **Reason:** ${reason}
@@ -121,7 +128,9 @@ module.exports = class MuteCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been muted`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been muted`,
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { basicEmbed, memberDetails } = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class NicknameCommand extends Command {
@@ -52,7 +54,9 @@ module.exports = class NicknameCommand extends Command {
 
         if (!member.manageable) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', fieldName: `Unable to change ${tag}'s nickname`,
+                color: 'RED',
+                emoji: 'cross',
+                fieldName: `Unable to change ${tag}'s nickname`,
                 fieldValue: 'Please check the role hierarchy or server ownership.'
             }))
         }
@@ -63,7 +67,8 @@ module.exports = class NicknameCommand extends Command {
         const wasApplied = await member.setNickname(toApply).catch(() => null)
         if (!wasApplied) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross',
+                color: 'RED',
+                emoji: 'cross',
                 description: 'An error occurred when trying to change that member\'s nickname. Please try again.'
             }))
         }

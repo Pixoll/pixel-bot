@@ -1,5 +1,5 @@
-const { stripIndent, oneLine } = require('common-tags');
-const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { stripIndent, oneLine } = require('common-tags')
+const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js')
 
 // const stampsLink = 'https://discord.com/developers/docs/reference#message-formatting-timestamp-styles'
 // const timeDetails = stripIndent`
@@ -15,7 +15,7 @@ const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.
 const userDetails = '`user` has to be a user\'s username, id or mention.'
 
 /** @param {string} [tag] @param {boolean} [plural] @param {number} max */
-const memberDetails = (tag, plural = false,  max = 30) => !plural ?
+const memberDetails = (tag, plural = false, max = 30) => !plural ?
     `\`${tag || 'member'}\` can be either a member's name, mention or id.` :
     `\`${tag || 'members'}\` to be all the members' names, mentions or ids, separated by commas (max. ${max} at once).`
 

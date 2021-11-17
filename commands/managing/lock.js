@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { TextChannel } = require('discord.js')
 const { basicEmbed, reasonDetails, channelDetails } = require('../../utils')
 const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class LockCommand extends Command {

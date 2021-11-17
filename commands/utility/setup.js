@@ -1,11 +1,14 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument } = require('../../utils')
+const {
+    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument
+} = require('../../utils')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
-const TextChannelType = require('../../command-handler/types/text-channel')
-const RoleType = require('../../command-handler/types/role')
+/* eslint-enable no-unused-vars */
 
 /**
  * Creates a default mongo document for {@link SetupSchema}
@@ -120,12 +123,12 @@ module.exports = class SetupCommand extends Command {
     async full(message, data) {
         const { guildId, client } = message
         const { types } = client.registry
-        /** @type {TextChannelType} */
         const textChanType = types.get('text-channel')
         /** @type {RoleType} */
         const roleType = types.get('role')
         let toDelete
 
+        /** @type {TextChannel} */
         let logsChannel
         while (!logsChannel || logsChannel.type !== 'GUILD_TEXT') {
             const msg = await basicCollector(message, {
@@ -138,6 +141,7 @@ module.exports = class SetupCommand extends Command {
 
         await toDelete.delete()
 
+        /** @type {Role} */
         let memberRole
         while (!memberRole || isMod(memberRole)) {
             const description = isMod(memberRole) ?
@@ -155,6 +159,7 @@ module.exports = class SetupCommand extends Command {
 
         await toDelete.delete()
 
+        /** @type {Role} */
         let botRole
         while (!botRole) {
             const msg = await basicCollector(message, {
@@ -168,6 +173,7 @@ module.exports = class SetupCommand extends Command {
 
         await toDelete.delete()
 
+        /** @type {Role} */
         let mutedRole
         while (!mutedRole) {
             const msg = await basicCollector(message, {
@@ -181,6 +187,7 @@ module.exports = class SetupCommand extends Command {
 
         await toDelete.delete()
 
+        /** @type {TextChannel[]} */
         const lockChannels = []
         while (lockChannels.length === 0) {
             const msg = await basicCollector(message, {
@@ -224,7 +231,8 @@ module.exports = class SetupCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
+            color: 'GREEN',
+            emoji: 'check',
             description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.'
         }))
     }
@@ -237,7 +245,9 @@ module.exports = class SetupCommand extends Command {
     async info(message, data) {
         if (!data) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', fieldName: 'There is no saved data for this server yet.',
+                color: 'RED',
+                emoji: 'cross',
+                fieldName: 'There is no saved data for this server yet.',
                 fieldValue: 'Please run the `setup full` command first.'
             }))
         }
@@ -282,7 +292,9 @@ module.exports = class SetupCommand extends Command {
     async _reload(message, data) {
         if (!data) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', fieldName: 'There is no saved data for this server yet.',
+                color: 'RED',
+                emoji: 'cross',
+                fieldName: 'There is no saved data for this server yet.',
                 fieldValue: 'Please run the `setup full` command first.'
             }))
         }
@@ -345,7 +357,9 @@ module.exports = class SetupCommand extends Command {
         await this.db.add(defaultDoc(message.guildId, 'logsChannel', channel.id))
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: oneLine`
+            color: 'GREEN',
+            emoji: 'check',
+            description: oneLine`
                 The new audit logs channel will be ${channel.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
@@ -367,7 +381,9 @@ module.exports = class SetupCommand extends Command {
         await this.db.add(defaultDoc(message.guildId, 'mutedRole', role.id))
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: oneLine`
+            color: 'GREEN',
+            emoji: 'check',
+            description: oneLine`
                 The new role for muted members will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
@@ -389,7 +405,9 @@ module.exports = class SetupCommand extends Command {
         await this.db.add(defaultDoc(message.guildId, 'memberRole', role.id))
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: oneLine`
+            color: 'GREEN',
+            emoji: 'check',
+            description: oneLine`
                 The new default role for all members will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
@@ -411,7 +429,9 @@ module.exports = class SetupCommand extends Command {
         await this.db.add(defaultDoc(message.guildId, 'botRole', role.id))
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: oneLine`
+            color: 'GREEN',
+            emoji: 'check',
+            description: oneLine`
                 The new default role for all bots will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `

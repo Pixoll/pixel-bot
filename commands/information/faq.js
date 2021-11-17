@@ -1,9 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs, confirmButtons } = require('../../utils')
 const { FaqSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class FaqCommand extends Command {
@@ -38,7 +41,7 @@ module.exports = class FaqCommand extends Command {
                     prompt: 'What items do you want to remove from the FAQ list?',
                     type: 'string',
                     validate: val => {
-                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => n !== NaN || n < 1))]
+                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => isNaN(n) || n < 1))]
                         return array.length !== 0
                     },
                     parse: val => [...new Set(val.split(/ +/).map(Number).sort())],
@@ -164,7 +167,8 @@ module.exports = class FaqCommand extends Command {
         }
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
+            color: 'GREEN',
+            emoji: 'check',
             description: `Removed entries ${deleted.map(d => `\`${d}\``).join(', ')} from the FAQ list.`
         }))
     }
@@ -189,8 +193,7 @@ module.exports = class FaqCommand extends Command {
         }
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            description: 'The FAQ list has been cleared.'
+            color: 'GREEN', emoji: 'check', description: 'The FAQ list has been cleared.'
         }))
     }
 }

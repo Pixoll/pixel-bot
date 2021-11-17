@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
 const isEqual = require('lodash.isequal')
 const { Model } = require('mongoose')
 const { CommandoGuild, CommandoClient, DataModel } = require('../typings')
+/* eslint-enable no-unused-vars */
 
 /** A database schema manager (MongoDB) */
 class DatabaseManager {
@@ -163,7 +165,7 @@ function docsFilter(filter) {
     return doc => {
         const objKeys = Object.keys(filter).length
         if (objKeys === 0) return true
-        let found = []
+        const found = []
         for (const p in filter) {
             found.push(isEqual(doc[p], filter[p]))
         }

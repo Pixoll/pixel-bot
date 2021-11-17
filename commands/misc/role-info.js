@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, Role } = require('discord.js')
-const { getKeyPerms, roleDetails, embedColor } = require('../../utils')
-const { stripIndent } = require('common-tags')
+const { getKeyPerms, roleDetails } = require('../../utils')
+const { stripIndent, oneLine } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class RoleInfoCommand extends Command {
@@ -11,9 +13,9 @@ module.exports = class RoleInfoCommand extends Command {
             name: 'roleinfo',
             aliases: ['role-info'],
             group: 'misc',
-            description:
-                'Displays multiple information about a role, such as color, position, members and mod permissions (if any).'
-            ,
+            description: oneLine`
+                Displays multiple information about a role, such as color, position, members and mod permissions (if any).
+            `,
             details: roleDetails(),
             format: 'roleinfo [role]',
             examples: ['roleinfo Staff'],
@@ -41,8 +43,8 @@ module.exports = class RoleInfoCommand extends Command {
 
         const roleInfo = new MessageEmbed()
             .setColor(color || '#4c9f4c')
-            .setAuthor(`Information for role: ${name}`).
-            setDescription(stripIndent`
+            .setAuthor(`Information for role: ${name}`)
+            .setDescription(stripIndent`
                 **Mention:** \`${role.toString()}\`
                 **Color:** ${color ? `[${color}](${colorURL})` : 'None'}
                 **Emoji:** ${unicodeEmoji || 'None'}

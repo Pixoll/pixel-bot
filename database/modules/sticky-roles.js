@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
 const { isModuleEnabled, fetchPartial } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles sticky roles for joining/leaving members.

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { docId, basicEmbed, userException, confirmButtons } = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class warnCommand extends Command {
@@ -11,7 +13,7 @@ module.exports = class warnCommand extends Command {
             name: 'warn',
             group: 'mod',
             description: 'Warn a member.',
-            details: '`member` can be a member\'s username, Id or mention. `reason` can be anything you want.',
+            details: '`member` can be a member\'s username, id or mention. `reason` can be anything you want.',
             format: 'warn [member] [reason]',
             examples: ['warn Pixoll Stop posting NSFW'],
             userPermissions: ['MANAGE_MESSAGES'],
@@ -56,7 +58,8 @@ module.exports = class warnCommand extends Command {
         if (!confirm) return
 
         await user.send(basicEmbed({
-            color: 'GOLD', fieldName: `You have been warned on ${guild.name}`,
+            color: 'GOLD',
+            fieldName: `You have been warned on ${guild.name}`,
             fieldValue: stripIndent`
                 **Reason:** ${reason}
                 **Moderator:** ${author.toString()}
@@ -74,7 +77,9 @@ module.exports = class warnCommand extends Command {
         this.client.emit('guildMemberWarn', guild, author, user, reason)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been warned`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been warned`,
             fieldValue: `**Reason:** ${reason}`
         }))
     }

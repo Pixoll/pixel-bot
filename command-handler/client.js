@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { Client, User, UserResolvable, Collection, Permissions } = require('discord.js')
 const CommandoRegistry = require('./registry')
 const CommandDispatcher = require('./dispatcher')
@@ -7,6 +8,7 @@ const { CommandoClientOptions, GuildDatabaseManager, CommandoGuildManager } = re
 const CommandoMessage = require('./extensions/message')
 // const CommandoGuild = require('./extensions/guild')
 const ClientDatabaseManager = require('./database/ClientDatabaseManager')
+/* eslint-enable no-unused-vars */
 
 /**
  * Discord.js Client with a command framework
@@ -27,7 +29,7 @@ class CommandoClient extends Client {
 		 * Options for the client
 		 * @type {CommandoClientOptions}
 		 */
-		this.options
+		this.options = options
 
 		if (typeof options.inviteOptions === 'object') {
 			const invitePerms = options.inviteOptions.permissions
@@ -50,7 +52,7 @@ class CommandoClient extends Client {
 		/**
 		 * @type {CommandoGuildManager}
 		 */
-		this.guilds
+		this.guilds = super.guilds
 
 		/**
 		 * The client's command registry
@@ -194,7 +196,7 @@ class CommandoClient extends Client {
 		this.emit('debug', `Provider set to ${newProvider.constructor.name} - will initialise once ready.`)
 		await new Promise(resolve => {
 			this.once('ready', () => {
-				this.emit('debug', `Initialising provider...`)
+				this.emit('debug', 'Initialising provider...')
 				resolve(newProvider.init(this))
 			})
 		})

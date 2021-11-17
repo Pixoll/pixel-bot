@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
@@ -5,6 +7,7 @@ const CommandGroup = require('../../command-handler/commands/group')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { permissions } = require('../../command-handler/util')
 const { getArgument } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class DiagnoseCommand extends Command {
@@ -147,7 +150,7 @@ module.exports = class DiagnoseCommand extends Command {
             group = value
         }
 
-        const { guild } = message
+        const { guild, client } = message
         const isEnabled = guild ? group.isEnabledIn(guild, true) : group._globalEnabled
 
         const global = guild ? 'Status' : 'Global status'

@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class AfkCommand extends Command {
@@ -53,8 +55,7 @@ module.exports = class AfkCommand extends Command {
             await afkStatus.updateOne({ status })
 
             return await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check',
-                fieldName: 'I updated your AFK status to:', fieldValue: status
+                color: 'GREEN', emoji: 'check', fieldName: 'I updated your AFK status to:', fieldValue: status
             }))
         }
 
@@ -71,8 +72,7 @@ module.exports = class AfkCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: 'I set your AFK status as:', fieldValue: status
+            color: 'GREEN', emoji: 'check', fieldName: 'I set your AFK status as:', fieldValue: status
         }))
     }
 }

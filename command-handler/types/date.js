@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { myMs } = require('../../utils')
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
+/* eslint-enable no-unused-vars */
 
 const dateMatcher = '([1-3]?\\d[\\/\\-\\.,][01]?\\d(?:[\\/\\-\\.,]\\d{2})?(?:\\d{2})?)'
 const timeMatcher = '([0-2]?\\d(?::[0-5]?\\d)?)'
@@ -28,7 +30,7 @@ class DateArgumentType extends ArgumentType {
      */
     validate(val, _, arg) {
         const date = this._parseDate(val.match(regex)?.slice(1, 5), val)
-        if (!Boolean(date)) {
+        if (!date) {
             return 'Please enter a valid date format. Use the `help` command for more information.'
         }
         if (arg.skipValidation) return true
@@ -64,7 +66,7 @@ class DateArgumentType extends ArgumentType {
         if (matches.length === 0) return null
         const defDate = new Date()
 
-        const dateNums = matches[0]?.split(/[\/\-\.,]/g).map((s, i) => {
+        const dateNums = matches[0]?.split(/[/\-.,]/g).map((s, i) => {
             const parsed = Number.parseInt(s)
             if (i === 0) return parsed
             if (i === 1) return parsed - 1

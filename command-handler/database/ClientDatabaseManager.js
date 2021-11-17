@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
 const { CommandoClient } = require('../typings')
 const DatabaseManager = require('./DatabaseManager')
 const schemas = require('../../schemas')
+/* eslint-enable no-unused-vars */
 
 /** The client's database manager (MongoDB) */
 class ClientDatabaseManager {
@@ -40,7 +42,7 @@ class ClientDatabaseManager {
             if (!this[name]) continue
             this[name].cache = schema
         }
-        this.client.emit('debug', `Caching process has finished for the client`)
+        this.client.emit('debug', 'Caching process has finished for the client')
         return this
     }
 }

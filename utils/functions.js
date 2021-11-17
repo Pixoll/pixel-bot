@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const {
     MessageEmbed, GuildMember, User, Role, MessageOptions, TextChannel, GuildChannel, Message, ColorResolvable,
     AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu,
@@ -11,13 +12,14 @@ const { version } = require('../package.json')
 const { moderations, active } = require('../schemas')
 const { permissions } = require('../command-handler/util')
 const { Module, AuditLog } = require('../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /**
  * Pauses the command's execution
  * @param {number} s Amount of seconds
  */
 function sleep(s) {
-    return new Promise(resolve => setTimeout(resolve, s * 1000));
+    return new Promise(resolve => setTimeout(resolve, s * 1000))
 }
 
 /**
@@ -93,10 +95,10 @@ async function isModuleEnabled(guild, module, subModule) {
     subModule = removeDashes(subModule)
     const check = subModule ? data?.[module]?.[subModule] : data?.[module]
     if (typeof check === 'object') {
-        let status = []
+        const status = []
         for (const prop in check) {
             if (typeof check[prop] === 'function') continue
-            status.push(check[prop] === false ? false : true)
+            status.push(check[prop] !== false)
         }
         return Boolean(status.filter(b => b)[0])
     }
@@ -186,7 +188,7 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
  * @param {boolean} [showUnit] Whether to display the units or not
  */
 function formatBytes(bytes, decimals = 2, showUnit = true) {
-    if (bytes == 0) {
+    if (bytes === 0) {
         if (showUnit) return '0 B'
         return '0'
     }
@@ -284,13 +286,17 @@ function userException(user, author, { client, name }) {
     /** @type {BasicEmbedOptions} */
     const options = { color: 'RED', emoji: 'cross' }
 
-    if (user.id === client.user.id) return {
-        ...options,
-        description: `You can't make me ${name} myself.`
+    if (user.id === client.user.id) {
+        return {
+            ...options,
+            description: `You can't make me ${name} myself.`
+        }
     }
-    if (user.id === author.id) return {
-        ...options,
-        description: `You can't ${name} yourself.`
+    if (user.id === author.id) {
+        return {
+            ...options,
+            description: `You can't ${name} yourself.`
+        }
     }
 
     return null
@@ -315,9 +321,11 @@ function memberException(member, { client, name }) {
             fieldValue: 'Please check the role hierarchy or server ownership.'
         }
     }
-    if (!client.isOwner(member) && isMod(member)) return {
-        ...options,
-        description: `That user is a mod/admin, you can't ${name} them.`
+    if (!client.isOwner(member) && isMod(member)) {
+        return {
+            ...options,
+            description: `That user is a mod/admin, you can't ${name} them.`
+        }
     }
 
     return null
@@ -410,7 +418,7 @@ function removeUnderscores(perm, codeLike) {
 function capitalize(str) {
     if (!str) return ''
 
-    let splitStr = str.toLowerCase().split(/ +/)
+    const splitStr = str.toLowerCase().split(/ +/)
     for (let i = 0; i < splitStr.length; i++) {
         splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
     }
@@ -469,9 +477,13 @@ function sliceDots(string, length) {
  */
 function formatDate(date) {
     const timeFormat = new Intl.DateTimeFormat('en-GB', {
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric',
-        timeZone: 'UTC',  //, timeZoneName: 'short'
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        timeZone: 'UTC',
+        // timeZoneName: 'short'
     })
 
     if (!date && date !== 0) return
@@ -579,7 +591,7 @@ function difference(first, second) {
         let arrayIndexCounter = 0
         return transform(newObj, function (result, value, key) {
             if (!isEqual(value, origObj[key])) {
-                let resultKey = isArray(origObj) ? arrayIndexCounter++ : key
+                const resultKey = isArray(origObj) ? arrayIndexCounter++ : key
                 result[resultKey] = (isObject(value) && isObject(origObj[key])) ? changes(value, origObj[key]) : value
             }
         })
@@ -594,7 +606,7 @@ function difference(first, second) {
 function validURL(str) {
     if (!str.includes('.') || !str.includes('/')) return false
 
-    let pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+    const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
         '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
@@ -619,11 +631,13 @@ async function ban(guild, bot, user, reason = 'No reason given.') {
 
     if (reason.length > 512 || !member?.bannable || isMod(member)) return
 
-    if (member && !user.bot) await user.send(stripIndent`
-        You have been **banned** from **${guildName}**
-        **Reason:** ${reason}
-        **Moderator:** ${bot.tag} - Auto-moderation system
-    `).catch(() => null)
+    if (member && !user.bot) {
+        await user.send(stripIndent`
+            You have been **banned** from **${guildName}**
+            **Reason:** ${reason}
+            **Moderator:** ${bot.tag} - Auto-moderation system
+        `).catch(() => null)
+    }
 
     await members.ban(user, { days: 7, reason: reason }).catch(() => null)
 
@@ -751,11 +765,13 @@ async function mute(guild, bot, member, role, time, reason = 'No reason given.')
 
     const duration = myMs(time, { long: true })
 
-    if (!member.user.bot) await member.send(stripIndent`
-        You have been **muted** on **${guildName}** for **${duration}**
-        **Reason:** ${reason}
-        **Moderator:** ${bot.tag} - Auto-moderation system
-    `).catch(() => null)
+    if (!member.user.bot) {
+        await member.send(stripIndent`
+            You have been **muted** on **${guildName}** for **${duration}**
+            **Reason:** ${reason}
+            **Moderator:** ${bot.tag} - Auto-moderation system
+        `).catch(() => null)
+    }
 
     await member.roles.add(role).catch(() => null)
 
@@ -871,10 +887,12 @@ async function pagedEmbed(message, data, template) {
             [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
         )
 
-    if (data.toUser && !isDMs) await message.reply(stripIndent`
-        ${data.dmMsg || ''}
-        **Didn\'t get the DM?** Then please allow DMs from server members.
-    `)
+    if (data.toUser && !isDMs) {
+        await message.reply(stripIndent`
+            ${data.dmMsg || ''}
+            **Didn\'t get the DM?** Then please allow DMs from server members.
+        `)
+    }
 
     await targetChan.sendTyping().catch(() => null)
 
@@ -1013,7 +1031,7 @@ async function pagedEmbed(message, data, template) {
  * @param {string[]} [data.keys=undefined] The properties to display in the embed. If empty I will use every property
  * @param {string[]} [data.keysExclude=[]] The properties to exclude on the embed.
  * If empty I will use `data.keys` or every property
- * @param {boolean} [data.useDocId=false] Whether to use the document's Id on each data chunk
+ * @param {boolean} [data.useDocId=false] Whether to use the document's id on each data chunk
  */
 async function generateEmbed(message, array, data) {
     const {
@@ -1043,14 +1061,18 @@ async function generateEmbed(message, array, data) {
         if (embedTitle) embed.setTitle(embedTitle)
         if (authorName) embed.setAuthor(authorName, authorIconURL)
         if (pages > 1) embed.setFooter(`Page ${Math.round(start / number + 1)} of ${pages}`)
-        if (useDescription) return {
-            embed: embed.setDescription(current.join('\n')),
-            total: _array.length
+        if (useDescription) {
+            return {
+                embed: embed.setDescription(current.join('\n')),
+                total: _array.length
+            }
         }
 
-        if (_array.length === 0) return {
-            embed: embed.addField('There\'s nothing to see here', 'Please try with another filter.'),
-            total: _array.length
+        if (_array.length === 0) {
+            return {
+                embed: embed.addField('There\'s nothing to see here', 'Please try with another filter.'),
+                total: _array.length
+            }
         }
 
         const { channels } = message.client
@@ -1095,7 +1117,7 @@ async function generateEmbed(message, array, data) {
             }
 
             embed.addField(
-                `${numberPrefix} ${prefix} ${title} ${suffix}`.replace(/ +/g,' '),
+                `${numberPrefix} ${prefix} ${title} ${suffix}`.replace(/ +/g, ' '),
                 `${value.length !== 0 ? value.join('\n') : item}`,
                 inLine
             )
@@ -1193,7 +1215,7 @@ async function confirmButtons(message, action, target, data = {}, sendCancelled 
  */
 function commandInfo(cmd, guild) {
     const { prefix: _prefix, user, owners } = cmd.client
-    let {
+    const {
         name, description, details, examples, aliases, group, guarded,
         throttling, ownerOnly, guildOnly, dmOnly, deprecated, replacing
     } = cmd
@@ -1218,7 +1240,7 @@ function commandInfo(cmd, guild) {
     const embed = new MessageEmbed()
         .setColor('#4c9f4c')
         .setAuthor(
-            `Information for command: ${name} ${deprecated ? `(Deprecated)` : ''}`,
+            `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
             user.displayAvatarURL({ dynamic: true })
         )
         .setDescription(stripIndent`

@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, memberDetails } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class RolesCommand extends Command {
@@ -45,11 +47,11 @@ module.exports = class RolesCommand extends Command {
         const name = member?.user.username || guild.name
         const avatar = member?.user.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        const roles = !!rolesCache.size ?
+        const roles = rolesCache.size ?
             rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) :
             'This member has no roles.'
 
-        if (typeof roles == 'string') {
+        if (typeof roles === 'string') {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: roles
             }))

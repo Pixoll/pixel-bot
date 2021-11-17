@@ -1,9 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class PollCommand extends Command {
@@ -199,10 +202,12 @@ module.exports = class PollCommand extends Command {
             .setDescription(winner || noVotes || draw)
             .setTimestamp()
 
-        if (!noVotes) pollEmbed.addField(
-            'These are the full results:',
-            results.map(d => `**>** Choice ${d.emoji} with \`${d.votes}\` votes.`).join('\n')
-        )
+        if (!noVotes) {
+            pollEmbed.addField(
+                'These are the full results:',
+                results.map(d => `**>** Choice ${d.emoji} with \`${d.votes}\` votes.`).join('\n')
+            )
+        }
 
         await pollChannel.send({ embeds: [pollEmbed] })
         await this.db.delete(pollData)

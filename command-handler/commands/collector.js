@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient, ArgumentInfo, ArgumentCollectorResult, CommandoMessage } = require('../typings')
 const Argument = require('./argument')
+/* eslint-enable no-unused-vars */
 
 /** Obtains, validates, and prompts for argument values */
 class ArgumentCollector {
@@ -57,7 +59,6 @@ class ArgumentCollector {
 
 		try {
 			for (let i = 0; i < this.args.length; i++) {
-				/* eslint-disable no-await-in-loop */
 				const arg = this.args[i]
 				const result = await arg.obtain(msg, arg.infinite ? provided.slice(i) : provided[i], promptLimit)
 				results.push(result)
@@ -73,7 +74,6 @@ class ArgumentCollector {
 				}
 
 				values[arg.key] = result.value
-				/* eslint-enable no-await-in-loop */
 			}
 		} catch (err) {
 			this.client.dispatcher._awaiting.delete(msg.author.id + msg.channel.id)

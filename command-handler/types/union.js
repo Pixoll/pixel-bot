@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMessage, Argument } = require('../typings')
 const ArgumentType = require('./base')
+/* eslint-enable no-unused-vars */
 
 /**
  * A type for command arguments that handles multiple other types

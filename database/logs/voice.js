@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, getLogsChannel, channelTypes } = require('../../utils')
+const { isModuleEnabled, channelTypes } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the voice logs.

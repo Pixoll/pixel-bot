@@ -1,7 +1,12 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, MessageButton, MessageActionRow, MessageEmbed } = require('discord.js')
-const { channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, sleep, embedColor, basicEmbed } = require('../../utils')
+const {
+    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor,
+    basicEmbed
+} = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ButtonRoleCommand extends Command {
@@ -96,7 +101,8 @@ module.exports = class ButtonRoleCommand extends Command {
         const { url } = await channel.send({ embeds: [embed], components: rows })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
+            color: 'GREEN',
+            emoji: 'check',
             description: `The buttons roles were successfully created at [this message](${url}).`
         }))
     }

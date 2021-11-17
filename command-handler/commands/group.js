@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { Collection, GuildResolvable } = require('discord.js')
 const { CommandoClient, Command } = require('../typings')
+/* eslint-enable no-unused-vars */
 
 /** A group for commands. Whodathunkit? */
 class CommandGroup {

@@ -55,9 +55,7 @@ function myMs(val, options = {}) {
         if (options.long) {
             const plural = val > 1 ? prop + 's' : prop
             arr.push(`${val} ${plural}`)
-        }
-
-        else {
+        } else {
             let char = prop.charAt(0)
             if (prop === 'month') char = 'mth'
             if (prop === 'millisecond') char = 'ms'
@@ -131,8 +129,13 @@ class Duration {
      */
     _formatDate(date) {
         return new Intl.DateTimeFormat('en-GB', {
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: 'numeric', minute: 'numeric', timeZone: 'UTC'//, timeZoneName: 'short'
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            timeZone: 'UTC',
+            // timeZoneName: 'short'
         }).format(date)
     }
 }
@@ -186,7 +189,11 @@ module.exports = {
 function _parse(str) {
     if (typeof str !== 'string') throw new TypeError('Expected a string.')
 
-    const regex = /(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|minutes?|mins?|hours?|hrs?|days?|weeks?|months?|mths?|years?|yrs?|[smhdwy])?/gi
+    const regex = new RegExp(
+        '(-?(?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|' +
+        'minutes?|mins?|hours?|hrs?|days?|weeks?|months?|mths?|years?|yrs?|[smhdwy])?',
+        'gi'
+    )
     const match = str.match(regex)
     if (!match) return
 

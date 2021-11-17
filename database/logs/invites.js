@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Invite, Collection } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled, validURL, timestamp } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the invite logs.
@@ -69,7 +71,9 @@ module.exports = (client) => {
             if (!invite) continue
             if (invites?.get(invite.code)) continue
 
-            const { channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild } = invite
+            const {
+                channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild
+            } = invite
 
             const embed = new MessageEmbed()
                 .setColor('BLUE')

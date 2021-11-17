@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the emoji logs.

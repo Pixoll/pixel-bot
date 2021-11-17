@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { Document } = require('mongoose')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = require('../../schemas')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles database behaviour in guild events.

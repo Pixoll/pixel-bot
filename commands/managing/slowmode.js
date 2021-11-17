@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { myMs, channelDetails, timeDetails } = require('../../utils')
 const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class SlowmodeCommand extends Command {
@@ -66,7 +68,9 @@ module.exports = class SlowmodeCommand extends Command {
         }
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `Changed slowmode in #${channel.name}`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Changed slowmode in #${channel.name}`,
             fieldValue: `**New rate limit:** ${myMs(ratelimit * 1000, { long: true, showAnd: true })}`
         }))
     }

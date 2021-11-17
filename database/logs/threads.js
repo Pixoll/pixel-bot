@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, getLogsChannel, channelTypes, timestamp, myMs } = require('../../utils')
+const { isModuleEnabled, channelTypes, timestamp, myMs } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the thread logs.

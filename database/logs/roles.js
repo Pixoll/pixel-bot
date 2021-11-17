@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Permissions } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji, isModuleEnabled, getKeyPerms, getLogsChannel, compareArrays } = require('../../utils')
+const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays } = require('../../utils')
 const { permissions } = require('../../command-handler/util')
+/* eslint-enable no-unused-vars */
 
 /**
  * Formats the {@link Permissions} into an array of string
@@ -55,7 +57,7 @@ module.exports = (client) => {
         if (tags) {
             const bot = tags.botId ? `Bot role for <@${tags.botId}>` : null
             const integration = tags.integrationId ? `Integration role for <@${tags.integrationId}>` : null
-            const boost = tags.premiumSubscriberRole ? `Default Server Booster role.` : null
+            const boost = tags.premiumSubscriberRole ? 'Default Server Booster role.' : null
             const tagsArr = [bot, integration, boost].filter(t => t)
             embed.addField('Tags', tagsArr.join('\n'))
         }
@@ -93,7 +95,7 @@ module.exports = (client) => {
         if (tags) {
             const bot = tags.botId ? `Bot role for <@${tags.botId}>` : null
             const integration = tags.integrationId ? `Integration role for <@${tags.integrationId}>` : null
-            const boost = tags.premiumSubscriberRole ? `Default Server Booster role.` : null
+            const boost = tags.premiumSubscriberRole ? 'Default Server Booster role.' : null
             const tagsArr = [bot, integration, boost].filter(t => t)
             embed.addField('Tags', tagsArr.join('\n'))
         }
@@ -134,10 +136,12 @@ module.exports = (client) => {
 
         if (emoji1 !== emoji2) embed.addField('Emoji', `${emoji1 || 'None'} ➜ ${emoji2 || 'None'}`)
 
-        if (icon1 !== icon2) embed.addField('Icon', stripIndent`
-            **Before:** ${imageLink(oldRole.iconURL({ size: 2048 }))}
-            **After:** ${imageLink(newRole.iconURL({ size: 2048 }))}
-        `).setThumbnail(newRole.iconURL({ size: 2048 }))
+        if (icon1 !== icon2) {
+            embed.addField('Icon', stripIndent`
+                **Before:** ${imageLink(oldRole.iconURL({ size: 2048 }))}
+                **After:** ${imageLink(newRole.iconURL({ size: 2048 }))}
+            `).setThumbnail(newRole.iconURL({ size: 2048 }))
+        }
 
         if (hoist1 !== hoist2) embed.addField('Hoisted', hoist1 ? 'Yes ➜ No' : 'No ➜ Yes')
 

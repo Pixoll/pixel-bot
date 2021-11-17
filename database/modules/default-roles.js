@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles default roles for new members.

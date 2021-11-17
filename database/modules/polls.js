@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /**
  * This module manages polls.
@@ -51,10 +53,12 @@ module.exports = async (client) => {
                     .setDescription(winner || noVotes || draw)
                     .setTimestamp()
 
-                if (!noVotes) pollEmbed.addField(
-                    'These are the full results:',
-                    results.map(d => `**>** Choice ${d.emoji} with \`${d.votes}\` votes.`).join('\n')
-                )
+                if (!noVotes) {
+                    pollEmbed.addField(
+                        'These are the full results:',
+                        results.map(d => `**>** Choice ${d.emoji} with \`${d.votes}\` votes.`).join('\n')
+                    )
+                }
 
                 await message.reply({ embeds: [pollEmbed] })
             }

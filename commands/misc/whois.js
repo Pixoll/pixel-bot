@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
 const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class WhoIsCommand extends Command {
@@ -40,7 +42,7 @@ module.exports = class WhoIsCommand extends Command {
         const member = await guild?.members.fetch(user).catch(() => null)
         const permissions = getKeyPerms(member)
 
-        let description = [user.toString()]
+        const description = [user.toString()]
         if (flags) {
             for (const flag of flags) description.push(userFlags[flag])
         }
@@ -66,10 +68,12 @@ module.exports = class WhoIsCommand extends Command {
                     let times = ''
                     if (timestamps) {
                         if (!timestamps.end) times = `Started ${timestamp(timestamps.start, 'R')}`
-                        else times = `${myMs(
-                            timestamps.end.getTime() - (timestamps.start?.getTime() || Date.now()),
-                            { long: true, showAnd: true }
-                        )} left`
+                        else {
+                            times = `${myMs(
+                                timestamps.end.getTime() - (timestamps.start?.getTime() || Date.now()),
+                                { long: true, showAnd: true }
+                            )} left`
+                        }
                     }
 
                     if (type === 'CUSTOM' && !!state) userInfo.addField('Custom status:', state)

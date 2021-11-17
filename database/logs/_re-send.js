@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../../command-handler/typings')
 const { getLogsChannel } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Re-sends audit-logs when deleted.

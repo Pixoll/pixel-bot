@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
 const { myMs } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 class DurationArgumentType extends ArgumentType {
     constructor(client) {
@@ -16,7 +18,7 @@ class DurationArgumentType extends ArgumentType {
         /** @type {number} */
         const int = myMs(val, { number: true })
 
-        if (!Boolean(int) || int < 1000) {
+        if (!int || int < 1000) {
             return 'Please enter a valid duration format. Use the `help` command for more information.'
         }
 

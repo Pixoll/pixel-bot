@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { oneLine } = require('common-tags')
 const { MessageEmbed, ColorResolvable, TextChannel, TextBasedChannels } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 const { embedColor, customEmoji } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the owner logs.
@@ -21,16 +23,13 @@ module.exports = async (client) => {
         const { ownerId, name, id } = guild
         const owner = await guild.fetchOwner()
 
+        const ownedBy = owner.user || owner ? `${owner.toString()} ${owner.user?.tag || ''}` : ownerId
+
         const info = new MessageEmbed()
             .setColor(color)
             .setAuthor(message, guild.iconURL({ dynamic: true }))
             .setThumbnail(guild.iconURL({ dynamic: true, size: 2048 }))
-            .setDescription(oneLine`
-                **${name}** is owned by ${owner.user || owner ?
-                    `${owner.toString()} ${owner.user?.tag || ''}`
-                    : ownerId
-                }
-            `)
+            .setDescription(`**${name}** is owned by ${ownedBy}`)
             .setFooter(`Guild id: ${id} | Owner id: ${ownerId}`)
             .setTimestamp()
 

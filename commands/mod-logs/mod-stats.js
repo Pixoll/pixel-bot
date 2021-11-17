@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { getDayDiff, code } = require('../../utils')
 const { ModerationSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ModStatsCommand extends Command {

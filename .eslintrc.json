@@ -1,0 +1,37 @@
+{
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "standard"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 12
+    },
+    "rules": {
+        "comma-dangle": "off",
+        "eol-last": [
+            "warn",
+            "never"
+        ],
+        "indent": "off",
+        "max-len": [
+            "error",
+            {
+                "code": 125
+            }
+        ],
+        "multiline-ternary": "off",
+        "no-tabs": [
+            "error",
+            {
+                "allowIndentationTabs": true
+            }
+        ],
+        "operator-linebreak": "off",
+        "space-before-function-paren": "off",
+        "new-cap": "off"
+    }
+}

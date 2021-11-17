@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const ArgumentType = require('./base')
 const { disambiguation } = require('../util')
 const { Util: { escapeMarkdown }, Role } = require('discord.js')
 const { CommandoMessage, Argument } = require('../typings')
+/* eslint-enable no-unused-vars */
 
 class RoleArgumentType extends ArgumentType {
 	constructor(client) {

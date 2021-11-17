@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { MessageEmbed, User, TextBasedChannels, Message, MessageOptions, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { myMs, noReplyInDMs, fetchPartial } = require('../../utils')
 const { basicEmbed } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * This module manages reminders.
@@ -72,7 +74,9 @@ module.exports = async (client) => {
 
         await user.send({
             embeds: [basicEmbed({
-                color: 'GREEN', emoji: 'check', fieldName: 'Your reminder has been cancelled',
+                color: 'GREEN',
+                emoji: 'check',
+                fieldName: 'Your reminder has been cancelled',
                 fieldValue: data.reminder
             })]
         })

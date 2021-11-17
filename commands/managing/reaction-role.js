@@ -1,10 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
 const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, getArgument, isValidRole } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
 const { ReactionRoleSchema } = require('../../schemas/types')
-const RoleArgumentType = require('../../command-handler/types/role')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ReactionRoleCommand extends Command {
@@ -91,13 +93,15 @@ module.exports = class ReactionRoleCommand extends Command {
      */
     async create(message, channel, msg) {
         const { client, guildId } = message
-        /** @type {RoleArgumentType} */
         const roleType = client.registry.types.get('role')
 
         const roles = []
         while (roles.length === 0) {
             const rolesMsg = await basicCollector(message, {
-                fieldName: 'What are the roles that you want to assign? Please send them separated by commas (max. 30 at once).'
+                fieldName: oneLine`
+                    What are the roles that you want to assign?
+                    Please send them separated by commas (max. 30 at once).
+                `
             }, { time: myMs('2m') })
             if (!rolesMsg) return
 
@@ -106,6 +110,7 @@ module.exports = class ReactionRoleCommand extends Command {
                 const con2 = isValidRole(message, con1 === true ? roleType.parse(str, message) : null)
                 if (!con1 && !con2) continue
 
+                /** @type {Role} */
                 const role = roleType.parse(str, message)
                 roles.push(role)
             }
@@ -143,7 +148,8 @@ module.exports = class ReactionRoleCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
+            color: 'GREEN',
+            emoji: 'check',
             description: `The reaction roles were successfully created at [this message](${msg.url}).`
         }))
     }
@@ -164,7 +170,8 @@ module.exports = class ReactionRoleCommand extends Command {
         await data.deleteOne()
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
+            color: 'GREEN',
+            emoji: 'check',
             description: `The reaction roles of [this message](${url}) were successfully removed.`
         }))
     }

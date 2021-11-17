@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { Guild, User, MessageEmbed } = require('discord.js')
 const Command = require('../commands/base')
 const GuildDatabaseManager = require('../database/GuildDatabaseManager')
 const GuildSettingsHelper = require('../providers/helper')
 const { CommandoClient, CommandResolvable, CommandGroupResolvable } = require('../typings')
+/* eslint-enable no-unused-vars */
 
 /**
  * A fancier Guild for fancier people.
@@ -10,8 +12,8 @@ const { CommandoClient, CommandResolvable, CommandGroupResolvable } = require('.
  */
 class CommandoGuild extends Guild {
 	/**
-	 * @param {CommandoClient} client 
-	 * @param {Guild} data 
+	 * @param {CommandoClient} client
+	 * @param {Guild} data
 	 */
 	constructor(client, data) {
 		super(client, { id: data.id })
@@ -32,7 +34,7 @@ class CommandoGuild extends Guild {
 		 * The client the guild is for
 		 * @type {CommandoClient}
 		 */
-		this.client
+		this.client = client
 
 		/**
 		 * Shortcut to use setting provider methods for this guild
@@ -53,7 +55,7 @@ class CommandoGuild extends Guild {
 		 * The queued logs for this guild
 		 * @type {MessageEmbed[]}
 		 */
-		this.queuedLogs = new Array()
+		this.queuedLogs = []
 	}
 
 	/**

@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { Invite } = require('discord.js')
 const ArgumentType = require('./base')
+/* eslint-enable no-unused-vars */
 
 class InviteArgumentType extends ArgumentType {
 	constructor(client) {

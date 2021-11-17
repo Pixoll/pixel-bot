@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { stripIndent } = require('common-tags')
+const { stripIndent, oneLine } = require('common-tags')
 const { basicEmbed, docId, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ReasonCommand extends Command {
@@ -11,10 +13,13 @@ module.exports = class ReasonCommand extends Command {
             group: 'mod-logs',
             description: 'Change the reason of a moderation log.',
             details: stripIndent`
-                \`modlog Id\` has to be a valid mod log Id. To see all the mod logs in this server use the \`modlogs\` command.
+                ${oneLine`
+                    \`modlog id\` has to be a valid mod log id.
+                    To see all the mod logs in this server use the \`modlogs\` command.
+                `}
                 \`new reason\` will be the new reason of the moderation log.
             `,
-            format: 'reason [modlog Id] [new reason]',
+            format: 'reason [modlog id] [new reason]',
             examples: [`reason ${docId()} Post NSFW and being racist`],
             userPermissions: ['ADMINISTRATOR'],
             guildOnly: true,
@@ -22,7 +27,7 @@ module.exports = class ReasonCommand extends Command {
                 {
                     key: 'modlogId',
                     label: 'mod log id',
-                    prompt: 'What is the Id of the mod log you want to change the duration?',
+                    prompt: 'What is the id of the mod log you want to change the duration?',
                     type: 'string',
                     max: 12
                 },
@@ -39,7 +44,7 @@ module.exports = class ReasonCommand extends Command {
     /**
     * @param {CommandoMessage} message The message the command is being run for
     * @param {object} args The arguments for the command
-    * @param {string} args.modlogId The mod log Id
+    * @param {string} args.modlogId The mod log id
     * @param {number} args.reason The new reason
     */
     async run(message, { modlogId, reason }) {
@@ -62,8 +67,10 @@ module.exports = class ReasonCommand extends Command {
         if (activeLog) await active.update(activeLog, { reason })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: `Updated reason for mod log \`${modlogId}\``, fieldValue: `**New reason:** ${reason}`
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Updated reason for mod log \`${modlogId}\``,
+            fieldValue: `**New reason:** ${reason}`
         }))
     }
 }

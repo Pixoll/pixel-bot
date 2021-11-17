@@ -1,4 +1,8 @@
-const { Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels, MessageButton, MessageActionRow } = require('discord.js')
+/* eslint-disable no-unused-vars */
+const {
+	Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels, MessageButton,
+	MessageActionRow
+} = require('discord.js')
 const { CommandoClient, StringResolvable, CommandoGuild, ClientGuildMember } = require('../typings')
 const { oneLine, stripIndent } = require('common-tags')
 const Command = require('../commands/base')
@@ -6,6 +10,7 @@ const FriendlyError = require('../errors/friendly')
 const CommandFormatError = require('../errors/command-format')
 const { resolveString } = require('../util')
 const { embedColor } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * An extension of the base Discord.js Message class to add command-related functionality.
@@ -28,13 +33,13 @@ class CommandoMessage extends Message {
 		 * The client the message is for
 		 * @type {CommandoClient}
 		 */
-		this.client
+		this.client = client
 
 		/**
 		 * The channel the message is for
 		 * @type {TextBasedChannels}
 		 */
-		this.channel
+		this.channel = data.channel
 		this.channelId = data.channelId
 
 		this.type = data.type
@@ -43,13 +48,13 @@ class CommandoMessage extends Message {
 		 * The author of the message
 		 * @type {User}
 		 */
-		this.author
+		this.author = data.channel
 
 		/**
 		 * The guild this message is for
 		 * @type {CommandoGuild}
 		 */
-		this.guild
+		this.guild = data.guild
 		this.guildId = this.guild?.id || null
 
 		/**
@@ -165,7 +170,7 @@ class CommandoMessage extends Message {
 	 * Runs the command
 	 * @return {Promise<?Message|?Array<Message>>}
 	 */
-	async run() { // eslint-disable-line complexity
+	async run() {
 		// Checks if the client has permission to send messages
 		const clientPerms = this.clientMember?.permissionsIn(this.channel).serialize()
 		if (clientPerms && !clientPerms.SEND_MESSAGES) {
@@ -286,7 +291,8 @@ class CommandoMessage extends Message {
 				throw new TypeError(oneLine`
 					Command ${this.command.name}'s run() resolved with an unknown type
 					(${retVal !== null ? retVal && retVal.constructor ? retVal.constructor.name : typeof retVal : null}).
-					Command run methods must return a Promise that resolve with a Message, Array of Messages, or null/undefined.
+					Command run methods must return a Promise that resolve with a Message,
+					Array of Messages, or null/undefined.
 				`)
 			}
 
@@ -408,7 +414,7 @@ class CommandoMessage extends Message {
 			}
 			return Promise.all(promises)
 		} else {
-			if (response instanceof Array) { // eslint-disable-line no-lonely-if
+			if (response instanceof Array) {
 				for (let i = response.length - 1; i > 0; i--) response[i].delete()
 				return response[0].edit(options)
 			} else {

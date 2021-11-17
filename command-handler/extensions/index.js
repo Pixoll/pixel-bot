@@ -22,7 +22,7 @@ Structures.extend('Guild', Guild => {
              * The client the guild is for
              * @type {CommandoClient}
              */
-            this.client
+            this.client = client
 
             /**
              * Shortcut to use setting provider methods for this guild
@@ -43,7 +43,7 @@ Structures.extend('Guild', Guild => {
              * The queued logs for this server
              * @type {MessageEmbed[]}
              */
-            this.queuedLogs = new Array()
+            this.queuedLogs = []
         }
 
         /**
@@ -146,7 +146,9 @@ Structures.extend('Guild', Guild => {
     return CommandoGuild
 })
 
+/* eslint-disable no-unused-vars */
 const { CommandResolvable, CommandGroupResolvable, CommandoClient } = require('../typings')
 const { Command } = require('../')
 const { User, MessageEmbed } = require('discord.js')
 const GuildDatabaseManager = require('../database/GuildDatabaseManager')
+/* eslint-enable no-unused-vars */

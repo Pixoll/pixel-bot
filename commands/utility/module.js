@@ -1,9 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, capitalize, getArgument, addDashes, removeDashes } = require('../../utils')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 const Obj = require('../../schemas').modules.schema.obj
 /** @type {string[]} */
@@ -16,7 +19,7 @@ const auditLogs = Object.keys(Obj.auditLogs).map(addDashes)
  * @param {ModuleSchema} data The data to patch
  */
 function patchData(data) {
-    const _patch = b => b === false ? false : true
+    const _patch = b => b !== false
 
     const patch = {
         // autoMod: _patch(data?.autoMod),
@@ -185,7 +188,9 @@ module.exports = class ModuleCommand extends Command {
         this.client.emit('moduleStatusChange', guild, target, status)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `Toggled the ${type} \`${target}\``,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Toggled the ${type} \`${target}\``,
             fieldValue: `**New status:** ${status ? 'Enabled' : 'Disabled'}`
         }))
     }

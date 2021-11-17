@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient } = require('./command-handler/typings')
 const { CommandoMessage, Command } = require('./command-handler/typings')
 const { MessageEmbed, TextChannel, Util } = require('discord.js')
 const { customEmoji, docId, code } = require('./utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /**
  * A manager for all errors of the process and client
@@ -49,12 +51,12 @@ module.exports = (client) => {
      * @param {string} [id] the error id to use
      */
     async function errorHandler(error, type, message, command, id) {
+        /** @type {TextChannel} */
+        const errorsChannel = await client.channels.fetch('906740370304540702')
+
         if (error instanceof Error) {
             if (command?.name === 'eval') return
             console.error(error)
-
-            /** @type {TextChannel} */
-            const errorsChannel = await client.channels.fetch('906740370304540702')
 
             const lentgh = error.name.length + error.message.length + 3
             const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
@@ -72,12 +74,17 @@ module.exports = (client) => {
             ).join('\n')
 
             const { guild, channel, url, author } = message ?? {}
-            const where = message ? (
-                guild ? stripIndent`
-                At guild **${guild.name}** (${guild.id}), channel ${channel.toString()}.
-                Please go to [this message](${url}) for more information.
-            ` : `In DMs with ${author.toString()} (${author.tag}).`
-            ) : ''
+            let where = ''
+            if (message) {
+                if (guild) {
+                    where = stripIndent`
+                        At guild **${guild.name}** (${guild.id}), channel ${channel.toString()}.
+                        Please go to [this message](${url}) for more information.
+                    `
+                } else {
+                    where = `In DMs with ${author.toString()} (${author.tag}).`
+                }
+            }
             const whatCommand = command ? ` at '${command.name}' command` : ''
 
             id ??= docId()
@@ -108,9 +115,7 @@ module.exports = (client) => {
                 command: command?.name,
                 files: code(files)
             })
-        }
-
-        else {
+        } else {
             console.warn(error)
 
             const embed = new MessageEmbed()
@@ -118,7 +123,7 @@ module.exports = (client) => {
                 .setTitle(type)
                 .setDescription(error)
 
-            await channel.send({ embeds: [embed] })
+            await errorsChannel.send({ embeds: [embed] })
         }
     }
 }

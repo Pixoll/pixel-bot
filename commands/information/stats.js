@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { myMs, formatBytes } = require('../../utils')
 const { MessageEmbed } = require('discord.js')
-const { stripIndent } = require('common-tags')
 const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class StatsCommand extends Command {

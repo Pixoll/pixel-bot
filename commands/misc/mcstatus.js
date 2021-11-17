@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, MessageAttachment, MessageOptions } = require('discord.js')
@@ -5,7 +7,7 @@ const { status: statusJava, statusBedrock } = require('minecraft-server-util')
 const { StatusResponse, BedrockStatusResponse } = require('minecraft-server-util/dist/model/StatusResponse')
 const { basicEmbed, getArgument, remDiscFormat, noReplyInDMs } = require('../../utils')
 const { stripIndent } = require('common-tags')
-const { McIpSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class McStatusCommand extends Command {
@@ -94,7 +96,8 @@ module.exports = class McStatusCommand extends Command {
 
         if (!savedServer) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross',
+                color: 'RED',
+                emoji: 'cross',
                 description: 'Please run the `save:java` or `save:bedrock` sub-commands before using this.'
             }))
         }
@@ -176,7 +179,9 @@ module.exports = class McStatusCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: 'Saved Minecraft server data',
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: 'Saved Minecraft server data',
             fieldValue: stripIndent`
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
@@ -191,9 +196,9 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} port The port of the Bedrock server to save
      */
     async saveBedrock(message, ip, port) {
-        const { permissions } = message.member
+        const { guildId, member } = message
 
-        if (!this.client.isOwner(message) && !permissions.has('ADMINISTRATOR')) {
+        if (!this.client.isOwner(message) && !member.permissions.has('ADMINISTRATOR')) {
             return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
 
@@ -211,7 +216,9 @@ module.exports = class McStatusCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: 'Saved Minecraft server data',
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: 'Saved Minecraft server data',
             fieldValue: stripIndent`
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
@@ -246,10 +253,12 @@ module.exports = class McStatusCommand extends Command {
             .setThumbnail('attachment://icon.png')
             .setTimestamp()
 
-        if (samplePlayers?.length > 0) serverInfo.addField(
-            'Player list',
-            samplePlayers.map(p => `\`${p.name}\``).join(', ')
-        )
+        if (samplePlayers?.length > 0) {
+            serverInfo.addField(
+                'Player list',
+                samplePlayers.map(p => `\`${p.name}\``).join(', ')
+            )
+        }
 
         serverInfo.addField('Information', stripIndent`
             **>** **Online players:** ${onlinePlayers}/${maxPlayers}

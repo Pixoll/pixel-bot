@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { MessageEmbed } = require('discord.js')
 const { commandInfo, pagedEmbed, getArgument } = require('../../utils')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
-const { CommandoMessage, Command: CommandType } = require('../../command-handler/typings')
+const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class HelpCommand extends Command {
@@ -31,7 +33,7 @@ module.exports = class HelpCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {CommandType} args.cmd The command to get information from
+     * @param {Command} args.cmd The command to get information from
      */
     async run(message, { cmd }) {
         const { guild, client, author } = message
@@ -197,7 +199,9 @@ module.exports = class HelpCommand extends Command {
             })
 
             return await pagedEmbed(message, {
-                number: 1, total: pages.length, toUser: true,
+                number: 1,
+                total: pages.length,
+                toUser: true,
                 dmMsg: 'Check your DMs for a list of the commands and information about the bot.'
             }, generate)
         }

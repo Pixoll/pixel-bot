@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { stripIndent } = require('common-tags')
+const { stripIndent, oneLine } = require('common-tags')
 const { myMs, basicEmbed, timeDetails, docId, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class DurationCommand extends Command {
@@ -11,7 +13,10 @@ module.exports = class DurationCommand extends Command {
             group: 'mod-logs',
             description: 'Change the duration of a punishment.',
             details: stripIndent`
-                \`modlog Id\` has to be a valid mod log id. To see all the mod logs in this server use the \`modlogs\` command.
+                ${oneLine`
+                    \`modlog id\` has to be a valid mod log id.
+                    To see all the mod logs in this server use the \`modlogs\` command.
+                `}
                 ${timeDetails('new duration')}
             `,
             format: 'duration [modlog id] [new duration]',
@@ -42,7 +47,7 @@ module.exports = class DurationCommand extends Command {
      * Runs the command
      * @param {CommandoMessage} message The message the command is being run for
      * @param {object} args The arguments for the command
-     * @param {string} args.modlogId The mod log Id
+     * @param {string} args.modlogId The mod log id
      * @param {number|Date} args.duration The new duration
      */
     async run(message, { modlogId, duration }) {
@@ -75,8 +80,10 @@ module.exports = class DurationCommand extends Command {
         await active.update(activeLog, { duration })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: `Updated duration for mod log \`${modlogId}\``, fieldValue: `**New duration:** ${longTime}`
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Updated duration for mod log \`${modlogId}\``,
+            fieldValue: `**New duration:** ${longTime}`
         }))
     }
 }

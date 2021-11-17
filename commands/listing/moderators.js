@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { oneLine } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { isMod, generateEmbed, basicEmbed, pluralize } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ModeratorsCommand extends Command {
@@ -29,7 +31,8 @@ module.exports = class ModeratorsCommand extends Command {
         const mods = members?.filter(m => isMod(m, true) && !m.user.bot)
         if (!mods || mods.size === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info',
+                color: 'BLUE',
+                emoji: 'info',
                 description: 'There are no moderators, try running the `admins` command instead.'
             }))
         }

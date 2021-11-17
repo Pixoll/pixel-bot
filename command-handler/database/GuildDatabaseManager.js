@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
 const { CommandoGuild, CommandoClient } = require('../typings')
 const DatabaseManager = require('./DatabaseManager')
 const schemas = require('../../schemas')
+/* eslint-enable no-unused-vars */
 
 /** All guilds' database manager (MongoDB) */
 class GuildDatabaseManager {

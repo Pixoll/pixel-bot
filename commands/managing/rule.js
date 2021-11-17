@@ -1,9 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, myMs, embedColor, getArgument } = require('../../utils')
 const { RuleSchema } = require('../../schemas/types')
 const { MessageEmbed } = require('discord.js')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class RuleCommand extends Command {
@@ -165,7 +168,9 @@ module.exports = class RuleCommand extends Command {
         rule++
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `Removed rule number ${rule--}:`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Removed rule number ${rule--}:`,
             fieldValue: rulesData.rules[rule]
         }))
     }

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { ModuleSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /**
  * Patches the data of a {@link ModuleSchema}

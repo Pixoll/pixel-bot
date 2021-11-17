@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled, timestamp } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Returns a clickable link to the image. `None` if the link is invald
@@ -94,10 +96,12 @@ module.exports = (client) => {
 
         if (nick1 !== nick2) embed.addField('Nickname', `${nick1 || 'None'} ➜ ${nick2 || 'None'}`)
 
-        if (avatar1 !== avatar2) embed.addField('Server avatar', stripIndent`
-            **Before:** ${imageLink(oldMember.displayAvatarURL(imgOptions))}
-            **After:** ${imageLink(newMember.displayAvatarURL(imgOptions))}
-        `).setThumbnail(newMember.displayAvatarURL(imgOptions))
+        if (avatar1 !== avatar2) {
+            embed.addField('Server avatar', stripIndent`
+                **Before:** ${imageLink(oldMember.displayAvatarURL(imgOptions))}
+                **After:** ${imageLink(newMember.displayAvatarURL(imgOptions))}
+            `).setThumbnail(newMember.displayAvatarURL(imgOptions))
+        }
 
         if (role) {
             const action = roles2.cache.has(role.id) ? 'Added' : 'Removed'

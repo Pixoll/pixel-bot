@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { Message, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /**
  * This module manages button roles.

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { escapeRegex } = require('./util')
 const isPromise = require('is-promise')
 const CommandoRegistry = require('./registry')
 const { Message, MessageEmbed } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient } = require('./typings')
+/* eslint-enable no-unused-vars */
 
 /** Handles parsing messages and running commands from them */
 class CommandDispatcher {
@@ -52,6 +54,7 @@ class CommandDispatcher {
 		this._awaiting = new Set()
 	}
 
+	/* eslint-disable no-tabs */
 	/**
 	 * Adds an inhibitor
 	 * @param {Inhibitor} inhibitor The inhibitor function to add
@@ -68,6 +71,7 @@ class CommandDispatcher {
 	 * 	}
 	 * })
 	 */
+	/* eslint-enable no-tabs */
 	addInhibitor(inhibitor) {
 		if (typeof inhibitor !== 'function') throw new TypeError('The inhibitor must be a function.')
 		if (this.inhibitors.has(inhibitor)) return false
@@ -93,7 +97,6 @@ class CommandDispatcher {
 	 * @private
 	 */
 	async handleMessage(message, oldMessage) {
-		/* eslint-disable max-depth */
 		if (!this.shouldHandleMessage(message, oldMessage)) return
 
 		// Parse the message, and get the old result if it exists
@@ -152,7 +155,6 @@ class CommandDispatcher {
 		}
 
 		this.cacheCommandoMessage(message, oldMessage, cmdMsg, responses)
-		/* eslint-enable max-depth */
 	}
 
 	/**

@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { memberDetails, reasonDetails, basicEmbed, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class UnmuteCommand extends Command {
@@ -51,7 +53,8 @@ module.exports = class UnmuteCommand extends Command {
         const data = await setup.fetch()
         if (!data || !data.mutedRole) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross',
+                color: 'RED',
+                emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
             }))
         }
@@ -74,7 +77,9 @@ module.exports = class UnmuteCommand extends Command {
         if (mute) await active.delete(mute)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been unmuted`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been unmuted`,
             fieldValue: `**Reason:** ${reason}`
         }))
     }

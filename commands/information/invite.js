@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const { MessageButton, MessageActionRow } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class InviteCommand extends Command {

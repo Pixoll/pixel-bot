@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../../command-handler/typings')
+/* eslint-enable no-unused-vars */
 
 /**
  * Disables all saved modules in all servers.

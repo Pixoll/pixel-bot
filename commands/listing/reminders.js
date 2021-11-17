@@ -1,9 +1,12 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, pluralize, confirmButtons } = require('../../utils')
 const { ReminderSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class RemindersCommand extends Command {
@@ -41,7 +44,8 @@ module.exports = class RemindersCommand extends Command {
         const data = await this.db.fetchMany({ user: message.author.id })
         if (data.size === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info',
+                color: 'BLUE',
+                emoji: 'info',
                 description: 'You have no active reminders. Use the `reminder` command to add reminders.'
             }))
         }
@@ -91,8 +95,7 @@ module.exports = class RemindersCommand extends Command {
         }
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            description: 'Your reminders have been deleted.'
+            color: 'GREEN', emoji: 'check', description: 'Your reminders have been deleted.'
         }))
     }
 }

@@ -1,8 +1,11 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, getArgument, confirmButtons } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TodoSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class TodoCommand extends Command {
@@ -41,7 +44,7 @@ module.exports = class TodoCommand extends Command {
                     validate: (val, msg) => {
                         const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
                         if (sc !== 'remove') return true
-                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => n !== NaN || n < 1))]
+                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => isNaN(n) || n < 1))]
                         return array.length !== 0
                     },
                     parse: (val, msg) => {
@@ -124,8 +127,10 @@ module.exports = class TodoCommand extends Command {
         else await this.db.update(todoData, { $push: { list: item } })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            fieldName: 'Added the following item to your to-do list:', fieldValue: item
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: 'Added the following item to your to-do list:',
+            fieldValue: item
         }))
     }
 
@@ -178,8 +183,7 @@ module.exports = class TodoCommand extends Command {
         await this.db.delete(todoData)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
-            description: 'Your to-do list has been cleared.'
+            color: 'GREEN', emoji: 'check', description: 'Your to-do list has been cleared.'
         }))
     }
 }

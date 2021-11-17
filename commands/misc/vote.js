@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { User, MessageActionRow, MessageButton } = require('discord.js')
+const { MessageActionRow, MessageButton } = require('discord.js')
 const { noReplyInDMs } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class VoteCommand extends Command {

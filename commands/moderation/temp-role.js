@@ -1,9 +1,13 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { Role, GuildMember } = require('discord.js')
-const { memberDetails, timeDetails, roleDetails, reasonDetails, timestamp, isValidRole } = require('../../utils')
+const {
+    memberDetails, timeDetails, roleDetails, reasonDetails, timestamp, isValidRole, getArgument
+} = require('../../utils')
 const { basicEmbed, docId } = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class TempRoleCommand extends Command {
@@ -79,7 +83,8 @@ module.exports = class TempRoleCommand extends Command {
         if (!user.bot) {
             await user.send({
                 embeds: [basicEmbed({
-                    color: 'GOLD', fieldName: `You have been given the \`${role.name}\` role on ${guild.name}`,
+                    color: 'GOLD',
+                    fieldName: `You have been given the \`${role.name}\` role on ${guild.name}`,
                     fieldValue: stripIndent`
                         **Expires:** ${timestamp(duration, 'R')}
                         **Reason:** ${reason}
@@ -99,7 +104,9 @@ module.exports = class TempRoleCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `Added role \`${role.name}\` to ${user.tag}`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `Added role \`${role.name}\` to ${user.tag}`,
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}

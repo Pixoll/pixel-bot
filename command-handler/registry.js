@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const path = require('path')
 const { Collection } = require('discord.js')
 const Command = require('./commands/base')
@@ -5,7 +6,10 @@ const CommandGroup = require('./commands/group')
 const CommandoMessage = require('./extensions/message')
 const ArgumentType = require('./types/base')
 const { isConstructor } = require('./util')
-const { CommandoClient, DefaultCommandsOptions, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable } = require('./typings')
+const {
+	CommandoClient, DefaultCommandsOptions, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable
+} = require('./typings')
+/* eslint-enable no-unused-vars */
 
 /** Handles registration and searching of commands and groups */
 class CommandoRegistry {
@@ -61,7 +65,7 @@ class CommandoRegistry {
 		if (typeof group === 'string') {
 			group = new CommandGroup(this.client, group, name, guarded)
 		} else if (isConstructor(group, CommandGroup)) {
-			group = new group(this.client) // eslint-disable-line new-cap
+			group = new group(this.client)
 		} else if (typeof group === 'object' && !(group instanceof CommandGroup)) {
 			group = new CommandGroup(this.client, group.id, group.name, group.guarded)
 		}
@@ -79,6 +83,7 @@ class CommandoRegistry {
 		return this
 	}
 
+	/* eslint-disable no-tabs */
 	/**
 	 * Registers multiple groups
 	 * @param {CommandGroup[]|Function[]|Object[]|Array<string[]>} groups An array of CommandGroup instances,
@@ -96,6 +101,7 @@ class CommandoRegistry {
 	 * 	{ id: 'mod', name: 'Moderation' }
 	 * ])
 	 */
+	/* eslint-enable no-tabs */
 	registerGroups(groups) {
 		if (!Array.isArray(groups)) throw new TypeError('Groups must be an Array.')
 		for (const group of groups) {
@@ -112,10 +118,8 @@ class CommandoRegistry {
 	 * @see {@link CommandoRegistry#registerCommands}
 	 */
 	registerCommand(command) {
-		/* eslint-disable new-cap */
 		if (isConstructor(command, Command)) command = new command(this.client)
 		else if (isConstructor(command.default, Command)) command = new command.default(this.client)
-		/* eslint-enable new-cap */
 		if (!(command instanceof Command)) throw new Error(`Invalid command object to register: ${command}`)
 
 		// Make sure there aren't any conflicts
@@ -195,10 +199,8 @@ class CommandoRegistry {
 	 * @see {@link CommandoRegistry#registerTypes}
 	 */
 	registerType(type) {
-		/* eslint-disable new-cap */
 		if (isConstructor(type, ArgumentType)) type = new type(this.client)
 		else if (isConstructor(type.default, ArgumentType)) type = new type.default(this.client)
-		/* eslint-enable new-cap */
 
 		if (!(type instanceof ArgumentType)) throw new Error(`Invalid type object to register: ${type}`)
 
@@ -223,7 +225,11 @@ class CommandoRegistry {
 	registerTypes(types, ignoreInvalid = false) {
 		if (!Array.isArray(types)) throw new TypeError('Types must be an Array.')
 		for (const type of types) {
-			const valid = isConstructor(type, ArgumentType) || isConstructor(type.default, ArgumentType) || type instanceof ArgumentType || type.default instanceof ArgumentType
+			const valid = isConstructor(type, ArgumentType) ||
+				isConstructor(type.default, ArgumentType) ||
+				type instanceof ArgumentType ||
+				type.default instanceof ArgumentType
+
 			if (ignoreInvalid && !valid) {
 				this.client.emit('warn', `Attempting to register an invalid argument type object: ${type} skipping.`)
 				continue
@@ -245,6 +251,7 @@ class CommandoRegistry {
 		return this.registerTypes(types, true)
 	}
 
+	/* eslint-disable no-tabs */
 	/**
 	 * Registers the default argument types, groups, and commands. This is equivalent to:
 	 * ```js
@@ -254,6 +261,7 @@ class CommandoRegistry {
 	 * ```
 	 * @return {CommandoRegistry}
 	 */
+	/* eslint-enable no-tabs */
 	registerDefaults() {
 		this.registerDefaultTypes()
 		this.registerDefaultGroups()
@@ -299,10 +307,29 @@ class CommandoRegistry {
 	 */
 	registerDefaultTypes(types = {}) {
 		types = {
-			string: true, integer: true, float: true, boolean: true, duration: true, date: true, time: true, user: true,
-			member: true, role: true, channel: true, textChannel: true, threadChannel: true, voiceChannel: true,
-			stageChannel: true, categoryChannel: true, message: true, invite: true, customEmoji: true,
-			defaultEmoji: true, command: true, group: true, ...types
+			string: true,
+			integer: true,
+			float: true,
+			boolean: true,
+			duration: true,
+			date: true,
+			time: true,
+			user: true,
+			member: true,
+			role: true,
+			channel: true,
+			textChannel: true,
+			threadChannel: true,
+			voiceChannel: true,
+			stageChannel: true,
+			categoryChannel: true,
+			message: true,
+			invite: true,
+			customEmoji: true,
+			defaultEmoji: true,
+			command: true,
+			group: true,
+			...types
 		}
 
 		for (let type in types) {
@@ -322,10 +349,8 @@ class CommandoRegistry {
 	 * @param {Command} oldCommand Old command
 	 */
 	reregisterCommand(command, oldCommand) {
-		/* eslint-disable new-cap */
 		if (isConstructor(command, Command)) command = new command(this.client)
 		else if (isConstructor(command.default, Command)) command = new command.default(this.client)
-		/* eslint-enable new-cap */
 
 		if (command.name !== oldCommand.name) throw new Error('Command name cannot change.')
 		if (command.groupId !== oldCommand.groupId) throw new Error('Command group cannot change.')

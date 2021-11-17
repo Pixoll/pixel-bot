@@ -3,7 +3,7 @@ import {
 	MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable,
 	InviteGenerationOptions, GuildMember, ClientUser, Snowflake, CachedManager, FetchGuildOptions, FetchGuildsOptions
 } from 'discord.js'
-import { ConnectOptions, FilterQuery, Model, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose'
+import { FilterQuery, Model, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose'
 import {
 	ActiveSchema, AfkSchema, DisabledSchema, ErrorSchema, FaqSchema, McIpSchema, ModerationSchema, ModuleSchema, PollSchema, PrefixSchema,
 	ReactionRoleSchema, ReminderSchema, RuleSchema, SetupSchema, StickyRoleSchema, TodoSchema, WelcomeSchema

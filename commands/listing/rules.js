@@ -1,7 +1,10 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class RulesCommand extends Command {
@@ -40,7 +43,8 @@ module.exports = class RulesCommand extends Command {
 
         if (!data || data.rules.length === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info',
+                color: 'BLUE',
+                emoji: 'info',
                 description: 'The are no saved rules for this server. Use the `rule` command to add rules.'
             }))
         }
@@ -88,7 +92,8 @@ module.exports = class RulesCommand extends Command {
         await this.db.delete(data)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check',
+            color: 'GREEN',
+            emoji: 'check',
             description: 'All the server rules have been deleted.'
         }))
     }

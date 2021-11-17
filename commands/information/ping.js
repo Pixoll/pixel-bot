@@ -1,8 +1,10 @@
-const { oneLine, stripIndent } = require('common-tags')
+/* eslint-disable no-unused-vars */
+const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { embedColor, basicEmbed } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class PingCommand extends Command {

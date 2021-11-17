@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const ArgumentType = require('./base')
 const { disambiguation } = require('../util')
 const { Util: { escapeMarkdown }, GuildEmoji } = require('discord.js')
 const { CommandoMessage } = require('../typings')
+/* eslint-enable no-unused-vars */
 
 class CustomEmojiArgumentType extends ArgumentType {
 	constructor(client) {

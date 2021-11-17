@@ -1,7 +1,12 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter, locales, nsfwLevels, removeUnderscores, sysChannelFlags } = require('../../utils')
+const {
+    arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter,
+    locales, nsfwLevels, removeUnderscores, sysChannelFlags
+} = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Compares and returns the difference between the set of permissions
@@ -37,7 +42,8 @@ module.exports = (client) => {
 
         const { id, client } = oldGuild
 
-        const { name: name1, systemChannel: sysChan1, afkChannel: afkChan1, afkTimeout: afkTo1, ownerId: ownerId1,
+        const {
+            name: name1, systemChannel: sysChan1, afkChannel: afkChan1, afkTimeout: afkTo1, ownerId: ownerId1,
             defaultMessageNotifications: notif1, banner: banner1, description: desc1, splash: splash1, vanityURLCode: url1,
             features: features1, icon: icon1, verificationLevel: verLVL1, explicitContentFilter: expFilter1,
             mfaLevel: mfa1, widgetChannel: widgetChan1, widgetEnabled: widgetOn1, discoverySplash: discSplash1,
@@ -45,7 +51,8 @@ module.exports = (client) => {
             partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1,
             maximumBitrate: maxBitrate1
         } = oldGuild
-        const { name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,
+        const {
+            name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,
             defaultMessageNotifications: notif2, banner: banner2, description: desc2, splash: splash2, vanityURLCode: url2,
             features: features2, icon: icon2, verificationLevel: verLVL2, explicitContentFilter: expFilter2,
             mfaLevel: mfa2, widgetChannel: widgetChan2, widgetEnabled: widgetOn2, discoverySplash: discSplash2,
@@ -66,12 +73,14 @@ module.exports = (client) => {
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)
 
-        if (desc1 !== desc2) embed.addField('Description', stripIndent`
-            **Before**
-            ${desc1 || 'None'}
-            **After**
-            ${desc2 || 'None'}
-        `)
+        if (desc1 !== desc2) {
+            embed.addField('Description', stripIndent`
+                **Before**
+                ${desc1 || 'None'}
+                **After**
+                ${desc2 || 'None'}
+            `)
+        }
 
         if (icon1 !== icon2) {
             imagesEmbed.addField('Icon', stripIndent`
@@ -79,7 +88,7 @@ module.exports = (client) => {
                 **After:** ${imageLink(newGuild.iconURL(imgOptions))}
             `).setThumbnail(newGuild.iconURL(imgOptions))
 
-            guild.queuedLogs.push(imagesEmbed)
+            newGuild.queuedLogs.push(imagesEmbed)
         }
 
         if (ownerId1 !== ownerId2) {
@@ -91,7 +100,10 @@ module.exports = (client) => {
         }
 
         if (sysChan1 !== sysChan2) {
-            embed.addField('System messages channel', `${sysChan1?.toString() || 'None'} ➜ ${sysChan2?.toString() || 'None'}`)
+            embed.addField(
+                'System messages channel',
+                `${sysChan1?.toString() || 'None'} ➜ ${sysChan2?.toString() || 'None'}`
+            )
         }
 
         if (!arrayEquals(sysChanFlags1.toArray(), sysChanFlags2.toArray())) {
@@ -117,38 +129,43 @@ module.exports = (client) => {
             embed.addField('AFK channel', `${afkChan1?.toString() || 'None'} ➜ ${afkChan2?.toString() || 'None'}`)
         }
 
-        if (afkTo1 !== afkTo2) embed.addField(
-            'AFK timeout',
-            `${myMs(afkTo1 * 1000, { long: true })} ➜ ${myMs(afkTo2 * 1000, { long: true })}`
-        )
+        if (afkTo1 !== afkTo2) {
+            embed.addField(
+                'AFK timeout',
+                `${myMs(afkTo1 * 1000, { long: true })} ➜ ${myMs(afkTo2 * 1000, { long: true })}`
+            )
+        }
 
         if (notif1 !== notif2) {
             embed.addField(
-                'Default notification settings', notif1 === 'ALL_MESSAGES' || notif1 === 0 ?
-                'All messages ➜ Only @mentions' : 'Only @mentions ➜ All messages'
+                'Default notification settings',
+                notif1 === 'ALL_MESSAGES' || notif1 === 0 ?
+                    'All messages ➜ Only @mentions' : 'Only @mentions ➜ All messages'
             )
         }
 
         if (banner1 !== banner2) {
             imagesEmbed.spliceFields(0, 1, [{
-                name: 'Banner', value: stripIndent`
+                name: 'Banner',
+                value: stripIndent`
                     **Before:** ${imageLink(oldGuild.bannerURL(imgOptions), true)}
                     **After:** ${imageLink(newGuild.bannerURL(imgOptions))}
                 `
             }]).setThumbnail(newGuild.bannerURL(imgOptions))
 
-            guild.queuedLogs.push(imagesEmbed)
+            newGuild.queuedLogs.push(imagesEmbed)
         }
 
         if (splash1 !== splash2) {
             imagesEmbed.spliceFields(0, 1, [{
-                name: 'Invite splash image', value: stripIndent`
+                name: 'Invite splash image',
+                value: stripIndent`
                     **Before:** ${imageLink(oldGuild.splashURL(imgOptions), true)}
                     **After:** ${imageLink(newGuild.splashURL(imgOptions))}
                 `
             }]).setThumbnail(newGuild.splashURL(imgOptions))
 
-            guild.queuedLogs.push(imagesEmbed)
+            newGuild.queuedLogs.push(imagesEmbed)
         }
 
         if (url1 !== url2) embed.addField('Vanity URL code', `${url1 || 'None'} ➜ ${url2 || 'None'}`)
@@ -208,13 +225,14 @@ module.exports = (client) => {
 
         if (discSplash1 !== discSplash2) {
             imagesEmbed.spliceFields(0, 1, [{
-                name: 'Discovery splash image', value: stripIndent`
+                name: 'Discovery splash image',
+                value: stripIndent`
                     **Before:** ${imageLink(oldGuild.discoverySplashURL(imgOptions), true)}
                     **After:** ${imageLink(newGuild.discoverySplashURL(imgOptions))}
                 `
             }]).setThumbnail(newGuild.discoverySplashURL(imgOptions))
 
-            guild.queuedLogs.push(imagesEmbed)
+            newGuild.queuedLogs.push(imagesEmbed)
         }
 
         if (updateChan1 !== updateChan2) {

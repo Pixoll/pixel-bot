@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
-const { generateEmbed, pluralize, abcOrder } = require('../../utils')
+const { generateEmbed, pluralize, abcOrder, basicEmbed } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class BoostersCommand extends Command {
@@ -26,7 +28,7 @@ module.exports = class BoostersCommand extends Command {
 
         if (boosters.length === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info', description: `There are no boosters in this server.`
+                color: 'BLUE', emoji: 'info', description: 'There are no boosters in this server.'
             }))
         }
 

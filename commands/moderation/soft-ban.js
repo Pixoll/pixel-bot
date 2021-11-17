@@ -1,8 +1,13 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User, TextChannel, GuildMember } = require('discord.js')
-const { docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge, confirmButtons } = require('../../utils')
+const {
+    docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge,
+    confirmButtons
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class SoftBanCommand extends Command {
@@ -68,7 +73,8 @@ module.exports = class SoftBanCommand extends Command {
 
         if (!user.bot && !!member) {
             const embed = basicEmbed({
-                color: 'GOLD', fieldName: `You have been soft-banned from ${guild.name}`,
+                color: 'GOLD',
+                fieldName: `You have been soft-banned from ${guild.name}`,
                 fieldValue: stripIndent`
                     **Reason:** ${reason}
                     **Moderator:** ${author.toString()}
@@ -99,7 +105,9 @@ module.exports = class SoftBanCommand extends Command {
         })
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been soft-banned`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been soft-banned`,
             fieldValue: `**Reason:** ${reason}`
         }))
     }

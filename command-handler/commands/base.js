@@ -1,9 +1,14 @@
+/* eslint-disable no-unused-vars */
 const path = require('path')
 const { PermissionResolvable, Message, GuildResolvable, User, MessageEmbed } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const ArgumentCollector = require('./collector')
 const { permissions } = require('../util')
-const { ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult, CommandBlockData, Throttle, CommandBlockReason } = require('../typings')
+const {
+	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult,
+	CommandBlockData, Throttle, CommandBlockReason
+} = require('../typings')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 class Command {
@@ -11,7 +16,6 @@ class Command {
 	 * @param {CommandoClient} client The client the command is for
 	 * @param {CommandInfo} info The command information
 	 */
-	// eslint-disable-next-line complexity
 	constructor(client, info) {
 		this.constructor.validateInfo(client, info)
 
@@ -33,7 +37,7 @@ class Command {
 		 * @type {string[]}
 		 */
 		this.aliases = info.aliases || []
-		if (Boolean(info.autoAliases)) {
+		if (info.autoAliases) {
 			if (this.name.includes('-')) this.aliases.push(this.name.replace(/-/g, ''))
 			for (const alias of this.aliases) {
 				if (alias.includes('-')) this.aliases.push(alias.replace(/-/g, ''))
@@ -276,7 +280,7 @@ class Command {
 	 * @return {Promise<?Message|?Array<Message>>}
 	 * @abstract
 	 */
-	async run(message, args, fromPattern, result) { // eslint-disable-line no-unused-vars, require-await
+	async run(message, args, fromPattern, result) {
 		throw new Error(`${this.constructor.name} doesn't have a run() method.`)
 	}
 
@@ -343,6 +347,7 @@ class Command {
 	 */
 	onError(err, message, args, fromPattern, result) {
 		return
+		/* eslint-disable no-unreachable */
 		const owner = message.client.owners[0]
 		const { serverInvite } = message.client.options
 		const emoji = '<:cross:802617654442852394>'
@@ -356,6 +361,7 @@ class Command {
 			.addField(err.name, '```' + err.message + '```')
 
 		message.replyEmbed(reply)
+		/* eslint-enable no-unreachable */
 	}
 
 	/**
@@ -455,7 +461,11 @@ class Command {
 				newCmd = require(cmdPath)
 			} catch (err2) {
 				if (cached) require.cache[cmdPath] = cached
-				if (err2.message.includes('Cannot find module')) throw err; else throw err2;
+				if (err2.message.includes('Cannot find module')) {
+					throw err
+				} else {
+					throw err2
+				}
 			}
 		}
 
@@ -502,7 +512,7 @@ class Command {
 	 * @param {CommandInfo} info Info to validate
 	 * @private
 	 */
-	static validateInfo(client, info) { // eslint-disable-line complexity
+	static validateInfo(client, info) {
 		if (!client) throw new Error('A client must be specified.')
 		if (typeof info !== 'object') throw new TypeError('Command info must be an Object.')
 		if (typeof info.name !== 'string') throw new TypeError('Command name must be a string.')
@@ -516,8 +526,12 @@ class Command {
 		}
 		if (typeof info.group !== 'string') throw new TypeError('Command group must be a string.')
 		if (info.group !== info.group.toLowerCase()) throw new RangeError('Command group must be lowercase.')
-		if (typeof info.name !== 'string' && typeof info.memberName !== 'string') throw new TypeError('Command memberName must be a string.')
-		if (info.memberName !== info.memberName?.toLowerCase() && info.memberName === 'string') throw new Error('Command memberName must be lowercase.')
+		if (typeof info.name !== 'string' && typeof info.memberName !== 'string') {
+			throw new TypeError('Command memberName must be a string.')
+		}
+		if (info.memberName !== info.memberName?.toLowerCase() && info.memberName === 'string') {
+			throw new Error('Command memberName must be lowercase.')
+		}
 		if (typeof info.description !== 'string') throw new TypeError('Command description must be a string.')
 		if ('format' in info && typeof info.format !== 'string') throw new TypeError('Command format must be a string.')
 		if ('details' in info && typeof info.details !== 'string') throw new TypeError('Command details must be a string.')

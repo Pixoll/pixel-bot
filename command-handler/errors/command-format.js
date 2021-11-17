@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { CommandoMessage } = require('../typings')
 const FriendlyError = require('./friendly')
+/* eslint-enable no-unused-vars */
 
 /**
  * Has a descriptive message for a command not having proper format

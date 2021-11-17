@@ -1,8 +1,11 @@
+/* eslint-disable indent */
+/* eslint-disable no-unused-vars */
 const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, generateEmbed, getArgument } = require('../../utils')
 const { ErrorSchema } = require('../../schemas/types')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class ErrorsCommand extends Command {
@@ -83,13 +86,13 @@ module.exports = class ErrorsCommand extends Command {
                 .setMaxValues(1).setMinValues(1)
                 .setPlaceholder('Filter...')
                 .setOptions([
-                    { label: 'All', value: 'all'},
-                    { label: 'Command error', value: 'Command error'},
-                    { label: 'Client error', value: 'Client error'},
-                    { label: 'Unhandled rejection', value: 'Unhandled rejection'},
-                    { label: 'Uncaught exception', value: 'Uncaught exception'},
-                    { label: 'Uncaught exception monitor', value: 'Uncaught exception monitor'},
-                    { label: 'Process warning', value: 'Process warning'},
+                    { label: 'All', value: 'all' },
+                    { label: 'Command error', value: 'Command error' },
+                    { label: 'Client error', value: 'Client error' },
+                    { label: 'Unhandled rejection', value: 'Unhandled rejection' },
+                    { label: 'Uncaught exception', value: 'Uncaught exception' },
+                    { label: 'Uncaught exception monitor', value: 'Uncaught exception monitor' },
+                    { label: 'Process warning', value: 'Process warning' },
                 ])
         )
 

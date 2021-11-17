@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { oneLine } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled, sliceDots, code } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Handles all of the command logs.
@@ -9,7 +11,7 @@ const { isModuleEnabled, sliceDots, code } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('commandRun', async (command, _, message) => {
-        const { guild, author, channel, id, url, cleanContent } = message
+        const { guild, author, channel, url, cleanContent } = message
         const isModCommand = !!command.userPermissions || command.ownerOnly ||
             command.guildOwnerOnly || command.name === 'prefix'
 

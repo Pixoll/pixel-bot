@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandoMessage } = require('../../command-handler/typings')
 const { User } = require('discord.js')
 const { basicEmbed, userDetails, reasonDetails, confirmButtons } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class UnbanCommand extends Command {
@@ -63,7 +65,9 @@ module.exports = class UnbanCommand extends Command {
         if (data) await active.delete(data)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: `${user.tag} has been unbanned`,
+            color: 'GREEN',
+            emoji: 'check',
+            fieldName: `${user.tag} has been unbanned`,
             fieldValue: `**Reason:** ${reason}`
         }))
     }

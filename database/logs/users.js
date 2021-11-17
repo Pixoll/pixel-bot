@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled, userFlags, compareArrays, customEmoji } = require('../../utils')
+/* eslint-enable no-unused-vars */
 
 /**
  * Returns a clickable link to the image. `None` if the link is invald
@@ -34,10 +36,12 @@ module.exports = (client) => {
 
         if (discrim1 !== discrim2) embed.addField('Discriminator', `${discrim1} ➜ ${discrim2}`)
 
-        if (avatar1 !== avatar2) embed.addField('Avatar', stripIndent`
-            **Before:** ${imageLink(oldUser.displayAvatarURL(imgOptions))}
-            **After:** ${imageLink(newUser.displayAvatarURL(imgOptions))}
-        `).setThumbnail(newUser.displayAvatarURL(imgOptions))
+        if (avatar1 !== avatar2) {
+            embed.addField('Avatar', stripIndent`
+                **Before:** ${imageLink(oldUser.displayAvatarURL(imgOptions))}
+                **After:** ${imageLink(newUser.displayAvatarURL(imgOptions))}
+            `).setThumbnail(newUser.displayAvatarURL(imgOptions))
+        }
 
         if (flags1 !== flags2) {
             const array1 = flags1?.toArray().map(flag => userFlags[flag]) || []

@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const ArgumentType = require('./base')
 const emojiRegex = require('emoji-regex')()
 const { Argument } = require('../typings')
 const { Emoji } = require('discord.js')
+/* eslint-enable no-unused-vars */
 
 class DefaultEmojiArgumentType extends ArgumentType {
 	constructor(client) {

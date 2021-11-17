@@ -1,8 +1,12 @@
+/* eslint-disable no-unused-vars */
 const { Util: { escapeMarkdown }, MessageEmbed } = require('discord.js')
 const { oneLine, stripIndent } = require('common-tags')
 const isPromise = require('is-promise')
 const ArgumentUnionType = require('../types/union')
-const { ArgumentInfo, ArgumentDefault, ArgumentType, CommandoClient, ArgumentResult, CommandoMessage } = require('../typings')
+const {
+	ArgumentInfo, ArgumentDefault, ArgumentType, CommandoClient, ArgumentResult, CommandoMessage
+} = require('../typings')
+/* eslint-enable no-unused-vars */
 
 /** A fancy argument */
 class Argument {
@@ -150,7 +154,6 @@ class Argument {
 		let valid = !empty ? await this.validate(val, msg) : false
 
 		while (!valid || typeof valid === 'string') {
-			/* eslint-disable no-await-in-loop */
 			if (prompts.length >= promptLimit) {
 				return {
 					value: null,
@@ -168,9 +171,11 @@ class Argument {
 					Respond with \`cancel\` to cancel the command.
 				`)
 
-			if (!empty) prompt.setDescription(
-				valid ? `**${valid}**` : `You provided an invalid ${this.label}. Please try again.`
-			)
+			if (!empty) {
+				prompt.setDescription(
+					valid ? `**${valid}**` : `You provided an invalid ${this.label}. Please try again.`
+				)
+			}
 
 			// Prompt the user for a new value
 			prompts.push(await msg.replyEmbed(prompt))
@@ -207,7 +212,6 @@ class Argument {
 
 			empty = this.isEmpty(val, msg, responses.first())
 			valid = await this.validate(val, msg, responses.first())
-			/* eslint-enable no-await-in-loop */
 		}
 
 		return {
@@ -226,15 +230,14 @@ class Argument {
 	 * @return {Promise<ArgumentResult>}
 	 * @private
 	 */
-	async obtainInfinite(msg, vals, promptLimit = Infinity) { // eslint-disable-line complexity
+	async obtainInfinite(msg, vals, promptLimit = Infinity) {
 		const wait = this.wait > 0 && this.wait !== Infinity ? this.wait * 1000 : undefined
 		const results = []
 		const prompts = []
 		const answers = []
 		let currentVal = 0
 
-		while (true) { // eslint-disable-line no-constant-condition
-			/* eslint-disable no-await-in-loop */
+		while (true) {
 			let val = vals && vals[currentVal] ? vals[currentVal] : null
 			let valid = val ? await this.validate(val, msg) : false
 			let attempts = 0
@@ -261,13 +264,10 @@ class Argument {
 							"${escaped.length < 1850 ? escaped : '[too long to show]'}".
 							Please try again.
 						`)
-						.addField(
-							this.prompt,
-							stripIndent`
-								**Don't type the whole command again!** Only what I ask for.
-								Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry up to this point.
-							`
-						)
+						.addField(this.prompt, stripIndent`
+							**Don't type the whole command again!** Only what I ask for.
+							Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry up to this point.
+						`)
 						.setFooter(wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : '')
 
 					prompts.push(await msg.replyEmbed(prompt))
@@ -343,7 +343,6 @@ class Argument {
 					}
 				}
 			}
-			/* eslint-enable no-await-in-loop */
 		}
 	}
 
@@ -359,14 +358,16 @@ class Argument {
 			this.validator(val, originalMsg, this, currentMsg) :
 			this.type.validate(val, originalMsg, this, currentMsg)
 		if (!valid || typeof valid === 'string') return this.error || valid
-		if (isPromise(valid)) return valid.then(vld => {
-			const arr = typeof vld === 'string' ? vld.split('\n') : null
-			if (arr) {
-				if (arr.length === 1) return arr[0]
-				else if (arr.length > 1) return arr.pop()
-			}
-			return !vld || typeof vld === 'string' ? this.error || vld : vld
-		})
+		if (isPromise(valid)) {
+			return valid.then(vld => {
+				const arr = typeof vld === 'string' ? vld.split('\n') : null
+				if (arr) {
+					if (arr.length === 1) return arr[0]
+					else if (arr.length > 1) return arr.pop()
+				}
+				return !vld || typeof vld === 'string' ? this.error || vld : vld
+			})
+		}
 		return valid
 	}
 
@@ -402,7 +403,7 @@ class Argument {
 	 * @param {ArgumentInfo} info Info to validate
 	 * @private
 	 */
-	static validateInfo(client, info) { // eslint-disable-line complexity
+	static validateInfo(client, info) {
 		if (!client) throw new Error('The argument client must be specified.')
 		if (typeof info !== 'object') throw new TypeError('Argument info must be an Object.')
 		if (typeof info.key !== 'string') throw new TypeError('Argument key must be a string.')
