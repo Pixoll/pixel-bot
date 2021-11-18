@@ -40,18 +40,8 @@ module.exports = class TodoCommand extends Command {
                     key: 'item',
                     prompt: 'What item do you want to add/remove?',
                     type: 'string',
+                    min: 1,
                     max: 512,
-                    validate: (val, msg) => {
-                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                        if (sc !== 'remove') return true
-                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => isNaN(n) || n < 1))]
-                        return array.length !== 0
-                    },
-                    parse: (val, msg) => {
-                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                        if (sc !== 'remove') return val
-                        return [...new Set(val.split(/ +/).map(Number).sort())]
-                    },
                     required: false
                 }
             ]

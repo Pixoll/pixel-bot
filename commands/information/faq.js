@@ -39,14 +39,9 @@ module.exports = class FaqCommand extends Command {
                 {
                     key: 'items',
                     prompt: 'What items do you want to remove from the FAQ list?',
-                    type: 'string',
-                    validate: val => {
-                        const array = [...new Set(val.split(/ +/).map(Number).filter(n => isNaN(n) || n < 1))]
-                        return array.length !== 0
-                    },
-                    parse: val => [...new Set(val.split(/ +/).map(Number).sort())],
-                    required: false,
-                    error: 'None of the items you specified are correct. Please try again.'
+                    type: 'integer',
+                    min: 1,
+                    required: false
                 }
             ]
         })

@@ -52,7 +52,6 @@ module.exports = class ButtonRoleCommand extends Command {
                         }
                         return removeDuplicated(valid)
                     },
-                    required: false,
                     error: 'At least one of the roles you specified was invalid, please try again.'
                 }
             ]
