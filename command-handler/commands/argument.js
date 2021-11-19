@@ -410,7 +410,7 @@ class Argument {
 		if (info.label && typeof info.label !== 'string') throw new TypeError('Argument label must be a string.')
 		if (typeof info.prompt !== 'string') throw new TypeError('Argument prompt must be a string.')
 		if (info.error && typeof info.error !== 'string') throw new TypeError('Argument error must be a string.')
-		if (info.type instanceof Array) info.type = info.type.join('|')
+		if (Array.isArray(info.type)) info.type = info.type.join('|')
 		if (info.type && typeof info.type !== 'string') {
 			throw new TypeError('Argument type must be a string or an Array of strings.')
 		}
@@ -443,7 +443,7 @@ class Argument {
 	 */
 	static determineType(client, id) {
 		if (!id) return null
-		if (id instanceof Array) id = id.join('|')
+		if (Array.isArray(id)) id = id.join('|')
 		if (!id.includes('|')) return client.registry.types.get(id)
 
 		let type = client.registry.types.get(id)

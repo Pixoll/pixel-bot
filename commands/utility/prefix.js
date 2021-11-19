@@ -2,7 +2,7 @@
 const Command = require('../../command-handler/commands/base')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -32,12 +32,12 @@ module.exports = class PrefixCommand extends Command {
     }
 
     /**
-	 * Runs the command
-	 * @param {CommandoMessage} message The message the command is being run for
-	 * @param {object} args The arguments for the command
-	 * @param {string} args.newPrefix The new prefix to set
-	 */
-    async run(message, { newPrefix }) {
+     * Runs the command
+     * @param {CommandInstances} instances The instances the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {string} args.newPrefix The new prefix to set
+     */
+    async run({ message }, { newPrefix }) {
         const { guild, client, member } = message
 
         if (!newPrefix) {
@@ -51,11 +51,11 @@ module.exports = class PrefixCommand extends Command {
         }
 
         if (!guild && !client.isOwner(message)) {
-            return await this.onBlock(message, 'ownerOnly')
+            return await this.onBlock({ message }, 'ownerOnly')
         }
 
         if (guild && !client.isOwner(message) && !member.permissions.has('ADMINISTRATOR')) {
-            return await this.onBlock(message, 'userPermissions', { missing: ['ADMINISTRATOR'] })
+            return await this.onBlock({ message }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
 
         const current = guild?.prefix || client?.prefix

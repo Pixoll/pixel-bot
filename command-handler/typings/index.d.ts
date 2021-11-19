@@ -1,12 +1,15 @@
 import {
 	Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment,
 	MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable,
-	InviteGenerationOptions, GuildMember, ClientUser, Snowflake, CachedManager, FetchGuildOptions, FetchGuildsOptions
+	InviteGenerationOptions, GuildMember, ClientUser, Snowflake, CachedManager, FetchGuildOptions, FetchGuildsOptions,
+	CommandInteraction
 } from 'discord.js'
+import { APIApplicationCommand } from 'discord-api-types/payloads/v9'
 import { FilterQuery, Model, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose'
 import {
-	ActiveSchema, AfkSchema, DisabledSchema, ErrorSchema, FaqSchema, McIpSchema, ModerationSchema, ModuleSchema, PollSchema, PrefixSchema,
-	ReactionRoleSchema, ReminderSchema, RuleSchema, SetupSchema, StickyRoleSchema, TodoSchema, WelcomeSchema
+	ActiveSchema, AfkSchema, DisabledSchema, ErrorSchema, FaqSchema, McIpSchema, ModerationSchema, ModuleSchema,
+	PollSchema, PrefixSchema, ReactionRoleSchema, ReminderSchema, RuleSchema, SetupSchema, StickyRoleSchema, TodoSchema,
+	WelcomeSchema
 } from '../../schemas/types'
 
 /** A fancy argument */
@@ -239,6 +242,8 @@ export abstract class Command {
 	private _globalEnabled: boolean
 	/** Current throttle objects for the command, mapped by user id */
 	private _throttles: Map<string, object>
+	/** The slash command data to send to the API */
+	private _slashToAPI: APIApplicationCommand
 
 	/**
 	 * Creates/obtains the throttle object for a user, if necessary (owners are excluded)
@@ -356,13 +361,24 @@ export abstract class Command {
 	 * Required if `deprecated` is `true`.
 	 */
 	public replacing: string
+	/**
+	 * The data for the slash command, or `true` to use the same information as the message command
+	 * @default false
+	 */
+	public slash: SlashCommandInfo
+	/**
+	 * Whether the slash command will be registered in the test guild only or not
+	 * @default false
+	 */
+	public test: boolean
 
 	/**
 	 * Checks whether the user has permission to use the command
-	 * @param message The triggering command message
+	 * @param instances The triggering command instances
 	 * @param ownerOverride Whether the bot owner(s) will always have permission
 	 */
-	public hasPermission(message: CommandoMessage, ownerOverride?: boolean): true | 'ownerOnly' | 'guildOwnerOnly' | PermissionString[]
+	public hasPermission(instances: CommandInstances, ownerOverride?: boolean):
+		true | 'ownerOnly' | 'guildOwnerOnly' | PermissionString[]
 	/**
 	 * Checks if the command is enabled in a guild
 	 * @param guild Guild to check in
@@ -370,34 +386,42 @@ export abstract class Command {
 	 */
 	public isEnabledIn(guild: GuildResolvable, bypassGroup?: boolean): boolean
 	/**
-	 * Checks if the command is usable for a message
-	 * @param message The message
+	 * Checks if the command is usable for an instance
+	 * @param instances The instances
 	 */
-	public isUsable(message?: Message): boolean
+	public isUsable(instances?: CommandInstances): boolean
 	/**
 	 * Called when the command is prevented from running
-	 * @param message Command message that the command is running from
-	 * @param reason Reason that the command was blocked (built-in reasons are `guildOnly`, `nsfw`, `permission`, `throttling`, and `clientPermissions`)
+	 * @param instances The instances the command is being run for
+	 * @param reason Reason that the command was blocked (built-in reasons are `guildOnly`, `nsfw`, `permission`,
+	 * `throttling`, and `clientPermissions`)
 	 * @param data Additional data associated with the block. Built-in reason data properties:
 	 * - guildOnly & nsfw & dmOnly: none
 	 * - throttling: `throttle` ({@link Throttle}), `remaining` (number) time in seconds
 	 * - userPermissions & clientPermissions: `missing` (Array<{@link PermissionString}>) permission names
 	 */
-	public onBlock(message: CommandoMessage, reason: CommandBlockReason, data?: CommandBlockData): Promise<Message | Message[]>
+	public onBlock(instances: CommandInstances, reason: CommandBlockReason, data?: CommandBlockData):
+		Promise<Message | Message[]>
 	/**
 	 * Called when the command produces an error while running
 	 * @param err Error that was thrown
-	 * @param message Command message that the command is running from (see {@link Command#run})
+	 * @param instances The instances the command is being run for
 	 * @param args Arguments for the command (see {@link Command#run})
 	 * @param fromPattern Whether the args are pattern matches (see {@link Command#run})
 	 * @param result Result from obtaining the arguments from the collector (if applicable - see {@link Command#run})
 	 */
-	public onError(err: Error, message: CommandoMessage, args: object | string | string[], fromPattern: boolean, result?: ArgumentCollectorResult): Promise<Message | Message[]>
+	public onError(
+		err: Error,
+		instances: CommandInstances,
+		args: object | string | string[],
+		fromPattern: boolean,
+		result?: ArgumentCollectorResult
+	): Promise<Message | Message[]>
 	/** Reloads the command */
 	public reload(): void
 	/**
 	 * Runs the command
-	 * @param message The message the command is being run for
+	 * @param instances The instances the command is being run forr
 	 * @param args The arguments for the command, or the matches from a pattern.
 	 * - If args is specified on the command, thise will be the argument values object.
 	 * - If argsType is single, then only one string will be passed.
@@ -406,7 +430,12 @@ export abstract class Command {
 	 * @param fromPattern Whether or not the command is being run from a pattern match
 	 * @param result Result from obtaining the arguments from the collector (if applicable)
 	 */
-	public abstract run(message: CommandoMessage, args: object | string | string[], fromPattern: boolean, result?: ArgumentCollectorResult): Promise<Message | Message[] | null> | null
+	public abstract run(
+		instances: CommandInstances,
+		args: object | string | string[],
+		fromPattern: boolean,
+		result?: ArgumentCollectorResult
+	): Promise<Message | Message[] | null> | null
 	/**
 	 * Enables or disables the command in a guild
 	 * @param guild Guild to enable/disable the command in
@@ -459,13 +488,23 @@ export class CommandDispatcher {
 	 * @param cmdMsg Command message to cache
 	 * @param responses Responses to the message
 	 */
-	private cacheCommandoMessage(message: Message, oldMessage: Message, cmdMsg: CommandoMessage, responses: Message | Message[]): void
+	private cacheCommandoMessage(
+		message: Message,
+		oldMessage: Message,
+		cmdMsg: CommandoMessage,
+		responses: Message | Message[]
+	): void
 	/**
 	 * Handle a new message or a message update
 	 * @param message The message to handle
 	 * @param oldMessage The old message before the update
 	 */
 	private handleMessage(message: Message, oldMessage?: Message): Promise<void>
+	/**
+	 * Handle a slash command interaction
+	 * @param interaction The interaction to handle
+	 */
+	private handleSlash(interaction: CommandInteraction): Promise<void>
 	/**
 	 * Inhibits a command message
 	 * @param cmdMsg Command message to inhibit
@@ -685,6 +724,11 @@ export class CommandoGuildManager extends CachedManager<Snowflake, CommandoGuild
 	public fetch(options?: FetchGuildsOptions): Promise<Collection<Snowflake, CommandoGuild>>
 }
 
+export class CommandoInteraction extends CommandInteraction {
+	public client: CommandoClient
+	public guild: CommandoGuild
+}
+
 export class CommandoMember extends GuildMember {
 	public guild: CommandoGuild
 }
@@ -693,8 +737,6 @@ export class CommandoMember extends GuildMember {
 export class CommandoMessage extends Message {
 	/** The client this message is for */
 	public readonly client: CommandoClient
-	/** The client member this message is for */
-	public readonly clientMember?: ClientGuildMember
 	/** Argument string for the command */
 	public argString: string | null
 	/** Command that the message triggers, if any */
@@ -717,13 +759,15 @@ export class CommandoMessage extends Message {
 	 * @param id The id of the channel the response is in ("DM" for direct messages)
 	 * @param options Options for the response
 	 */
-	private editCurrentResponse(id: string, options: MessageEditOptions | Exclude<MessageAttachment>): Promise<CommandoMessage | CommandoMessage[]>
+	private editCurrentResponse(id: string, options: MessageEditOptions | Exclude<MessageAttachment>):
+		Promise<CommandoMessage | CommandoMessage[]>
 	/**
 	 * Edits a response to the command message
 	 * @param response The response message(s) to edit
 	 * @param options Options for the response
 	 */
-	private editResponse(response: CommandoMessage | CommandoMessage[], options: RespondEditOptions): Promise<CommandoMessage | CommandoMessage[]>
+	private editResponse(response: CommandoMessage | CommandoMessage[], options: RespondEditOptions):
+		Promise<CommandoMessage | CommandoMessage[]>
 	/**
 	 * Finalizes the command message by setting the responses and deleting any remaining prior ones
 	 * @param responses Responses to the message
@@ -762,7 +806,7 @@ export class CommandoMessage extends Message {
 	 */
 	// public replyEmbed: CommandoMessage['embed']
 	/** Runs the command */
-	public run(): Promise<null | CommandoMessage | CommandoMessage[]>
+	public run(): Promise<null | Message | CommandoMessage | (Message | CommandoMessage)[]>
 	/**
 	 * Responds with a plain message
 	 * @param content Content for the message
@@ -838,6 +882,9 @@ export class CommandoRegistry {
 	 */
 	public constructor(client?: CommandoClient)
 
+	/** Registers every client and guild slash command available - this may only be called upon startup. */
+	private registerSlashCommands(): Promise<void>
+
 	/** The client this registry is for */
 	public readonly client: CommandoClient
 	/** Registered commands, mapped by their name */
@@ -855,10 +902,10 @@ export class CommandoRegistry {
 	 * Finds all commands that match the search string
 	 * @param searchString The string to search for
 	 * @param exact Whether the search should be exact
-	 * @param message The message to check usability against
+	 * @param instances The instances to check usability against
 	 * @returns All commands that are found
 	 */
-	public findCommands(searchString?: string, exact?: boolean, message?: Message | CommandoMessage): Command[]
+	public findCommands(searchString?: string, exact?: boolean, instances?: CommandInstances): Command[]
 	/**
 	 * Finds all groups that match the search string
 	 * @param searchString The string to search for
@@ -890,18 +937,6 @@ export class CommandoRegistry {
 	 * Registers the default commands to the registry
 	 * @param commands Object specifying which commands to register
 	 */
-	public registerDefaultCommands(commands?: DefaultCommandsOptions): CommandoRegistry
-	/** Registers the default groups ("util" and "commands") */
-	public registerDefaultGroups(): CommandoRegistry
-	/**
-	 * Registers the default argument types, groups, and commands. This is equivalent to:
-	 * ```js
-	 * registry.registerDefaultTypes()
-	   * 	.registerDefaultGroups()
-	 * 	.registerDefaultCommands()
-	 * ```
-	 */
-	public registerDefaults(): CommandoRegistry
 	/**
 	 * Registers the default argument types to the registry
 	 * @param types Object specifying which types to register
@@ -914,7 +949,11 @@ export class CommandoRegistry {
 	 * @param guarded Whether the group should be guarded (if the first argument is the group id)
 	 *  @see {@link CommandoRegistry#registerGroups}
 	 */
-	public registerGroup(group: CommandGroup | Function | { id: string, name?: string, guarded?: boolean } | string, name?: string, guarded?: boolean): CommandoRegistry
+	public registerGroup(
+		group: CommandGroup | Function | { id: string, name?: string, guarded?: boolean } | string,
+		name?: string,
+		guarded?: boolean
+	): CommandoRegistry
 	/**
 	 * Registers multiple groups
 	 * @param groups An array of CommandGroup instances, constructors, plain objects
@@ -930,7 +969,12 @@ export class CommandoRegistry {
 	 * 	{ id: 'mod', name: 'Moderation' }
 	 * ])
 	 */
-	public registerGroups(groups: CommandGroup[] | Function[] | { id: string, name?: string, guarded?: boolean }[] | string[][]): CommandoRegistry
+	public registerGroups(
+		groups: CommandGroup[] |
+			Function[] |
+			{ id: string, name?: string, guarded?: boolean }[] |
+			string[][]
+	): CommandoRegistry
 	/**
 	 * Registers a single argument type
 	 * @param type Either an ArgumentType instance, or a constructor for one
@@ -1447,13 +1491,6 @@ export type ArgumentTypes = 'string' | 'integer' | 'float' | 'boolean' | 'durati
 	'role' | 'channel' | 'text-channel' | 'thread-channel' | 'voice-channel' | 'stage-channel' | 'category-channel' |
 	'message' | 'invite' | 'custom-emoji' | 'default-emoji' | 'command' | 'group'
 
-export class ClientGuildMember extends GuildMember {
-	/** The client this member is for */
-	client: CommandoClient
-	/** The user this client member is for */
-	user: ClientUser
-}
-
 /**
  * A CommandGroupResolvable can be:
  * - A {@link CommandGroup}
@@ -1523,6 +1560,16 @@ export interface CommandInfo {
 	defaultHandling?: boolean
 	/** Options for throttling usages of the command. */
 	throttling?: ThrottlingOptions
+	/**
+	 * The data for the slash command, or `true` to use the same information as the message command
+	 * @default false
+	 */
+	slash?: SlashCommandInfo | boolean
+	/**
+	 * Whether the slash command will be registered in the test guild only or not
+	 * @default false
+	 */
+	test?: boolean
 	/** Arguments for the command */
 	args?: ArgumentInfo[]
 	/**
@@ -1580,17 +1627,17 @@ export interface CommandInfo {
 }
 
 export interface CommandoClientEvents extends ClientEvents {
-	commandBlock: [message: CommandoMessage, reason: CommandBlockReason, data?: CommandBlockData]
+	commandBlock: [instances: CommandInstances, reason: CommandBlockReason, data?: CommandBlockData]
 	commandCancel: [command: Command, reason: string, message: CommandoMessage, result?: ArgumentCollectorResult]
 	commandError: [
-		command: Command, error: Error, message: CommandoMessage, args: object | string | string[],
+		command: Command, error: Error, instances: CommandInstances, args: object | string | string[],
 		fromPattern: boolean, result?: ArgumentCollectorResult
 	]
 	commandPrefixChange: [guild?: CommandoGuild, prefix?: string]
 	commandRegister: [command: Command, registry: CommandoRegistry]
 	commandReregister: [newCommand: Command, oldCommand: Command]
 	commandRun: [
-		command: Command, promise: Promise<any>, message: CommandoMessage,
+		command: Command, promise: Promise<any>, instances: CommandInstances,
 		args: object | string | string[], fromPattern: boolean, result?: ArgumentCollectorResult
 	]
 	commandStatusChange: [guild?: CommandoGuild, command: Command, enabled: boolean]
@@ -1632,6 +1679,8 @@ export interface CommandoClientOptions extends ClientOptions {
 	serverInvite?: string
 	/** Invite options for the bot */
 	inviteOptions?: InviteGenerationOptions | string
+	/** The test guild id or the slash commands */
+	testGuild?: string
 }
 
 /** Additional data associated with the block */
@@ -1671,6 +1720,14 @@ export type CommandBlockReason =
  * - A {@link CommandoMessage}
  */
 export type CommandResolvable = Command | string
+
+/** The instances the command is being run for */
+export interface CommandInstances {
+	/** The message the command is being run for */
+	message?: CommandoMessage | null
+	/** The interaction the command is being run for */
+	interaction?: CommandoInteraction | null
+}
 
 /** Object specifying which commands to register */
 export interface DefaultCommandsOptions {
@@ -1846,5 +1903,103 @@ export interface RespondEditOptions {
 	options?: MessageEditOptions | Exclude<MessageAttachment>
 	type?: ResponseType
 }
+
+/** The slash command information */
+export interface SlashCommandInfo {
+	/** The name of the command (must be lowercase) - defaults to {@link CommandInfo}'s `name` */
+	name?: string
+	/** A short description of the command - defaults to {@link CommandInfo}'s `description` */
+	description?: string
+	/** The slash command usage format string - defaults to {@link CommandInfo}'s `format` */
+	format?: string
+	/** A detailed description of the command and its functionality - defaults to {@link CommandInfo}'s `details` */
+	details?: string
+	/** Usage examples of the command - defaults to {@link CommandInfo}'s `examples` */
+	examples?: string[]
+	/**
+	 * Whether the command is usable only in NSFW channels - defaults to {@link CommandInfo}'s `nsfw`
+	 * @default false
+	 */
+	nsfw?: boolean
+	/**
+	 * Whether or not the command should only function in direct messages - defaults to {@link CommandInfo}'s `dmOnly`
+	 * @default false
+	 */
+	dmOnly?: boolean
+	/**
+	 * Whether or not the command should only function in a guild channel - defaults to {@link CommandInfo}'s `guildOnly`
+	 * @default false
+	 */
+	guildOnly?: boolean
+	/**
+	 * Whether or not the command is usable only by a server owner - defaults to {@link CommandInfo}'s `guildOwnerOnly`
+	 * @default false
+	 */
+	guildOwnerOnly?: boolean
+	/**
+	 * Whether or not the command is usable only by an owner - defaults to {@link CommandInfo}'s `ownerOnly`
+	 * @default false
+	 */
+	ownerOnly?: boolean
+	// /** Permissions required by the client to use the command. */
+	// clientPermissions?: PermissionResolvable[]
+	// /** Permissions required by the user to use the command. */
+	// userPermissions?: PermissionResolvable[]
+	/** Options for the command */
+	options?: SlashCommandOptionInfo[]
+	/**
+	 * Whether the command should be protected from disabling - defaults to {@link CommandInfo}'s `guarded`
+	 * @default false
+	 */
+	guarded?: boolean
+	/**
+	 * Whether the command is marked as deprecated - defaults to {@link CommandInfo}'s `deprecated`
+	 * @default false
+	 */
+	deprecated?: boolean
+	/**
+	 * The name or alias of the command that is replacing the deprecated command.
+	 * Required if `deprecated` is `true`.
+	 * Defaults to {@link CommandInfo}'s `replacing`.
+	 */
+	replacing?: string
+	/**
+	 * Whether the reply of the slash command should be ephemeral or not
+	 * @default false
+	 */
+	ephemeral?: boolean
+}
+
+export interface SlashCommandOptionInfo {
+	/** The type of the option */
+	type: SlashCommandOptionType
+	/** The name of the option */
+	name: string
+	/** The description of the option - required if `type` is `blah blh blahafuhijkge` */
+	description: string
+	/**
+	 * Whether the option is required or not
+	 * @default false
+	 */
+	required?: boolean
+	/** The minimum value permitted - only usable if `type` is `integer` or `number` */
+	minValue?: number
+	/** The maxmum value permitted - only usable if `type` is `integer` or `number` */
+	maxValue?: number
+	/** The choices options for the option - only usable if `type` is `string`, `integer` or `number` */
+	choices?: { name: string, value: string | number }[]
+	/** The type options for the option - only usable if `type` is `channel` */
+	channelTypes?: SlashCommandChannelType[]
+	/** The options for the sub-command - only usable if `type` is `subcommand` */
+	options?: SlashCommandOptionInfo[]
+	/** Enable autocomplete interactions for this option - may not be set to true if `choices` are present */
+	autocomplete?: boolean
+}
+
+export type SlashCommandOptionType = 'subcommand' | 'subcommand-group' | 'string' | 'integer' | 'boolean' | 'user' |
+	'channel' | 'role' | 'mentionable' | 'number'
+
+export type SlashCommandChannelType = 'guild-text' | 'guild-voice' | 'guild-category' | 'guild-news' | 'guild-store' |
+	'guild-news-thread' | 'guild-public-thread' | 'guild-private-thread' | 'guild-stage-voice'
 
 export type StringResolvable = string | string[] | object

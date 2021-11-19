@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { get } = require('lodash')
 const { sliceDots, code } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -33,12 +33,12 @@ module.exports = class MsgInfoCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {CommandoMessage} args.msg The message to get info from
      * @param {string} args.property The property of The message the command is being run for
      */
-    async run(message, { msg, property }) {
+    async run({ message }, { msg, property }) {
         const thing = property ? get(msg, property) : msg
 
         await message.direct(stripIndent`

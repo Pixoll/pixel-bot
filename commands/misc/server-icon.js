@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
 const { noReplyInDMs, embedColor } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -9,20 +9,21 @@ const { noReplyInDMs, embedColor } = require('../../utils')
 module.exports = class ServerIconCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'servericon',
-            aliases: ['sicon'],
+            name: 'server-icon',
+            aliases: ['servericon', 'sicon'],
             group: 'misc',
             description: 'Displays the server\'s icon.',
-            guildOnly: true
+            guildOnly: true,
+            slash: true
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run(message) {
-        const { guild } = message
+    async run({ message, interaction }) {
+        const { guild } = message || interaction
 
         const icon = guild.iconURL({ dynamic: true, size: 2048 })
 
@@ -40,6 +41,8 @@ module.exports = class ServerIconCommand extends Command {
                     .setURL(icon)
             )
 
-        await message.reply({ embeds: [embed], components: [row], ...noReplyInDMs(message) })
+        const options = { embeds: [embed], components: [row], ...noReplyInDMs(message) }
+        await interaction?.editReply(options)
+        await message?.reply(options)
     }
 }

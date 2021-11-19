@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -27,11 +27,11 @@ module.exports = class InfractionsCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the infractions from
      */
-    async run(message, { user }) {
+    async run({ message }, { user }) {
         const { guild } = message
         const db = guild.database.moderations
 
@@ -58,7 +58,7 @@ module.exports = class InfractionsCommand extends Command {
                 ])
         )
 
-        await generateEmbed(message, mods.toJSON(), {
+        await generateEmbed({ message }, mods.toJSON(), {
             authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             title: ' |  ID:',

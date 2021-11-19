@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { getDayDiff, code } = require('../../utils')
@@ -11,8 +11,8 @@ const { ModerationSchema } = require('../../schemas/types')
 module.exports = class ModStatsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'modstats',
-            aliases: ['mod-stats'],
+            name: 'mod-stats',
+            aliases: ['modstats'],
             group: 'mod-logs',
             description: 'Displays your moderation statistics or for a moderator or admin.',
             details: stripIndent`
@@ -34,14 +34,14 @@ module.exports = class ModStatsCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod stats from
      */
-    async run(message, { user }) {
+    async run({ message }, { user }) {
         const { guild, author } = message
         const db = guild.database.moderations
-        if (!user) user = author
+        user ??= author
 
         const stats = await db.fetchMany({ mod: { id: user.id } })
 

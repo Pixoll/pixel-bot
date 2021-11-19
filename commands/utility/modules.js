@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { ModuleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -57,9 +57,9 @@ module.exports = class ModulesCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run(message) {
+    async run({ message }) {
         const { guild } = message
 
         const data = await guild.database.modules.fetch()

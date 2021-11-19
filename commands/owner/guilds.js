@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, generateEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -18,9 +18,9 @@ module.exports = class GuildsCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run(message) {
+    async run({ message }) {
         const { guilds, user } = this.client
         if (guilds.cache.size === 0) {
             return await message.replyEmbed(basicEmbed({
@@ -38,7 +38,7 @@ module.exports = class GuildsCommand extends Command {
             })
         }
 
-        await generateEmbed(message, guildsList, {
+        await generateEmbed({ message }, guildsList, {
             authorName: `${user.username}'s guilds`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             keyTitle: { suffix: 'name' }

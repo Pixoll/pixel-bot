@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { basicEmbed, docId, confirmButtons } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -42,12 +42,13 @@ module.exports = class ReasonCommand extends Command {
     }
 
     /**
-    * @param {CommandoMessage} message The message the command is being run for
-    * @param {object} args The arguments for the command
-    * @param {string} args.modlogId The mod log id
-    * @param {number} args.reason The new reason
-    */
-    async run(message, { modlogId, reason }) {
+     * Runs the command
+     * @param {CommandInstances} instances The instances the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {string} args.modlogId The mod log id
+     * @param {number} args.reason The new reason
+     */
+    async run({ message }, { modlogId, reason }) {
         const { guild } = message
         const { moderations, active } = guild.database
 
@@ -60,7 +61,7 @@ module.exports = class ReasonCommand extends Command {
 
         const activeLog = await active.fetch(modlogId)
 
-        const confirm = await confirmButtons(message, 'update modlog reason', modlogId, { reason })
+        const confirm = await confirmButtons({ message }, 'update modlog reason', modlogId, { reason })
         if (!confirm) return
 
         await moderations.update(modLog, { reason })

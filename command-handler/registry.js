@@ -7,7 +7,7 @@ const CommandoMessage = require('./extensions/message')
 const ArgumentType = require('./types/base')
 const { isConstructor } = require('./util')
 const {
-	CommandoClient, DefaultCommandsOptions, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable
+	CommandoClient, CommandInstances, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable
 } = require('./typings')
 /* eslint-enable no-unused-vars */
 
@@ -51,6 +51,33 @@ class CommandoRegistry {
 		 * @type {?Command}
 		 */
 		this.unknownCommand = null
+	}
+
+	/**
+	 * Registers every client and guild slash command available - this may only be called upon startup.
+	 * @private
+	 */
+	async registerSlashCommands() {
+		const testCommands = this.commands.filter(cmd => cmd.test && cmd.slash).map(cmd => cmd._slashToAPI)
+		if (testCommands.length !== 0) {
+			if (typeof this.client.options.testGuild !== 'string') throw new TypeError('Client testGuild must be a string.')
+			const guild = this.client.guilds.resolve(this.client.options.testGuild)
+			if (!guild) throw new TypeError('Client testGuild must be a valid Guild id.')
+			const current = await guild.commands.fetch()
+			const toAdd = testCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
+			for (const command of toAdd) {
+				await guild.commands.create(command)
+			}
+			this.client.emit('debug', `Loaded ${testCommands.length} guild slash commands`)
+		}
+		const slashCommands = this.commands.filter(cmd => !cmd.test && cmd.slash).map(cmd => cmd._slashToAPI)
+		if (slashCommands.length === 0) return
+		const current = await this.client.application.commands.fetch()
+		const toAdd = slashCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
+		for (const command of toAdd) {
+			await this.client.application.commands.create(command)
+		}
+		this.client.emit('debug', `Loaded ${slashCommands.length} public slash commands`)
 	}
 
 	/**
@@ -251,55 +278,6 @@ class CommandoRegistry {
 		return this.registerTypes(types, true)
 	}
 
-	/* eslint-disable no-tabs */
-	/**
-	 * Registers the default argument types, groups, and commands. This is equivalent to:
-	 * ```js
-	 * registry.registerDefaultTypes()
-	 * 	.registerDefaultGroups()
-	 * 	.registerDefaultCommands()
-	 * ```
-	 * @return {CommandoRegistry}
-	 */
-	/* eslint-enable no-tabs */
-	registerDefaults() {
-		this.registerDefaultTypes()
-		this.registerDefaultGroups()
-		this.registerDefaultCommands()
-		return this
-	}
-
-	/**
-	 * Registers the default groups ("util" and "commands")
-	 * @return {CommandoRegistry}
-	 */
-	registerDefaultGroups() {
-		return this.registerGroups([
-			['commands', 'Commands', true],
-			['util', 'Utility']
-		])
-	}
-
-	/**
-	 * Registers the default commands to the registry
-	 * @param {DefaultCommandsOptions} [commands] Object specifying which commands to register
-	 * @return {CommandoRegistry}
-	 */
-	registerDefaultCommands(commands = {}) {
-		commands = {
-			unknown: true, commandState: true, ...commands
-		}
-		if (commands.unknown) this.registerCommand(require('./commands/util/unknown-command'))
-		if (commands.commandState) {
-			this.registerCommands([
-				require('./commands/commands/reload'),
-				require('./commands/commands/load'),
-				require('./commands/commands/unload')
-			])
-		}
-		return this
-	}
-
 	/**
 	 * Registers the default argument types to the registry
 	 * @param {DefaultTypesOptions} [types] Object specifying which types to register
@@ -423,13 +401,13 @@ class CommandoRegistry {
 	 * Finds all commands that match the search string
 	 * @param {string} [searchString] The string to search for
 	 * @param {boolean} [exact=false] Whether the search should be exact
-	 * @param {Message} [message] The message to check usability against
+	 * @param {CommandInstances} [instances] The instances to check usability against
 	 * @return {Command[]} All commands that are found
 	 */
-	findCommands(searchString = null, exact = false, message = null) {
+	findCommands(searchString = null, exact = false, { message, interaction } = {}) {
 		if (!searchString) {
-			return message ?
-				Array.from(this.commands.filter(cmd => cmd.isUsable(message)).values()) :
+			return (message || interaction) ?
+				Array.from(this.commands.filter(cmd => cmd.isUsable({ message, interaction })).values()) :
 				Array.from(this.commands)
 		}
 

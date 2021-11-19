@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, confirmButtons } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -18,10 +18,10 @@ module.exports = class RestartCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run(message) {
-        const confirmed = await confirmButtons(message, 'restart the bot')
+    async run({ message }) {
+        const confirmed = await confirmButtons({ message }, 'restart the bot')
         if (!confirmed) return
 
         await message.replyEmbed(basicEmbed({

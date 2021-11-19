@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel, Role, MessageButton, MessageActionRow, MessageEmbed } = require('discord.js')
 const {
     channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor,
@@ -12,8 +12,8 @@ const {
 module.exports = class ButtonRoleCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'buttonrole',
-            aliases: ['brole', 'button-role'],
+            name: 'button-role',
+            aliases: ['brole', 'buttonrole'],
             group: 'managing',
             description: 'Create or remove button roles.',
             details: `${channelDetails()}\n${roleDetails(null, true, 10)}`,
@@ -33,7 +33,7 @@ module.exports = class ButtonRoleCommand extends Command {
                     type: 'string',
                     validate: async (val, msg, arg) => {
                         const type = msg.client.registry.types.get('role')
-                        const array = val.split(/\s*,\s*/).slice(0, 30)
+                        const array = val.split(/\s*,\s*/).slice(0, 10)
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
@@ -45,14 +45,13 @@ module.exports = class ButtonRoleCommand extends Command {
                     },
                     parse: async (val, msg) => {
                         const type = msg.client.registry.types.get('role')
-                        const array = val.split(/\s*,\s*/).slice(0, 30)
+                        const array = val.split(/\s*,\s*/).slice(0, 10)
                         const valid = []
                         for (const str of array) {
                             valid.push(await type.parse(str, msg))
                         }
                         return removeDuplicated(valid)
                     },
-                    required: false,
                     error: 'At least one of the roles you specified was invalid, please try again.'
                 }
             ]
@@ -61,15 +60,15 @@ module.exports = class ButtonRoleCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The text channel of the button roles
      * @param {Role[]} args.roles The roles for the buttons
      */
-    async run(message, { channel, roles }) {
+    async run({ message }, { channel, roles }) {
         const { id } = message
 
-        const msg = await basicCollector(message, {
+        const msg = await basicCollector({ message }, {
             fieldName: 'What message should I send with the buttons?'
         }, { time: myMs('2m') })
         if (!msg) return

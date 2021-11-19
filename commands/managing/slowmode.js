@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { myMs, channelDetails, timeDetails } = require('../../utils')
 const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
@@ -45,12 +45,12 @@ module.exports = class SlowmodeCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to change the rate limit
      * @param {number|'off'} args.ratelimit The new rate limit
      */
-    async run(message, { channel, ratelimit }) {
+    async run({ message }, { channel, ratelimit }) {
         ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
 
         if (channel.rateLimitPerUser === ratelimit) {

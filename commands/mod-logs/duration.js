@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { myMs, basicEmbed, timeDetails, docId, confirmButtons } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -45,12 +45,12 @@ module.exports = class DurationCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {string} args.modlogId The mod log id
      * @param {number|Date} args.duration The new duration
      */
-    async run(message, { modlogId, duration }) {
+    async run({ message }, { modlogId, duration }) {
         const { guild } = message
         const { moderations, active } = guild.database
 
@@ -74,7 +74,7 @@ module.exports = class DurationCommand extends Command {
         /** @type {string} */
         const longTime = myMs(duration - Date.now(), { long: true })
 
-        const confirm = await confirmButtons(message, 'update modlog duration', modlogId, { duration: longTime })
+        const confirm = await confirmButtons({ message }, 'update modlog duration', modlogId, { duration: longTime })
         if (!confirm) return
         await moderations.update(modLog, { duration: longTime })
         await active.update(activeLog, { duration })

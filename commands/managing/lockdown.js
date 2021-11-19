@@ -5,7 +5,7 @@ const { stripIndent, oneLine } = require('common-tags')
 const {
     basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails
 } = require('../../utils')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
 /* eslint-enable no-unused-vars */
@@ -79,12 +79,12 @@ module.exports = class LockdownCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'start'|'end'|'channels'|'add'|'remove'} args.subCommand The sub-command
      * @param {string} args.channels The reason of the lockdown, or the channels to add/remove
      */
-    async run(message, { subCommand, channels }) {
+    async run({ message }, { subCommand, channels }) {
         const { guild } = message
         this.db = guild.database.setup
         const _channels = guild.channels.cache
@@ -131,7 +131,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        const confirmed = await confirmButtons(message, 'start lockdown', null, { reason })
+        const confirmed = await confirmButtons({ message }, 'start lockdown', null, { reason })
         if (!confirmed) return
 
         const { guild, guildId } = message
@@ -187,7 +187,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        const confirmed = await confirmButtons(message, 'end lockdown', null, { reason })
+        const confirmed = await confirmButtons({ message }, 'end lockdown', null, { reason })
         if (!confirmed) return
 
         const { guild, guildId } = message
@@ -242,7 +242,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        await generateEmbed(message, channelsData, {
+        await generateEmbed({ message }, channelsData, {
             number: 20,
             authorName: `There's ${pluralize('lockdown channel', channelsData.length)}`,
             authorIconURL: message.guild.iconURL({ dynamic: true }),
@@ -258,7 +258,7 @@ module.exports = class LockdownCommand extends Command {
      * @param {TextChannel[]} channels The lockdown channels to add
      */
     async add(message, data, savedChannels, channels) {
-        if (!channels) {
+        if (message && !channels) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             channels = value
@@ -307,7 +307,7 @@ module.exports = class LockdownCommand extends Command {
             }))
         }
 
-        if (!channels) {
+        if (message && !channels) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             channels = value

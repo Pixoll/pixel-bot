@@ -13,15 +13,16 @@ require('dotenv').config()
 const client = new CommandoClient({
     prefix: '!!',
     owner: '667937325002784768',
+    testGuild: '790051159099703316',
     serverInvite: 'https://discord.gg/Pc9pAHf3GU',
     inviteOptions: {
         scopes: ['applications.commands', 'bot'],
         permissions: [
             'ADD_REACTIONS', 'ADMINISTRATOR', 'ATTACH_FILES', 'BAN_MEMBERS', 'CHANGE_NICKNAME', 'CREATE_INSTANT_INVITE',
-            'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD', 'MANAGE_MESSAGES',
-            'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS',
-            'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'USE_PRIVATE_THREADS', 'USE_PUBLIC_THREADS',
-            'VIEW_AUDIT_LOG', 'VIEW_CHANNEL'
+            'EMBED_LINKS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
+            'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'SEND_MESSAGES',
+            'SEND_MESSAGES_IN_THREADS', 'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'USE_PRIVATE_THREADS',
+            'USE_PUBLIC_THREADS', 'VIEW_AUDIT_LOG', 'VIEW_CHANNEL'
         ]
     },
     intents: [
@@ -33,7 +34,7 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
-const debugExclude = /'Heartbeat|Registered|WS|Loaded feature|for guild|Garbage collection completed'/
+const debugExclude = /Heartbeat|Registered|WS|Loaded feature|for guild|Garbage collection completed/
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')

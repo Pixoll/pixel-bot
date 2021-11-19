@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { oneLine } = require('common-tags')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
@@ -10,8 +10,8 @@ const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../uti
 module.exports = class ModLogsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'modlogs',
-            aliases: ['mod-logs'],
+            name: 'mod-logs',
+            aliases: ['modlogs'],
             group: 'mod-logs',
             description: 'Displays all moderator logs of the server of a specific user, or all if none is specified',
             details: userDetails,
@@ -30,11 +30,11 @@ module.exports = class ModLogsCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod logs from
      */
-    async run(message, { user }) {
+    async run({ message }, { user }) {
         const { guild } = message
         const db = guild.database.moderations
 
@@ -63,7 +63,7 @@ module.exports = class ModLogsCommand extends Command {
 
         const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        await generateEmbed(message, modLogs.toJSON(), {
+        await generateEmbed({ message }, modLogs.toJSON(), {
             authorName: oneLine`
                 ${user ? `${user.username} has` : 'There\'s'}
                 ${pluralize('mod log', modLogs.size)}

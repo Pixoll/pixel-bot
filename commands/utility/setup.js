@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const {
     channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument
 } = require('../../utils')
@@ -83,12 +83,12 @@ module.exports = class SetupCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {SubCommand} args.subCommand The sub-command to use
      * @param {TextChannel|Role|string} args.value The value to set for that sub-command
      */
-    async run(message, { subCommand, value }) {
+    async run({ message }, { subCommand, value }) {
         subCommand = subCommand.toLowerCase()
         const { guild } = message
         this.db = guild.database.setup
@@ -131,7 +131,7 @@ module.exports = class SetupCommand extends Command {
         /** @type {TextChannel} */
         let logsChannel
         while (!logsChannel || logsChannel.type !== 'GUILD_TEXT') {
-            const msg = await basicCollector(message, {
+            const msg = await basicCollector({ message }, {
                 fieldName: 'In what __text channel__ should I send the audit-logs?'
             }, null, true)
             if (!msg) return
@@ -148,7 +148,7 @@ module.exports = class SetupCommand extends Command {
                 'This is considered as a moderation role, please try again with another one.' :
                 `Audit logs will be sent in ${logsChannel}.`
 
-            const msg = await basicCollector(message, {
+            const msg = await basicCollector({ message }, {
                 description,
                 fieldName: 'What __role__ should I give to a __member__ when they join the server?'
             }, null, true)
@@ -162,7 +162,7 @@ module.exports = class SetupCommand extends Command {
         /** @type {Role} */
         let botRole
         while (!botRole) {
-            const msg = await basicCollector(message, {
+            const msg = await basicCollector({ message }, {
                 description: `The default member role will be ${memberRole}.`,
                 fieldName: 'What __role__ should I give to a __bot__ when they join the server?'
             }, null, true)
@@ -176,7 +176,7 @@ module.exports = class SetupCommand extends Command {
         /** @type {Role} */
         let mutedRole
         while (!mutedRole) {
-            const msg = await basicCollector(message, {
+            const msg = await basicCollector({ message }, {
                 description: `The default bot role will be ${botRole}.`,
                 fieldName: 'What __role__ should I give to a __member__ when they get muted?'
             }, null, true)
@@ -190,7 +190,7 @@ module.exports = class SetupCommand extends Command {
         /** @type {TextChannel[]} */
         const lockChannels = []
         while (lockChannels.length === 0) {
-            const msg = await basicCollector(message, {
+            const msg = await basicCollector({ message }, {
                 description: `The role given to muted people will be ${mutedRole}.`,
                 fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
             }, { time: myMs('2m') }, true)
@@ -205,7 +205,7 @@ module.exports = class SetupCommand extends Command {
 
         await toDelete.delete()
 
-        const msg = await basicCollector(message, {
+        const msg = await basicCollector({ message }, {
             description: stripIndent`
                 This is all the data I got:
                 **>** **Audit logs channel:** ${logsChannel}
@@ -348,10 +348,12 @@ module.exports = class SetupCommand extends Command {
      * @param {TextChannel} channel The channel for the audit logs
      */
     async auditLogs(message, channel) {
-        while (!(channel instanceof TextChannel)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channel = value
+        if (message) {
+            while (!(channel instanceof TextChannel)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                channel = value
+            }
         }
 
         await this.db.add(defaultDoc(message.guildId, 'logsChannel', channel.id))
@@ -372,10 +374,12 @@ module.exports = class SetupCommand extends Command {
      * @param {Role} role The role for the muted members
      */
     async mutedRole(message, role) {
-        while (!(role instanceof Role)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            role = value
+        if (message) {
+            while (!(role instanceof Role)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                role = value
+            }
         }
 
         await this.db.add(defaultDoc(message.guildId, 'mutedRole', role.id))
@@ -396,10 +400,12 @@ module.exports = class SetupCommand extends Command {
      * @param {Role} role The default role for all members
      */
     async memberRole(message, role) {
-        while (!(role instanceof Role)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            role = value
+        if (message) {
+            while (!(role instanceof Role)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                role = value
+            }
         }
 
         await this.db.add(defaultDoc(message.guildId, 'memberRole', role.id))
@@ -420,10 +426,12 @@ module.exports = class SetupCommand extends Command {
      * @param {Role} role The default role for all bots
      */
     async botRole(message, role) {
-        while (!(role instanceof Role)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            role = value
+        if (message) {
+            while (!(role instanceof Role)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                role = value
+            }
         }
 
         await this.db.add(defaultDoc(message.guildId, 'botRole', role.id))
@@ -445,10 +453,12 @@ module.exports = class SetupCommand extends Command {
      * @param {string|TextChannel} channelsStr All the lockdown channels for the server
      */
     async lockdownChannels(message, data, channelsStr) {
-        while (channelsStr instanceof Role) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channelsStr = value
+        if (message) {
+            while (channelsStr instanceof Role) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                channelsStr = value
+            }
         }
 
         const { client } = message
@@ -468,7 +478,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         while (channels.length === 0) {
-            const msg = await basicCollector(message, {
+            const msg = await basicCollector({ message }, {
                 fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
             }, { time: myMs('2m') }, true)
             if (!msg) return

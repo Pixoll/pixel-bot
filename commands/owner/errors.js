@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, generateEmbed, getArgument } = require('../../utils')
 const { ErrorSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -40,12 +40,12 @@ module.exports = class ErrorsCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'view'|'remove'} args.subCommand The sub-command
      * @param {string} args.errorId The id of the error to remove
      */
-    async run(message, { subCommand, errorId }) {
+    async run({ message }, { subCommand, errorId }) {
         subCommand = subCommand.toLowerCase()
         const errors = await this.db.fetchMany()
         if (errors.size === 0) {
@@ -96,7 +96,7 @@ module.exports = class ErrorsCommand extends Command {
                 ])
         )
 
-        await generateEmbed(message, errorsList, {
+        await generateEmbed({ message }, errorsList, {
             number: 3,
             authorName: 'Errors and bugs list',
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
@@ -114,7 +114,7 @@ module.exports = class ErrorsCommand extends Command {
      * @param {string} errorId The id of the error to remove
      */
     async remove(message, errorId) {
-        if (!errorId) {
+        if (message && !errorId) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             errorId = value

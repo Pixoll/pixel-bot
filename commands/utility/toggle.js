@@ -4,7 +4,7 @@ const Command = require('../../command-handler/commands/base')
 const CommandGroup = require('../../command-handler/commands/group')
 const { basicEmbed, getArgument } = require('../../utils')
 const { stripIndent } = require('common-tags')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { DisabledSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -47,12 +47,12 @@ module.exports = class ToggleCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'command'|'group'} args.subCommand The sub-command to use
      * @param {Command|CommandGroup} args.cmdOrGroup The command or group to toggle
      */
-    async run(message, { subCommand, cmdOrGroup }) {
+    async run({ message }, { subCommand, cmdOrGroup }) {
         subCommand = subCommand.toLowerCase()
         const { guildId, guild } = message
         this.db = guild?.database.disabled || this.client.database.disabled
@@ -74,10 +74,12 @@ module.exports = class ToggleCommand extends Command {
      * @param {DisabledSchema} data The disabled commands & groups data
      */
     async command(message, command, data) {
-        while (!(command instanceof Command)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            command = value
+        if (message) {
+            while (!(command instanceof Command)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                command = value
+            }
         }
 
         const { guildId } = message
@@ -117,10 +119,12 @@ module.exports = class ToggleCommand extends Command {
      * @param {DisabledSchema} data The disabled commands & groups data
      */
     async _group(message, group, data) {
-        while (!(group instanceof CommandGroup)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            group = value
+        if (message) {
+            while (!(group instanceof CommandGroup)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                group = value
+            }
         }
 
         const { guildId } = message

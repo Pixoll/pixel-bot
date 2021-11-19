@@ -1,0 +1,45 @@
+/* eslint-disable no-unused-vars */
+const Command = require('../../command-handler/commands/base')
+const { CommandInstances } = require('../../command-handler/typings')
+const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
+/* eslint-enable no-unused-vars */
+
+/** A command that can be run in a client */
+module.exports = class PollsCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'polls',
+            group: 'lists',
+            description: 'Displays all the on-going polls on this server. Use the `poll` command to add polls.',
+            guildOnly: true,
+            slash: true
+        })
+    }
+
+    /**
+     * Runs the command
+     * @param {CommandInstances} instances The instances the command is being run for
+     */
+    async run({ message, interaction }) {
+        const { guild } = message || interaction
+        const db = guild.database.polls
+
+        const pollsData = await db.fetchMany()
+        if (pollsData.size === 0) {
+            const embed = basicEmbed({
+                color: 'BLUE', emoji: 'info', description: 'There are no active polls.'
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
+        }
+
+        await generateEmbed({ message, interaction }, pollsData.toJSON(), {
+            number: 5,
+            authorName: `There's ${pluralize('active poll', pollsData.size)}`,
+            authorIconURL: guild.iconURL({ dynamic: true }),
+            title: 'Poll',
+            keys: ['channel', 'duration', 'endsAt']
+        })
+    }
+}

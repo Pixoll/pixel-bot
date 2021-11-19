@@ -2,7 +2,7 @@
 const Command = require('../../command-handler/commands/base')
 const { TextChannel } = require('discord.js')
 const { basicEmbed, reasonDetails, channelDetails } = require('../../utils')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -37,12 +37,12 @@ module.exports = class LockCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to lock
      * @param {string} args.reason The message to send when the channel get's locked
      */
-    async run(message, { channel, reason }) {
+    async run({ message }, { channel, reason }) {
         const { guildId, channelId, guild } = message
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles

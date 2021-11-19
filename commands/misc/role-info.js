@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, Role } = require('discord.js')
 const { getKeyPerms, roleDetails } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
@@ -10,11 +10,11 @@ const { stripIndent, oneLine } = require('common-tags')
 module.exports = class RoleInfoCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'roleinfo',
-            aliases: ['role-info'],
+            name: 'role-info',
+            aliases: ['roleinfo'],
             group: 'misc',
             description: oneLine`
-                Displays multiple information about a role, such as color, position, members and mod permissions (if any).
+                Displays multiple information about a role, such as color, position, members and mod permissions.
             `,
             details: roleDetails(),
             format: 'roleinfo [role]',
@@ -24,17 +24,29 @@ module.exports = class RoleInfoCommand extends Command {
                 key: 'role',
                 prompt: 'What role do you want to get information from?',
                 type: 'role'
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'role',
+                    name: 'role',
+                    description: 'The role to get info from.',
+                    required: true
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {Role} args.role The role to get information about
      */
-    async run(message, { role }) {
+    async run({ message, interaction }, { role }) {
+        if (interaction) {
+            role = interaction.options.getRole('role')
+        }
+
         const { hexColor, id, name, hoist, position, mentionable, members, createdTimestamp, unicodeEmoji } = role
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.colorhexa.com/${color.replace('#', '')}.png` : null
@@ -60,6 +72,7 @@ module.exports = class RoleInfoCommand extends Command {
 
         if (permissions !== 'None') roleInfo.addField('Mod permissions', permissions)
 
-        await message.replyEmbed(roleInfo)
+        await interaction?.editReply({ embeds: [roleInfo] })
+        await message?.replyEmbed(roleInfo)
     }
 }

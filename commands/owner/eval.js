@@ -3,7 +3,7 @@ const util = require('util')
 const { Util: { splitMessage } } = require('discord.js')
 const { stripIndents } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
 /** @param {string} str */
@@ -37,11 +37,12 @@ module.exports = class EvalCommand extends Command {
     }
 
     /**
-	 * @param {CommandoMessage} message The message
-	 * @param {object} args The arguments
-	 * @param {string} script The script to evaluate
-	 */
-    run(message, { script }) {
+     * Runs the command
+     * @param {CommandInstances} instances The instances the command is being run for
+     * @param {object} args The arguments
+     * @param {string} script The script to evaluate
+     */
+    run({ message }, { script }) {
         // Remove any surrounding code blocks before evaluation
         if (script.startsWith('```') && script.endsWith('```')) {
             script = script.replace(/(^.*?\s)|(\n.*$)/g, '')

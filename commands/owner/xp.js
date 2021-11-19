@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { myMs, code, abcOrder } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -19,10 +19,10 @@ module.exports = class xpCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      */
-    async run(message) {
+    async run({ message }) {
         const fetched = await message.channel.messages.fetch({ before: message.id, limit: 1 })
         const { content } = fetched.first()
 

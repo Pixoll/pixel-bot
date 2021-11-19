@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, channelDetails, basicCollector, myMs } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -48,12 +48,12 @@ module.exports = class WelcomeCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel where to send the welcome messages
      * @param {string} args.msg The welcome message to send
      */
-    async run(message, { channel, msg }) {
+    async run({ message }, { channel, msg }) {
         this.db = message.guild.database.welcome
         const data = await this.db.fetch()
 
@@ -73,7 +73,7 @@ module.exports = class WelcomeCommand extends Command {
         }
 
         if (!msg) {
-            const welcomeMsg = await basicCollector(message, {
+            const welcomeMsg = await basicCollector({ message }, {
                 fieldName: `What message would you like me to send in #${channel.name}?`
             }, { time: myMs('2m') })
             if (!welcomeMsg) return

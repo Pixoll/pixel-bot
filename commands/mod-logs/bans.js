@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { GuildBan, Collection, GuildAuditLogs } = require('discord.js')
 const { basicEmbed, generateEmbed, abcOrder, pluralize } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -20,9 +20,9 @@ module.exports = class BansCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run(message) {
+    async run({ message }) {
         const { guild } = message
 
         /** @type {Collection<string, GuildBan>} */
@@ -53,7 +53,7 @@ module.exports = class BansCommand extends Command {
             })
         }
 
-        await generateEmbed(message, bansList.sort((a, b) =>
+        await generateEmbed({ message }, bansList.sort((a, b) =>
             abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
         ), {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,

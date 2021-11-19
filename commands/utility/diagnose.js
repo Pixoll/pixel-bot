@@ -4,7 +4,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const CommandGroup = require('../../command-handler/commands/group')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { permissions } = require('../../command-handler/util')
 const { getArgument } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -50,12 +50,12 @@ module.exports = class DiagnoseCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'all'|'command'|'group'} args.subCommand The sub-command to use
      * @param {Command|CommandGroup} args.cmdOrGroup The command or group to diagnose
      */
-    async run(message, { subCommand, cmdOrGroup }) {
+    async run({ message }, { subCommand, cmdOrGroup }) {
         subCommand = subCommand.toLowerCase()
 
         switch (subCommand) {
@@ -106,13 +106,15 @@ module.exports = class DiagnoseCommand extends Command {
      * @param {Command} command The command to diagnose
      */
     async command(message, command) {
-        while (!(command instanceof Command)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            command = value
+        if (message) {
+            while (!(command instanceof Command)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                command = value
+            }
         }
 
-        const { guild, clientMember, client } = message
+        const { guild, client } = message
         const isEnabled = guild ? command.isEnabledIn(guild, true) : command._globalEnabled
 
         const global = guild ? 'Status' : 'Global status'
@@ -129,7 +131,7 @@ module.exports = class DiagnoseCommand extends Command {
             /** @type {GuildChannel} */
             const channel = message.channel
 
-            const perms = channel.permissionsFor(clientMember).missing(command.clientPermissions)
+            const perms = channel.permissionsFor(guild.me).missing(command.clientPermissions)
             const missing = perms?.map(str => `\`${permissions[str.toString()]}\``).join(', ') || 'None'
 
             diagnose.addField('Missing permissions', missing)
@@ -144,10 +146,12 @@ module.exports = class DiagnoseCommand extends Command {
      * @param {CommandGroup} group The group to diagnose
      */
     async _group(message, group) {
-        while (!(group instanceof CommandGroup)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            group = value
+        if (message) {
+            while (!(group instanceof CommandGroup)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                group = value
+            }
         }
 
         const { guild, client } = message

@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex } = require('../../utils')
 const { stripIndent } = require('common-tags')
@@ -57,14 +57,14 @@ module.exports = class PollCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'create'|'end'} args.subCommand The sub-command to use
      * @param {TextChannel} args.channel The text channel of the poll to create or end
      * @param {number|Date|string} args.durationOrMsg The duration of the poll to create,
      * or the message of the poll to end
      */
-    async run(message, { subCommand, channel, durationOrMsg }) {
+    async run({ message }, { subCommand, channel, durationOrMsg }) {
         subCommand = subCommand.toLowerCase()
         this.db = message.guild.database.polls
 
@@ -83,21 +83,25 @@ module.exports = class PollCommand extends Command {
      * @param {number|Date|string} duration The duration of the poll to create
      */
     async create(message, channel, duration) {
-        if (!channel) {
+        if (message && !channel) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             channel = value
         }
 
-        while (!duration || typeof duration === 'string') {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            duration = value
+        if (message) {
+            while (!duration || typeof duration === 'string') {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
+                if (cancelled) return
+                duration = value
+                if (typeof duration === 'number') duration += Date.now()
+                if (duration instanceof Date) duration = duration.getTime()
+            }
         }
 
         const { guildId, client } = message
 
-        const pollMsg = await basicCollector(message, {
+        const pollMsg = await basicCollector({ message }, {
             fieldName: 'What will the message of the poll be?'
         }, { time: myMs('2m') })
         if (!pollMsg) return
@@ -105,7 +109,7 @@ module.exports = class PollCommand extends Command {
         const allEmojis = client.emojis.cache
         const emojis = []
         while (emojis.length < 2) {
-            const emojisMsg = await basicCollector(message, {
+            const emojisMsg = await basicCollector({ message }, {
                 fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**'
             }, { time: myMs('2m') })
             if (!emojisMsg) return
@@ -143,7 +147,7 @@ module.exports = class PollCommand extends Command {
      * @param {string} _msg The message id of the poll to end
      */
     async end(message, channel, _msg) {
-        if (!channel) channel = message.channel
+        channel ??= message.channel
 
         if (_msg) {
             while (!(_msg instanceof Message)) {

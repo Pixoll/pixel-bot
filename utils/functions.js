@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 const {
     MessageEmbed, GuildMember, User, Role, MessageOptions, TextChannel, GuildChannel, Message, ColorResolvable,
-    AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu,
+    AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu
 } = require('discord.js')
-const { CommandoMessage, CommandoGuild, Command, Argument } = require('../command-handler/typings')
+const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
 const CGuildClass = require('../command-handler/extensions/guild')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent, oneLine } = require('common-tags')
@@ -213,6 +213,7 @@ function formatBytes(bytes, decimals = 2, showUnit = true) {
  * @returns Whether the user should be pinged or not.
  */
 function noReplyInDMs(msg) {
+    if (!msg) return {}
     /** @type {MessageOptions} */
     const options = msg.channel.type === 'DM' ? {
         allowedMentions: { repliedUser: false }
@@ -223,19 +224,21 @@ function noReplyInDMs(msg) {
 
 /**
  * Creates a basic collector with the given parameters.
- * @param {CommandoMessage} msg The message for this collector.
+ * @param {CommandInstances} instances The instances the command is being run for
  * @param {BasicEmbedOptions} embedOptions The options for the response messages.
  * @param {AwaitMessagesOptions} [collectorOptions] The collector's options.
  * @param {boolean} [shouldDelete] Whether the prompt should be deleted after it gets a value or not.
  */
-async function basicCollector(msg, embedOptions, collectorOptions = {}, shouldDelete) {
-    if (!msg) throw new Error('The argument msg must be specified')
+async function basicCollector({ message, interaction } = {}, embedOptions, collectorOptions = {}, shouldDelete) {
+    if (!message && !interaction) throw new Error('The argument instances must be specified')
     if (!embedOptions) throw new Error('The argument embedOptions must be specified')
     if (collectorOptions === null) collectorOptions = {}
 
     if (!collectorOptions.time) collectorOptions.time = 30 * 1000
     if (!collectorOptions.max) collectorOptions.max = 1
-    if (!collectorOptions.filter) collectorOptions.filter = m => m.author.id === msg.author.id
+    if (!collectorOptions.filter) {
+        collectorOptions.filter = m => m.author.id === (message?.author || interaction.user).id
+    }
 
     if (!embedOptions.color) embedOptions.color = 'BLUE'
     if (!embedOptions.fieldValue) embedOptions.fieldValue = 'Respond with `cancel` to cancel the command.'
@@ -245,19 +248,20 @@ async function basicCollector(msg, embedOptions, collectorOptions = {}, shouldDe
         )}`
     }
 
-    const toDelete = await msg.replyEmbed(basicEmbed(embedOptions))
+    const toDelete = await message?.replyEmbed(basicEmbed(embedOptions))
 
-    const messages = await msg.channel.awaitMessages(collectorOptions)
+    const messages = await (message || interaction).channel.awaitMessages(collectorOptions)
     if (messages.size === 0) {
-        await msg.replyEmbed('You didn\'t answer in time.')
+        await interaction?.editReply('You didn\'t answer in time.')
+        await message?.replyEmbed('You didn\'t answer in time.')
         return null
     }
     if (messages.first().content.toLowerCase() === 'cancel') {
-        await messages.first().reply({ content: 'Cancelled command.', ...noReplyInDMs(msg) })
+        await messages.first().reply({ content: 'Cancelled command.', ...noReplyInDMs(message) })
         return null
     }
 
-    if (shouldDelete) await toDelete.delete()
+    if (shouldDelete && toDelete) await toDelete.delete()
 
     return messages.first()
 }
@@ -806,10 +810,10 @@ function isValidRole(msg, role) {
     if (!role) return false
     if (role.managed) return false
 
-    const { member, client, author, clientMember } = msg
+    const { member, client, author, guild } = msg
     const botId = client.user.id
 
-    const botManagable = clientMember.roles.highest.comparePositionTo(role)
+    const botManagable = guild.me.roles.highest.comparePositionTo(role)
     if (botManagable < 1) return false
 
     const isOwner = author.id === botId
@@ -837,7 +841,7 @@ function docId() {
 
 /**
  * Creates a basic paged embed with the template provided.
- * @param {CommandoMessage} message Used to send the embed.
+ * @param {CommandInstances} instances The instances for this embed
  * @param {object} data The number of pages the embed should have.
  * @param {number} data.number The number of chunks of data to be displayed in one page.
  * @param {number} data.total The total chunks of data.
@@ -847,8 +851,9 @@ function docId() {
  * @param {boolean} [data.skipMaxButtons=false] Whether to skip the page start and page end buttons
  * @param {TemplateEmbedFunction} template The embed template to use.
  */
-async function pagedEmbed(message, data, template) {
-    const { channel, author, id } = message
+async function pagedEmbed({ message, interaction }, data, template) {
+    const { channel, id } = message || interaction
+    const author = message?.author || interaction.user
     const isDMs = channel.type === 'DM'
     const targetChan = data.toUser ? await author.createDM() : channel
 
@@ -888,13 +893,15 @@ async function pagedEmbed(message, data, template) {
         )
 
     if (data.toUser && !isDMs) {
-        await message.reply(stripIndent`
+        const content = stripIndent`
             ${data.dmMsg || ''}
             **Didn\'t get the DM?** Then please allow DMs from server members.
-        `)
+        `
+        await interaction?.editReply(content)
+        await message?.reply(content)
     }
 
-    await targetChan.sendTyping().catch(() => null)
+    if (message) await targetChan.sendTyping().catch(() => null)
 
     const first = await template(0)
     const msgOptions = {
@@ -902,18 +909,23 @@ async function pagedEmbed(message, data, template) {
         components: [...data.components, buttons].filter(c => c),
         ...noReplyInDMs(message)
     }
+
     /** @type {Message} */
-    const msg = data.toUser && !isDMs ?
-        await targetChan.send(msgOptions).catch(() => null) :
-        await message.reply(msgOptions)
+    let msg
+    if (data.toUser && !isDMs) msg = await targetChan.send(msgOptions).catch(() => null)
+    else {
+        if (interaction) msg = await interaction.editReply(msgOptions)
+        else msg = await message.reply(msgOptions)
+    }
+
     if (!msg) return
 
     if (data.total <= data.number && !data.components[0]) return
 
     let index = 0
-    const collector = msg.createMessageComponentCollector({
+    const collector = targetChan.createMessageComponentCollector({
         filter: async int => {
-            if (msg.id !== int.message?.id) return false
+            if ((msg || interaction).id !== int.message?.id) return false
             if (!int.isButton() && !int.isSelectMenu()) return false
             if (int.user.id !== author.id) {
                 await int.reply({
@@ -1002,13 +1014,14 @@ async function pagedEmbed(message, data, template) {
     })
 
     collector.on('end', async () => {
-        await msg.edit({ components: [] }).catch(() => null)
+        if (msg) await msg.edit({ components: [] }).catch(() => null)
+        else interaction.editReply({ components: [] }).catch(() => null)
     })
 }
 
 /**
  * Generates a paged embed based off the `array` and `embedOptions`
- * @param {CommandoMessage} message This lets me know where to send the embed
+ * @param {CommandInstances} instances The instances for this embed
  * @param {array} array The array that contains the data to be displayed
  * @param {object} data Some extra data for the embed
  * @param {number} [data.number=6] The number of chunks to display per page
@@ -1033,7 +1046,7 @@ async function pagedEmbed(message, data, template) {
  * If empty I will use `data.keys` or every property
  * @param {boolean} [data.useDocId=false] Whether to use the document's id on each data chunk
  */
-async function generateEmbed(message, array, data) {
+async function generateEmbed({ message, interaction }, array, data) {
     const {
         number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription = false,
         title = '', inLine = false, toUser = false, dmMsg = '', hasObjects = true, keyTitle = {},
@@ -1075,7 +1088,7 @@ async function generateEmbed(message, array, data) {
             }
         }
 
-        const { channels } = message.client
+        const { channels } = (message || interaction).client
 
         let index = 0
         for (const item of current) {
@@ -1127,12 +1140,16 @@ async function generateEmbed(message, array, data) {
         return { embed: embed, total: _array.length }
     }
 
-    await pagedEmbed(message, { number, total: array.length, toUser, dmMsg, components, skipMaxButtons }, createEmbed)
+    await pagedEmbed(
+        { message, interaction },
+        { number, total: array.length, toUser, dmMsg, components, skipMaxButtons },
+        createEmbed
+    )
 }
 
 /**
  * Creates and manages confirmation buttons (y/n) for moderation actions
- * @param {CommandoMessage} message The message that triggers this confirmation
+ * @param {CommandInstances} instances The instances for these buttons
  * @param {string} action The action for confirmation
  * @param {User|string|CommandoGuild} [target] The target on which this action is being executed
  * @param {object} [data] The data of this action
@@ -1140,8 +1157,9 @@ async function generateEmbed(message, array, data) {
  * @param {string} [data.duration] The duration of this action
  * @param {boolean} [sendCancelled=true] Whether to send 'Cancelled command.' or not
  */
-async function confirmButtons(message, action, target, data = {}, sendCancelled = true) {
-    const { id, author, channel } = message
+async function confirmButtons({ message, interaction }, action, target, data = {}, sendCancelled = true) {
+    const { id } = message || interaction
+    const author = message?.author || interaction.user
 
     const ids = { yes: `${id}:yes`, no: `${id}:no` }
     const targetStr = target instanceof User ? target.tag :
@@ -1177,10 +1195,15 @@ async function confirmButtons(message, action, target, data = {}, sendCancelled 
         .setCustomId(ids.no)
         .setEmoji(customEmoji('cross'))
 
-    const msg = await message.replyEmbed(confirmEmbed, {
+    /** @type {Message} */
+    let msg
+    const msgData = {
+        embeds: [confirmEmbed],
         components: [new MessageActionRow().addComponents(yesButton, noButton)],
         ...noReplyInDMs(message)
-    })
+    }
+    if (interaction) msg = await interaction.editReply(msgData)
+    else msg = await message.reply(msgData)
 
     const pushed = await msg.awaitMessageComponent({
         filter: async int => {
@@ -1197,14 +1220,20 @@ async function confirmButtons(message, action, target, data = {}, sendCancelled 
         componentType: 'BUTTON'
     }).catch(() => null)
 
-    await msg.delete()
+    if (message) await msg.delete()
+
+    await interaction?.editReply({ components: [] })
 
     if (!pushed || pushed.customId === ids.no) {
-        if (sendCancelled) await message.reply({ content: 'Cancelled command.', ...noReplyInDMs(message) })
+        const options = { content: 'Cancelled command.', ...noReplyInDMs(message) }
+        if (sendCancelled) {
+            await interaction?.editReply({ ...options, embeds: [] })
+            await message?.reply(options)
+        }
         return false
     }
 
-    await channel.sendTyping().catch(() => null)
+    await message?.channel.sendTyping().catch(() => null)
     return true
 }
 
@@ -1216,8 +1245,8 @@ async function confirmButtons(message, action, target, data = {}, sendCancelled 
 function commandInfo(cmd, guild) {
     const { prefix: _prefix, user, owners } = cmd.client
     const {
-        name, description, details, examples, aliases, group, guarded,
-        throttling, ownerOnly, guildOnly, dmOnly, deprecated, replacing
+        name, description, details, examples, aliases, group, guarded, throttling, ownerOnly, guildOnly,
+        dmOnly, deprecated, replacing, slash
     } = cmd
 
     const prefix = guild?.prefix || _prefix
@@ -1262,6 +1291,7 @@ function commandInfo(cmd, guild) {
     const information = {
         Category: group.name,
         Aliases: aliases.join(', ') || null,
+        Slash: slash ? 'Yes' : 'No',
         Cooldown: throttling ?
             `${pluralize('usage', throttling.usages)} per ${myMs(throttling.duration * 1000, { long: true })}` :
             null,

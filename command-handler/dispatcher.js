@@ -2,8 +2,11 @@
 const { escapeRegex } = require('./util')
 const isPromise = require('is-promise')
 const CommandoRegistry = require('./registry')
-const { Message, MessageEmbed } = require('discord.js')
+const { Message, MessageEmbed, CommandInteraction, MessageButton, MessageActionRow } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient } = require('./typings')
+const { oneLine } = require('common-tags')
+const { probability, embedColor } = require('../utils')
+const FriendlyError = require('./errors/friendly')
 /* eslint-enable no-unused-vars */
 
 /** Handles parsing messages and running commands from them */
@@ -158,6 +161,120 @@ class CommandDispatcher {
 	}
 
 	/**
+	 * Handle a slash command interaction
+	 * @param {CommandInteraction} interaction The interaction to handle
+	 * @return {Promise<void>}
+	 * @private
+	 */
+	async handleSlash(interaction) {
+		if (!interaction.isCommand()) return
+
+		// Get the matching command
+		const { commandName, channelId, channel, guild, user } = interaction
+		const command = this.registry.resolveCommand(commandName)
+		if (!command) throw new Error(`There is no matching command for "${commandName}".`)
+		const { groupId, memberName } = command
+
+		// Obtain the member if we don't have it
+		if (channel.type !== 'DM' && !guild.members.cache.has(user.id)) {
+			interaction.member = await guild.members.fetch(user)
+		}
+
+		// Obtain the member for the ClientUser if it doesn't already exist
+		if (channel.type !== 'DM' && !guild.members.cache.has(this.client.user.id)) {
+			await guild.members.fetch(this.client.user.id)
+		}
+
+		// Defers the reply
+		try {
+			await interaction.deferReply({ ephemeral: Boolean(command.slash.ephemeral) })
+		} catch (err) {
+			throw new Error(err)
+		}
+
+		// Make sure the command is usable in this context
+		if (command.dmOnly && guild) {
+			this.client.emit('commandBlock', { interaction }, 'dmOnly')
+			return await command.onBlock({ interaction }, 'dmOnly')
+		}
+
+		// Make sure the command is usable in this context
+		if ((command.guildOnly || command.guildOwnerOnly) && !guild) {
+			this.client.emit('commandBlock', { interaction }, 'guildOnly')
+			return await command.onBlock({ interaction }, 'guildOnly')
+		}
+
+		// Ensure the channel is a NSFW one if required
+		if (command.nsfw && !channel.nsfw) {
+			this.client.emit('commandBlock', { interaction }, 'nsfw')
+			return await command.onBlock({ interaction }, 'nsfw')
+		}
+
+		// Ensure the user has permission to use the command
+		const isOwner = this.client.isOwner(user)
+		const hasPermission = command.hasPermission({ interaction })
+		if (!isOwner && hasPermission !== true) {
+			if (typeof hasPermission === 'string') {
+				this.client.emit('commandBlock', { interaction }, hasPermission)
+				return await command.onBlock({ interaction }, hasPermission)
+			}
+			const data = { missing: hasPermission }
+			this.client.emit('commandBlock', { interaction }, 'userPermissions', data)
+			return await command.onBlock({ interaction }, 'userPermissions', data)
+		}
+
+		// Ensure the client user has the required permissions
+		if (channel.type !== 'DM' && command.clientPermissions) {
+			const missing = channel.permissionsFor(this.client.user).missing(command.clientPermissions)
+			if (missing.length > 0) {
+				const data = { missing }
+				this.client.emit('commandBlock', { interaction }, 'clientPermissions', data)
+				return await this.command.onBlock({ interaction }, 'clientPermissions', data)
+			}
+		}
+
+		// Run the command
+		try {
+			this.client.emit('debug', `Running slash command "${groupId}:${memberName}" in channel "${channelId}".`)
+			const promise = command.run({ interaction }, {}, false, {})
+			this.client.emit('commandRun', command, promise, { interaction }, {}, false, {})
+			await promise
+
+			if (probability(2)) {
+				const { user, botInvite } = this.client
+				const embed = new MessageEmbed()
+					.setColor(embedColor)
+					.addField(`Enjoying ${user.username}?`, oneLine`
+						The please consider voting for it! It helps the bot to become more noticed
+						between other bots. And perhaps consider adding it to any of your own servers
+						as well!
+					`)
+				const vote = new MessageButton()
+					.setEmoji('👍')
+					.setLabel('Vote me')
+					.setStyle('LINK')
+					.setURL('https://top.gg/bot/802267523058761759/vote')
+				const invite = new MessageButton()
+					.setEmoji('🔗')
+					.setLabel('Invite me')
+					.setStyle('LINK')
+					.setURL(botInvite)
+				const row = new MessageActionRow().addComponents(vote, invite)
+				await channel.send({ embeds: [embed], components: [row] }).catch(() => null)
+			}
+
+			return
+		} catch (err) {
+			this.client.emit('commandError', command, err, { interaction })
+			if (err instanceof FriendlyError) {
+				return await interaction.reply(err.message)
+			} else {
+				return await command.onError(err, { interaction })
+			}
+		}
+	}
+
+	/**
 	 * Check whether a message should be handled
 	 * @param {Message} message The message to handle
 	 * @param {Message} [oldMessage] The old message before the update
@@ -203,7 +320,7 @@ class CommandDispatcher {
 					)
 				}
 
-				this.client.emit('commandBlock', cmdMsg, inhibit.reason, inhibit)
+				this.client.emit('commandBlock', { message: cmdMsg }, inhibit.reason, inhibit)
 				return inhibit
 			}
 		}

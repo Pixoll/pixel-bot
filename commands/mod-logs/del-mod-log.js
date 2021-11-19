@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, docId, confirmButtons } = require('../../utils')
 const { oneLine } = require('common-tags')
 /* eslint-enable no-unused-vars */
@@ -9,8 +9,8 @@ const { oneLine } = require('common-tags')
 module.exports = class DelModLogCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'delmodlog',
-            aliases: ['del-modlog'],
+            name: 'del-mod-log',
+            aliases: ['del-modlog', 'delmodlog'],
             group: 'mod-logs',
             description: 'Delete a single moderation log.',
             details: oneLine`
@@ -33,11 +33,11 @@ module.exports = class DelModLogCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {string} args.modlogId The mod log id
      */
-    async run(message, { modlogId }) {
+    async run({ message }, { modlogId }) {
         modlogId = modlogId.toLowerCase()
         const { guild } = message
         const db = guild.database.moderations
@@ -49,7 +49,7 @@ module.exports = class DelModLogCommand extends Command {
             }))
         }
 
-        const confirm = await confirmButtons(message, 'delete modlog', modlogId)
+        const confirm = await confirmButtons({ message }, 'delete modlog', modlogId)
         if (!confirm) return
         await db.delete(modLog)
 

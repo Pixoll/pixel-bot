@@ -2,8 +2,8 @@
 const { stripIndent } = require('common-tags')
 const { Collection, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
-const { timeDetails, abcOrder, pagedEmbed, embedColor } = require('../../utils')
+const { CommandInstances } = require('../../command-handler/typings')
+const { timeDetails, abcOrder, pagedEmbed, embedColor, basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const timeZones = new Collection([
@@ -82,20 +82,56 @@ module.exports = class TimesCommand extends Command {
                     oneOf: cities,
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'string',
+                        name: 'hour',
+                        description: 'The time of the day to check.'
+                    },
+                    {
+                        type: 'string',
+                        name: 'place',
+                        description: 'The place to check its time.'
+                    }
+                ]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {Date} args.hour The hour to check
      * @param {string} args.place The place to check
      */
-    async run(message, { hour, place }) {
+    async run({ message, interaction }, { hour, place }) {
+        if (interaction) {
+            const { options } = interaction
+            const arg = this.argsCollector.args[0]
+            hour = arg.parse(options.getString('hour') ?? 'now') || null
+            if (!hour) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The hour you specified is not valid.'
+                    })]
+                })
+            }
+            place = options.getString('place').toLowerCase()
+            if (place && !cities.map(c => c.toLowerCase()).includes(place)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The place you specified is not valid.'
+                    })]
+                })
+            }
+        }
+
         const date = hour || new Date()
-        const is12Hour = !!message.parseArgs().trim().match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0]
+        const toMatch = message?.parseArgs().trim() || interaction.options.getString('hour')
+        const is12Hour = !!toMatch?.match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0]
 
         const times = []
         /** @param {string} city */
@@ -125,7 +161,9 @@ module.exports = class TimesCommand extends Command {
                 `)
                 .setTimestamp()
 
-            return await message.replyEmbed(embed)
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         for (const data of timeZones) times.push(timeZone(...data))
@@ -139,7 +177,6 @@ module.exports = class TimesCommand extends Command {
 
         const hours = date.getUTCHours()
         const clock = hours - (hours > 12 ? 12 : 0)
-        console.log(date, hours, clock)
 
         const base = new MessageEmbed()
             .setColor(embedColor)
@@ -159,6 +196,6 @@ module.exports = class TimesCommand extends Command {
             embed: pages[page].setFooter(`Page ${++page} of 3`)
         })
 
-        await pagedEmbed(message, { number: 1, total: 3 }, generate)
+        await pagedEmbed({ message, interaction }, { number: 1, total: 3 }, generate)
     }
 }

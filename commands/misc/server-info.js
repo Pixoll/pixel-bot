@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
+const { CommandInstances, CommandoGuild } = require('../../command-handler/typings')
 const { MessageEmbed, PremiumTier } = require('discord.js')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
@@ -23,21 +23,22 @@ function formatLvl(tier) {
 module.exports = class ServerInfoCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'serverinfo',
-            aliases: ['server-info'],
+            name: 'server-info',
+            aliases: ['serverinfo'],
             group: 'misc',
             description: 'Displays some information and statistics of the server, such as owner, boosts and member count.',
-            guildOnly: true
+            guildOnly: true,
+            slash: true
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {CommandoGuild} guild The guild to get information from
      */
-    async run(message, guild) {
-        const server = message.guild || guild
+    async run({ message, interaction }, guild) {
+        const server = (message || interaction).guild || guild
         const { name, channels, premiumTier, premiumSubscriptionCount, memberCount, roles, id, createdTimestamp } = server
         const owner = await server.fetchOwner()
 
@@ -67,6 +68,7 @@ module.exports = class ServerInfoCommand extends Command {
             .setFooter(`Server id: ${id} | Created at`)
             .setTimestamp(createdTimestamp)
 
-        await message.replyEmbed(serverInfo)
+        await interaction?.editReply({ embeds: [serverInfo] })
+        await message?.replyEmbed(serverInfo)
     }
 }

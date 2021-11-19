@@ -3,7 +3,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, capitalize, getArgument, addDashes, removeDashes } = require('../../utils')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -97,13 +97,13 @@ module.exports = class ModuleCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'diagnose'|'toggle'} args.subCommand The sub-command to use
      * @param {Module} args.module The module to toggle or diagnose
      * @param {AuditLog} args.subModule The sub-module to toggle or diagnose
      */
-    async run(message, { subCommand, module, subModule }) {
+    async run({ message }, { subCommand, module, subModule }) {
         subCommand = subCommand.toLowerCase()
         module = module.toLowerCase()
         subModule = subModule?.toLowerCase()
@@ -166,7 +166,7 @@ module.exports = class ModuleCommand extends Command {
      * @param {AuditLog} subModule The sub-module to toggle
      */
     async toggle(message, data, module, subModule) {
-        if (module === 'audit-logs' && !subModule) {
+        if (message && module === 'audit-logs' && !subModule) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
             if (cancelled) return
             subModule = value.toLowerCase()

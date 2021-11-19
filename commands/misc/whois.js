@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
 const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -10,7 +10,7 @@ module.exports = class WhoIsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'whois',
-            aliases: ['userinfo'],
+            aliases: ['user-info', 'userinfo'],
             group: 'misc',
             description: 'Displays a user\'s information.',
             details: userDetails,
@@ -21,19 +21,30 @@ module.exports = class WhoIsCommand extends Command {
                 prompt: 'What user do you want to get information from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The user to get info from.'
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get information from
      */
-    async run(message, { user }) {
-        const { guild } = message
-        if (!user) user = message.author
+    async run({ message, interaction }, { user }) {
+        if (interaction) {
+            user = interaction.options.getUser('user')
+        }
+
+        const { guild } = message || interaction
+        user ??= message?.author || interaction.user
         user = await user.fetch()
 
         /** @type {UserFlags} */
@@ -103,6 +114,7 @@ module.exports = class WhoIsCommand extends Command {
             userInfo.setImage(banner).addField('Banner', 'Look below:')
         }
 
-        await message.replyEmbed(userInfo)
+        await interaction?.editReply({ embeds: [userInfo] })
+        await message?.replyEmbed(userInfo)
     }
 }

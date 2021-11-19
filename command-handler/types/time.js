@@ -24,7 +24,7 @@ class TimeArgumentType extends ArgumentType {
      */
     validate(val) {
         const date = this._parseDate(val.match(regex)?.slice(1, 4), val)
-        if (!Boolean(date)) {
+        if (!date) {
             return 'Please enter a valid date format. Use the `help` command for more information.'
         }
 

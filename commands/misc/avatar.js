@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
 const { userDetails, noReplyInDMs, embedColor } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -21,18 +21,28 @@ module.exports = class AvatarCommand extends Command {
                 prompt: 'What user do you want to get their avatar from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The user to get the avatar from.'
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the avatar from
      */
-    async run(message, { user }) {
-        if (!user) user = message.author
+    async run({ message, interaction }, { user }) {
+        if (interaction) {
+            user = interaction.options.getUser('user') || interaction.user
+        }
+        if (message && !user) user = message.author
 
         const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 })
 
@@ -50,6 +60,8 @@ module.exports = class AvatarCommand extends Command {
                     .setURL(avatar)
             )
 
-        await message.reply({ embeds: [embed], components: [row], ...noReplyInDMs(message) })
+        const options = { embeds: [embed], components: [row], ...noReplyInDMs(message) }
+        await interaction?.editReply(options)
+        await message?.reply(options)
     }
 }

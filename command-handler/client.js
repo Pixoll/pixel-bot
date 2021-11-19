@@ -44,9 +44,9 @@ class CommandoClient extends Client {
 		this.botInvite = typeof options.inviteOptions === 'string' ? options.inviteOptions : null
 		if (!this.botInvite) {
 			this.once('ready', () => {
-				this.botInvite = this.options.inviteOptions ?
-					this.generateInvite(this.options.inviteOptions) :
-					null
+				if (this.options.inviteOptions) {
+					this.botInvite = this.generateInvite(this.options.inviteOptions)
+				}
 			})
 		}
 
@@ -99,23 +99,31 @@ class CommandoClient extends Client {
 		this._prefix = null
 
 		// Set up message command handling
-		const msgErr = err => {
+		const catchErr = err => {
 			this.emit('error', err)
 		}
-		this.on('messageCreate', message => {
+		this.on('messageCreate', async message => {
 			const commando = new CommandoMessage(this, message)
 			this.emit('cMessageCreate', commando)
-			this.dispatcher.handleMessage(commando).catch(msgErr)
+			await this.dispatcher.handleMessage(commando).catch(catchErr)
 		})
-		this.on('messageUpdate', (oldMessage, newMessage) => {
+		this.on('messageUpdate', async (oldMessage, newMessage) => {
 			const commando = new CommandoMessage(this, newMessage)
-			this.dispatcher.handleMessage(commando, oldMessage).catch(msgErr)
+			await this.dispatcher.handleMessage(commando, oldMessage).catch(catchErr)
+		})
+
+		// Set up slash command handling
+		this.once('ready', async () => {
+			await this.registry.registerSlashCommands()
+		})
+		this.on('interactionCreate', async interaction => {
+			await this.dispatcher.handleSlash(interaction).catch(catchErr)
 		})
 
 		// Fetch the owner(s)
 		if (options.owner) {
 			this.once('ready', () => {
-				if (options.owner instanceof Array || options.owner instanceof Set) {
+				if (Array.isArray(options.owner) || options.owner instanceof Set) {
 					for (const owner of options.owner) {
 						this.users.fetch(owner).catch(err => {
 							this.emit('warn', `Unable to fetch owner ${owner}.`)
@@ -173,7 +181,7 @@ class CommandoClient extends Client {
 		user = this.users.resolve(user)
 		if (!user) throw new RangeError('Unable to resolve user.')
 		if (typeof this.options.owner === 'string') return user.id === this.options.owner
-		if (this.options.owner instanceof Array) return this.options.owner.includes(user.id)
+		if (Array.isArray(this.options.owner)) return this.options.owner.includes(user.id)
 		if (this.options.owner instanceof Set) return this.options.owner.has(user.id)
 		throw new RangeError('The client\'s "owner" option is an unknown value.')
 	}

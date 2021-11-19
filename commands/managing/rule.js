@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, myMs, embedColor, getArgument } = require('../../utils')
 const { RuleSchema } = require('../../schemas/types')
 const { MessageEmbed } = require('discord.js')
@@ -41,12 +41,12 @@ module.exports = class RuleCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'view'|'add'|'remove'} args.subCommand The sub-command to use
      * @param {string} args.rule The number of the rule you want to remove
      */
-    async run(message, { subCommand, rule }) {
+    async run({ message }, { subCommand, rule }) {
         subCommand = subCommand.toLowerCase()
         this.db = message.guild.database.rules
         const rulesData = await this.db.fetch()
@@ -74,7 +74,7 @@ module.exports = class RuleCommand extends Command {
             }))
         }
 
-        if (!rule || rule > rulesData.rules.length) {
+        if (message && (!rule || rule > rulesData.rules.length)) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             rule = value
@@ -101,11 +101,11 @@ module.exports = class RuleCommand extends Command {
         const { guildId, guild, author, client } = message
 
         if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock(message, 'guildOwnerOnly')
+            return await this.onBlock({ message }, 'guildOwnerOnly')
         }
 
         while (!rule || rule.length > 512 || typeof rule === 'number') {
-            const ruleMsg = await basicCollector(message, {
+            const ruleMsg = await basicCollector({ message }, {
                 fieldName: 'What rule do you want to add?'
             }, { time: myMs('2m') })
             if (!ruleMsg) return
@@ -132,20 +132,20 @@ module.exports = class RuleCommand extends Command {
         const { guild, author, client } = message
 
         if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock(message, 'guildOwnerOnly')
+            return await this.onBlock({ message }, 'guildOwnerOnly')
         }
 
         rule = Number(rule) ?? null
 
         while (typeof rule !== 'number' || rule < 1) {
-            const ruleMsg = await basicCollector(message, {
+            const ruleMsg = await basicCollector({ message }, {
                 fieldName: 'What rule do you want to remove?'
             }, { time: myMs('2m') })
             if (!ruleMsg) return
             rule = Number(ruleMsg.content)
         }
 
-        if (!rule) {
+        if (message && !rule) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
             rule = value

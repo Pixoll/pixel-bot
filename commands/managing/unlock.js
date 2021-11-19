@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel } = require('discord.js')
 const { basicEmbed, channelDetails, reasonDetails } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -37,12 +37,12 @@ module.exports = class UnlockCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to lock
      * @param {string} args.reason The message to send when the channel get's locked
      */
-    async run(message, { channel, reason }) {
+    async run({ message }, { channel, reason }) {
         const { guildId, channelId, guild } = message
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles

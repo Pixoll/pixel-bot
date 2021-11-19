@@ -48,7 +48,7 @@ module.exports = (client) => {
                 .setDescription(`${data.status}\n${timestamp(data.updatedAt, 'R')}`)
                 .setTimestamp(data.updatedAt)
 
-            const toDelete = await message.reply({ embeds: [embed] })
+            const toDelete = await message.replyEmbed(embed)
 
             await sleep(15)
             await toDelete.delete().catch(() => null)

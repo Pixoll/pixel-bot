@@ -48,13 +48,13 @@ module.exports = class GuildCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'info'|'invite'|'remove'} args.subCommand The sub-command
      * @param {string} args.guildId The guild's id or name
      * @param {string} args.reason Why the bot is leaving such guild
      */
-    async run(message, { subCommand, guildId, reason }) {
+    async run({ message }, { subCommand, guildId, reason }) {
         subCommand = subCommand.toLowerCase()
         guildId = guildId.toLowerCase()
 
@@ -62,10 +62,12 @@ module.exports = class GuildCommand extends Command {
         const find = val => g => g.name.toLowerCase() === val || g.name.toLowerCase().includes(val)
         let guild = guilds.get(guildId) || guilds.find(find(guildId))
 
-        while (!guild || !guild._commando) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            guild = guilds.get(value) || guilds.find(find(value))
+        if (message) {
+            while (!guild || !guild._commando) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                guild = guilds.get(value) || guilds.find(find(value))
+            }
         }
 
         switch (subCommand) {
@@ -85,7 +87,7 @@ module.exports = class GuildCommand extends Command {
      */
     async info(message, guild) {
         const serverInfo = this.client.registry.resolveCommand('serverinfo')
-        await serverInfo.run(message, guild)
+        await serverInfo.run({ message }, guild)
     }
 
     /**
