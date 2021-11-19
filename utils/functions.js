@@ -249,7 +249,7 @@ async function basicCollector(msg, embedOptions, collectorOptions = {}, shouldDe
 
     const messages = await msg.channel.awaitMessages(collectorOptions)
     if (messages.size === 0) {
-        await msg.replyEmbed('You didn\'t answer in time.')
+        await msg.reply('You didn\'t answer in time.')
         return null
     }
     if (messages.first().content.toLowerCase() === 'cancel') {
