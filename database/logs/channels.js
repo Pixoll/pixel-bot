@@ -4,7 +4,7 @@ const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('disco
 const { CommandoClient } = require('../../command-handler/typings')
 const { myMs, rtcRegions, compareArrays } = require('../../utils')
 const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes } = require('../../utils')
-const { permissions } = require('../../command-handler/util')
+const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
 
 /**

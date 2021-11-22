@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { GuildMember, TextChannel } = require('discord.js')
 const {
     docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails,

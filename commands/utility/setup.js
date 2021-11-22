@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const {
     channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument

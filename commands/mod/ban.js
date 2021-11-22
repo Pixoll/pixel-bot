@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { User, GuildMember } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const {
     docId, basicEmbed, userException, memberException, reasonDetails, userDetails, confirmButtons
 } = require('../../utils')

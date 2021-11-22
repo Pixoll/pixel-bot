@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags')
 const { TextChannel, Invite, Collection } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
 const { basicEmbed, getArgument, embedColor, inviteButton, confirmButtons } = require('../../utils')
 /* eslint-enable no-unused-vars */

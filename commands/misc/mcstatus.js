@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { MessageEmbed, MessageAttachment, MessageOptions } = require('discord.js')
 const { status: statusJava, statusBedrock } = require('minecraft-server-util')

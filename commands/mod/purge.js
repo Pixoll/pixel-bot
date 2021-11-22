@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js')
 const { validURL, basicEmbed, userDetails, getArgument, sleep } = require('../../utils')

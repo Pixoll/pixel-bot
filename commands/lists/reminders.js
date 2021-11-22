@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { Collection } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, pluralize, confirmButtons } = require('../../utils')
 const { ReminderSchema } = require('../../schemas/types')

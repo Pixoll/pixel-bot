@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { stripIndent, oneLine } = require('common-tags')
 const {
     basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails

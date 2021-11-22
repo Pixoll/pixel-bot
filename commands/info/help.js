@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { MessageEmbed } = require('discord.js')
 const { commandInfo, pagedEmbed, getArgument } = require('../../utils')
 const { version } = require('../../package.json')

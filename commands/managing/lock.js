@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { TextChannel } = require('discord.js')
 const { basicEmbed, reasonDetails, channelDetails } = require('../../utils')
 const { CommandInstances } = require('../../command-handler/typings')

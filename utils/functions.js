@@ -4,13 +4,12 @@ const {
     AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
-const CGuildClass = require('../command-handler/extensions/guild')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent, oneLine } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
 const { version } = require('../package.json')
 const { moderations, active } = require('../schemas')
-const { permissions } = require('../command-handler/util')
+const { permissions, CommandoGuild: CGuildClass } = require('../command-handler')
 const { Module, AuditLog } = require('../schemas/types')
 /* eslint-enable no-unused-vars */
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { MessageButton, MessageActionRow } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 

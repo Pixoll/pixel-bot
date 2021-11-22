@@ -16,7 +16,7 @@ module.exports = {
 	ClientDatabaseManager: require('./database/ClientDatabaseManager'),
 	GuildDatabaseManager: require('./database/GuildDatabaseManager'),
 
-	util: require('./util'),
+	...require('./util'),
 	version: '0.13.0',
 
 	SettingProvider: require('./providers/base'),

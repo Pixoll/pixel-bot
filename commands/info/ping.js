@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { embedColor, basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
