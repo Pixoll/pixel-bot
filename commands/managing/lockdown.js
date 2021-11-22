@@ -5,7 +5,7 @@ const { stripIndent, oneLine } = require('common-tags')
 const {
     basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails
 } = require('../../utils')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
 /* eslint-enable no-unused-vars */
@@ -48,32 +48,95 @@ module.exports = class LockdownCommand extends Command {
                     `,
                     type: 'string',
                     validate: async (val, msg, arg) => {
-                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                        if (!['add', 'remove', 'channels'].includes(sc)) return true
+                        if (typeof msg.parseArgs === 'function') {
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
+                            if (!['add', 'remove', 'channels'].includes(sc)) return true
+                        }
                         const type = msg.client.registry.types.get('text-channel')
                         const array = val.split(/ +/).slice(0, 30)
                         const valid = []
                         for (const str of array) {
                             valid.push(await type.validate(str, msg, arg))
                         }
-                        const wrong = valid.filter(b => b !== true)
-                        return wrong[0] === undefined
+                        return valid.filter(b => b !== true).length !== array.length
                     },
-                    parse: async (val, msg) => {
-                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                        if (!['add', 'remove', 'channels'].includes(sc)) return val || 'No reason given.'
+                    parse: async (val, msg, arg) => {
+                        if (typeof msg.parseArgs === 'function') {
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
+                            if (!['add', 'remove', 'channels'].includes(sc)) return val || 'No reason given.'
+                        }
                         const type = msg.client.registry.types.get('text-channel')
                         const array = val.split(/ +/).slice(0, 30)
                         const valid = []
                         for (const str of array) {
+                            const isValid = await type.validate(str, msg, arg)
+                            if (!isValid) continue
                             valid.push(await type.parse(str, msg))
                         }
                         return valid
                     },
                     required: false,
-                    error: 'At least one of the channels you specified was invalid, please try again.'
+                    error: 'None of the channels you specified were valid. Please try again.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'start',
+                        description: 'Start the lockdown',
+                        options: [{
+                            type: 'string',
+                            name: 'reason',
+                            description: 'Why are you starting the lockdown.'
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'end',
+                        description: 'End the lockdown',
+                        options: [{
+                            type: 'string',
+                            name: 'reason',
+                            description: 'Why are you ending the lockdown.'
+                        }]
+                    },
+                    {
+                        type: 'subcommand-group',
+                        name: 'channels',
+                        description: 'View, add or remove lockdown channels.',
+                        options: [
+                            {
+                                type: 'subcommand',
+                                name: 'add',
+                                description: 'Add lockdown channels (max. 30 at once).',
+                                options: [{
+                                    type: 'string',
+                                    name: 'channels',
+                                    description: 'The channels to add, separated by spaces.',
+                                    required: true
+                                }]
+                            },
+                            {
+                                type: 'subcommand',
+                                name: 'remove',
+                                description: 'Remove lockdown channels (max. 30 at once).',
+                                options: [{
+                                    type: 'string',
+                                    name: 'channels',
+                                    description: 'The channels to remove, separated by spaces.',
+                                    required: true
+                                }]
+                            },
+                            {
+                                type: 'subcommand',
+                                name: 'view',
+                                description: 'Display the lockdown channels.'
+                            },
+                        ]
+                    }
+                ]
+            }
         })
     }
 
@@ -81,22 +144,35 @@ module.exports = class LockdownCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
-     * @param {'start'|'end'|'channels'|'add'|'remove'} args.subCommand The sub-command
-     * @param {string} args.channels The reason of the lockdown, or the channels to add/remove
+     * @param {'start'|'end'|'channels'|'add'|'remove'|'view'} args.subCommand The sub-command
+     * @param {string|TextChannel[]} args.channels The reason of the lockdown, or the channels to add/remove
+     * @param {string} reason The reason of the lockdown
      */
-    async run({ message }, { subCommand, channels }) {
-        const { guild } = message
+    async run({ message, interaction }, { subCommand, channels, reason }) {
+        if (interaction && channels) {
+            const arg = this.argsCollector.args[1]
+            const msg = await interaction.fetchReply()
+            const isValid = await arg.validate(channels, msg)
+            if (isValid !== true) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: 'e' })]
+                })
+            }
+            channels = await arg.parse(channels, msg)
+        }
+
+        const { guild } = message || interaction
         this.db = guild.database.setup
-        const _channels = guild.channels.cache
+        const _channels = guild.channels
         subCommand = subCommand.toLowerCase()
 
         const data = await this.db.fetch()
 
         const savedChannels = []
         if (data) {
-            for (const channelId of [...data.lockChannels]) {
+            for (const channelId of data.lockChannels) {
                 /** @type {TextChannel} */
-                const channel = _channels.get(channelId)
+                const channel = await _channels.fetch(channelId).catch(() => null)
                 if (!channel) continue
                 savedChannels.push(channel)
             }
@@ -104,42 +180,49 @@ module.exports = class LockdownCommand extends Command {
 
         switch (subCommand) {
             case 'start':
-                return await this.start(message, savedChannels, channels)
+                return await this.start({ message, interaction }, savedChannels, channels || reason)
             case 'end':
-                return await this.end(message, savedChannels, channels)
+                return await this.end({ message, interaction }, savedChannels, channels || reason)
             case 'channels':
-                return await this.channels(message, savedChannels)
+            case 'view':
+                return await this.channels({ message, interaction }, savedChannels)
             case 'add':
-                return await this.add(message, data, savedChannels.map(c => c.id), channels)
+                return await this.add({ message, interaction }, data, savedChannels.map(c => c.id), channels)
             case 'remove':
-                return await this.remove(message, data, savedChannels.map(c => c.id), channels)
+                return await this.remove({ message, interaction }, data, savedChannels.map(c => c.id), channels)
         }
     }
 
     /**
      * The `start` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel[]} savedChannels The saved lockdown channels of the server
      * @param {string} reason The reason of the lockdown
      */
-    async start(message, savedChannels, reason) {
+    async start({ message, interaction }, savedChannels, reason) {
         if (savedChannels.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
+        reason ??= 'We\'ll be back shortly.'
 
-        const confirmed = await confirmButtons({ message }, 'start lockdown', null, { reason })
+        const confirmed = await confirmButtons({ message, interaction }, 'start lockdown', null, { reason })
         if (!confirmed) return
 
-        const { guild, guildId } = message
+        const { guild, guildId } = message || interaction
         const { everyone } = guild.roles
 
-        const toDelete = await message.replyEmbed(basicEmbed({
+        const locking = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
-        }))
+        })
+        const toDelete = await message?.replyEmbed(locking)
+        await interaction?.editReply({ embeds: [locking] })
 
         let amount = 0
         for (const channel of savedChannels) {
@@ -156,46 +239,55 @@ module.exports = class LockdownCommand extends Command {
             amount++
         }
 
-        await toDelete.delete().catch(() => null)
-        await message.channel.sendTyping().catch(() => null)
+        await toDelete?.delete().catch(() => null)
+        await message?.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
-            return await message.replyEmbed(basicEmbed({
-                color: 'RED', description: 'No changes were made.'
-            }))
+            const embed = basicEmbed({ color: 'GOLD', description: 'No changes were made.' })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Locked ${amount}/${savedChannels.length} lockdown channels.`
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 
     /**
      * The `end` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel[]} savedChannels The saved lockdown channels of the server
      * @param {string} reason The reason of the lockdown
      */
-    async end(message, savedChannels, reason) {
+    async end({ message, interaction }, savedChannels, reason) {
         if (savedChannels.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
+        reason ??= 'Thanks for waiting.'
 
-        const confirmed = await confirmButtons({ message }, 'end lockdown', null, { reason })
+        const confirmed = await confirmButtons({ message, interaction }, 'end lockdown', null, { reason })
         if (!confirmed) return
 
-        const { guild, guildId } = message
+        const { guild, guildId } = message || interaction
         const { everyone } = guild.roles
 
-        const toDelete = await message.replyEmbed(basicEmbed({
+        const locking = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
-        }))
+        })
+        const toDelete = await message?.replyEmbed(locking)
+        await interaction?.editReply({ embeds: [locking] })
 
         let amount = 0
         for (const channel of savedChannels) {
@@ -212,52 +304,58 @@ module.exports = class LockdownCommand extends Command {
             amount++
         }
 
-        await toDelete.delete().catch(() => null)
-        await message.channel.sendTyping().catch(() => null)
+        await toDelete?.delete().catch(() => null)
+        await message?.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
-            return await message.replyEmbed(basicEmbed({
-                color: 'RED', description: 'No changes were made.'
-            }))
+            const embed = basicEmbed({ color: 'GOLD', description: 'No changes were made.' })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Unocked ${amount}/${savedChannels.length} lockdown channels.`
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 
     /**
      * The `channels` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel[]} channelsData The channels data for the server
      */
-    async channels(message, channelsData) {
+    async channels({ message, interaction }, channelsData) {
         if (channelsData.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
-        await generateEmbed({ message }, channelsData, {
+        await generateEmbed({ message, interaction }, channelsData, {
             number: 20,
             authorName: `There's ${pluralize('lockdown channel', channelsData.length)}`,
-            authorIconURL: message.guild.iconURL({ dynamic: true }),
+            authorIconURL: (message || interaction).guild.iconURL({ dynamic: true }),
             useDescription: true
         })
     }
 
     /**
      * The `add` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
      * @param {string[]} savedChannels The ids of the saved channels of the server
      * @param {TextChannel[]} channels The lockdown channels to add
      */
-    async add(message, data, savedChannels, channels) {
+    async add({ message, interaction }, data, savedChannels, channels) {
         if (message && !channels) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
@@ -266,12 +364,15 @@ module.exports = class LockdownCommand extends Command {
 
         const channelsList = channels.filter(c => !savedChannels.includes(c.id))
         if (channelsList.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The channels you specified have already been added.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
-        const { guildId } = message
+        const { guildId } = message || interaction
         if (!data) {
             await this.db.add({
                 guild: guildId,
@@ -283,28 +384,33 @@ module.exports = class LockdownCommand extends Command {
             })
         }
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been added:',
             fieldValue: channelsList.join(', ')
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 
     /**
      * The `remove` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
      * @param {string[]} savedChannels The ids of the saved channels of the server
      * @param {TextChannel[]} channels The lockdown channels to remove
      */
-    async remove(message, data, savedChannels, channels) {
+    async remove({ message, interaction }, data, savedChannels, channels) {
         if (savedChannels.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         if (message && !channels) {
@@ -315,20 +421,25 @@ module.exports = class LockdownCommand extends Command {
 
         const channelsList = channels.filter(c => savedChannels.includes(c.id))
         if (channelsList.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The channels you specified have not been added.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         await this.db.update(data, {
             $pull: { lockChannels: { $in: channelsList.map(c => c.id) } }
         })
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been removed:',
             fieldValue: channelsList.join(', ')
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 }

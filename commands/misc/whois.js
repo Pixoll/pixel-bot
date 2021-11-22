@@ -39,13 +39,11 @@ module.exports = class WhoIsCommand extends Command {
      * @param {User} args.user The user to get information from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) {
-            user = interaction.options.getUser('user')
-        }
+        if (interaction) user = user?.user ?? user ?? interaction.user
+        if (message) user ??= message.author
+        user = await user.fetch()
 
         const { guild } = message || interaction
-        user ??= message?.author || interaction.user
-        user = await user.fetch()
 
         /** @type {UserFlags} */
         const flags = await user.fetchFlags().catch(() => null)

@@ -4,7 +4,7 @@ const { PermissionResolvable, Message, GuildResolvable, User, MessageEmbed } = r
 const { APIApplicationCommand } = require('discord-api-types/payloads/v9')
 const { stripIndent, oneLine } = require('common-tags')
 const ArgumentCollector = require('./collector')
-const { permissions, slashOptionTypes } = require('../util')
+const { permissions, slashOptionTypes, slashOptionChannelTypes } = require('../util')
 const {
 	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult,
 	CommandBlockData, Throttle, CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo
@@ -700,6 +700,13 @@ class Command {
 				const toApply = prop.replace(/[A-Z]/g, '_$&').toLowerCase()
 				option[toApply] = option[prop]
 				delete option[prop]
+				if (toApply === 'channel_types') {
+					for (let i = 0; i < option[toApply].length; i++) {
+						const elem = option[toApply][i]
+						const chan = slashOptionChannelTypes[elem]
+						option[toApply][i] = chan
+					}
+				}
 			}
 			if (option.options) this.parseSlash(option.options)
 		})

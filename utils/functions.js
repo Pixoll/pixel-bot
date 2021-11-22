@@ -253,7 +253,7 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
     const messages = await (message || interaction).channel.awaitMessages(collectorOptions)
     if (messages.size === 0) {
         await interaction?.editReply('You didn\'t answer in time.')
-        await message?.replyEmbed('You didn\'t answer in time.')
+        await message?.reply('You didn\'t answer in time.')
         return null
     }
     if (messages.first().content.toLowerCase() === 'cancel') {
@@ -261,7 +261,7 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
         return null
     }
 
-    if (shouldDelete && toDelete) await toDelete.delete()
+    if (shouldDelete) await toDelete?.delete()
 
     return messages.first()
 }
@@ -813,14 +813,14 @@ function isValidRole(msg, role) {
     const { member, client, author, guild } = msg
     const botId = client.user.id
 
-    const botManagable = guild.me.roles.highest.comparePositionTo(role)
-    if (botManagable < 1) return false
+    const botManageable = guild.me.roles.highest.comparePositionTo(role)
+    if (botManageable < 1) return false
 
     const isOwner = author.id === botId
     if (isOwner) return true
 
-    const memberManagable = member.roles.highest.comparePositionTo(role)
-    if (memberManagable < 1) return false
+    const memberManageable = member.roles.highest.comparePositionTo(role)
+    if (memberManageable < 1) return false
     if (isMod(role)) return false
 
     return true
@@ -1220,7 +1220,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
         componentType: 'BUTTON'
     }).catch(() => null)
 
-    if (message) await msg.delete()
+    if (message) await msg?.delete()
 
     await interaction?.editReply({ components: [] })
 

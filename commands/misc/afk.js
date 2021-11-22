@@ -50,10 +50,6 @@ module.exports = class AfkCommand extends Command {
         const author = message?.author || interaction.user
         const db = guild.database.afk
 
-        if (interaction) {
-            status = interaction.options.getString('status')
-        }
-
         const afkStatus = await db.fetch({ guild: guildId, user: author.id })
 
         if (afkStatus) {

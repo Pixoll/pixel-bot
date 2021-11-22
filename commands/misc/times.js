@@ -109,9 +109,8 @@ module.exports = class TimesCommand extends Command {
      */
     async run({ message, interaction }, { hour, place }) {
         if (interaction) {
-            const { options } = interaction
             const arg = this.argsCollector.args[0]
-            hour = arg.parse(options.getString('hour') ?? 'now') || null
+            hour = arg.parse(hour ?? 'now') || null
             if (!hour) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
@@ -119,7 +118,7 @@ module.exports = class TimesCommand extends Command {
                     })]
                 })
             }
-            place = options.getString('place').toLowerCase()
+            place = place?.toLowerCase()
             if (place && !cities.map(c => c.toLowerCase()).includes(place)) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({

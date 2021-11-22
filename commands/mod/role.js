@@ -58,23 +58,28 @@ module.exports = class RoleCommand extends Command {
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
-                            const con2 = isValidRole(msg, con1 === true ? await type.parse(str, msg) : null)
-                            valid.push(con1 && con2)
+                            if (!con1) valid.push(false)
+                            const con2 = isValidRole(msg, await type.parse(str, msg))
+                            valid.push(con2)
                         }
-                        const wrong = valid.filter(b => b !== true)
-                        return wrong[0] === undefined
+                        return valid.filter(b => b !== true).length === array.length
                     },
-                    parse: async (val, msg) => {
+                    parse: async (val, msg, arg) => {
                         const type = msg.client.registry.types.get('role')
                         const array = val.split(/\s*,\s*/).slice(0, 30)
                         const valid = []
                         for (const str of array) {
-                            valid.push(await type.parse(str, msg))
+                            const con1 = await type.validate(str, msg, arg)
+                            if (!con1) continue
+                            const role = await type.parse(str, msg)
+                            const con2 = isValidRole(msg, role)
+                            if (!con2) continue
+                            valid.push(role)
                         }
                         return removeDuplicated(valid)
                     },
                     required: false,
-                    error: 'At least one of the roles you specified was invalid, please try again.'
+                    error: 'None of the roles you specified were valid. Please try again.'
                 }
             ]
         })

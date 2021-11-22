@@ -44,7 +44,7 @@ module.exports = (client) => {
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
 
-        await newMessage.delete().catch(() => null)
+        await newMessage?.delete().catch(() => null)
         await channel.send({ embeds }).catch(() => null)
     })
 }

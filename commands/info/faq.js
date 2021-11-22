@@ -74,7 +74,7 @@ module.exports = class FaqCommand extends Command {
                             name: 'item',
                             description: 'The item to remove from the FAQ list.',
                             required: true,
-                            minValue: 1
+                            // minValue: 1
                         }]
                     },
                     {
@@ -95,19 +95,9 @@ module.exports = class FaqCommand extends Command {
      * @param {object} args The arguments for the command
      * @param {'add'|'remove'|'view'|'clear'} args.subCommand The sub-command to use
      * @param {number} args.item The item you want to add or remove from the FAQ list
+     * @param {string}
      */
-    async run({ message, interaction }, { subCommand, item }) {
-        let question, answer
-        if (interaction) {
-            const { options } = interaction
-            subCommand = options.getSubcommand()
-            if (subCommand === 'remove') item = options.getInteger('item')
-            if (subCommand === 'add') {
-                question = options.getString('question')
-                answer = options.getString('answer')
-            }
-        }
-
+    async run({ message, interaction }, { subCommand, item, question, answer }) {
         subCommand = subCommand.toLowerCase()
         const faqData = await this.db.fetchMany()
 

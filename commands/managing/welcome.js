@@ -21,8 +21,8 @@ module.exports = class WelcomeCommand extends Command {
                 **>** **{member_count}:** The member count of this server.
             `,
             format: stripIndent`
-                welcome - Display the current welcomes.
-                welcome [text-channel] [message] - Set/update the welcomes to a channel. 
+                welcome - Display the current welcome message.
+                welcome [text-channel] [message] - Set/update the welcomes to a channel.
             `,
             examples: ['welcome #welcome Thanks for joining {server_name}! We hope you a great stay here <3'],
             userPermissions: ['ADMINISTRATOR'],
@@ -42,7 +42,36 @@ module.exports = class WelcomeCommand extends Command {
                     max: 1024,
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'view',
+                        description: 'Display the current welcome message.'
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'set',
+                        description: 'Set/update the welcomes to a channel.',
+                        options: [
+                            {
+                                type: 'channel',
+                                channelTypes: ['guild-text'],
+                                name: 'channel',
+                                description: 'The channel where the welcome messages should be sent.',
+                                required: true
+                            },
+                            {
+                                type: 'string',
+                                name: 'message',
+                                description: 'The message to send.',
+                                required: true
+                            }
+                        ]
+                    }
+                ]
+            }
         })
     }
 
@@ -53,11 +82,15 @@ module.exports = class WelcomeCommand extends Command {
      * @param {TextChannel} args.channel The channel where to send the welcome messages
      * @param {string} args.msg The welcome message to send
      */
-    async run({ message }, { channel, msg }) {
-        this.db = message.guild.database.welcome
-        const data = await this.db.fetch()
+    async run({ message, interaction }, { channel, msg, message: intMsg }) {
+        if (interaction) {
+            const sc = interaction.options.getSubcommand()
+            if (sc === 'set') msg = intMsg
+        }
 
-        const { guild, guildId } = message
+        const { guild, guildId } = message || interaction
+        this.db = guild.database.welcome
+        const data = await this.db.fetch()
 
         if (!channel) {
             const embed = new MessageEmbed()
@@ -69,10 +102,12 @@ module.exports = class WelcomeCommand extends Command {
                 `)
                 .setTimestamp()
 
-            return await message.replyEmbed(embed)
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
-        if (!msg) {
+        if (message && !msg) {
             const welcomeMsg = await basicCollector({ message }, {
                 fieldName: `What message would you like me to send in #${channel.name}?`
             }, { time: myMs('2m') })
@@ -80,14 +115,23 @@ module.exports = class WelcomeCommand extends Command {
             msg = welcomeMsg.content
         }
 
-        await this.db.add({
-            guild: guildId,
-            channel: channel.id,
-            message: msg
-        })
+        if (data) {
+            await this.db.update(data, {
+                channel: channel.id,
+                message: msg
+            })
+        } else {
+            await this.db.add({
+                guild: guildId,
+                channel: channel.id,
+                message: msg
+            })
+        }
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 }

@@ -89,12 +89,12 @@ module.exports = class ReloadCmdsCommand extends Command {
                 await application.commands.fetch()
                 const guildCommand = guild.commands.cache.find(findCommand)
                 if (guildCommand) {
-                    if (test) await guild.commands.edit(guildCommand.id, _slashToAPI)
-                    else guild.commands.delete(_slashToAPI)
+                    await guild.commands.delete(guildCommand.id)
+                    if (test) await guild.commands.create(_slashToAPI)
                 }
                 const clientCommand = application.commands.cache.find(findCommand)
                 if (clientCommand) await application.commands.edit(clientCommand.id, _slashToAPI)
-                else application.commands.delete(_slashToAPI)
+                else await application.commands.delete(clientCommand.id)
             }
         }
 

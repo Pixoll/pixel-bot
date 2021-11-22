@@ -139,7 +139,7 @@ module.exports = class SetupCommand extends Command {
             logsChannel = textChanType.parse(msg.content, message)
         }
 
-        await toDelete.delete()
+        await toDelete?.delete()
 
         /** @type {Role} */
         let memberRole
@@ -157,7 +157,7 @@ module.exports = class SetupCommand extends Command {
             memberRole = roleType.parse(msg.content, message)
         }
 
-        await toDelete.delete()
+        await toDelete?.delete()
 
         /** @type {Role} */
         let botRole
@@ -171,7 +171,7 @@ module.exports = class SetupCommand extends Command {
             botRole = roleType.parse(msg.content, message)
         }
 
-        await toDelete.delete()
+        await toDelete?.delete()
 
         /** @type {Role} */
         let mutedRole
@@ -185,7 +185,7 @@ module.exports = class SetupCommand extends Command {
             mutedRole = roleType.parse(msg.content, message)
         }
 
-        await toDelete.delete()
+        await toDelete?.delete()
 
         /** @type {TextChannel[]} */
         const lockChannels = []
@@ -203,7 +203,7 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        await toDelete.delete()
+        await toDelete?.delete()
 
         const msg = await basicCollector({ message }, {
             description: stripIndent`
@@ -336,7 +336,7 @@ module.exports = class SetupCommand extends Command {
 
         await this.db.update(data, newDoc)
 
-        await toDelete.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null)
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Reloaded data.'
         }))

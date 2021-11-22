@@ -50,10 +50,6 @@ module.exports = class RulesCommand extends Command {
      * @param {'view'|'clear'} args.subCommand The sub-command to use
      */
     async run({ message, interaction }, { subCommand }) {
-        if (interaction) {
-            subCommand = interaction.options.getSubcommand()
-        }
-
         subCommand = subCommand.toLowerCase()
         const { guild } = message || interaction
         this.db = guild.database.rules

@@ -25,20 +25,17 @@ module.exports = (client) => {
         if (message) string = message.cleanContent
         else {
             string = `/${command.name}`
-            const data = interaction.options.data[0]
-            if (data) {
-                /** @param {data} data */
-                function concat(data) {
-                    if (data.name && data.value === undefined) {
-                        string += ` ${data.name}`
-                        for (const option of data.options) {
-                            concat(option)
-                        }
+            for (const option of interaction.options.data) {
+                /** @param {option} opt */
+                function concat(opt) {
+                    if (opt.name && [undefined, null].includes(opt.value)) {
+                        string += ` ${opt.name}`
                     } else {
-                        string += ` ${data.name}: ${data.value}`
+                        string += ` ${opt.name}: "${opt.value}"`
                     }
+                    opt.options?.forEach(concat)
                 }
-                concat(data)
+                concat(option)
             }
         }
         const content = sliceDots(string, 1016)

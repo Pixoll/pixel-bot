@@ -70,7 +70,7 @@ module.exports = class TodoCommand extends Command {
                             name: 'item',
                             description: 'The item to remove from your to-do list.',
                             required: true,
-                            minValue: 1
+                            // minValue: 1
                         }]
                     },
                     {
@@ -93,13 +93,6 @@ module.exports = class TodoCommand extends Command {
      * @param {string|number} args.item The item to add/remove
      */
     async run({ message, interaction }, { subCommand, item }) {
-        if (interaction) {
-            const { options } = interaction
-            subCommand = options.getSubcommand()
-            if (subCommand === 'add') item = options.getString('item')
-            else if (subCommand === 'remove') item = options.getInteger('item')
-        }
-
         subCommand = subCommand.toLowerCase()
         const author = message?.author || interaction.user
 

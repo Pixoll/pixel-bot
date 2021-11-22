@@ -77,12 +77,12 @@ module.exports = class xpCommand extends Command {
                 return `- ${time} ${task}`
             }).join('\n')
 
-        await message.delete()
+        await message?.delete()
         const m = await message.say(`${week}\n${code(`!xp ${XP}\n${command}`)}`)
         await m.pin()
 
         const msgs = await message.channel.messages.fetch({ after: m.id })
         const target = msgs.filter(msg => msg.reference.messageId === m.id).first()
-        await target.delete()
+        await target?.delete()
     }
 }

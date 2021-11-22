@@ -34,13 +34,13 @@ async function bulkDelete(msg, messages) {
 
     if (_msg && !_msg.deleted) {
         toDelete = await msg.replyEmbed(embed)
-        await msg.delete()
+        await msg?.delete()
     } else {
         toDelete = await msg.embed(embed)
     }
 
     await sleep(10)
-    await toDelete.delete().catch(() => null)
+    await toDelete?.delete().catch(() => null)
 }
 
 /**

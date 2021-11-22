@@ -62,22 +62,27 @@ module.exports = class MultiBanCommand extends Command {
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
-                            const con2 = validMember(msg, con1 === true ? await type.parse(str, msg) : null)
-                            valid.push(con1 && con2)
+                            if (!con1) valid.push(false)
+                            const con2 = validMember(msg, await type.parse(str, msg))
+                            valid.push(con2)
                         }
-                        const wrong = valid.filter(b => b !== true)
-                        return wrong[0] === undefined
+                        return valid.filter(b => b !== true).length === array.length
                     },
-                    parse: async (val, msg) => {
+                    parse: async (val, msg, arg) => {
                         const type = msg.client.registry.types.get('member')
                         const array = val.split(/\s*,\s*/).slice(0, 30)
                         const valid = []
                         for (const str of array) {
-                            valid.push(await type.parse(str, msg))
+                            const con1 = await type.validate(str, msg, arg)
+                            if (!con1) valid.push(false)
+                            const member = await type.parse(str, msg)
+                            const con2 = validMember(msg, member)
+                            if (!con2) continue
+                            valid.push(member)
                         }
                         return valid
                     },
-                    error: 'At least one of the members you specified was invalid, please try again.'
+                    error: 'None of the members you specified were valid. Please try again.'
                 }
             ]
         })
@@ -142,7 +147,7 @@ module.exports = class MultiBanCommand extends Command {
             color: 'RED', emoji: 'cross', description: 'No members were banned.'
         }
 
-        await toEdit.delete().catch(() => null)
+        await toEdit?.delete().catch(() => null)
         await message.replyEmbed(basicEmbed(options))
     }
 }

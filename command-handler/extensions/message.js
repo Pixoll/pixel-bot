@@ -398,7 +398,7 @@ class CommandoMessage extends Message {
 			return Promise.all(promises)
 		} else {
 			if (Array.isArray(response)) {
-				for (let i = response.length - 1; i > 0; i--) response[i].delete()
+				for (let i = response.length - 1; i > 0; i--) response[i]?.delete()
 				return response[0].edit(options)
 			} else {
 				return response.edit(options)
@@ -535,9 +535,9 @@ class CommandoMessage extends Message {
 			for (let i = this.responsePositions[id] + 1; i < responses.length; i++) {
 				const response = responses[i]
 				if (Array.isArray(response)) {
-					for (const resp of response) resp.delete()
+					for (const resp of response) resp?.delete()
 				} else {
-					response.delete()
+					response?.delete()
 				}
 			}
 		}

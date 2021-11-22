@@ -50,8 +50,11 @@ module.exports = class HelpCommand extends Command {
         const prefix = guild?.prefix || client.prefix
 
         if (interaction) {
-            const toSearch = interaction.options.getString('command')
-            if (toSearch) command = registry.resolveCommand(toSearch)
+            try {
+                command &&= registry.resolveCommand(command)
+            } catch {
+                command = null
+            }
         }
 
         if (!command) {

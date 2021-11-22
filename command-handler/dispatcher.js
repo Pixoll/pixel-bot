@@ -172,7 +172,7 @@ class CommandDispatcher {
 		// Get the matching command
 		const { commandName, channelId, channel, guild, user } = interaction
 		const command = this.registry.resolveCommand(commandName)
-		if (!command) throw new Error(`There is no matching command for "${commandName}".`)
+		if (!command) return
 		const { groupId, memberName } = command
 
 		// Obtain the member if we don't have it
@@ -235,9 +235,45 @@ class CommandDispatcher {
 
 		// Run the command
 		try {
+			// Parses the options into an arguments object
+			const options = {}
+			for (const option of interaction.options.data) {
+				/** @param {option} opt */
+				function concat(opt) {
+					const name = opt.name.replace(/-/g, '_')
+					if (name && [undefined, null].includes(opt.value)) {
+						options.subCommand = name
+					} else {
+						switch (opt.type) {
+							case 'BOOLEAN':
+							case 'INTEGER':
+							case 'NUMBER':
+							case 'STRING':
+							case 'SUB_COMMAND':
+								options[name] = opt.value ?? null
+								break
+							case 'CHANNEL':
+								options[name] = opt.channel ?? null
+								break
+							case 'MENTIONABLE':
+								options[name] = opt.member ?? opt.user ?? opt.channel ?? opt.role ?? null
+								break
+							case 'ROLE':
+								options[name] = opt.role ?? null
+								break
+							case 'USER':
+								options[name] = opt.member ?? opt.user ?? null
+								break
+						}
+					}
+					opt.options?.forEach(concat)
+				}
+				concat(option)
+			}
+
 			this.client.emit('debug', `Running slash command "${groupId}:${memberName}" in channel "${channelId}".`)
-			const promise = command.run({ interaction }, {}, false, {})
-			this.client.emit('commandRun', command, promise, { interaction }, {}, false, {})
+			const promise = command.run({ interaction }, options, false, {})
+			this.client.emit('commandRun', command, promise, { interaction }, options, false, {})
 			await promise
 
 			if (probability(2)) {

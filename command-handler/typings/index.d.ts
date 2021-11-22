@@ -1982,10 +1982,10 @@ export interface SlashCommandOptionInfo {
 	 * @default false
 	 */
 	required?: boolean
-	/** The minimum value permitted - only usable if `type` is `integer` or `number` */
-	minValue?: number
-	/** The maxmum value permitted - only usable if `type` is `integer` or `number` */
-	maxValue?: number
+	// /** The minimum value permitted - only usable if `type` is `integer` or `number` */
+	// minValue?: number
+	// /** The maxmum value permitted - only usable if `type` is `integer` or `number` */
+	// maxValue?: number
 	/** The choices options for the option - only usable if `type` is `string`, `integer` or `number` */
 	choices?: { name: string, value: string | number }[]
 	/** The type options for the option - only usable if `type` is `channel` */

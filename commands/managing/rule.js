@@ -17,7 +17,7 @@ module.exports = class RuleCommand extends Command {
             description: 'Add or remove a rule from the server.',
             format: stripIndent`
                 rule view [number] - View a single rule.
-                rule add - Add a new rule (max. 512 characters) (server owner only).
+                rule add [rule] - Add a new rule (server owner only).
                 rule remove [number] - Remove a rule (server owner only).
             `,
             guildOnly: true,
@@ -35,7 +35,44 @@ module.exports = class RuleCommand extends Command {
                     type: 'string',
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'view',
+                        description: 'View a single rule.',
+                        options: [{
+                            type: 'integer',
+                            name: 'rule',
+                            description: 'The number of the rule to view.',
+                            required: true
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'add',
+                        description: 'Add a new rule (server owner only).',
+                        options: [{
+                            type: 'string',
+                            name: 'rule',
+                            description: 'The rule you want to add.',
+                            required: true
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'remove',
+                        description: 'Remove a rule (server owner only).',
+                        options: [{
+                            type: 'integer',
+                            name: 'rule',
+                            description: 'The number of the rule to remove.',
+                            required: true
+                        }]
+                    }
+                ]
+            }
         })
     }
 
@@ -46,32 +83,35 @@ module.exports = class RuleCommand extends Command {
      * @param {'view'|'add'|'remove'} args.subCommand The sub-command to use
      * @param {string} args.rule The number of the rule you want to remove
      */
-    async run({ message }, { subCommand, rule }) {
+    async run({ message, interaction }, { subCommand, rule }) {
         subCommand = subCommand.toLowerCase()
-        this.db = message.guild.database.rules
+        this.db = (message || interaction).guild.database.rules
         const rulesData = await this.db.fetch()
 
         switch (subCommand) {
             case 'view':
-                return await this.view(message, rulesData, rule)
+                return await this.view({ message, interaction }, rulesData, rule)
             case 'add':
-                return await this.add(message, rulesData, rule)
+                return await this.add({ message, interaction }, rulesData, rule)
             case 'remove':
-                return await this.remove(message, rulesData, rule)
+                return await this.remove({ message, interaction }, rulesData, rule)
         }
     }
 
     /**
      * The `view` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {RuleSchema} rulesData The rules data
      * @param {number} rule The rule to view
      */
-    async view(message, rulesData, rule) {
+    async view({ message, interaction }, rulesData, rule) {
         if (!rulesData || rulesData.rules.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         if (message && (!rule || rule > rulesData.rules.length)) {
@@ -80,7 +120,7 @@ module.exports = class RuleCommand extends Command {
             rule = value
         }
 
-        const { guild } = message
+        const { guild } = message || interaction
 
         const ruleEmbed = new MessageEmbed()
             .setColor(embedColor)
@@ -88,28 +128,38 @@ module.exports = class RuleCommand extends Command {
             .addField(`Rule ${rule--}`, rulesData.rules[rule])
             .setTimestamp()
 
-        await message.replyEmbed(ruleEmbed)
+        await interaction?.editReply({ embeds: [ruleEmbed] })
+        await message?.replyEmbed(ruleEmbed)
     }
 
     /**
      * The `add` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {RuleSchema} rulesData The rules data
      * @param {string} rule The rule to add
      */
-    async add(message, rulesData, rule) {
-        const { guildId, guild, author, client } = message
+    async add({ message, interaction }, rulesData, rule) {
+        const { guildId, guild, client } = message || interaction
+        const author = message?.author || interaction.user
 
-        if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock({ message }, 'guildOwnerOnly')
+        if (!client.isOwner(author) && guild.ownerId !== author.id) {
+            return await this.onBlock({ message, interaction }, 'guildOwnerOnly')
         }
 
-        while (!rule || rule.length > 512 || typeof rule === 'number') {
-            const ruleMsg = await basicCollector({ message }, {
-                fieldName: 'What rule do you want to add?'
-            }, { time: myMs('2m') })
-            if (!ruleMsg) return
-            rule = ruleMsg.content
+        if (message) {
+            while (!rule || rule.length > 1024 || typeof rule === 'number') {
+                const ruleMsg = await basicCollector({ message }, {
+                    fieldName: 'What rule do you want to add?'
+                }, { time: myMs('2m') })
+                if (!ruleMsg) return
+                rule = ruleMsg.content
+            }
+        } else if (rule.length > 1024) {
+            return await interaction.editReply({
+                embeds: [basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The rule must be at most 1024 characters long.'
+                })]
+            })
         }
 
         if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })
@@ -117,61 +167,68 @@ module.exports = class RuleCommand extends Command {
 
         const number = rulesData ? rulesData.rules.length + 1 : 1
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN', emoji: 'check', description: `The rule has been added under \`Rule ${number}\``
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 
     /**
      * The `remove` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {RuleSchema} rulesData The rules data
      * @param {number} rule The rule to remove from the rules list
      */
-    async remove(message, rulesData, rule) {
-        const { guild, author, client } = message
-
-        if (!client.isOwner(message) && guild.ownerId !== author.id) {
-            return await this.onBlock({ message }, 'guildOwnerOnly')
-        }
-
-        rule = Number(rule) ?? null
-
-        while (typeof rule !== 'number' || rule < 1) {
-            const ruleMsg = await basicCollector({ message }, {
-                fieldName: 'What rule do you want to remove?'
-            }, { time: myMs('2m') })
-            if (!ruleMsg) return
-            rule = Number(ruleMsg.content)
-        }
-
-        if (message && !rule) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            rule = value
-        }
-
+    async remove({ message, interaction }, rulesData, rule) {
         if (!rulesData || rulesData.rules.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
+        }
+
+        const { guild, client } = message || interaction
+        const author = message?.author || interaction.user
+
+        if (!client.isOwner(author) && guild.ownerId !== author.id) {
+            return await this.onBlock({ message, interaction }, 'guildOwnerOnly')
+        }
+
+        rule = Number(rule) || null
+
+        if (message) {
+            while (typeof rule !== 'number' || rule < 1) {
+                const ruleMsg = await basicCollector({ message }, {
+                    fieldName: 'What rule do you want to remove?'
+                }, { time: myMs('2m') })
+                if (!ruleMsg) return
+                rule = Number(ruleMsg.content)
+            }
         }
 
         if (rule > rulesData.rules.length) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That rule doesn\'t exist.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         rule--
         await rulesData.updateOne({ $pull: { rules: rulesData.rules[rule] } })
         rule++
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Removed rule number ${rule--}:`,
             fieldValue: rulesData.rules[rule]
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 }

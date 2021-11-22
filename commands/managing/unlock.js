@@ -31,7 +31,22 @@ module.exports = class UnlockCommand extends Command {
                     max: 512,
                     default: 'Thanks for waiting.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'channel',
+                        channelTypes: ['guild-text'],
+                        name: 'channel',
+                        description: 'The channel to unlock.'
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'Why are you unlocking the channel.'
+                    }
+                ]
+            }
         })
     }
 
@@ -42,16 +57,31 @@ module.exports = class UnlockCommand extends Command {
      * @param {TextChannel} args.channel The channel to lock
      * @param {string} args.reason The message to send when the channel get's locked
      */
-    async run({ message }, { channel, reason }) {
-        const { guildId, channelId, guild } = message
+    async run({ message, interaction }, { channel, reason }) {
+        if (interaction) {
+            channel ??= interaction.channel
+            reason ??= 'We\'ll be back shortly.'
+            if (reason.length > 512) {
+                return interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guildId, channelId, guild } = message || interaction
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles
 
         const perms = permissions.cache.find(p => p.id === guildId)
         if (!perms.deny.has('SEND_MESSAGES')) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })
@@ -61,10 +91,12 @@ module.exports = class UnlockCommand extends Command {
             })]
         })
 
+        const embed = basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
+        })
+        await interaction?.editReply({ embeds: [embed] })
         if (channelId !== channel.id) {
-            await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
-            }))
+            await message?.replyEmbed(embed)
         }
     }
 }

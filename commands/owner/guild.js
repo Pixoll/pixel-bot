@@ -86,7 +86,7 @@ module.exports = class GuildCommand extends Command {
      * @param {CommandoGuild} guild The guild to get information from
      */
     async info(message, guild) {
-        const serverInfo = this.client.registry.resolveCommand('serverinfo')
+        const serverInfo = this.client.registry.resolveCommand('server-info')
         await serverInfo.run({ message }, guild)
     }
 

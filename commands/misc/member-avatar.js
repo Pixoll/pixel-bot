@@ -40,10 +40,6 @@ module.exports = class MemberAvatarCommand extends Command {
      * @param {GuildMember} args.member The user to get the avatar from
      */
     async run({ message, interaction }, { member }) {
-        if (interaction) {
-            member = interaction.options.getMember('member')
-        }
-
         member ??= (message || interaction).member
         const { user, displayName } = member
 

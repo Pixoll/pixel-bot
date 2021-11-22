@@ -39,10 +39,8 @@ module.exports = class AvatarCommand extends Command {
      * @param {User} args.user The user to get the avatar from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) {
-            user = interaction.options.getUser('user') || interaction.user
-        }
-        if (message && !user) user = message.author
+        if (interaction) user = user?.user ?? user ?? interaction.user
+        if (message) user ??= message.author
 
         const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 })
 

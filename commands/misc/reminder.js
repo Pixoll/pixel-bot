@@ -63,10 +63,9 @@ module.exports = class ReminderCommand extends Command {
      */
     async run({ message, interaction }, { time, reminder }) {
         if (interaction) {
-            const { options } = interaction
             const arg = this.argsCollector.args[0]
 
-            time = await arg.parse(options.getString('time') ?? '').catch(() => null) || null
+            time = await arg.parse(time).catch(() => null) || null
             if (!time) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
@@ -74,7 +73,7 @@ module.exports = class ReminderCommand extends Command {
                     })]
                 })
             }
-            reminder = options.getString('reminder') ?? '`Not specified`'
+            reminder ??= '`Not specified`'
         }
 
         if (typeof time === 'number') time += Date.now()

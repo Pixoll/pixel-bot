@@ -39,10 +39,6 @@ module.exports = class MembersCommand extends Command {
      * @param {Role} args.role The role to get the members from
      */
     async run({ message, interaction }, { role }) {
-        if (interaction) {
-            role = interaction.options.getRole('role')
-        }
-
         const members = role.members.sort((a, b) => abcOrder(a.user.tag, b.user.tag))
             .map(m => `${m.toString()} ${m.user.tag}`)
 

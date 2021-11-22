@@ -39,7 +39,23 @@ module.exports = class SlowmodeCommand extends Command {
                     type: ['duration', 'string'],
                     oneOf: ['off']
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'integer',
+                        name: 'rate-limit',
+                        description: 'The new channel\'s rate limit, in seconds.',
+                        required: true
+                    },
+                    {
+                        type: 'channel',
+                        channelTypes: ['guild-text'],
+                        name: 'channel',
+                        description: 'The channel to change its rate limit.'
+                    }
+                ]
+            }
         })
     }
 
@@ -50,28 +66,41 @@ module.exports = class SlowmodeCommand extends Command {
      * @param {TextChannel} args.channel The channel to change the rate limit
      * @param {number|'off'} args.ratelimit The new rate limit
      */
-    async run({ message }, { channel, ratelimit }) {
-        ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
+    async run({ message, interaction }, { channel, ratelimit, rate_limit }) {
+        if (interaction) {
+            channel ??= interaction.channel
+            ratelimit = Math.abs(rate_limit)
+        } else {
+            ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
+        }
 
         if (channel.rateLimitPerUser === ratelimit) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The slowmode is already set to that value.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         await channel.setRateLimitPerUser(ratelimit)
 
         if (ratelimit === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'GREEN', emoji: 'check', description: `Disabled slowmode in ${channel.toString()}`
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Changed slowmode in #${channel.name}`,
             fieldValue: `**New rate limit:** ${myMs(ratelimit * 1000, { long: true, showAnd: true })}`
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 }

@@ -22,7 +22,7 @@ module.exports = class LockCommand extends Command {
                 {
                     key: 'channel',
                     prompt: 'What channel do you want to lock?',
-                    type: 'text-channel',
+                    type: 'text-channel'
                 },
                 {
                     key: 'reason',
@@ -31,7 +31,22 @@ module.exports = class LockCommand extends Command {
                     max: 512,
                     default: 'We\'ll be back shortly.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'channel',
+                        channelTypes: ['guild-text'],
+                        name: 'channel',
+                        description: 'The channel to lock.'
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'Why are you locking the channel.'
+                    }
+                ]
+            }
         })
     }
 
@@ -42,16 +57,31 @@ module.exports = class LockCommand extends Command {
      * @param {TextChannel} args.channel The channel to lock
      * @param {string} args.reason The message to send when the channel get's locked
      */
-    async run({ message }, { channel, reason }) {
-        const { guildId, channelId, guild } = message
+    async run({ message, interaction }, { channel, reason }) {
+        if (interaction) {
+            channel ??= interaction.channel
+            reason ??= 'We\'ll be back shortly.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guildId, channelId, guild } = message || interaction
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles
 
         const perms = permissions.resolve(guildId)
         if (perms && perms.deny.has('SEND_MESSAGES')) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already locked.`
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         await permissions.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 })
@@ -61,10 +91,12 @@ module.exports = class LockCommand extends Command {
             })]
         })
 
+        const embed = basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`
+        })
+        await interaction?.editReply({ embeds: [embed] })
         if (channelId !== channel.id) {
-            await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`
-            }))
+            await message?.replyEmbed(embed)
         }
     }
 }

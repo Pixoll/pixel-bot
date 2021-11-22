@@ -43,10 +43,6 @@ module.exports = class RoleInfoCommand extends Command {
      * @param {Role} args.role The role to get information about
      */
     async run({ message, interaction }, { role }) {
-        if (interaction) {
-            role = interaction.options.getRole('role')
-        }
-
         const { hexColor, id, name, hoist, position, mentionable, members, createdTimestamp, unicodeEmoji } = role
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.colorhexa.com/${color.replace('#', '')}.png` : null

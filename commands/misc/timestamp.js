@@ -48,7 +48,7 @@ module.exports = class TimestampCommand extends Command {
     async run({ message, interaction }, { date }) {
         if (interaction) {
             const arg = this.argsCollector.args[0]
-            date = await arg.parse(interaction.options.getString('date') ?? 'now').catch(() => null) || null
+            date = await arg.parse(date ?? 'now').catch(() => null) || null
             if (!date) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({

@@ -31,8 +31,8 @@ module.exports = class DiscriminatorCommand extends Command {
                     name: 'discriminator',
                     description: 'The discriminator to look for.',
                     required: true,
-                    minValue: 1,
-                    maxValue: 9999
+                    // minValue: 1,
+                    // maxValue: 9999
                 }]
             }
         })
@@ -49,8 +49,7 @@ module.exports = class DiscriminatorCommand extends Command {
         const members = guild.members.cache
 
         if (interaction) {
-            const val = interaction.options.getInteger('discriminator')
-            discriminator = val.toString().padStart(4, '0').slice(-4)
+            discriminator = discriminator.toString().padStart(4, '0').slice(-4)
         }
 
         const match = members.filter(m => m.user.discriminator === discriminator)

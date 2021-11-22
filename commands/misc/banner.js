@@ -38,10 +38,8 @@ module.exports = class BannerCommand extends Command {
      * @param {User} args.user The user to get the banner from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) {
-            user = interaction.options.getUser('user') || interaction.user
-        }
-        user ??= message.author
+        if (interaction) user = user?.user ?? user ?? interaction.user
+        if (message) user ??= message.author
         user = await user.fetch()
 
         const banner = user.bannerURL({ dynamic: true, size: 2048 })

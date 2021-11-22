@@ -28,7 +28,7 @@ module.exports = (client) => {
         })
 
         await sleep(10)
-        await toDelete.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null)
     })
 
     client.on('cMessageCreate', async message => {
@@ -51,7 +51,7 @@ module.exports = (client) => {
             const toDelete = await message.replyEmbed(embed)
 
             await sleep(15)
-            await toDelete.delete().catch(() => null)
+            await toDelete?.delete().catch(() => null)
         }
     })
 }

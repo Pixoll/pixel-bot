@@ -3,8 +3,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel, Role, MessageButton, MessageActionRow, MessageEmbed } = require('discord.js')
 const {
-    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor,
-    basicEmbed
+    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor, basicEmbed
 } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -29,7 +28,7 @@ module.exports = class ButtonRoleCommand extends Command {
                 },
                 {
                     key: 'roles',
-                    prompt: 'What roles do you want to toggle for that member?',
+                    prompt: 'What roles do you want to set for the button roles?',
                     type: 'string',
                     validate: async (val, msg, arg) => {
                         const type = msg.client.registry.types.get('role')
@@ -37,24 +36,52 @@ module.exports = class ButtonRoleCommand extends Command {
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
-                            const con2 = isValidRole(msg, con1 === true ? await type.parse(str, msg) : null)
-                            valid.push(con1 && con2)
+                            if (!con1) valid.push(false)
+                            const con2 = isValidRole(msg, await type.parse(str, msg))
+                            valid.push(con2)
                         }
-                        const wrong = valid.filter(b => b !== true)
-                        return wrong[0] === undefined
+                        return valid.filter(b => b !== true).length !== array.length
                     },
-                    parse: async (val, msg) => {
+                    parse: async (val, msg, arg) => {
                         const type = msg.client.registry.types.get('role')
                         const array = val.split(/\s*,\s*/).slice(0, 10)
                         const valid = []
                         for (const str of array) {
-                            valid.push(await type.parse(str, msg))
+                            const con1 = await type.validate(str, msg, arg)
+                            if (!con1) continue
+                            const role = await type.parse(str, msg)
+                            const con2 = isValidRole(msg, role)
+                            if (!con2) continue
+                            valid.push(role)
                         }
                         return removeDuplicated(valid)
                     },
-                    error: 'At least one of the roles you specified was invalid, please try again.'
+                    error: 'None of the roles you specified were valid. Please try again.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'channel',
+                        channelTypes: ['guild-text', 'guild-news'],
+                        name: 'channel',
+                        description: 'The channel where to create the button roles.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'message',
+                        description: 'The message for these button roles.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'roles',
+                        description: 'The roles for the button roles, separated by commas.',
+                        required: true
+                    }
+                ]
+            }
         })
     }
 
@@ -65,17 +92,33 @@ module.exports = class ButtonRoleCommand extends Command {
      * @param {TextChannel} args.channel The text channel of the button roles
      * @param {Role[]} args.roles The roles for the buttons
      */
-    async run({ message }, { channel, roles }) {
-        const { id } = message
+    async run({ message, interaction }, { channel, roles, message: content }) {
+        const intMsg = await interaction?.fetchReply()
 
-        const msg = await basicCollector({ message }, {
-            fieldName: 'What message should I send with the buttons?'
-        }, { time: myMs('2m') })
-        if (!msg) return
+        if (interaction) {
+            const arg = this.argsCollector.args[1]
+            const isValid = await arg.validate(roles, intMsg, arg)
+            if (isValid !== true) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
+                })
+            }
+            roles = await arg.parse(roles, intMsg, arg)
+        }
+
+        const { id } = message || intMsg
+
+        if (message) {
+            const msg = await basicCollector({ message }, {
+                fieldName: 'What message should I send with the buttons?'
+            }, { time: myMs('2m') })
+            if (!msg) return
+            content = msg.content
+        }
 
         const embed = new MessageEmbed()
             .setColor(embedColor)
-            .setDescription(msg.content)
+            .setDescription(content)
 
         const buttons = []
         for (const role of roles) {
@@ -99,10 +142,12 @@ module.exports = class ButtonRoleCommand extends Command {
 
         const { url } = await channel.send({ embeds: [embed], components: rows })
 
-        await message.replyEmbed(basicEmbed({
+        const reply = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `The buttons roles were successfully created at [this message](${url}).`
-        }))
+            description: `The buttons roles were successfully created [here](${url}).`
+        })
+        await interaction?.editReply({ embeds: [reply] })
+        await message?.replyEmbed(reply)
     }
 }

@@ -35,7 +35,7 @@ module.exports = class DatabaseCommand extends Command {
     async run({ message }, { collection }) {
         const data = await Database[removeDashes(collection)].find({})
 
-        const array = [...data].map(({ _doc: val }) => {
+        const array = data.map(({ _doc: val }) => {
             delete val._id
             delete val.__v
             if (val.updatedAt) delete val.updatedAt

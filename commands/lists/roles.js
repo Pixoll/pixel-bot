@@ -41,10 +41,6 @@ module.exports = class RolesCommand extends Command {
     async run({ message, interaction }, { member }) {
         const { guild, guildId } = message || interaction
 
-        if (interaction) {
-            member = interaction.options.getMember('member')
-        }
-
         const memberRoles = member?.roles.cache.filter(role => role.id !== guildId)
         const guildRoles = !memberRoles ? await guild.roles.fetch() : null
 

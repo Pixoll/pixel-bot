@@ -11,12 +11,12 @@ const { stripIndent } = require('common-tags')
 
 const optionsLook = [
     { type: 'string', name: 'ip', description: 'The IP of the server to look for.', required: true },
-    { type: 'integer', name: 'port', description: 'The port of the server to look for.', minValue: 1, maxValue: 65535 }
+    { type: 'integer', name: 'port', description: 'The port of the server to look for.', /* minValue: 1, maxValue: 65535 */ }
 ]
 
 const optionsSave = [
     { type: 'string', name: 'ip', description: 'The IP of the server to save.', required: true },
-    { type: 'integer', name: 'port', description: 'The port of the server to save.', minValue: 1, maxValue: 65535 }
+    { type: 'integer', name: 'port', description: 'The port of the server to save.', /* minValue: 1, maxValue: 65535 */ }
 ]
 
 /** A command that can be run in a client */
@@ -108,14 +108,7 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} args.port The IP of the server to save/look for
      */
     async run({ message, interaction }, { subCommand, ip, port }) {
-        if (interaction) {
-            const { options } = interaction
-            subCommand = options.getSubcommand().replace('-', ':')
-            ip = options.getString('ip')
-            port = options.getInteger('port')
-        }
-
-        subCommand = subCommand.toLowerCase()
+        subCommand = subCommand.replace('_', ':').toLowerCase()
         const { guild } = message || interaction
         this.db = guild.database.mcIps
 
