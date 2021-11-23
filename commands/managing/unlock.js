@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel } = require('discord.js')
-const { basicEmbed, channelDetails, reasonDetails } = require('../../utils')
+const { basicEmbed, channelDetails, reasonDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -31,25 +31,52 @@ module.exports = class UnlockCommand extends Command {
                     max: 512,
                     default: 'Thanks for waiting.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'channel',
+                        channelTypes: ['guild-text'],
+                        name: 'channel',
+                        description: 'The channel to unlock.'
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'Why are you unlocking the channel.'
+                    }
+                ]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to lock
      * @param {string} args.reason The message to send when the channel get's locked
      */
-    async run(message, { channel, reason }) {
-        const { guildId, channelId, guild } = message
+    async run({ message, interaction }, { channel, reason }) {
+        if (interaction) {
+            channel ??= interaction.channel
+            reason ??= 'We\'ll be back shortly.'
+            if (reason.length > 512) {
+                return interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guildId, channelId, guild } = message || interaction
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles
 
         const perms = permissions.cache.find(p => p.id === guildId)
         if (!perms.deny.has('SEND_MESSAGES')) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
             }))
         }
@@ -61,10 +88,12 @@ module.exports = class UnlockCommand extends Command {
             })]
         })
 
+        const embed = basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
+        })
+        await interaction?.editReply({ embeds: [embed] })
         if (channelId !== channel.id) {
-            await message.replyEmbed(basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
-            }))
+            await message?.replyEmbed(embed)
         }
     }
 }

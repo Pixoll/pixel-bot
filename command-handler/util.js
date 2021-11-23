@@ -103,11 +103,38 @@ function resolveString(data) {
 	return String(data)
 }
 
+const slashOptionTypes = {
+    subcommand: 1,
+    'subcommand-group': 2,
+    string: 3,
+    integer: 4,
+    boolean: 5,
+    user: 6,
+    channel: 7,
+    role: 8,
+    mentionable: 9,
+    number: 10
+}
+
+const slashOptionChannelTypes = {
+	'guild-text': 0,
+	'guild-voice': 2,
+    'guild-category': 4,
+    'guild-news': 5,
+    'guild-store': 6,
+	'guild-news-thread': 10,
+    'guild-public-thread': 11,
+    'guild-private-thread': 12,
+    'guild-stage-voice': 13
+}
+
 module.exports = {
 	escapeRegex,
 	disambiguation,
 	paginate,
 	permissions,
 	isConstructor,
-	resolveString
+	resolveString,
+	slashOptionChannelTypes,
+	slashOptionTypes
 }

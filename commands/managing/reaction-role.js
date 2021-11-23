@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
 const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, getArgument, isValidRole } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
@@ -12,8 +12,8 @@ const { ReactionRoleSchema } = require('../../schemas/types')
 module.exports = class ReactionRoleCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'reactionrole',
-            aliases: ['reactrole', 'rrole', 'reaction-role', 'react-role'],
+            name: 'reaction-role',
+            aliases: ['reactrole', 'rrole', 'reactionrole', 'react-role'],
             group: 'managing',
             description: 'Create or remove reaction roles.',
             details: stripIndent`
@@ -58,20 +58,22 @@ module.exports = class ReactionRoleCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'create'|'remove'} args.subCommand The sub-command to use
      * @param {TextChannel} args.channel The text channel of the reaction messages
      * @param {string} args.msgId The message of the reaction messages
      */
-    async run(message, { subCommand, channel, msgId }) {
+    async run({ message }, { subCommand, channel, msgId }) {
         subCommand = subCommand.toLowerCase()
 
         let msg = await channel?.messages.fetch(msgId).catch(() => null)
-        while (!(msg instanceof Message)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            msg = await channel.messages.fetch(value).catch(() => null)
+        if (message) {
+            while (!(msg instanceof Message)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                msg = await channel.messages.fetch(value).catch(() => null)
+            }
         }
 
         this.db = message.guild.database.reactionRoles
@@ -97,15 +99,15 @@ module.exports = class ReactionRoleCommand extends Command {
 
         const roles = []
         while (roles.length === 0) {
-            const rolesMsg = await basicCollector(message, {
+            const rolesMsg = await basicCollector({ message }, {
                 fieldName: oneLine`
                     What are the roles that you want to assign?
-                    Please send them separated by commas (max. 30 at once).
+                    Please send them separated by commas (max. 10 at once).
                 `
             }, { time: myMs('2m') })
             if (!rolesMsg) return
 
-            for (const str of rolesMsg.content.split(/\s*,\s*/).slice(0, 30)) {
+            for (const str of rolesMsg.content.split(/\s*,\s*/).slice(0, 10)) {
                 const con1 = roleType.validate(str, message)
                 const con2 = isValidRole(message, con1 === true ? roleType.parse(str, message) : null)
                 if (!con1 && !con2) continue
@@ -119,7 +121,7 @@ module.exports = class ReactionRoleCommand extends Command {
         const allEmojis = client.emojis.cache
         const emojis = []
         while (roles.length !== emojis.length) {
-            const emojisMsg = await basicCollector(message, {
+            const emojisMsg = await basicCollector({ message }, {
                 fieldName: oneLine`
                     Now, what emojis should the bot react with in the message?
                     These will be applied to the roles you specified in the same exact order.

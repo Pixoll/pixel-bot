@@ -1,9 +1,11 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
-const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex } = require('../../utils')
+const {
+    myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex, validURL, replyAll
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -51,75 +53,175 @@ module.exports = class PollCommand extends Command {
                     type: ['date', 'duration', 'string'],
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'create',
+                        description: 'Create a poll.',
+                        options: [
+                            {
+                                type: 'channel',
+                                channelTypes: ['guild-text'],
+                                name: 'channel',
+                                description: 'The channel where to create the poll.',
+                                required: true
+                            },
+                            {
+                                type: 'string',
+                                name: 'duration',
+                                description: 'The duration of the poll.',
+                                required: true
+                            },
+                            {
+                                type: 'string',
+                                name: 'message',
+                                description: 'The message to send with the poll.',
+                                required: true
+                            },
+                            {
+                                type: 'string',
+                                name: 'emojis',
+                                description: 'The emojis for the options of the poll (min. of 2).',
+                                required: true
+                            }
+                        ]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'end',
+                        description: 'End a poll.',
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'message-url',
+                                description: 'The link/url of the poll to end.',
+                                required: true
+                            }
+                        ]
+                    }
+                ]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'create'|'end'} args.subCommand The sub-command to use
      * @param {TextChannel} args.channel The text channel of the poll to create or end
      * @param {number|Date|string} args.durationOrMsg The duration of the poll to create,
      * or the message of the poll to end
      */
-    async run(message, { subCommand, channel, durationOrMsg }) {
+    async run(
+        { message, interaction }, { subCommand, channel, durationOrMsg, duration, message: msg, emojis, messageUrl }
+    ) {
+        const emojisArr = []
+        if (interaction) {
+            const { client } = interaction
+            const arg = this.argsCollector.args[2]
+
+            if (subCommand === 'create') {
+                durationOrMsg = await arg.parse(duration).catch(() => null) || null
+                if (!durationOrMsg || typeof durationOrMsg === 'string') {
+                    return await interaction.editReply({
+                        embeds: [basicEmbed({
+                            color: 'RED', emoji: 'cross', description: 'That duration is invalid.'
+                        })]
+                    })
+                }
+                if (typeof durationOrMsg === 'number') durationOrMsg += Date.now()
+                if (durationOrMsg instanceof Date) durationOrMsg = durationOrMsg.getTime()
+                this.now = Date.now()
+                const allEmojis = client.emojis.cache
+                const match = emojis.match(emojiRegex)?.map(e => e).filter(e => e) || []
+                for (const emoji of match) {
+                    if (emojisArr.includes(emoji)) continue
+
+                    if (!Number.parseInt(emoji)) emojisArr.push(emoji)
+                    if (allEmojis.get(emoji)) emojisArr.push(emoji)
+                }
+                if (emojisArr.length < 2) {
+                    return await interaction.editReply({
+                        embeds: [basicEmbed({
+                            color: 'RED', emoji: 'cross', description: 'You need to send at least 2 emojis.'
+                        })]
+                    })
+                }
+            } else if (!validURL(messageUrl)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That message url is invalid.'
+                    })]
+                })
+            }
+        }
+
+        const { guild } = message || interaction
         subCommand = subCommand.toLowerCase()
-        this.db = message.guild.database.polls
+        this.db = guild.database.polls
 
         switch (subCommand) {
             case 'create':
-                return await this.create(message, channel, durationOrMsg)
+                return await this.create({ message, interaction }, channel, durationOrMsg, msg, emojisArr)
             case 'end':
-                return await this.end(message, channel, durationOrMsg)
+                return await this.end({ message, interaction }, channel, durationOrMsg, messageUrl)
         }
     }
 
     /**
      * The `create` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel} channel The text channel of the poll to create
      * @param {number|Date|string} duration The duration of the poll to create
+     * @param {string} msg The message to send with the poll
+     * @param {string[]} emojis The emojis options of the poll
      */
-    async create(message, channel, duration) {
-        if (!channel) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channel = value
-        }
+    async create({ message, interaction }, channel, duration, msg, emojis = []) {
+        const { guildId, client } = message || interaction
 
-        while (!duration || typeof duration === 'string') {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            duration = value
-        }
+        if (message) {
+            if (!channel) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                channel = value
+            }
 
-        const { guildId, client } = message
+            while (!duration || typeof duration === 'string') {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
+                if (cancelled) return
+                duration = value
+            }
+            this.now = Date.now()
+            if (typeof duration === 'number') duration += this.now
+            if (duration instanceof Date) duration = duration.getTime()
 
-        const pollMsg = await basicCollector(message, {
-            fieldName: 'What will the message of the poll be?'
-        }, { time: myMs('2m') })
-        if (!pollMsg) return
-
-        const allEmojis = client.emojis.cache
-        const emojis = []
-        while (emojis.length < 2) {
-            const emojisMsg = await basicCollector(message, {
-                fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**'
+            const pollMsg = await basicCollector({ message }, {
+                fieldName: 'What will the message of the poll be?'
             }, { time: myMs('2m') })
-            if (!emojisMsg) return
+            if (!pollMsg) return
+            msg = pollMsg.content
 
-            const match = emojisMsg.content.match(emojiRegex)?.map(e => e).filter(e => e) || []
-            for (const emoji of match) {
-                if (emojis.includes(emoji)) continue
+            const allEmojis = client.emojis.cache
+            while (emojis.length < 2) {
+                const emojisMsg = await basicCollector({ message }, {
+                    fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**'
+                }, { time: myMs('2m') })
+                if (!emojisMsg) return
 
-                if (!Number.parseInt(emoji)) emojis.push(emoji)
-                if (allEmojis.get(emoji)) emojis.push(emoji)
+                const match = emojisMsg.content.match(emojiRegex)?.map(e => e).filter(e => e) || []
+                for (const emoji of match) {
+                    if (emojis.includes(emoji)) continue
+
+                    if (!Number.parseInt(emoji)) emojis.push(emoji)
+                    if (allEmojis.get(emoji)) emojis.push(emoji)
+                }
             }
         }
 
-        const sent = await channel.send(pollMsg.content)
+        const sent = await channel.send(msg)
         for (const emoji of emojis) await sent.react(emoji)
 
         await this.db.add({
@@ -127,54 +229,74 @@ module.exports = class PollCommand extends Command {
             channel: channel.id,
             message: sent.id,
             emojis,
-            duration: myMs(duration - Date.now(), { long: true }),
+            duration: myMs(duration - this.now, { long: true }),
             endsAt: duration
         })
 
-        await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `The poll was successfully created in ${channel}.`
+        await replyAll({ message, interaction }, basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `The poll was successfully created [here](${sent.url}).`
         }))
     }
 
     /**
      * The `end` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel} channel The text channel of the poll to end
-     * @param {string} _msg The message id of the poll to end
+     * @param {Message} msg The message id of the poll to end
+     * @param {string} pollURL The URL of the poll to end
      */
-    async end(message, channel, _msg) {
-        if (!channel) channel = message.channel
+    async end({ message, interaction }, channel, msg, pollURL) {
+        const { guild } = message || interaction
+        const { channels } = guild
 
-        if (_msg) {
-            while (!(_msg instanceof Message)) {
-                const msg = await channel.messages.fetch(_msg)
-                _msg = msg
+        if (interaction) {
+            const [, chanId, msgId] = pollURL.match(/(\d+)[/-](\d+)$/)?.map(m => m) || []
+            channel = await channels.fetch(chanId).catch(() => null)
+            if (!channel) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'I couldn\'t get the channel from the url.'
+                    })]
+                })
+            }
+            msg = await channel.messages.fetch(msgId).catch(() => null)
+            if (!msg) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'I couldn\'t get the message from the url.'
+                    })]
+                })
+            }
+        } else {
+            channel ??= message.channel
+            msg = await channel.messages.fetch(msg).catch(() => null)
+            while (!(msg instanceof Message)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
+                if (cancelled) return
+                msg = await channel.messages.fetch(value).catch(() => null)
             }
         }
 
-        const { guild } = message
-        const { channels } = guild
-
         const pollData = await this.db.fetch(
-            _msg ? { channel: channel.id, message: _msg.id } : { channel: channel.id }
+            msg ? { channel: channel.id, message: msg.id } : { channel: channel.id }
         )
         if (!pollData) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the poll you were looking for.'
             }))
         }
 
         /** @type {TextChannel} */
-        const pollChannel = channels.resolve(pollData.channel)
+        const pollChannel = channel || channels.fetch(pollData.channel).catch(() => null)
         /** @type {Message} */
-        const msg = _msg || await pollChannel?.messages.fetch(pollData.message)
-        if (!msg) {
-            return await message.replyEmbed(basicEmbed({
+        const pollMsg = msg || await pollChannel?.messages.fetch(pollData.message)
+        if (!pollMsg) {
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That poll message or the channel were deleted.'
             }))
         }
 
-        const reactions = msg.reactions.cache.filter(r =>
+        const reactions = pollMsg.reactions.cache.filter(r =>
             pollData.emojis.includes(r.emoji.id || r.emoji.name)
         )
 
@@ -198,7 +320,7 @@ module.exports = class PollCommand extends Command {
 
         const pollEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), msg.url)
+            .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), pollMsg.url)
             .setDescription(winner || noVotes || draw)
             .setTimestamp()
 
@@ -211,5 +333,9 @@ module.exports = class PollCommand extends Command {
 
         await pollChannel.send({ embeds: [pollEmbed] })
         await this.db.delete(pollData)
+
+        await replyAll({ message, interaction }, basicEmbed({
+            color: 'GREEN', emoji: 'check', description: `[This poll](${pollMsg.url}) has been ended.`
+        }))
     }
 }

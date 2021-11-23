@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, docId, confirmButtons } = require('../../utils')
+const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -37,36 +37,61 @@ module.exports = class ReasonCommand extends Command {
                     type: 'string',
                     max: 512
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'string',
+                        name: 'modlog-id',
+                        description: 'The id of the mod log to update.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The new reason of the mod log.',
+                        required: true
+                    }
+                ]
+            }
         })
     }
 
     /**
-    * @param {CommandoMessage} message The message the command is being run for
-    * @param {object} args The arguments for the command
-    * @param {string} args.modlogId The mod log id
-    * @param {number} args.reason The new reason
-    */
-    async run(message, { modlogId, reason }) {
-        const { guild } = message
+     * Runs the command
+     * @param {CommandInstances} instances The instances the command is being run for
+     * @param {object} args The arguments for the command
+     * @param {string} args.modlogId The mod log id
+     * @param {string} args.reason The new reason
+     */
+    async run({ message, interaction }, { modlogId, reason }) {
+        if (interaction && reason.length > 512) {
+            return await interaction.editReply({
+                embeds: [basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                })]
+            })
+        }
+
+        const { guild } = message || interaction
         const { moderations, active } = guild.database
 
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
             }))
         }
 
         const activeLog = await active.fetch(modlogId)
 
-        const confirm = await confirmButtons(message, 'update modlog reason', modlogId, { reason })
-        if (!confirm) return
+        const confirmed = await confirmButtons({ message, interaction }, 'update mod log reason', modlogId, { reason })
+        if (!confirmed) return
 
         await moderations.update(modLog, { reason })
         if (activeLog) await active.update(activeLog, { reason })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated reason for mod log \`${modlogId}\``,

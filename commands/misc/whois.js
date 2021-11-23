@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
-const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags } = require('../../utils')
+const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -10,7 +10,7 @@ module.exports = class WhoIsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'whois',
-            aliases: ['userinfo'],
+            aliases: ['user-info', 'userinfo'],
             group: 'misc',
             description: 'Displays a user\'s information.',
             details: userDetails,
@@ -21,20 +21,29 @@ module.exports = class WhoIsCommand extends Command {
                 prompt: 'What user do you want to get information from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The user to get info from.'
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get information from
      */
-    async run(message, { user }) {
-        const { guild } = message
-        if (!user) user = message.author
+    async run({ message, interaction }, { user }) {
+        if (interaction) user = user?.user ?? user ?? interaction.user
+        if (message) user ??= message.author
         user = await user.fetch()
+
+        const { guild } = message || interaction
 
         /** @type {UserFlags} */
         const flags = await user.fetchFlags().catch(() => null)
@@ -64,7 +73,7 @@ module.exports = class WhoIsCommand extends Command {
         if (member) {
             if (member.presence) {
                 for (const { type, name, state, details, url, timestamps } of member.presence.activities) {
-                    const status = details && !!state ? `${details}\n${state}` : details
+                    const status = details && state ? `${details}\n${state}` : details
                     let times = ''
                     if (timestamps) {
                         if (!timestamps.end) times = `Started ${timestamp(timestamps.start, 'R')}`
@@ -76,7 +85,7 @@ module.exports = class WhoIsCommand extends Command {
                         }
                     }
 
-                    if (type === 'CUSTOM' && !!state) userInfo.addField('Custom status:', state)
+                    if (type === 'CUSTOM' && state) userInfo.addField('Custom status:', state)
                     if (type === 'STREAMING') userInfo.addField(`Streaming ${name}`, url)
                     if (!['COMPETING', 'CUSTOM'].includes(type)) {
                         userInfo.addField(
@@ -103,6 +112,6 @@ module.exports = class WhoIsCommand extends Command {
             userInfo.setImage(banner).addField('Banner', 'Look below:')
         }
 
-        await message.replyEmbed(userInfo)
+        await replyAll({ message, interaction }, userInfo)
     }
 }

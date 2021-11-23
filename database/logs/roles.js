@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed, Permissions } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays } = require('../../utils')
-const { permissions } = require('../../command-handler/util')
+const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
 
 /**

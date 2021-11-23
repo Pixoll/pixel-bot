@@ -72,7 +72,7 @@ module.exports = (client) => {
 
     client.on('messageUpdate', async (oldMessage, newMessage) => {
         const { content: content1 } = oldMessage
-        await newMessage.fetch().catch(() => null)
+        newMessage = await newMessage.fetch().catch(() => null)
         if (!newMessage) return
 
         const { guild, channel, author, content: content2, url } = newMessage

@@ -35,4 +35,16 @@ module.exports = (client) => {
             await logsChannel.send({ embeds: toSend }).catch(() => null)
         }
     })
+
+    client.on('messageUpdate', async (oldMessage, newMessage) => {
+        if (oldMessage.partial || newMessage.partial) return
+        const { guild, author, embeds, channelId, channel } = oldMessage
+        if (!guild || client.user.id !== author.id || embeds.length === 0) return
+
+        const logsChannel = await getLogsChannel(guild)
+        if (!logsChannel || logsChannel.id !== channelId) return
+
+        await newMessage?.delete().catch(() => null)
+        await channel.send({ embeds }).catch(() => null)
+    })
 }

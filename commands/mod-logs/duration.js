@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
-const { myMs, basicEmbed, timeDetails, docId, confirmButtons } = require('../../utils')
+const { myMs, basicEmbed, timeDetails, docId, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -39,31 +39,59 @@ module.exports = class DurationCommand extends Command {
                     prompt: 'What will be the new duration of the mod log?',
                     type: ['date', 'duration']
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'string',
+                        name: 'modlog-id',
+                        description: 'The id of the mod log to update.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'duration',
+                        description: 'The new duration or expire date of the mod log.',
+                        required: true
+                    }
+                ]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {string} args.modlogId The mod log id
      * @param {number|Date} args.duration The new duration
      */
-    async run(message, { modlogId, duration }) {
-        const { guild } = message
+    async run({ message, interaction }, { modlogId, duration }) {
+        if (interaction) {
+            const arg = this.argsCollector.args[1]
+            duration = await arg.parse(duration).catch(() => null) || null
+            if (!duration) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    })]
+                })
+            }
+        }
+
+        const { guild } = message || interaction
         const { moderations, active } = guild.database
 
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
             }))
         }
 
         const activeLog = await active.fetch(modlogId)
         if (!activeLog) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That punishment has expired.'
             }))
         }
@@ -74,12 +102,15 @@ module.exports = class DurationCommand extends Command {
         /** @type {string} */
         const longTime = myMs(duration - Date.now(), { long: true })
 
-        const confirm = await confirmButtons(message, 'update modlog duration', modlogId, { duration: longTime })
-        if (!confirm) return
+        const confirmed = await confirmButtons(
+            { message, interaction }, 'update mod log duration', modlogId, { duration: longTime }
+        )
+        if (!confirmed) return
+
         await moderations.update(modLog, { duration: longTime })
         await active.update(activeLog, { duration })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated duration for mod log \`${modlogId}\``,

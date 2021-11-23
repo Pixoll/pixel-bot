@@ -1,10 +1,9 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const CommandGroup = require('../../command-handler/commands/group')
-const { basicEmbed, getArgument } = require('../../utils')
+const { Command, CommandGroup } = require('../../command-handler')
+const { basicEmbed, getArgument, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances, Command: CommandType, CommandGroup: CommandGroupType } = require('../../command-handler/typings')
 const { DisabledSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -17,8 +16,8 @@ module.exports = class ToggleCommand extends Command {
             description: 'Toggles a command or group on/off.',
             details: '`name` can be either a command\'s name or alias, or a group\'s name.',
             format: stripIndent`
-                toggle command [name]
-                toggle group [name]
+                toggle command [name] - Toggle a command on/off.
+                toggle group [name] - Toggle a group on/off.
             `,
             examples: [
                 'toggle command ban',
@@ -41,46 +40,104 @@ module.exports = class ToggleCommand extends Command {
                     type: ['command', 'group'],
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'command',
+                        description: 'Toggle a command on/off.',
+                        options: [{
+                            type: 'string',
+                            name: 'command',
+                            description: 'The command to toggle.',
+                            required: true
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'group',
+                        description: 'Toggle a group on/off.',
+                        options: [{
+                            type: 'string',
+                            name: 'group',
+                            description: 'The group to toggle.',
+                            required: true,
+                            choices: [
+                                { name: 'ℹ️ Information', value: 'info' },
+                                { name: '📋 Listing', value: 'lists' },
+                                { name: '💼 Managing', value: 'managing' },
+                                { name: '🎲 Miscellaneous', value: 'misc' },
+                                { name: '🛡️ Moderation', value: 'mod' },
+                                { name: '🗃 Moderation logs', value: 'mod-logs' },
+                                { name: '🛠 Utility', value: 'utility' },
+                            ]
+                        }]
+                    }
+                ]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'command'|'group'} args.subCommand The sub-command to use
      * @param {Command|CommandGroup} args.cmdOrGroup The command or group to toggle
      */
-    async run(message, { subCommand, cmdOrGroup }) {
+    async run({ message, interaction }, { subCommand, cmdOrGroup, command, group }) {
         subCommand = subCommand.toLowerCase()
-        const { guildId, guild } = message
+
+        try {
+            command &&= this.client.registry.resolveCommand(command)
+            group &&= this.client.registry.resolveGroup(group)
+        } catch {
+            command = null
+            group = null
+        }
+
+        const { guildId, guild } = message || interaction
         this.db = guild?.database.disabled || this.client.database.disabled
 
         const data = await this.db.fetch(guildId ? {} : { global: true })
 
         switch (subCommand) {
             case 'command':
-                return await this.command(message, cmdOrGroup, data)
+                return await this.command({ message, interaction }, cmdOrGroup ?? command, data)
             case 'group':
-                return await this._group(message, cmdOrGroup, data)
+                return await this._group({ message, interaction }, cmdOrGroup ?? group, data)
         }
     }
 
     /**
      * The `command` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
-     * @param {Command} command The command to toggle
+     * @param {CommandInstances} instances The instances the command is being run for
+     * @param {CommandType} command The command to toggle
      * @param {DisabledSchema} data The disabled commands & groups data
      */
-    async command(message, command, data) {
-        while (!(command instanceof Command)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            command = value
+    async command({ message, interaction }, command, data) {
+        if (message) {
+            while (!(command instanceof Command)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                command = value
+            }
+        } else if (!command) {
+            return await interaction.editReply({
+                embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.' })]
+            })
         }
 
-        const { guildId } = message
+        if (command.guarded) {
+            return await replyAll({ message, interaction }, basicEmbed({
+                color: 'RED',
+                emoji: 'cross',
+                description: `The \`${command.name}\` command is guarded, and thus it cannot be disabled.`
+            }))
+        }
+
+        const { guildId } = message || interaction
 
         const isEnabled = guildId ? command.isEnabledIn(guildId, true) : command._globalEnabled
         const global = guildId ? '' : ' globally'
@@ -102,7 +159,7 @@ module.exports = class ToggleCommand extends Command {
             })
         }
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the \`${command.name}\` command${global}`,
@@ -112,18 +169,28 @@ module.exports = class ToggleCommand extends Command {
 
     /**
      * The `group` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
-     * @param {CommandGroup} group The group to toggle
+     * @param {CommandInstances} instances The instances the command is being run for
+     * @param {CommandGroupType} group The group to toggle
      * @param {DisabledSchema} data The disabled commands & groups data
      */
-    async _group(message, group, data) {
-        while (!(group instanceof CommandGroup)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            group = value
+    async _group({ message, interaction }, group, data) {
+        if (message) {
+            while (!(group instanceof CommandGroup)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                group = value
+            }
         }
 
-        const { guildId } = message
+        if (group.guarded) {
+            return await replyAll({ message, interaction }, basicEmbed({
+                color: 'RED',
+                emoji: 'cross',
+                description: `The \`${group.name}\` group is guarded, and thus it cannot be disabled.`
+            }))
+        }
+
+        const { guildId } = message || interaction
 
         const isEnabled = guildId ? group.isEnabledIn(guildId) : group._globalEnabled
         const global = guildId ? '' : ' globally'
@@ -145,7 +212,7 @@ module.exports = class ToggleCommand extends Command {
             })
         }
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the \`${group.name}\` group${global}`,

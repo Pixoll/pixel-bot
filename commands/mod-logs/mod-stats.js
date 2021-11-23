@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { getDayDiff, code } = require('../../utils')
+const { getDayDiff, code, replyAll } = require('../../utils')
 const { ModerationSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -11,8 +11,8 @@ const { ModerationSchema } = require('../../schemas/types')
 module.exports = class ModStatsCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'modstats',
-            aliases: ['mod-stats'],
+            name: 'mod-stats',
+            aliases: ['modstats'],
             group: 'mod-logs',
             description: 'Displays your moderation statistics or for a moderator or admin.',
             details: stripIndent`
@@ -25,25 +25,35 @@ module.exports = class ModStatsCommand extends Command {
             guildOnly: true,
             args: [{
                 key: 'user',
-                prompt: 'What user do you want to get the statistics from?',
+                prompt: 'What moderator do you want to get the statistics from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The moderator to check their stats.'
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod stats from
      */
-    async run(message, { user }) {
-        const { guild, author } = message
-        const db = guild.database.moderations
-        if (!user) user = author
+    async run({ message, interaction }, { user }) {
+        if (interaction) user = user?.user ?? user
 
-        const stats = await db.fetchMany({ mod: { id: user.id } })
+        const { guild } = message || interaction
+        const author = message?.author || interaction.user
+        const db = guild.database.moderations
+        user ??= author
+
+        const stats = await db.fetchMany({ modId: user.id })
 
         const pad = 10
         const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'
@@ -63,7 +73,7 @@ module.exports = class ModStatsCommand extends Command {
             .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        await message.replyEmbed(embed)
+        await replyAll({ message, interaction }, embed)
     }
 
     /**

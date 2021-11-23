@@ -7,15 +7,11 @@ interface BaseSchema extends Document {
 
 type TimeBasedModeration = 'mute' | 'temp-ban'
 
-type SchemaUser = {
-    id: string
-    tag: string
-}
-
 export interface ActiveSchema extends BaseSchema {
     type: TimeBasedModeration | 'temp-role'
     guild: string
-    user: SchemaUser
+    userId: string
+    userTag: string
     role: string
     duration: number
 }
@@ -49,8 +45,10 @@ export interface FaqSchema extends BaseSchema {
 export interface ModerationSchema extends BaseSchema {
     type: 'warn' | 'ban' | 'kick' | 'soft-ban' | TimeBasedModeration
     guild: string
-    user: SchemaUser
-    mod: SchemaUser
+    userId: string
+    userTag: string
+    modId: string
+    modTag: string
     reason: string
     duration: string
 }

@@ -22,7 +22,7 @@ module.exports = async (client, ...exclude) => {
 
     // Caches all the database in memory
     const now1 = Date.now()
-    client.emit('debug', 'Initializing database caching process for all guilds')
+    client.emit('debug', 'Initializing database caching process')
 
     /** @type {Collection<string, Collection<string, object>>} */
     const data = new Collection()

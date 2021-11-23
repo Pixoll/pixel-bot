@@ -4,7 +4,7 @@ const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('disco
 const { CommandoClient } = require('../../command-handler/typings')
 const { myMs, rtcRegions, compareArrays } = require('../../utils')
 const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes } = require('../../utils')
-const { permissions } = require('../../command-handler/util')
+const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -131,12 +131,13 @@ module.exports = (client) => {
             const diff = cache1.difference(cache2).first()
 
             /** @type {Role|GuildMember} */
-            const target = guild[diff.type + 's'].cache.get(diff.id)
+            const target = await guild[diff.type + 's'].fetch(diff.id)
+            if (target) {
+                const mention = target.toString()
+                const name = remDiscFormat(target.user?.tag || target.name)
 
-            const mention = target.toString()
-            const name = remDiscFormat(target.user?.tag)
-
-            embed.addField(`${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
+                embed.addField(`${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
+            }
 
             checked = true
         }

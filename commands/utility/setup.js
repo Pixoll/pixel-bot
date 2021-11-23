@@ -1,10 +1,10 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const {
-    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument
+    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument, replyAll
 } = require('../../utils')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
@@ -32,25 +32,54 @@ function defaultDoc(guildId, key, value) {
     return doc
 }
 
+const logsOption = {
+    type: 'channel',
+    channelTypes: ['guild-text'],
+    name: 'audit-logs-channel',
+    description: 'The channel where to send the audit logs.',
+    required: true
+}
+const mutedOption = {
+    type: 'role',
+    name: 'muted-role',
+    description: 'The role that will be given to muted members.',
+    required: true
+}
+const memberOption = {
+    type: 'role',
+    name: 'member-role',
+    description: 'The role that will be given to a member upon joining.',
+    required: true
+}
+const botOption = {
+    type: 'role',
+    name: 'bot-role',
+    description: 'The role that will be given to a bot upon joining.',
+    required: true
+}
+const lockdownOption = {
+    type: 'string',
+    name: 'lockdown-channels',
+    description: 'The channels for the lockdown command, separated by spaces (max. 30 at once).',
+    required: true
+}
+
 /** A command that can be run in a client */
 module.exports = class SetupCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setup',
             group: 'utility',
-            description: oneLine`
-                Setup the bot to it\'s core. The data collected from this command is never deleted,
-                so you don\'t have to worry about doing this twice if I ever leave the server and rejoin.
-            `,
+            description: 'Setup the bot to its core. The data collected from this command will never be deleted.',
             details: `${channelDetails('text-channel')}\n${roleDetails()}\n${channelDetails('text-channels', true)}`,
             format: stripIndent`
                 setup <full> - Setup the bot completely to its core.
-                setup info - View the current setup data of the server.
+                setup view - View the current setup data of the server.
                 setup reload - Reloads the data of the server.
                 setup audit-logs [text-channel] - Setup the audit logs channel.
-                setup muted-role [role] - Setup the role for muted people.
-                setup member-role [role] - Setup the role given to all members upon joining.
-                setup bot-role [role] - Setup the role given to all bots upon joining.
+                setup muted-role [role] - Setup the role for muted members.
+                setup member-role [role] - Setup the role given to a member upon joining.
+                setup bot-role [role] - Setup the role given to a bot upon joining.
                 setup lockdown-channels [text-channels] - Setup all the lockdown channels used in the \`lockdown\` command.
             `,
             userPermissions: ['ADMINISTRATOR'],
@@ -63,7 +92,7 @@ module.exports = class SetupCommand extends Command {
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: [
-                        'info', 'full', 'reload', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'
+                        'view', 'full', 'reload', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'
                     ],
                     default: 'full'
                 },
@@ -73,7 +102,57 @@ module.exports = class SetupCommand extends Command {
                     type: ['text-channel', 'role', 'string'],
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'view',
+                        description: 'View the current setup data of the server.'
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'full',
+                        description: 'Setup the bot completely to its core.',
+                        options: [logsOption, mutedOption, memberOption, botOption, lockdownOption]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'reload',
+                        description: 'Reloads the data of the server.'
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'audit-logs',
+                        description: 'Setup the audit logs channel.',
+                        options: [logsOption]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'muted-role',
+                        description: 'Setup the role for muted members.',
+                        options: [mutedOption]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'member-role',
+                        description: 'Setup the role given to a member upon joining.',
+                        options: [memberOption]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'bot-role',
+                        description: 'Setup the role given to a bot upon joining.',
+                        options: [botOption]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'lockdown-channels',
+                        description: 'Setup all the lockdown channels used in the "lockdown" command.',
+                        options: [lockdownOption]
+                    }
+                ]
+            }
         })
     }
 
@@ -83,129 +162,156 @@ module.exports = class SetupCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {SubCommand} args.subCommand The sub-command to use
      * @param {TextChannel|Role|string} args.value The value to set for that sub-command
      */
-    async run(message, { subCommand, value }) {
+    async run({ message, interaction }, {
+        subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels
+    }) {
         subCommand = subCommand.toLowerCase()
-        const { guild } = message
+        const { guild } = message || interaction
         this.db = guild.database.setup
 
         const data = await this.db.fetch()
+        const fullData = { auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels }
 
         switch (subCommand) {
             case 'full':
-                return await this.full(message, data)
-            case 'info':
-                return await this.info(message, data)
+                return await this.full({ message, interaction }, data, fullData)
+            case 'view':
+                return await this.view({ message, interaction }, data)
             case 'reload':
-                return await this._reload(message, data)
+                return await this._reload({ message, interaction }, data)
             case 'audit-logs':
-                return await this.auditLogs(message, value)
+                return await this.auditLogs({ message, interaction }, value ?? auditLogsChannel)
             case 'muted-role':
-                return await this.mutedRole(message, value)
+                return await this.mutedRole({ message, interaction }, value ?? mutedRole)
             case 'member-role':
-                return await this.memberRole(message, value)
+                return await this.memberRole({ message, interaction }, value ?? memberRole)
             case 'bot-role':
-                return await this.botRole(message, value)
+                return await this.botRole({ message, interaction }, value ?? botRole)
             case 'lockdown-channels':
-                return await this.lockdownChannels(message, data, value)
+                return await this.lockdownChannels({ message, interaction }, data, value ?? lockdownChannels)
         }
     }
 
     /**
      * The `full` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
+     * @param {object} fullData The full setup data (for "interaction")
+     * @param {TextChannel} fullData.auditLogsChannel
+     * @param {Role} fullData.mutedRole
+     * @param {Role} fullData.memberRole
+     * @param {Role} fullData.botRole
+     * @param {string} fullData.lockdownChannels
      */
-    async full(message, data) {
+    async full({ message, interaction }, data, fullData) {
         const { guildId, client } = message
         const { types } = client.registry
         const textChanType = types.get('text-channel')
-        /** @type {RoleType} */
         const roleType = types.get('role')
-        let toDelete
 
         /** @type {TextChannel} */
-        let logsChannel
-        while (!logsChannel || logsChannel.type !== 'GUILD_TEXT') {
-            const msg = await basicCollector(message, {
-                fieldName: 'In what __text channel__ should I send the audit-logs?'
-            }, null, true)
-            if (!msg) return
-            toDelete = msg
-            logsChannel = textChanType.parse(msg.content, message)
-        }
-
-        await toDelete.delete()
-
+        let logsChannel = fullData.auditLogsChannel
         /** @type {Role} */
-        let memberRole
-        while (!memberRole || isMod(memberRole)) {
-            const description = isMod(memberRole) ?
-                'This is considered as a moderation role, please try again with another one.' :
-                `Audit logs will be sent in ${logsChannel}.`
-
-            const msg = await basicCollector(message, {
-                description,
-                fieldName: 'What __role__ should I give to a __member__ when they join the server?'
-            }, null, true)
-            if (!msg) return
-            toDelete = msg
-            memberRole = roleType.parse(msg.content, message)
-        }
-
-        await toDelete.delete()
-
+        let mutedRole = fullData.mutedRole
         /** @type {Role} */
-        let botRole
-        while (!botRole) {
-            const msg = await basicCollector(message, {
-                description: `The default member role will be ${memberRole}.`,
-                fieldName: 'What __role__ should I give to a __bot__ when they join the server?'
-            }, null, true)
-            if (!msg) return
-            toDelete = msg
-            botRole = roleType.parse(msg.content, message)
-        }
-
-        await toDelete.delete()
-
+        let memberRole = fullData.memberRole
         /** @type {Role} */
-        let mutedRole
-        while (!mutedRole) {
-            const msg = await basicCollector(message, {
-                description: `The default bot role will be ${botRole}.`,
-                fieldName: 'What __role__ should I give to a __member__ when they get muted?'
-            }, null, true)
-            if (!msg) return
-            toDelete = msg
-            mutedRole = roleType.parse(msg.content, message)
-        }
-
-        await toDelete.delete()
-
+        let botRole = fullData.botRole
         /** @type {TextChannel[]} */
         const lockChannels = []
-        while (lockChannels.length === 0) {
-            const msg = await basicCollector(message, {
-                description: `The role given to muted people will be ${mutedRole}.`,
-                fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-            }, { time: myMs('2m') }, true)
-            if (!msg) return
-            toDelete = msg
-            for (const val of msg.content.split(/ +/)) {
+
+        if (message) {
+            let toDelete
+            while (!logsChannel || logsChannel.type !== 'GUILD_TEXT') {
+                const msg = await basicCollector({ message }, {
+                    fieldName: 'In what __text channel__ should I send the audit-logs?'
+                }, null, true)
+                if (!msg) return
+                toDelete = msg
+                logsChannel = textChanType.parse(msg.content, message)
+            }
+
+            await toDelete?.delete()
+
+            while (!memberRole || isMod(memberRole)) {
+                const description = isMod(memberRole) ?
+                    'This is considered as a moderation role, please try again with another one.' :
+                    `Audit logs will be sent in ${logsChannel}.`
+
+                const msg = await basicCollector({ message }, {
+                    description,
+                    fieldName: 'What __role__ should I give to a __member__ when they join the server?'
+                }, null, true)
+                if (!msg) return
+                toDelete = msg
+                memberRole = roleType.parse(msg.content, message)
+            }
+
+            await toDelete?.delete()
+
+            while (!botRole) {
+                const msg = await basicCollector({ message }, {
+                    description: `The default member role will be ${memberRole}.`,
+                    fieldName: 'What __role__ should I give to a __bot__ when they join the server?'
+                }, null, true)
+                if (!msg) return
+                toDelete = msg
+                botRole = roleType.parse(msg.content, message)
+            }
+
+            await toDelete?.delete()
+
+            while (!mutedRole) {
+                const msg = await basicCollector({ message }, {
+                    description: `The default bot role will be ${botRole}.`,
+                    fieldName: 'What __role__ should I give to a __member__ when they get muted?'
+                }, null, true)
+                if (!msg) return
+                toDelete = msg
+                mutedRole = roleType.parse(msg.content, message)
+            }
+
+            await toDelete?.delete()
+
+            while (lockChannels.length === 0) {
+                const msg = await basicCollector({ message }, {
+                    description: `The role given to muted people will be ${mutedRole}.`,
+                    fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
+                }, { time: myMs('2m') }, true)
+                if (!msg) return
+                toDelete = msg
+                for (const val of msg.content.split(/ +/)) {
+                    if (lockChannels.length === 30) break
+                    const chan = textChanType.parse(val, message)
+                    if (!chan || lockChannels.includes(chan)) continue
+                    lockChannels.push(chan)
+                }
+            }
+
+            await toDelete?.delete()
+        } else {
+            const intMsg = await interaction.fetchReply()
+            for (const val of fullData.lockdownChannels.split(/ +/)) {
                 if (lockChannels.length === 30) break
-                const chan = textChanType.parse(val, message)
-                if (chan) lockChannels.push(chan)
+                const chan = textChanType.parse(val, intMsg)
+                if (!chan || lockChannels.includes(chan)) continue
+                lockChannels.push(chan)
+            }
+            if (lockChannels.length === 0) {
+                return await interaction.editReply(basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'None of the channels you specified were valid. Please try again.'
+                }))
             }
         }
 
-        await toDelete.delete()
-
-        const msg = await basicCollector(message, {
+        const msg = await basicCollector({ message, interaction }, {
             description: stripIndent`
                 This is all the data I got:
                 **>** **Audit logs channel:** ${logsChannel}
@@ -218,19 +324,21 @@ module.exports = class SetupCommand extends Command {
         }, null, true)
         if (!msg) return
         if (msg.content.toLowerCase() !== 'confirm') {
-            return await message.reply('Cancelled command.')
+            return await replyAll({ message, interaction }, { content: 'Cancelled command.', embeds: [] })
         }
 
-        await this.db.add({
+        const doc = {
             guild: guildId,
             logsChannel: logsChannel.id,
             memberRole: memberRole.id,
             botRole: botRole.id,
             mutedRole: mutedRole.id,
             lockChannels: lockChannels.map(c => c.id)
-        })
+        }
+        if (data) await this.db.update(data, doc)
+        else await this.db.add(doc)
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.'
@@ -238,13 +346,13 @@ module.exports = class SetupCommand extends Command {
     }
 
     /**
-     * The `info` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * The `view` sub-command
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
      */
-    async info(message, data) {
+    async view({ message, interaction }, data) {
         if (!data) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
@@ -252,7 +360,7 @@ module.exports = class SetupCommand extends Command {
             }))
         }
 
-        const { guild } = message
+        const { guild } = message || interaction
         const { roles, channels } = guild
 
         const logsChannel = await channels.fetch(data.logsChannel)
@@ -270,7 +378,7 @@ module.exports = class SetupCommand extends Command {
         ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`)
 
         if (toDisplay.length === 0) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
             }))
         }
@@ -281,17 +389,17 @@ module.exports = class SetupCommand extends Command {
             .setDescription(toDisplay.join('\n'))
             .setFooter('Missing or wrong data? Try using the "reload" sub-command!')
 
-        await message.replyEmbed(embed)
+        await replyAll({ message, interaction }, embed)
     }
 
     /**
      * The `reload` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
      */
-    async _reload(message, data) {
+    async _reload({ message, interaction }, data) {
         if (!data) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
@@ -299,11 +407,12 @@ module.exports = class SetupCommand extends Command {
             }))
         }
 
-        const toDelete = await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Reloading setup data...'
-        }))
+        })
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
-        const { guild, guildId } = message
+        const { guild, guildId } = message || interaction
         const newDoc = { guild: guildId }
 
         if (data.logsChannel) {
@@ -336,27 +445,29 @@ module.exports = class SetupCommand extends Command {
 
         await this.db.update(data, newDoc)
 
-        await toDelete.delete().catch(() => null)
-        await message.replyEmbed(basicEmbed({
+        await toDelete?.delete().catch(() => null)
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Reloaded data.'
         }))
     }
 
     /**
      * The `audit-logs` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel} channel The channel for the audit logs
      */
-    async auditLogs(message, channel) {
-        while (!(channel instanceof TextChannel)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channel = value
+    async auditLogs({ message, interaction }, channel) {
+        if (message) {
+            while (!(channel instanceof TextChannel)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                channel = value
+            }
         }
 
-        await this.db.add(defaultDoc(message.guildId, 'logsChannel', channel.id))
+        await this.db.add(defaultDoc((message || interaction).guildId, 'logsChannel', channel.id))
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: oneLine`
@@ -368,19 +479,21 @@ module.exports = class SetupCommand extends Command {
 
     /**
      * The `muted-role` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {Role} role The role for the muted members
      */
-    async mutedRole(message, role) {
-        while (!(role instanceof Role)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            role = value
+    async mutedRole({ message, interaction }, role) {
+        if (message) {
+            while (!(role instanceof Role)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                role = value
+            }
         }
 
-        await this.db.add(defaultDoc(message.guildId, 'mutedRole', role.id))
+        await this.db.add(defaultDoc((message || interaction).guildId, 'mutedRole', role.id))
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: oneLine`
@@ -392,19 +505,21 @@ module.exports = class SetupCommand extends Command {
 
     /**
      * The `member-role` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {Role} role The default role for all members
      */
-    async memberRole(message, role) {
-        while (!(role instanceof Role)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            role = value
+    async memberRole({ message, interaction }, role) {
+        if (message) {
+            while (!(role instanceof Role)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                role = value
+            }
         }
 
-        await this.db.add(defaultDoc(message.guildId, 'memberRole', role.id))
+        await this.db.add(defaultDoc((message || interaction).guildId, 'memberRole', role.id))
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: oneLine`
@@ -416,19 +531,21 @@ module.exports = class SetupCommand extends Command {
 
     /**
      * The `bot-role` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {Role} role The default role for all bots
      */
-    async botRole(message, role) {
-        while (!(role instanceof Role)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            role = value
+    async botRole({ message, interaction }, role) {
+        if (message) {
+            while (!(role instanceof Role)) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                role = value
+            }
         }
 
-        await this.db.add(defaultDoc(message.guildId, 'botRole', role.id))
+        await this.db.add(defaultDoc((message || interaction).guildId, 'botRole', role.id))
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: oneLine`
@@ -440,49 +557,62 @@ module.exports = class SetupCommand extends Command {
 
     /**
      * The `lockdown-channels` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
      * @param {string|TextChannel} channelsStr All the lockdown channels for the server
      */
-    async lockdownChannels(message, data, channelsStr) {
-        while (channelsStr instanceof Role) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channelsStr = value
+    async lockdownChannels({ message, interaction }, data, channelsStr) {
+        if (message) {
+            while (channelsStr instanceof Role) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
+                if (cancelled) return
+                channelsStr = value
+            }
         }
 
-        const { client } = message
+        const { client } = message || interaction
         const { types } = client.registry
         /** @type {TextChannelType} */
         const textChanType = types.get('text-channel')
 
         const channels = []
         if (typeof channelsStr === 'string') {
+            const intMsg = await interaction?.fetchReply()
             for (const val of channelsStr.split(/ +/)) {
                 if (channels.length === 30) break
-                const chan = textChanType.parse(val, message)
+                const chan = textChanType.parse(val, message || intMsg)
                 if (chan) channels.push(chan)
             }
         } else {
             channels.push(channelsStr)
         }
 
-        while (channels.length === 0) {
-            const msg = await basicCollector(message, {
-                fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-            }, { time: myMs('2m') }, true)
-            if (!msg) return
-            for (const val of msg.content.split(/ +/)) {
-                if (channels.length === 30) break
-                const chan = textChanType.parse(val, message)
-                if (chan) channels.push(chan)
+        if (message) {
+            while (channels.length === 0) {
+                const msg = await basicCollector({ message }, {
+                    fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
+                }, { time: myMs('2m') }, true)
+                if (!msg) return
+                for (const val of msg.content.split(/ +/)) {
+                    if (channels.length === 30) break
+                    const chan = textChanType.parse(val, message)
+                    if (chan) channels.push(chan)
+                }
+            }
+        } else {
+            if (channels.length === 0) {
+                return await interaction.editReply(basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'None of the channels you specified were valid. Please try again.'
+                }))
             }
         }
 
         if (data) await this.db.update(data, { $push: { lockChannels: { $each: channels.map(c => c.id) } } })
-        else await this.db.add(defaultDoc(message.guildId, 'lockChannels', channels.map(c => c.id)))
+        else await this.db.add(defaultDoc((message || interaction).guildId, 'lockChannels', channels.map(c => c.id)))
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
                 I have saved all the lockdown channels you specified.
                 Use the \`view\` sub-command if you wish to check it out.

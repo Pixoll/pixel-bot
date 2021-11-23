@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances, CommandoGuild } = require('../../command-handler/typings')
 const { MessageEmbed, PremiumTier } = require('discord.js')
 const { stripIndent } = require('common-tags')
+const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const ownerCrown = '<a:owner_crown:806558872440930425>'
@@ -23,21 +24,22 @@ function formatLvl(tier) {
 module.exports = class ServerInfoCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'serverinfo',
-            aliases: ['server-info'],
+            name: 'server-info',
+            aliases: ['serverinfo'],
             group: 'misc',
             description: 'Displays some information and statistics of the server, such as owner, boosts and member count.',
-            guildOnly: true
+            guildOnly: true,
+            slash: true
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {CommandoGuild} guild The guild to get information from
      */
-    async run(message, guild) {
-        const server = message.guild || guild
+    async run({ message, interaction }, guild) {
+        const server = (message || interaction).guild || guild
         const { name, channels, premiumTier, premiumSubscriptionCount, memberCount, roles, id, createdTimestamp } = server
         const owner = await server.fetchOwner()
 
@@ -53,20 +55,20 @@ module.exports = class ServerInfoCommand extends Command {
             .setAuthor(name, server.iconURL({ dynamic: true }))
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
             .addField('Information', stripIndent`
-                **>** **Owner:** ${owner.user.tag} ${ownerCrown}
-                **>** **Channel categories:** ${categories}
-                **>** **Text channels:** ${text}
-                **>** **Voice channels:** ${voice}
+                **Owner:** ${owner.user.tag} ${ownerCrown}
+                **Channel categories:** ${categories}
+                **Text channels:** ${text}
+                **Voice channels:** ${voice}
             `, true)
             .addField('\u200B', stripIndent`
-                **>** **Server boost lvl:** ${formatLvl(premiumTier)}
-                **>** **Server boosts:** ${premiumSubscriptionCount} ${boost}
-                **>** **Members:** ${memberCount}
-                **>** **Roles:** ${_roles.size}
+                **Server boost lvl:** ${formatLvl(premiumTier)}
+                **Server boosts:** ${premiumSubscriptionCount} ${boost}
+                **Members:** ${memberCount}
+                **Roles:** ${_roles.size}
             `, true)
             .setFooter(`Server id: ${id} | Created at`)
             .setTimestamp(createdTimestamp)
 
-        await message.replyEmbed(serverInfo)
+        await replyAll({ message, interaction }, serverInfo)
     }
 }

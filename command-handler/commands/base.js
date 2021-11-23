@@ -1,12 +1,13 @@
 /* eslint-disable no-unused-vars */
 const path = require('path')
 const { PermissionResolvable, Message, GuildResolvable, User, MessageEmbed } = require('discord.js')
-const { stripIndent } = require('common-tags')
+const { APIApplicationCommand } = require('discord-api-types/payloads/v9')
+const { stripIndent, oneLine } = require('common-tags')
 const ArgumentCollector = require('./collector')
-const { permissions } = require('../util')
+const { permissions, slashOptionTypes, slashOptionChannelTypes } = require('../util')
 const {
 	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult,
-	CommandBlockData, Throttle, CommandBlockReason
+	CommandBlockData, Throttle, CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo
 } = require('../typings')
 /* eslint-enable no-unused-vars */
 
@@ -237,16 +238,37 @@ class Command {
 		 * @private
 		 */
 		this._throttles = new Map()
+
+		/**
+		 * The data for the slash command
+		 * @type {SlashCommandInfo}
+		 * @default false
+		 */
+		this.slash = info.slash
+
+		/**
+		 * The slash command data to send to the API
+		 * @type {APIApplicationCommand}
+		 * @private
+		 */
+		this._slashToAPI = this.slash ? this.constructor.parseSlash(this.slash) : null
+
+		/**
+		 * Whether this command will be registered in the test guild only or not
+		 * @default false
+		 */
+		this.test = Boolean(info.test)
 	}
 
 	/**
 	 * Checks whether the user has permission to use the command
-	 * @param {CommandoMessage} message The triggering command message
+	 * @param {CommandInstances} instances The triggering command instances
 	 * @param {boolean} [ownerOverride=true] Whether the bot owner(s) will always have permission
 	 * @return Whether the user has permission, or an error message to respond with if they don't
 	 */
-	hasPermission(message, ownerOverride = true) {
-		const { author, channel, guild } = message
+	hasPermission({ message, interaction }, ownerOverride = true) {
+		const { channel, guild } = message || interaction
+		const author = message?.author || interaction.user
 
 		if (!this.guildOwnerOnly && !this.ownerOnly && !this.userPermissions) return true
 		if (ownerOverride && this.client.isOwner(author)) return true
@@ -269,7 +291,7 @@ class Command {
 
 	/**
 	 * Runs the command
-	 * @param {CommandoMessage} message The message the command is being run for
+	 * @param {CommandInstances} instances The instances the command is being run for
 	 * @param {object|string|string[]} args The arguments for the command, or the matches from a pattern.
 	 * If args is specified on the command, thise will be the argument values object. If argsType is single, then only
 	 * one string will be passed. If multiple, an array of strings will be passed. When fromPattern is true, this is the
@@ -280,13 +302,13 @@ class Command {
 	 * @return {Promise<?Message|?Array<Message>>}
 	 * @abstract
 	 */
-	async run(message, args, fromPattern, result) {
+	async run(instances, args, fromPattern, result) {
 		throw new Error(`${this.constructor.name} doesn't have a run() method.`)
 	}
 
 	/**
 	 * Called when the command is prevented from running
-	 * @param {CommandoMessage} message Command message that the command is running from
+	 * @param {CommandInstances} instances The instances the command is being run for
 	 * @param {CommandBlockReason} reason Reason that the command was blocked
 	 * @param {CommandBlockData} [data] Additional data associated with the block. Built-in reason data properties:
 	 * - guildOnly: none
@@ -295,57 +317,77 @@ class Command {
 	 * - userPermissions & clientPermissions: `missing` ({@link Array}<{@link string}>) permission names
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onBlock(message, reason, data) {
+	onBlock({ message, interaction }, reason, data) {
 		switch (reason) {
-			case 'dmOnly':
-				return message.replyEmbed(embed(
-					`The \`${this.name}\` command can only be used in direct messages.`
-				))
-			case 'guildOnly':
-				return message.replyEmbed(embed(
-					`The \`${this.name}\` command can only be used in a server channel.`
-				))
-			case 'guildOwnerOnly':
-				return message.replyEmbed(embed(
-					`The \`${this.name}\` command can only be used by the server's owner.`
-				))
-			case 'nsfw':
-				return message.replyEmbed(embed(
-					`The \`${this.name}\` command can only be used in a NSFW channel.`
-				))
-			case 'ownerOnly': {
-				return message.replyEmbed(embed(
-					`The \`${this.name}\` command can only be used by the bot's owner.`
-				))
+			case 'dmOnly': {
+				const toSend = embed(`The \`${this.name}\` command can only be used in direct messages.`)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
 			}
-			case 'userPermissions':
-				return message.replyEmbed(embed(
+			case 'guildOnly': {
+				const toSend = embed(`The \`${this.name}\` command can only be used in a server channel.`)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
+			}
+			case 'guildOwnerOnly': {
+				const toSend = embed(`The \`${this.name}\` command can only be used by the server's owner.`)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
+			}
+			case 'nsfw': {
+				const toSend = embed(`The \`${this.name}\` command can only be used in a NSFW channel.`)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
+			}
+			case 'ownerOnly': {
+				const toSend = embed(`The \`${this.name}\` command can only be used by the bot's owner.`)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
+			}
+			case 'userPermissions': {
+				const toSend = embed(
 					'You are missing the following permissions:',
 					data.missing.map(perm => `\`${permissions[perm]}\``).join(', ')
-				))
-			case 'clientPermissions':
-				return message.replyEmbed(embed(
+				)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
+			}
+			case 'clientPermissions': {
+				const toSend = embed(
 					'The bot is missing the following permissions:',
 					data.missing.map(perm => `\`${permissions[perm]}\``).join(', ')
-				))
-			case 'throttling':
-				return message.replyEmbed(embed(
-					`Please wait **${data.remaining.toFixed(1)} seconds** before using the \`${this.name}\` command again.`
-				))
+				)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+				return
+			}
+			case 'throttling': {
+				const toSend = embed(oneLine`
+					Please wait **${data.remaining.toFixed(1)} seconds** before using the \`${this.name}\` command again.
+				`)
+				interaction?.editReply({ embeds: [toSend] })
+				message?.replyEmbed(toSend)
+			}
 		}
 	}
 
 	/**
 	 * Called when the command produces an error while running
 	 * @param {Error} err Error that was thrown
-	 * @param {CommandoMessage} message Command message that the command is running from (see {@link Command#run})
+	 * @param {CommandInstances} instances The instances the command is being run for
 	 * @param {Object|string|string[]} args Arguments for the command (see {@link Command#run})
 	 * @param {boolean} fromPattern Whether the args are pattern matches (see {@link Command#run})
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector
 	 * (if applicable see {@link Command#run})
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onError(err, message, args, fromPattern, result) {
+	onError(err, { message }, args, fromPattern, result) {
 		return
 		/* eslint-disable no-unreachable */
 		const owner = message.client.owners[0]
@@ -420,15 +462,15 @@ class Command {
 	}
 
 	/**
-	 * Checks if the command is usable for a message
-	 * @param {?Message} message The message
+	 * Checks if the command is usable for an instance
+	 * @param {?CommandInstances} instances The instances
 	 * @return {boolean}
 	 */
-	isUsable(message = null) {
-		if (!message) return this._globalEnabled
-		if (this.guildOnly && message && !message.guild) return false
-		const hasPermission = this.hasPermission(message)
-		return this.isEnabledIn(message.guild) && hasPermission === true
+	isUsable({ message, interaction }) {
+		if (!message && !interaction) return this._globalEnabled
+		if (this.guildOnly && (message || interaction) && !(message || interaction).guild) return false
+		const hasPermission = this.hasPermission({ message, interaction })
+		return this.isEnabledIn((message || interaction).guild) && hasPermission === true
 	}
 
 	/**
@@ -587,6 +629,88 @@ class Command {
 		if (Boolean(info.deprecated) && info.replacing !== info.replacing.toLowerCase()) {
 			throw new TypeError('Command replacing must be lowercase.')
 		}
+		if ('slash' in info && (typeof info.slash !== 'object' && typeof info.slash !== 'boolean')) {
+			throw new TypeError('Command slash must be object or boolean.')
+		}
+		if (info.slash === true) {
+			info.slash = {}
+			for (const prop in info) {
+				if (prop === 'slash') continue
+				info.slash[prop] = info[prop]
+			}
+		}
+		if (typeof info.slash === 'object') {
+			if (Object.keys(info.slash).length === 0) throw new TypeError('Command slash must not be an empty object.')
+			for (const prop in info) {
+				if (['slash', 'test'].includes(prop)) continue
+				if (info.slash[prop] !== undefined && info.slash[prop] !== null) continue
+				info.slash[prop] = info[prop]
+			}
+			if ('name' in info.slash && typeof info.slash.name === 'string') {
+				if (info.slash.name !== info.slash.name.toLowerCase()) {
+					throw new TypeError('Command slash name must be lowercase.')
+				}
+				if (info.slash.name.replace(/ +/g, '') !== info.slash.name) {
+					throw new TypeError('Command slash name must not include spaces.')
+				}
+			}
+			if ('description' in info.slash) {
+				if (typeof info.slash.description !== 'string') {
+					throw new TypeError('Command slash description must be a string.')
+				}
+				if (info.slash.description.length > 100) {
+					throw new TypeError('Command slash description length must be at most 100 characters long.')
+				}
+			}
+			if ('format' in info.slash && typeof info.slash.format !== 'string') {
+				throw new TypeError('Command slash format must be a string.')
+			}
+			if ('details' in info.slash && typeof info.slash.details !== 'string') {
+				throw new TypeError('Command slash details must be a string.')
+			}
+			if (info.slash.examples && (
+				!Array.isArray(info.slash.examples) || info.slash.examples.some(ex => typeof ex !== 'string')
+			)) throw new TypeError('Command slash examples must be an Array of strings.')
+			if (Boolean(info.slash.deprecated) && typeof info.slash.replacing !== 'string') {
+				throw new TypeError('Command slash replacing must be a string.')
+			}
+			if (Boolean(info.slash.deprecated) && info.slash.replacing !== info.slash.replacing.toLowerCase()) {
+				throw new TypeError('Command slash replacing must be lowercase.')
+			}
+			if ('options' in info.slash && (
+				!Array.isArray(info.slash.options) || info.slash.options.some(op => typeof op !== 'object')
+			)) throw new TypeError('Command slash options must be an Array of objects.')
+		}
+	}
+
+	/**
+	 * Parses the slash command information, so it's usable by the API
+	 * @param {SlashCommandInfo|SlashCommandOptionInfo[]} info Info to parse
+	 * @private
+	 */
+	static parseSlash(info) {
+		const data = Array.isArray(info) ? info : { ...info }
+		if (!Array.isArray(data) && data.name) {
+			data.type = 1
+		}
+		(Array.isArray(data) ? data : data.options)?.forEach(option => {
+			if (typeof option.type === 'string') option.type = slashOptionTypes[option.type]
+			for (const prop in option) {
+				if (prop.toLowerCase() === prop) continue
+				const toApply = prop.replace(/[A-Z]/g, '_$&').toLowerCase()
+				option[toApply] = option[prop]
+				delete option[prop]
+				if (toApply === 'channel_types') {
+					for (let i = 0; i < option[toApply].length; i++) {
+						const elem = option[toApply][i]
+						const chan = slashOptionChannelTypes[elem]
+						option[toApply][i] = chan
+					}
+				}
+			}
+			if (option.options) this.parseSlash(option.options)
+		})
+		return data
 	}
 }
 

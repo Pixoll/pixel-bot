@@ -47,6 +47,7 @@ module.exports = async (client) => {
             const options = {}
             if (msg) options.reply = { messageReference: msg }
             else if (channel.type !== 'DM') options.content = user.toString()
+            if (msg.author.bot) options.content = user.toString()
 
             await channel.send({ embeds: [embed], ...options, ...noReplyInDMs(msg) }).catch(() => null)
         }

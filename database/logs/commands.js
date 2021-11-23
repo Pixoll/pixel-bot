@@ -10,8 +10,9 @@ const { isModuleEnabled, sliceDots, code } = require('../../utils')
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('commandRun', async (command, _, message) => {
-        const { guild, author, channel, url, cleanContent } = message
+    client.on('commandRun', async (command, _, { message, interaction }) => {
+        const { guild, channel } = message || interaction
+        const author = message?.author || interaction.user
         const isModCommand = !!command.userPermissions || command.ownerOnly ||
             command.guildOwnerOnly || command.name === 'prefix'
 
@@ -20,14 +21,38 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        const content = sliceDots(cleanContent, 1016)
+        let string
+        if (message) string = message.cleanContent
+        else {
+            string = `/${command.name}`
+            for (const option of interaction.options.data) {
+                /** @param {option} opt */
+                function concat(opt) {
+                    if (opt.name && [undefined, null].includes(opt.value)) {
+                        string += ` ${opt.name}`
+                    } else {
+                        string += ` ${opt.name}: "${opt.value}"`
+                    }
+                    opt.options?.forEach(concat)
+                }
+                concat(option)
+            }
+        }
+        const content = sliceDots(string, 1016)
+
+        let url
+        if (message) url = message.url
+        else {
+            const msg = await interaction.fetchReply()
+            if (msg) url = msg.url
+        }
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor(`Used ${command.name} command`, author.displayAvatarURL({ dynamic: true }))
             .setDescription(oneLine`
                 ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
-                [Jump to message](${url})
+                ${url ? `[Jump to message](${url})` : ''}
             `)
             .addField('Message', code(content))
             .setFooter(`Author id: ${author.id}`)

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, customEmoji, timestamp, timeDetails } = require('../../utils')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
+const { basicEmbed, customEmoji, timestamp, timeDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -33,7 +33,22 @@ module.exports = class ReminderCommand extends Command {
                     max: 512,
                     default: '`Not specified`'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'string',
+                        name: 'time',
+                        description: 'When to get reminded at.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reminder',
+                        description: 'What to get reminded about.'
+                    }
+                ]
+            }
         })
 
         this.db = this.client.database.reminders
@@ -41,16 +56,31 @@ module.exports = class ReminderCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {number|Date} args.time The time when the user should be reminder
      * @param {string} args.reminder What to remind the user about
      */
-    async run(message, { time, reminder }) {
+    async run({ message, interaction }, { time, reminder }) {
+        if (interaction) {
+            const arg = this.argsCollector.args[0]
+            time = await arg.parse(time).catch(() => null) || null
+            if (!time) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.'
+                    })]
+                })
+            }
+            reminder ??= '`Not specified`'
+        }
+
         if (typeof time === 'number') time += Date.now()
         if (time instanceof Date) time = time.getTime()
 
-        const { author, id, channelId, url } = message
+        const msg = await interaction?.fetchReply()
+        const { id, channelId, url } = message || msg
+        const author = interaction?.user || message.author
         const stamp = timestamp(time, 'R')
 
         await this.db.add({
@@ -62,8 +92,9 @@ module.exports = class ReminderCommand extends Command {
             channel: channelId,
         })
 
-        await message.react(customEmoji('cross'))
-        await message.replyEmbed(basicEmbed({
+        await (message || msg).react(customEmoji('cross'))
+
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `I'll remind you ${stamp} for:`,

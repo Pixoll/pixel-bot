@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient } = require('./command-handler/typings')
-const { CommandoMessage, Command } = require('./command-handler/typings')
+const { CommandInstances, Command } = require('./command-handler/typings')
 const { MessageEmbed, TextChannel, Util } = require('discord.js')
 const { customEmoji, docId, code } = require('./utils')
 const { stripIndent } = require('common-tags')
@@ -11,7 +11,7 @@ const { stripIndent } = require('common-tags')
  * @param {CommandoClient} client The client instance
  */
 module.exports = (client) => {
-    client.on('commandError', async (command, error, message) => {
+    client.on('commandError', async (command, error, { message, interaction }) => {
         const owner = client.owners[0]
         const { serverInvite } = client.options
         const id = docId()
@@ -20,15 +20,16 @@ module.exports = (client) => {
             .setColor('RED')
             .setDescription(stripIndent`
 				${customEmoji('cross')} **An unexpected error happened**
-				Please contact ${owner.toString()} (${owner.tag}), or join the [support server](${serverInvite}).
+				Please contact ${owner.toString()} (${owner.tag}) by joining the [support server](${serverInvite}).
 			`)
             .addField('Please send this information as well', stripIndent`
                 **Type:** ${error.name}
                 **Error id:** ${id}
             `)
 
-        await message.replyEmbed(reply)
-        await errorHandler(error, 'Command error', message, command, id)
+        await interaction?.editReply({ embeds: [reply] })
+        await message?.replyEmbed(reply)
+        await errorHandler(error, 'Command error', { message, interaction }, command, id)
     })
         .on('error', error => errorHandler(error, 'Client error'))
         .on('warn', warn => errorHandler(warn, 'Client warn'))
@@ -46,11 +47,11 @@ module.exports = (client) => {
      * sends the error message to the bot owner
      * @param {Error|string} error the error
      * @param {string} type the type of error
-     * @param {CommandoMessage} [message] the message
+     * @param {CommandInstances} [instances] the command instances
      * @param {Command} [command] the command
      * @param {string} [id] the error id to use
      */
-    async function errorHandler(error, type, message, command, id) {
+    async function errorHandler(error, type, { message, interaction }, command, id) {
         /** @type {TextChannel} */
         const errorsChannel = await client.channels.fetch('906740370304540702')
 
@@ -73,13 +74,16 @@ module.exports = (client) => {
                     .replace(/([\\]+)/g, '/')
             ).join('\n')
 
-            const { guild, channel, url, author } = message ?? {}
+            const { guild, channel } = (message || interaction) ?? {}
+            const author = (message?.author || interaction.user) ?? null
+            const url = message?.url ?? null
+
             let where = ''
-            if (message) {
+            if (message || interaction) {
                 if (guild) {
                     where = stripIndent`
                         At guild **${guild.name}** (${guild.id}), channel ${channel.toString()}.
-                        Please go to [this message](${url}) for more information.
+                        ${url ? `Please go to [this message](${url}) for more information.` : ''}
                     `
                 } else {
                     where = `In DMs with ${author.toString()} (${author.tag}).`
@@ -97,11 +101,12 @@ module.exports = (client) => {
                 ${where}
             `)
 
-            if (command) {
+            if (command && message) {
                 embed.addField('Command input', code(Util.escapeMarkdown(message.content).substr(0, 1018)))
             }
 
-            embed.addField(error.name + whatCommand + ': ' + error.message, code(files || 'No files.'))
+            const msg = (error.name + whatCommand + ': ' + error.message).split('Require stack:').shift()
+            embed.addField(msg, code(files || 'No files.'))
 
             await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] })
 

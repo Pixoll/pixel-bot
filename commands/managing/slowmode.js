@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
-const { myMs, channelDetails, timeDetails } = require('../../utils')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
+const { myMs, channelDetails, timeDetails, replyAll } = require('../../utils')
 const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
@@ -39,22 +39,43 @@ module.exports = class SlowmodeCommand extends Command {
                     type: ['duration', 'string'],
                     oneOf: ['off']
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'integer',
+                        name: 'rate-limit',
+                        description: 'The new channel\'s rate limit, in seconds.',
+                        required: true
+                    },
+                    {
+                        type: 'channel',
+                        channelTypes: ['guild-text'],
+                        name: 'channel',
+                        description: 'The channel to change its rate limit.'
+                    }
+                ]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {TextChannel} args.channel The channel to change the rate limit
      * @param {number|'off'} args.ratelimit The new rate limit
      */
-    async run(message, { channel, ratelimit }) {
-        ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
+    async run({ message, interaction }, { channel, ratelimit, rateLimit }) {
+        if (interaction) {
+            channel ??= interaction.channel
+            ratelimit = Math.abs(rateLimit)
+        } else {
+            ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
+        }
 
         if (channel.rateLimitPerUser === ratelimit) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The slowmode is already set to that value.'
             }))
         }
@@ -62,12 +83,12 @@ module.exports = class SlowmodeCommand extends Command {
         await channel.setRateLimitPerUser(ratelimit)
 
         if (ratelimit === 0) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'GREEN', emoji: 'check', description: `Disabled slowmode in ${channel.toString()}`
             }))
         }
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Changed slowmode in #${channel.name}`,

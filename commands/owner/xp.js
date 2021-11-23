@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { myMs, code, abcOrder } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -19,10 +19,10 @@ module.exports = class xpCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      */
-    async run(message) {
+    async run({ message }) {
         const fetched = await message.channel.messages.fetch({ before: message.id, limit: 1 })
         const { content } = fetched.first()
 
@@ -77,12 +77,12 @@ module.exports = class xpCommand extends Command {
                 return `- ${time} ${task}`
             }).join('\n')
 
-        await message.delete()
+        await message?.delete()
         const m = await message.say(`${week}\n${code(`!xp ${XP}\n${command}`)}`)
         await m.pin()
 
         const msgs = await message.channel.messages.fetch({ after: m.id })
         const target = msgs.filter(msg => msg.reference.messageId === m.id).first()
-        await target.delete()
+        await target?.delete()
     }
 }

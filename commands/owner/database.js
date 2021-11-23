@@ -1,7 +1,9 @@
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+/* eslint-disable no-unused-vars */
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { generateEmbed, basicEmbed, addDashes, removeDashes } = require('../../utils')
 const Database = require('../../schemas')
+/* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
 module.exports = class DatabaseCommand extends Command {
@@ -26,14 +28,14 @@ module.exports = class DatabaseCommand extends Command {
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {string} args.collection The collection to manage
      */
-    async run(message, { collection }) {
+    async run({ message }, { collection }) {
         const data = await Database[removeDashes(collection)].find({})
 
-        const array = [...data].map(({ _doc: val }) => {
+        const array = data.map(({ _doc: val }) => {
             delete val._id
             delete val.__v
             if (val.updatedAt) delete val.updatedAt
@@ -48,7 +50,7 @@ module.exports = class DatabaseCommand extends Command {
             }))
         }
 
-        await generateEmbed(message, array, {
+        await generateEmbed({ message }, array, {
             authorName: `Database: ${DBname}`,
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             title: 'Document',

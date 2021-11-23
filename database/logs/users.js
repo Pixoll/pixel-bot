@@ -59,8 +59,8 @@ module.exports = (client) => {
             const status = await isModuleEnabled(guild, 'audit-logs', 'users')
             if (!status) return
 
-            const hasUser = await guild.members.fetch(id).catch(() => null)
-            if (!hasUser) continue
+            const member = guild.members.cache.get(id)
+            if (!member) continue
 
             guild.queuedLogs.push(embed)
         }

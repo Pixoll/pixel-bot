@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { userDetails, noReplyInDMs, basicEmbed, embedColor } = require('../../utils')
+const { userDetails, noReplyInDMs, basicEmbed, embedColor, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -20,23 +20,31 @@ module.exports = class BannerCommand extends Command {
                 prompt: 'What user do you want to get their banner from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The user to get the banner from.'
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the banner from
      */
-    async run(message, { user }) {
-        if (!user) user = message.author
+    async run({ message, interaction }, { user }) {
+        if (interaction) user = user?.user ?? user ?? interaction.user
+        if (message) user ??= message.author
         user = await user.fetch()
 
         const banner = user.bannerURL({ dynamic: true, size: 2048 })
         if (!banner) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no banner on their profile.'
             }))
         }
@@ -55,6 +63,6 @@ module.exports = class BannerCommand extends Command {
                     .setURL(banner)
             )
 
-        await message.reply({ embeds: [embed], components: [row], ...noReplyInDMs(message) })
+        await replyAll({ message, interaction }, { embeds: [embed], components: [row] })
     }
 }

@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, Invite } = require('discord.js')
-const { timestamp } = require('../../utils')
+const { timestamp, basicEmbed, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -10,8 +10,8 @@ const { stripIndent } = require('common-tags')
 module.exports = class InviteInfoCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'inviteinfo',
-            aliases: ['invite-info'],
+            name: 'invite-info',
+            aliases: ['inviteinfo', 'invinfo'],
             group: 'misc',
             description: 'Displays information about an invite.',
             details: '`invite` may be a link, an invite codes, or a vanity code.',
@@ -24,17 +24,33 @@ module.exports = class InviteInfoCommand extends Command {
                 key: 'invite',
                 prompt: 'What invite do you want to get information from?',
                 type: 'invite'
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'string',
+                    name: 'invite',
+                    description: 'The invite to get info from.',
+                    required: true
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {Invite} args.invite The invite
      */
-    async run(message, { invite }) {
+    async run({ message, interaction }, { invite }) {
+        if (interaction) {
+            invite = await this.client.fetchInvite(invite).catch(() => null)
+            if (!invite) {
+                const embed = basicEmbed({ color: 'RED', emoji: 'cross', description: 'That invite is invalid.' })
+                return await interaction.editReply({ embeds: [embed] })
+            }
+        }
+
         const { guild, channel, url, inviter, presenceCount, memberCount, maxUses, expiresAt, temporary } = invite
 
         const embed = new MessageEmbed()
@@ -50,6 +66,6 @@ module.exports = class InviteInfoCommand extends Command {
             `)
             .setFooter(`Server id: ${guild.id}`)
 
-        await message.replyEmbed(embed)
+        await replyAll({ message, interaction }, embed)
     }
 }

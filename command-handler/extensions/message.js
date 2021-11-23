@@ -4,7 +4,7 @@ const {
 	Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels, MessageButton,
 	MessageActionRow
 } = require('discord.js')
-const { CommandoClient, StringResolvable, CommandoGuild, ClientGuildMember } = require('../typings')
+const { CommandoClient, StringResolvable, CommandoGuild } = require('../typings')
 const { oneLine, stripIndent } = require('common-tags')
 const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')
@@ -54,12 +54,6 @@ class CommandoMessage extends Message {
 		 * @type {CommandoGuild}
 		 */
 		this.guild
-
-		/**
-		 * The client member this message is for
-		 * @type {ClientGuildMember}
-		 */
-		this.clientMember = this.guild?.members.cache.get(this.client.user.id) || null
 
 		/**
 		 * Whether the message contains a command (even an unknown one)
@@ -170,13 +164,12 @@ class CommandoMessage extends Message {
 	 */
 	async run() {
 		// Checks if the client has permission to send messages
-		const clientPerms = this.clientMember?.permissionsIn(this.channel).serialize()
+		const clientPerms = this.guild?.me.permissionsIn(this.channel).serialize()
 		if (clientPerms && !clientPerms.SEND_MESSAGES) {
-			this.direct(stripIndent`
+			return await this.direct(stripIndent`
 				It seems like the bot cannot send messages in this channel: ${this.channel.toString()}
 				Please try in another channel, or contact the admins of that server to solve this issue.
 			`).catch(() => null)
-			return
 		}
 
 		// Obtain the member if we don't have it
@@ -191,33 +184,33 @@ class CommandoMessage extends Message {
 
 		// Make sure the command is usable in this context
 		if (this.command.dmOnly && this.guild) {
-			this.client.emit('commandBlock', this, 'dmOnly')
-			return this.command.onBlock(this, 'dmOnly')
+			this.client.emit('commandBlock', { message: this }, 'dmOnly')
+			return await this.command.onBlock({ message: this }, 'dmOnly')
 		}
 
 		// Make sure the command is usable in this context
 		if ((this.command.guildOnly || this.command.guildOwnerOnly) && !this.guild) {
-			this.client.emit('commandBlock', this, 'guildOnly')
-			return this.command.onBlock(this, 'guildOnly')
+			this.client.emit('commandBlock', { message: this }, 'guildOnly')
+			return await this.command.onBlock({ message: this }, 'guildOnly')
 		}
 
 		// Ensure the channel is a NSFW one if required
 		if (this.command.nsfw && !this.channel.nsfw) {
-			this.client.emit('commandBlock', this, 'nsfw')
-			return this.command.onBlock(this, 'nsfw')
+			this.client.emit('commandBlock', { message: this }, 'nsfw')
+			return await this.command.onBlock({ message: this }, 'nsfw')
 		}
 
 		// Ensure the user has permission to use the command
 		const isOwner = this.client.isOwner(this.author)
-		const hasPermission = this.command.hasPermission(this)
+		const hasPermission = this.command.hasPermission({ message: this })
 		if (!isOwner && hasPermission !== true) {
 			if (typeof hasPermission === 'string') {
-				this.client.emit('commandBlock', this, hasPermission)
-				return this.command.onBlock(this, hasPermission)
+				this.client.emit('commandBlock', { message: this }, hasPermission)
+				return await this.command.onBlock({ message: this }, hasPermission)
 			}
 			const data = { missing: hasPermission }
-			this.client.emit('commandBlock', this, 'userPermissions', data)
-			return this.command.onBlock(this, 'userPermissions', data)
+			this.client.emit('commandBlock', { message: this }, 'userPermissions', data)
+			return await this.command.onBlock({ message: this }, 'userPermissions', data)
 		}
 
 		// Ensure the client user has the required permissions
@@ -225,8 +218,8 @@ class CommandoMessage extends Message {
 			const missing = this.channel.permissionsFor(this.client.user).missing(this.command.clientPermissions)
 			if (missing.length > 0) {
 				const data = { missing }
-				this.client.emit('commandBlock', this, 'clientPermissions', data)
-				return this.command.onBlock(this, 'clientPermissions', data)
+				this.client.emit('commandBlock', { message: this }, 'clientPermissions', data)
+				return await this.command.onBlock({ message: this }, 'clientPermissions', data)
 			}
 		}
 
@@ -235,8 +228,8 @@ class CommandoMessage extends Message {
 		if (throttle && throttle.usages + 1 > this.command.throttling.usages) {
 			const remaining = (throttle.start + (this.command.throttling.duration * 1000) - Date.now()) / 1000
 			const data = { throttle, remaining }
-			this.client.emit('commandBlock', this, 'throttling', data)
-			return this.command.onBlock(this, 'throttling', data)
+			this.client.emit('commandBlock', { message: this }, 'throttling', data)
+			return await this.command.onBlock({ message: this }, 'throttling', data)
 		}
 
 		if (this.command.deprecated) {
@@ -270,22 +263,21 @@ class CommandoMessage extends Message {
 			}
 			args = collResult.values
 		}
-		if (!args) args = this.parseArgs()
+		args ??= this.parseArgs()
 		const fromPattern = Boolean(this.patternMatches)
 
 		// Run the command
 		if (throttle) throttle.usages++
 		try {
 			this.client.emit('debug', oneLine`
-				Running command "${this.command.groupId}:${this.command.memberName}" in channel "${this.channelId}".
-				Arguments: ${this.argString.trim() || 'None.'}
+				Running message command "${this.command.groupId}:${this.command.memberName}" in channel "${this.channelId}".
 			`)
 			await this.channel.sendTyping().catch(() => null)
-			const promise = this.command.run(this, args, fromPattern, collResult)
+			const promise = this.command.run({ message: this }, args, fromPattern, collResult)
 
-			this.client.emit('commandRun', this.command, promise, this, args, fromPattern, collResult)
+			this.client.emit('commandRun', this.command, promise, { message: this }, args, fromPattern, collResult)
 			const retVal = await promise
-			if (!(retVal instanceof Message || retVal instanceof Array || retVal === null || retVal === undefined)) {
+			if (!(retVal instanceof Message || Array.isArray(retVal) || retVal === null || retVal === undefined)) {
 				throw new TypeError(oneLine`
 					Command ${this.command.name}'s run() resolved with an unknown type
 					(${retVal !== null ? retVal && retVal.constructor ? retVal.constructor.name : typeof retVal : null}).
@@ -296,18 +288,13 @@ class CommandoMessage extends Message {
 
 			if (probability(2)) {
 				const { user, botInvite } = this.client
-
 				const embed = new MessageEmbed()
 					.setColor(embedColor)
-					.addField(
-						`Enjoying ${user.username}?`,
-						oneLine`
-							The please consider voting for it! It helps the bot to become more noticed
-							between other bots. And perhaps consider adding it to any of your own servers
-							as well!
-						`
-					)
-
+					.addField(`Enjoying ${user.username}?`, oneLine`
+						The please consider voting for it! It helps the bot to become more noticed
+						between other bots. And perhaps consider adding it to any of your own servers
+						as well!
+					`)
 				const vote = new MessageButton()
 					.setEmoji('👍')
 					.setLabel('Vote me')
@@ -318,19 +305,18 @@ class CommandoMessage extends Message {
 					.setLabel('Invite me')
 					.setStyle('LINK')
 					.setURL(botInvite)
-
 				const row = new MessageActionRow().addComponents(vote, invite)
-
 				await this.channel.send({ embeds: [embed], components: [row] }).catch(() => null)
 			}
 
 			return retVal
 		} catch (err) {
-			this.client.emit('commandError', this.command, err, this, args, fromPattern, collResult)
+			const message = await this.fetch().catch(() => null)
+			this.client.emit('commandError', this.command, err, { message }, args, fromPattern, collResult)
 			if (err instanceof FriendlyError) {
-				return this.reply(err.message)
+				return await this.reply(err.message)
 			} else {
-				return this.command.onError(err, this, args, fromPattern, collResult)
+				return await this.command.onError(err, { message }, args, fromPattern, collResult)
 			}
 		}
 	}
@@ -397,9 +383,9 @@ class CommandoMessage extends Message {
 	editResponse(response, { type, options }) {
 		if (!response) return this.respond({ type, options, fromEdit: true })
 
-		if (options.content instanceof Array) {
+		if (Array.isArray(options.content)) {
 			const promises = []
-			if (response instanceof Array) {
+			if (Array.isArray(response)) {
 				for (let i = 0; i < options.content.length; i++) {
 					if (response.length > i) promises.push(response[i].edit(`${options.content[i]}`/* , options */))
 					else promises.push(response[0].channel.send(`${options.content[i]}`))
@@ -412,8 +398,8 @@ class CommandoMessage extends Message {
 			}
 			return Promise.all(promises)
 		} else {
-			if (response instanceof Array) {
-				for (let i = response.length - 1; i > 0; i--) response[i].delete()
+			if (Array.isArray(response)) {
+				for (let i = response.length - 1; i > 0; i--) response[i]?.delete()
 				return response[0].edit(options)
 			} else {
 				return response.edit(options)
@@ -442,7 +428,7 @@ class CommandoMessage extends Message {
 	 * @return {Promise<Message>}
 	 */
 	say(content, options) {
-		if (!options && typeof content === 'object' && !(content instanceof Array)) {
+		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
 			content = ''
 		}
@@ -456,7 +442,7 @@ class CommandoMessage extends Message {
 	 * @return {Promise<Message>}
 	 */
 	direct(content, options) {
-		if (!options && typeof content === 'object' && !(content instanceof Array)) {
+		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
 			content = ''
 		}
@@ -471,7 +457,7 @@ class CommandoMessage extends Message {
 	 * @return {Promise<Message>}
 	 */
 	code(lang, content, options) {
-		if (!options && typeof content === 'object' && !(content instanceof Array)) {
+		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
 			content = ''
 		}
@@ -487,12 +473,12 @@ class CommandoMessage extends Message {
 	 * @return {Promise<Message>}
 	 */
 	embed(embed, content = '', options) {
-		if (!options && typeof content === 'object' && !(content instanceof Array)) {
+		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
 			content = ''
 		}
 		if (typeof options !== 'object') options = {}
-		options.embeds = embed instanceof Array ? embed : [embed]
+		options.embeds = Array.isArray(embed) ? embed : [embed]
 		return this.respond({ type: 'plain', content, options })
 	}
 
@@ -504,12 +490,12 @@ class CommandoMessage extends Message {
 	 * @return {Promise<Message>}
 	 */
 	replyEmbed(embed, content = '', options) {
-		if (!options && typeof content === 'object' && !(content instanceof Array)) {
+		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
 			content = ''
 		}
 		if (typeof options !== 'object') options = {}
-		options.embeds = embed instanceof Array ? embed : [embed]
+		options.embeds = Array.isArray(embed) ? embed : [embed]
 		return this.respond({ type: 'reply', content, options })
 	}
 
@@ -523,9 +509,9 @@ class CommandoMessage extends Message {
 		this.responses = {}
 		this.responsePositions = {}
 
-		if (responses instanceof Array) {
+		if (Array.isArray(responses)) {
 			for (const response of responses) {
-				const channel = (response instanceof Array ? response[0] : response).channel
+				const channel = (Array.isArray(response) ? response[0] : response).channel
 				const id = channelIdOrDM(channel)
 				if (!this.responses[id]) {
 					this.responses[id] = []
@@ -549,10 +535,10 @@ class CommandoMessage extends Message {
 			const responses = this.responses[id]
 			for (let i = this.responsePositions[id] + 1; i < responses.length; i++) {
 				const response = responses[i]
-				if (response instanceof Array) {
-					for (const resp of response) resp.delete()
+				if (Array.isArray(response)) {
+					for (const resp of response) resp?.delete()
 				} else {
-					response.delete()
+					response?.delete()
 				}
 			}
 		}

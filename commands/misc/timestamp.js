@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
-const { noReplyInDMs, timeDetails, timestamp } = require('../../utils')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
+const { noReplyInDMs, timeDetails, timestamp, basicEmbed, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const letters = ['t', 'T', 'd', 'D', 'f', 'F', 'R']
@@ -28,17 +28,36 @@ module.exports = class TimestampCommand extends Command {
                 type: ['date', 'duration'],
                 skipValidation: true,
                 default: 0
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'string',
+                    name: 'date',
+                    description: 'The date for the timestamp.'
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {number|Date} args.date The date for the timestamp
      */
-    async run(message, { date }) {
+    async run({ message, interaction }, { date }) {
+        if (interaction) {
+            const arg = this.argsCollector.args[0]
+            date = await arg.parse(date ?? 'now').catch(() => null) || null
+            if (!date) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.'
+                    })]
+                })
+            }
+        }
+
         if (typeof date === 'number') date += Date.now()
         if (date instanceof Date) date = date.getTime()
 
@@ -48,6 +67,6 @@ module.exports = class TimestampCommand extends Command {
             timestamps.push(`\`${string}\` ${string}`)
         }
 
-        await message.reply({ content: timestamps.join('\n'), ...noReplyInDMs(message) })
+        await replyAll({ message, interaction }, timestamps.join('\n'))
     }
 }

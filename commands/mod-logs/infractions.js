@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const { CommandoMessage } = require('../../command-handler/typings')
+const { Command } = require('../../command-handler')
+const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, userDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -21,30 +21,42 @@ module.exports = class InfractionsCommand extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get the infractions from?',
                 type: 'user'
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The user to check their infractions.',
+                    required: true
+                }]
+            }
         })
     }
 
     /**
      * Runs the command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the infractions from
      */
-    async run(message, { user }) {
-        const { guild } = message
+    async run({ message, interaction }, { user }) {
+        if (interaction) user = user.user ?? user
+
+        const { guild } = message || interaction
         const db = guild.database.moderations
 
-        const mods = await db.fetchMany({ user: { id: user.id } })
+        const mods = await db.fetchMany({ userId: user.id })
         if (mods.size === 0) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no infractions.'
             }))
         }
 
+        const intMsg = await interaction?.fetchReply()
+
         const filterMenu = new MessageActionRow().addComponents(
             new MessageSelectMenu()
-                .setCustomId(`${message.id}:menu`)
+                .setCustomId(`${(message || intMsg).id}:menu`)
                 .setMaxValues(1).setMinValues(1)
                 .setPlaceholder('Filter...')
                 .setOptions([
@@ -58,7 +70,7 @@ module.exports = class InfractionsCommand extends Command {
                 ])
         )
 
-        await generateEmbed(message, mods.toJSON(), {
+        await generateEmbed({ message, interaction }, mods.toJSON(), {
             authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             title: ' |  ID:',
