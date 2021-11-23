@@ -70,8 +70,8 @@ module.exports = class warnCommand extends Command {
             _id: docId(),
             type: 'warn',
             guild: guildId,
-            user: { id: user.id, tag: user.tag },
-            mod: { id: author.id, tag: author.tag },
+            userId: user.id,
+            userTag: user.tag,
             reason
         })
         this.client.emit('guildMemberWarn', guild, author, user, reason)

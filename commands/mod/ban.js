@@ -88,8 +88,10 @@ module.exports = class BanCommand extends Command {
             _id: docId(),
             type: 'ban',
             guild: guildId,
-            user: { id: user.id, tag: user.tag },
-            mod: { id: author.id, tag: author.tag },
+            userId: user.id,
+            userTag: user.tag,
+            modId: author.id,
+            modTag: author.tag,
             reason
         })
 

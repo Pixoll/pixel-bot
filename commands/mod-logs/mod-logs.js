@@ -13,7 +13,7 @@ module.exports = class ModLogsCommand extends Command {
             name: 'mod-logs',
             aliases: ['modlogs'],
             group: 'mod-logs',
-            description: 'Displays all moderator logs of the server of a specific user, or all if none is specified',
+            description: 'Displays all moderator logs of the server of a specific moderator, or all if none is specified',
             details: userDetails,
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],
@@ -21,10 +21,17 @@ module.exports = class ModLogsCommand extends Command {
             guildOnly: true,
             args: [{
                 key: 'user',
-                prompt: 'What user do you want to get the mod logs from?',
+                prompt: 'What moderator do you want to get the mod logs from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The moderator to check their mod logs.'
+                }]
+            }
         })
     }
 
@@ -34,20 +41,27 @@ module.exports = class ModLogsCommand extends Command {
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod logs from
      */
-    async run({ message }, { user }) {
-        const { guild } = message
+    async run({ message, interaction }, { user }) {
+        if (interaction) user &&= user.user ?? user
+
+        const { guild } = message || interaction
         const db = guild.database.moderations
 
-        const modLogs = await db.fetchMany(user ? { mod: { id: user.id } } : {})
+        const modLogs = await db.fetchMany(user ? { modId: user.id } : {})
         if (modLogs.size === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no moderation logs.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
+
+        const intMsg = await interaction?.fetchReply()
 
         const filterMenu = new MessageActionRow().addComponents(
             new MessageSelectMenu()
-                .setCustomId(`${message.id}:menu`)
+                .setCustomId(`${(message || intMsg).id}:menu`)
                 .setMaxValues(1).setMinValues(1)
                 .setPlaceholder('Filter...')
                 .setOptions([
@@ -63,7 +77,7 @@ module.exports = class ModLogsCommand extends Command {
 
         const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
 
-        await generateEmbed({ message }, modLogs.toJSON(), {
+        await generateEmbed({ message, interaction }, modLogs.toJSON(), {
             authorName: oneLine`
                 ${user ? `${user.username} has` : 'There\'s'}
                 ${pluralize('mod log', modLogs.size)}

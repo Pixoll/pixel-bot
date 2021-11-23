@@ -27,7 +27,9 @@ module.exports = class DelModLogCommand extends Command {
                 prompt: 'What is the id of the mod log you want to delete?',
                 type: 'string',
                 max: 12
-            }]
+            }],
+            deprecated: true,
+            replacing: 'mod-log'
         })
     }
 
@@ -38,7 +40,6 @@ module.exports = class DelModLogCommand extends Command {
      * @param {string} args.modlogId The mod log id
      */
     async run({ message }, { modlogId }) {
-        modlogId = modlogId.toLowerCase()
         const { guild } = message
         const db = guild.database.moderations
 

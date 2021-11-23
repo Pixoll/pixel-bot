@@ -1,15 +1,11 @@
 const { model, Schema } = require('mongoose')
 
-const schemaUser = {
-    id: String,
-    tag: String
-}
-
 const active = model('active', Schema({
     _id: String,
     type: String,
     guild: String,
-    user: schemaUser,
+    userId: String,
+    userTag: String,
     role: String,
     duration: Number
 }, { timestamps: true }), 'active')
@@ -45,8 +41,10 @@ const moderations = model('moderations', Schema({
     _id: String,
     type: String,
     guild: String,
-    user: schemaUser,
-    mod: schemaUser,
+    userId: String,
+    userTag: String,
+    modId: String,
+    modTag: String,
     reason: String,
     duration: String
 }, { timestamps: true }))

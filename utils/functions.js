@@ -4,12 +4,13 @@ const {
     AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
+const CGuildClass = require('../command-handler/extensions/guild')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent, oneLine } = require('common-tags')
 const { myMs, timestamp } = require('./custom-ms')
 const { version } = require('../package.json')
 const { moderations, active } = require('../schemas')
-const { permissions, CommandoGuild: CGuildClass } = require('../command-handler')
+const { permissions } = require('../command-handler/util')
 const { Module, AuditLog } = require('../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -917,14 +918,12 @@ async function pagedEmbed({ message, interaction }, data, template) {
         else msg = await message.reply(msgOptions)
     }
 
-    if (!msg) return
-
     if (data.total <= data.number && !data.components[0]) return
 
     let index = 0
     const collector = targetChan.createMessageComponentCollector({
         filter: async int => {
-            if ((msg || interaction).id !== int.message?.id) return false
+            if (msg.id !== int.message?.id) return false
             if (!int.isButton() && !int.isSelectMenu()) return false
             if (int.user.id !== author.id) {
                 await int.reply({
@@ -1117,11 +1116,10 @@ async function generateEmbed({ message, interaction }, array, data) {
                 /** @type {GuildChannel} */
                 const channel = key === 'channel' ? channels.resolve(item[key]) : null
 
-                const created = key === 'createdAt' ? `<t:${Math.trunc(item[key] * 1 / 1000)}>` : null
+                const created = key === 'createdAt' ? timestamp(item[key]) : null
                 const duration = key === 'duration' && Number(item[key]) ?
                     myMs(item[key], { long: true, length: 2, showAnd: true }) : null
-                const endsAt = key === 'endsAt' ?
-                    `<t:${Math.trunc(item[key] * 1 / 1000)}> (<t:${Math.trunc(item[key] * 1 / 1000)}:R>)` : null
+                const endsAt = key === 'endsAt' ? `${timestamp(item[key])} (${timestamp(item[key], 'R')})` : null
 
                 const docData = userStr || channel?.toString() || created || duration || endsAt || item[key]
 

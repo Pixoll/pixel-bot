@@ -37,7 +37,23 @@ module.exports = class ReasonCommand extends Command {
                     type: 'string',
                     max: 512
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'string',
+                        name: 'modlog-id',
+                        description: 'The id of the mod log to update.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The new reason of the mod log.',
+                        required: true
+                    }
+                ]
+            }
         })
     }
 
@@ -46,32 +62,45 @@ module.exports = class ReasonCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {string} args.modlogId The mod log id
-     * @param {number} args.reason The new reason
+     * @param {string} args.reason The new reason
      */
-    async run({ message }, { modlogId, reason }) {
-        const { guild } = message
+    async run({ message, interaction }, { modlogId, reason }) {
+        if (interaction && reason.length > 512) {
+            return await interaction.editReply({
+                embeds: [basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                })]
+            })
+        }
+
+        const { guild } = message || interaction
         const { moderations, active } = guild.database
 
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         const activeLog = await active.fetch(modlogId)
 
-        const confirm = await confirmButtons({ message }, 'update modlog reason', modlogId, { reason })
+        const confirm = await confirmButtons({ message, interaction }, 'update mod log reason', modlogId, { reason })
         if (!confirm) return
 
         await moderations.update(modLog, { reason })
         if (activeLog) await active.update(activeLog, { reason })
 
-        await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated reason for mod log \`${modlogId}\``,
             fieldValue: `**New reason:** ${reason}`
-        }))
+        })
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 }

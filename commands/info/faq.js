@@ -203,7 +203,7 @@ module.exports = class FaqCommand extends Command {
         const doc = faqData.first(item).pop()
         if (!doc) {
             const embed = basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That item is not valid inside the FAQ list.'
+                color: 'RED', emoji: 'cross', description: 'That item is invalid inside the FAQ list.'
             })
             await interaction?.editReply({ embeds: [embed] })
             await message?.replyEmbed(embed)

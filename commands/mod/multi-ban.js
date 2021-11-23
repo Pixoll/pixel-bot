@@ -98,7 +98,6 @@ module.exports = class MultiBanCommand extends Command {
     async run({ message }, { reason, members }) {
         const { guild, author, guildId } = message
         const manager = guild.members
-        const authorId = author.id
 
         const embed = n => basicEmbed({
             color: 'GOLD', emoji: 'loading', description: `Banned ${n}/${members.length} members...`
@@ -129,8 +128,10 @@ module.exports = class MultiBanCommand extends Command {
                 _id: docId(),
                 type: 'ban',
                 guild: guildId,
-                user: { id: user.id, tag: user.tag },
-                mod: { id: authorId, tag: author.tag },
+                userId: user.id,
+                userTag: user.tag,
+                modId: author.id,
+                modTag: author.tag,
                 reason
             })
 

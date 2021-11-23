@@ -34,6 +34,7 @@ const timeZones = new Collection([
     ['Asia/Dubai', 'Dubai'],
     ['Asia/Tehran', 'Iran'],
     ['Asia/Kabul', 'Afghanistan'],
+    ['Asia/Karachi', 'Pakistan'],
     ['Asia/Kolkata', 'India'],
     ['Asia/Bangkok', 'Thailand'],
     ['Asia/Jakarta', 'Western Indonesia'],
@@ -114,7 +115,7 @@ module.exports = class TimesCommand extends Command {
             if (!hour) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The hour you specified is not valid.'
+                        color: 'RED', emoji: 'cross', description: 'The hour you specified is invalid.'
                     })]
                 })
             }
@@ -122,7 +123,7 @@ module.exports = class TimesCommand extends Command {
             if (place && !cities.map(c => c.toLowerCase()).includes(place)) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The place you specified is not valid.'
+                        color: 'RED', emoji: 'cross', description: 'The place you specified is invalid.'
                     })]
                 })
             }

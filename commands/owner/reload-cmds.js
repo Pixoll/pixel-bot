@@ -84,7 +84,7 @@ module.exports = class ReloadCmdsCommand extends Command {
             case 'one': {
                 command.reload()
                 const { _slashToAPI, test } = command
-                const findCommand = cmd => cmd.name === _slashToAPI.name
+                const findCommand = cmd => cmd.name === (_slashToAPI || command).name
                 await guild.commands.fetch()
                 await application.commands.fetch()
                 const guildCommand = guild.commands.cache.find(findCommand)
@@ -94,7 +94,6 @@ module.exports = class ReloadCmdsCommand extends Command {
                 }
                 const clientCommand = application.commands.cache.find(findCommand)
                 if (clientCommand) await application.commands.edit(clientCommand.id, _slashToAPI)
-                else await application.commands.delete(clientCommand.id)
             }
         }
 

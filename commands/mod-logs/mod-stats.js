@@ -25,10 +25,17 @@ module.exports = class ModStatsCommand extends Command {
             guildOnly: true,
             args: [{
                 key: 'user',
-                prompt: 'What user do you want to get the statistics from?',
+                prompt: 'What moderator do you want to get the statistics from?',
                 type: 'user',
                 required: false
-            }]
+            }],
+            slash: {
+                options: [{
+                    type: 'user',
+                    name: 'user',
+                    description: 'The moderator to check their stats.'
+                }]
+            }
         })
     }
 
@@ -38,12 +45,15 @@ module.exports = class ModStatsCommand extends Command {
      * @param {object} args The arguments for the command
      * @param {User} args.user The user to get the mod stats from
      */
-    async run({ message }, { user }) {
-        const { guild, author } = message
+    async run({ message, interaction }, { user }) {
+        if (interaction) user = user?.user ?? user
+
+        const { guild } = message || interaction
+        const author = message?.author || interaction.user
         const db = guild.database.moderations
         user ??= author
 
-        const stats = await db.fetchMany({ mod: { id: user.id } })
+        const stats = await db.fetchMany({ modId: user.id })
 
         const pad = 10
         const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'
@@ -63,7 +73,8 @@ module.exports = class ModStatsCommand extends Command {
             .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        await message.replyEmbed(embed)
+        await interaction?.editReply({ embeds: [embed] })
+        await message?.replyEmbed(embed)
     }
 
     /**

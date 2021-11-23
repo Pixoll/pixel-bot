@@ -114,7 +114,7 @@ module.exports = class PollCommand extends Command {
      * or the message of the poll to end
      */
     async run(
-        { message, interaction }, { subCommand, channel, durationOrMsg, duration, message: msg, emojis, message_url }
+        { message, interaction }, { subCommand, channel, durationOrMsg, duration, message: msg, emojis, messageUrl }
     ) {
         const emojisArr = []
         if (interaction) {
@@ -148,7 +148,7 @@ module.exports = class PollCommand extends Command {
                         })]
                     })
                 }
-            } else if (!validURL(message_url)) {
+            } else if (!validURL(messageUrl)) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
                         color: 'RED', emoji: 'cross', description: 'That message url is invalid.'
@@ -165,7 +165,7 @@ module.exports = class PollCommand extends Command {
             case 'create':
                 return await this.create({ message, interaction }, channel, durationOrMsg, msg, emojisArr)
             case 'end':
-                return await this.end({ message, interaction }, channel, durationOrMsg, message_url)
+                return await this.end({ message, interaction }, channel, durationOrMsg, messageUrl)
         }
     }
 

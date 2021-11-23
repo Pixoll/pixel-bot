@@ -66,10 +66,10 @@ module.exports = class SlowmodeCommand extends Command {
      * @param {TextChannel} args.channel The channel to change the rate limit
      * @param {number|'off'} args.ratelimit The new rate limit
      */
-    async run({ message, interaction }, { channel, ratelimit, rate_limit }) {
+    async run({ message, interaction }, { channel, ratelimit, rateLimit }) {
         if (interaction) {
             channel ??= interaction.channel
-            ratelimit = Math.abs(rate_limit)
+            ratelimit = Math.abs(rateLimit)
         } else {
             ratelimit = typeof ratelimit === 'string' ? 0 : Math.trunc(ratelimit / 1000)
         }

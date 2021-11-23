@@ -14,7 +14,8 @@ module.exports = class BansCommand extends Command {
             description: 'Displays all the bans of the server.',
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
-            guildOnly: true
+            guildOnly: true,
+            slash: true
         })
     }
 
@@ -22,15 +23,18 @@ module.exports = class BansCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run({ message }) {
-        const { guild } = message
+    async run({ message, interaction }) {
+        const { guild } = message || interaction
 
         /** @type {Collection<string, GuildBan>} */
         const bans = await guild.bans.fetch().catch(() => null)
         if (!bans || bans.size === 0) {
-            return await message.replyEmbed(basicEmbed({
+            const embed = basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no bans in this server.'
-            }))
+            })
+            await interaction?.editReply({ embeds: [embed] })
+            await message?.replyEmbed(embed)
+            return
         }
 
         /** @type {GuildAuditLogs} */
@@ -53,7 +57,7 @@ module.exports = class BansCommand extends Command {
             })
         }
 
-        await generateEmbed({ message }, bansList.sort((a, b) =>
+        await generateEmbed({ message, interaction }, bansList.sort((a, b) =>
             abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
         ), {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,

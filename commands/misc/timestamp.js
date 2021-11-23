@@ -52,7 +52,7 @@ module.exports = class TimestampCommand extends Command {
             if (!date) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The date you specified is not valid.'
+                        color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.'
                     })]
                 })
             }

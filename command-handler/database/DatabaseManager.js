@@ -116,7 +116,7 @@ class DatabaseManager {
             const existing = this.cache.get(filter)
             if (existing) return existing
             const data = await this.schema.findById(filter)
-            this.cache.set(`${data._id}`, data)
+            if (data) this.cache.set(`${data._id}`, data)
             return data
         }
 

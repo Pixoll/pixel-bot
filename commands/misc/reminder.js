@@ -64,12 +64,11 @@ module.exports = class ReminderCommand extends Command {
     async run({ message, interaction }, { time, reminder }) {
         if (interaction) {
             const arg = this.argsCollector.args[0]
-
             time = await arg.parse(time).catch(() => null) || null
             if (!time) {
                 return await interaction.editReply({
                     embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The time you specified is not valid.'
+                        color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.'
                     })]
                 })
             }

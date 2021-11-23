@@ -4,7 +4,7 @@ const {
 	Util: { escapeMarkdown }, Message, MessageEmbed, User, MessageOptions, TextBasedChannels, MessageButton,
 	MessageActionRow
 } = require('discord.js')
-const { CommandoClient, StringResolvable, CommandoGuild, ClientGuildMember } = require('../typings')
+const { CommandoClient, StringResolvable, CommandoGuild } = require('../typings')
 const { oneLine, stripIndent } = require('common-tags')
 const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')

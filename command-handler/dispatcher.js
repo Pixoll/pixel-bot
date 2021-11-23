@@ -240,7 +240,7 @@ class CommandDispatcher {
 			for (const option of interaction.options.data) {
 				/** @param {option} opt */
 				function concat(opt) {
-					const name = opt.name.replace(/-/g, '_')
+					const name = removeDashes(opt.name)
 					if (name && [undefined, null].includes(opt.value)) {
 						options.subCommand = name
 					} else {
@@ -453,3 +453,29 @@ class CommandDispatcher {
 }
 
 module.exports = CommandDispatcher
+
+/**
+ * Removes dashes from the string and capitalizes the remaining strings
+ * @param {string} str The string to parse
+ */
+function removeDashes(str) {
+    if (!str) return
+    const arr = str.split('-')
+    const first = arr.shift()
+    const rest = arr.map(s => capitalize(s)).join('')
+    return first + rest
+}
+
+/**
+ * Capitalizes every word of a string.
+ * @param {string} str The string to capitalize.
+ */
+function capitalize(str) {
+    if (!str) return ''
+
+    const splitStr = str.toLowerCase().split(/ +/)
+    for (let i = 0; i < splitStr.length; i++) {
+        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
+    }
+    return splitStr.join(' ')
+}
