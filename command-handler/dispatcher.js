@@ -179,7 +179,7 @@ class CommandDispatcher {
 			return user.send(stripIndent`
 				I cannot use slash commands in ${channel.toString()}.
 				Please get in contact with one of the admins of **${guild.name}** to fix this issue.
-			`)
+			`).catch(() => null)
 		}
 
 		// Obtain the member if we don't have it
