@@ -175,11 +175,14 @@ class CommandDispatcher {
 		if (!command) return
 		const { groupId, memberName } = command
 
-		if (channel.type !== 'DM' && channel.permissionsFor(guild.me).missing('USE_APPLICATION_COMMANDS')) {
-			return user.send(stripIndent`
+		if (channel.type !== 'DM') {
+			const missingSlash = channel.permissionsFor(guild.me).missing('USE_APPLICATION_COMMANDS')
+			if (missingSlash.length !== 0) {
+				return await user.send(stripIndent`
 				I cannot use slash commands in ${channel.toString()}.
 				Please get in contact with one of the admins of **${guild.name}** to fix this issue.
 			`).catch(() => null)
+			}
 		}
 
 		// Obtain the member if we don't have it
@@ -466,11 +469,11 @@ module.exports = CommandDispatcher
  * @param {string} str The string to parse
  */
 function removeDashes(str) {
-    if (!str) return
-    const arr = str.split('-')
-    const first = arr.shift()
-    const rest = arr.map(s => capitalize(s)).join('')
-    return first + rest
+	if (!str) return
+	const arr = str.split('-')
+	const first = arr.shift()
+	const rest = arr.map(s => capitalize(s)).join('')
+	return first + rest
 }
 
 /**
@@ -478,11 +481,11 @@ function removeDashes(str) {
  * @param {string} str The string to capitalize.
  */
 function capitalize(str) {
-    if (!str) return ''
+	if (!str) return ''
 
-    const splitStr = str.toLowerCase().split(/ +/)
-    for (let i = 0; i < splitStr.length; i++) {
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
-    }
-    return splitStr.join(' ')
+	const splitStr = str.toLowerCase().split(/ +/)
+	for (let i = 0; i < splitStr.length; i++) {
+		splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
+	}
+	return splitStr.join(' ')
 }
