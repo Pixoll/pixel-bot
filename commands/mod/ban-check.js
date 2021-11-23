@@ -31,8 +31,7 @@ module.exports = class BanCheckCommand extends Command {
                     description: 'The user to check their ban.',
                     required: true
                 }]
-            },
-            test: true
+            }
         })
     }
 

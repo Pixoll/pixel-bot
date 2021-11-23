@@ -55,8 +55,7 @@ module.exports = class SoftBanCommand extends Command {
                         description: 'The reason of the soft-ban.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

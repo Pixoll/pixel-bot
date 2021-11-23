@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const {
     MessageEmbed, GuildMember, User, Role, MessageOptions, TextChannel, GuildChannel, Message, ColorResolvable,
-    AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu
+    AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
 const CGuildClass = require('../command-handler/extensions/guild')
@@ -48,7 +48,7 @@ function abcOrder(str1, str2) {
  * @param {string} [lang] The language to use for this block
  */
 function code(str, lang = '') {
-    return `\`\`\`${lang}\n${str}\n\`\`\``
+    return `\`\`\`${lang}\n${Util.escapeMarkdown(str)}\n\`\`\``
 }
 
 /**
@@ -1232,8 +1232,11 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     await interaction?.editReply({ components: [] })
 
     if (!pushed || pushed.customId === ids.no) {
-        if (sendCancelled) await replyAll({ message, interaction }, { content: 'Cancelled command.', components: [] })
-        else await interaction?.editReply({ components: [] })
+        if (sendCancelled) {
+            await replyAll({ message, interaction }, {
+                content: 'Cancelled command.', embeds: []
+            })
+        }
         return false
     }
 
@@ -1332,6 +1335,7 @@ module.exports = {
     basicEmbed,
     capitalize,
     code,
+    confirmButtons,
     commandInfo,
     compareArrays,
     customEmoji,
@@ -1353,7 +1357,6 @@ module.exports = {
     isValidRole,
     kick,
     memberException,
-    confirmButtons,
     mute,
     pagedEmbed,
     pluralize,

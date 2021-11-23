@@ -73,8 +73,7 @@ module.exports = class TempRoleCommand extends Command {
                         description: 'Why are you giving them the role.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

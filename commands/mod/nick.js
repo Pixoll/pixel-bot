@@ -54,8 +54,7 @@ module.exports = class NickCommand extends Command {
                         required: true
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

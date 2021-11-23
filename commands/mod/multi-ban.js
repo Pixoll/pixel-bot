@@ -100,8 +100,7 @@ module.exports = class MultiBanCommand extends Command {
                         required: true
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

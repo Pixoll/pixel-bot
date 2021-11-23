@@ -30,7 +30,8 @@ const client = new CommandoClient({
         'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES'
     ],
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
-    failIfNotExists: false
+    failIfNotExists: false,
+
 })
 
 const { registry } = client

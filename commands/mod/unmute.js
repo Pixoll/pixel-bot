@@ -49,8 +49,7 @@ module.exports = class UnmuteCommand extends Command {
                         description: 'The reason of the unmute.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

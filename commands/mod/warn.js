@@ -46,8 +46,7 @@ module.exports = class warnCommand extends Command {
                         required: true
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

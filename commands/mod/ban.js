@@ -52,8 +52,7 @@ module.exports = class BanCommand extends Command {
                         description: 'The reason of the ban.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

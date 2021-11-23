@@ -4,7 +4,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role, GuildMember, Collection } = require('discord.js')
 const {
-    basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument, replyAll
+    basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument, replyAll, confirmButtons
 } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
@@ -53,7 +53,7 @@ module.exports = class RoleCommand extends Command {
                     prompt: 'What roles do you want to toggle for that member?',
                     type: 'string',
                     validate: async (val, msg, arg) => {
-                        if (msg) {
+                        if (typeof msg.parseArgs === 'function') {
                             const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
                             if (sc !== 'toggle') return true
                         }
@@ -69,7 +69,7 @@ module.exports = class RoleCommand extends Command {
                         return valid.filter(b => b !== true).length !== array.length
                     },
                     parse: async (val, msg, arg) => {
-                        if (msg) {
+                        if (typeof msg.parseArgs === 'function') {
                             const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
                             if (sc !== 'toggle') return null
                         }
@@ -156,8 +156,7 @@ module.exports = class RoleCommand extends Command {
                         }]
                     },
                 ]
-            },
-            test: true
+            }
         })
     }
 
@@ -222,15 +221,26 @@ module.exports = class RoleCommand extends Command {
             }
         }
 
+        const confirmed = await confirmButtons({ message, interaction },
+            `toggle the ${role.name} role in all members and bots`
+        )
+        if (!confirmed) return
+
         /** @type {Collection<string, GuildMember>} */
-        const members = await message.guild.members.fetch().catch(() => null)
+        const members = await (message || interaction).guild.members.fetch().catch(() => null)
+
+        const embed = basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members and bots... Please be patient.'
+        })
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
         for (const [, { roles }] of members) {
             if (roles.cache.has(role.id)) await roles.remove(role)
             else await roles.add(role)
         }
 
-        await message.replyEmbed(basicEmbed({
+        await toDelete?.delete().catch(() => null)
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members and bots.`
         }))
     }
@@ -249,21 +259,25 @@ module.exports = class RoleCommand extends Command {
             }
         }
 
+        const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all bots`)
+        if (!confirmed) return
+
         /** @type {Collection<string, GuildMember>} */
-        const members = await message.guild.members.fetch().catch(() => null)
+        const members = await (message || interaction).guild.members.fetch().catch(() => null)
         const bots = members.filter(m => m.user.bot)
 
-        const toDelete = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all bots...'
-        }))
+        const embed = basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all bots... Please be patient.'
+        })
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
         for (const [, { roles }] of bots) {
             if (roles.cache.has(role.id)) await roles.remove(role)
             else await roles.add(role)
         }
 
-        await toDelete.delete(() => null)
-        await message.replyEmbed(basicEmbed({
+        await toDelete?.delete().catch(() => null)
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all bots.`
         }))
     }
@@ -282,21 +296,25 @@ module.exports = class RoleCommand extends Command {
             }
         }
 
+        const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all users`)
+        if (!confirmed) return
+
         /** @type {Collection<string, GuildMember>} */
-        const members = await message.guild.members.fetch().catch(() => null)
+        const members = await (message || interaction).guild.members.fetch().catch(() => null)
         const users = members.filter(m => !m.user.bot)
 
-        const toDelete = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members...'
-        }))
+        const embed = basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members... Please be patient.'
+        })
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
         for (const [, { roles }] of users) {
             if (roles.cache.has(role.id)) await roles.remove(role)
             else await roles.add(role)
         }
 
-        await toDelete.delete(() => null)
-        await message.replyEmbed(basicEmbed({
+        await toDelete?.delete().catch(() => null)
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members.`
         }))
     }
@@ -317,25 +335,30 @@ module.exports = class RoleCommand extends Command {
 
         const { roles, user } = member
         if (roles.cache.size === 0) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That member has no roles.'
             }))
         }
 
-        const botRole = message.guild.me.roles.highest
+        const confirmed = await confirmButtons({ message, interaction }, `remove all roles from ${member.toString()}`)
+        if (!confirmed) return
 
-        const toDelete = await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Removing all roles...'
-        }))
+        const { guild, guildId } = message || interaction
+        const botRole = guild.me.roles.highest
+
+        const embed = basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Removing all roles... Please be patient.'
+        })
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
         const memberRoles = roles.cache.filter(r => {
-            if (r.id === message.guildId) return false
+            if (r.id === guildId) return false
             return !r.managed && botRole.comparePositionTo(r) > 0
         })
         for (const [, role] of memberRoles) await roles.remove(role)
 
-        await toDelete.delete(() => null)
-        await message.replyEmbed(basicEmbed({
+        await toDelete?.delete().catch(() => null)
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Removed every role from ${user.toString()} (${user.tag}).`
         }))
     }
@@ -367,7 +390,7 @@ module.exports = class RoleCommand extends Command {
         const doesntHas = roles.filter(r => !_roles.cache.has(r.id))
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling all roles...'
+            color: 'GOLD', emoji: 'loading', description: 'Toggling the roles... Please be patient.'
         })
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 

@@ -4,6 +4,7 @@ const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { ModuleSchema } = require('../../schemas/types')
+const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -45,13 +46,11 @@ module.exports = class ModulesCommand extends Command {
         super(client, {
             name: 'modules',
             group: 'utility',
-            description: stripIndent`
-                Check the status of all available modules and sub-modules.
-                Use the \`module toggle\` command to toggle a module or sub-module.
-            `,
+            description: 'Check the status of all available modules and sub-modules.',
             userPermissions: ['MANAGE_MESSAGES'],
             guarded: true,
-            guildOnly: true
+            guildOnly: true,
+            slash: true
         })
     }
 
@@ -59,8 +58,8 @@ module.exports = class ModulesCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      */
-    async run({ message }) {
-        const { guild } = message
+    async run({ message, interaction }) {
+        const { guild } = message || interaction
 
         const data = await guild.database.modules.fetch()
         const patch = patchData(data)
@@ -73,7 +72,7 @@ module.exports = class ModulesCommand extends Command {
         // **>** **Automatic moderation:** ${autoMod}
         // **>** **Chat filter:** ${chatFilter}
 
-        const disabled = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
@@ -97,6 +96,6 @@ module.exports = class ModulesCommand extends Command {
             `)
             .setTimestamp()
 
-        await message.replyEmbed(disabled)
+        await replyAll({ message, interaction }, embed)
     }
 }

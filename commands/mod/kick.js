@@ -53,8 +53,7 @@ module.exports = class KickCommand extends Command {
                         description: 'The reason of the kick.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

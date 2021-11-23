@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -16,12 +16,16 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        const user = await sticker.fetchUser()
+        /** @type {User} */
+        const user = await sticker.fetchUser().catch(() => null)
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor('Created sticker', guild.iconURL({ dynamic: true }))
-            .setDescription(`**${user.toString()} added a sticker:** ${name}`)
+            .setDescription(user ?
+                `**${user.toString()} added a sticker:** ${name}` :
+                `**Added a sticker:** ${name}`
+            )
             .addField('Information', stripIndent`
                 **Related emoji:** ${tags.map(s => `:${s}:`).join(' ')}
                 **Description:** ${description || 'No description.'}

@@ -49,8 +49,7 @@ module.exports = class UnbanCommand extends Command {
                         description: 'The reason of the unban.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

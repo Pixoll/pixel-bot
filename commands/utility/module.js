@@ -4,7 +4,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, capitalize, getArgument, addDashes, removeDashes } = require('../../utils')
+const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -91,7 +91,51 @@ module.exports = class ModuleCommand extends Command {
                     oneOf: auditLogs,
                     required: false
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'diagnose',
+                        description: 'Diagnose a module or sub-module.',
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'module',
+                                description: 'The module to diagnose.',
+                                required: true,
+                                choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m }))
+                            },
+                            {
+                                type: 'string',
+                                name: 'sub-module',
+                                description: 'The sub-module to diagnose. Only usable if "module" is "Audit Logs".',
+                                choices: auditLogs.map(m => ({ name: capitalize(m), value: m }))
+                            }
+                        ]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'toggle',
+                        description: 'Toggle a module or sub-module on/off.',
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'module',
+                                description: 'The module to toggle.',
+                                required: true,
+                                choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m }))
+                            },
+                            {
+                                type: 'string',
+                                name: 'sub-module',
+                                description: 'The sub-module to toggle. Only usable if "module" is "Audit Logs".',
+                                choices: auditLogs.map(m => ({ name: capitalize(m), value: m }))
+                            }
+                        ]
+                    }
+                ]
+            }
         })
     }
 
@@ -103,33 +147,33 @@ module.exports = class ModuleCommand extends Command {
      * @param {Module} args.module The module to toggle or diagnose
      * @param {AuditLog} args.subModule The sub-module to toggle or diagnose
      */
-    async run({ message }, { subCommand, module, subModule }) {
+    async run({ message, interaction }, { subCommand, module, subModule }) {
         subCommand = subCommand.toLowerCase()
         module = module.toLowerCase()
-        subModule = subModule?.toLowerCase()
         if (module !== 'audit-logs') subModule = null
+        subModule &&= subModule.toLowerCase()
 
-        const { guild } = message
+        const { guild } = message || interaction
         this.db = guild.database.modules
 
         const data = await this.db.fetch()
 
         switch (subCommand) {
             case 'diagnose':
-                return await this.diagnose(message, data, module, subModule)
+                return await this.diagnose({ message, interaction }, data, module, subModule)
             case 'toggle':
-                return await this.toggle(message, data, module, subModule)
+                return await this.toggle({ message, interaction }, data, module, subModule)
         }
     }
 
     /**
      * The `diagnose` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {ModuleSchema} data The modules and sub-modules data
      * @param {Module} module The module to diagnose
      * @param {AuditLog} subModule The sub-module to diagnose
      */
-    async diagnose(message, data, module, subModule) {
+    async diagnose({ message, interaction }, data, module, subModule) {
         const patch = patchData(data)
 
         let part1 = patch[removeDashes(module)]
@@ -142,37 +186,37 @@ module.exports = class ModuleCommand extends Command {
         /** @type {boolean} */
         const isEnabled = subModule ? patch[removeDashes(module)][removeDashes(subModule)] : part1
 
-        const { guild } = message
+        const { guild } = message || interaction
         const type = subModule ? 'sub-module' : 'module'
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`Status of ${type}: ${subModule || module}`, guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Status:** ${isEnabled ? 'Enabled' : 'Disabled'}
-                ${subModule ? `**>** **Parent module:** ${capitalize(module)}` : ''}
-                ${subModule ? `**>** **Parent module status:** ${part1 ? 'Enabled' : 'Disabled'}` : ''}
+                **Status:** ${isEnabled ? 'Enabled' : 'Disabled'}
+                ${subModule ? `**Parent module:** ${capitalize(module)}` : ''}
+                ${subModule ? `**Parent module status:** ${part1 ? 'Enabled' : 'Disabled'}` : ''}
             `)
             .setTimestamp()
 
-        await message.replyEmbed(diagnose)
+        await replyAll({ message, interaction }, diagnose)
     }
 
     /**
      * The `toggle` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {ModuleSchema} data The modules and sub-modules data
      * @param {Module} module The module to toggle
      * @param {AuditLog} subModule The sub-module to toggle
      */
-    async toggle(message, data, module, subModule) {
+    async toggle({ message, interaction }, data, module, subModule) {
         if (message && module === 'audit-logs' && !subModule) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
             if (cancelled) return
             subModule = value.toLowerCase()
         }
 
-        const { guildId, guild } = message
+        const { guildId, guild } = message || interaction
 
         const patch = { guild: guildId, ...patchData(data) }
         if (!subModule) patch[removeDashes(module)] = !patch[removeDashes(module)]
@@ -187,7 +231,7 @@ module.exports = class ModuleCommand extends Command {
 
         this.client.emit('moduleStatusChange', guild, target, status)
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the ${type} \`${target}\``,

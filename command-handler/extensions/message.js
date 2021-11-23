@@ -311,11 +311,12 @@ class CommandoMessage extends Message {
 
 			return retVal
 		} catch (err) {
-			this.client.emit('commandError', this.command, err, { message: this }, args, fromPattern, collResult)
+			const message = await this.fetch().catch(() => null)
+			this.client.emit('commandError', this.command, err, { message }, args, fromPattern, collResult)
 			if (err instanceof FriendlyError) {
 				return await this.reply(err.message)
 			} else {
-				return await this.command.onError(err, { message: this }, args, fromPattern, collResult)
+				return await this.command.onError(err, { message }, args, fromPattern, collResult)
 			}
 		}
 	}

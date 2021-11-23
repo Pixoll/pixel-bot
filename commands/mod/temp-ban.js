@@ -67,8 +67,7 @@ module.exports = class TempBanCommand extends Command {
                         description: 'The reason of the ban.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 

@@ -21,7 +21,10 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor('Created emoji', guild.iconURL({ dynamic: true }))
-            .setDescription(`**${author.toString()} added an emoji:** ${name}`)
+            .setDescription(author ?
+                `**${author.toString()} added an emoji:** ${name}` :
+                `**Added emoji:** ${name}`
+            )
             .setThumbnail(url)
             .setFooter(`Emoji id: ${id}`)
             .setTimestamp()

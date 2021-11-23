@@ -61,8 +61,7 @@ module.exports = class MuteCommand extends Command {
                         description: 'The reason of the mute.'
                     }
                 ]
-            },
-            test: true
+            }
         })
     }
 
