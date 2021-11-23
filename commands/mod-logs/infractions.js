@@ -75,7 +75,7 @@ module.exports = class InfractionsCommand extends Command {
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             title: ' |  ID:',
             keyTitle: { prefix: 'type' },
-            keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'user'],
+            keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'userId', 'userTag'],
             useDocId: true,
             components: [filterMenu]
         })

@@ -82,7 +82,7 @@ module.exports = class ModLogsCommand extends Command {
             authorIconURL: avatarURL,
             title: ' |  Id:',
             keyTitle: { prefix: 'type' },
-            keysExclude: ['updatedAt', 'guild', user ? 'mod' : null],
+            keysExclude: ['updatedAt', 'guild', user ? ('modId', 'modTag') : null],
             useDocId: true,
             components: [filterMenu]
         })

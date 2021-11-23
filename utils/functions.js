@@ -1122,7 +1122,8 @@ async function generateEmbed({ message, interaction }, array, data) {
 
                 const propName = capitalize(key.replace('createdAt', 'date'))
 
-                const userStr = ['mod', 'user'].includes(key) ? `<@${item[key].id}> ${item[key].tag}` : null
+                const userStr = key === 'userId' ? `<@${item.userId}> ${item.userTag}` : null
+                const modStr = key === 'modId' ? `<@${item.modId}> ${item.modTag}` : null
                 /** @type {GuildChannel} */
                 const channel = key === 'channel' ? channels.resolve(item[key]) : null
 
@@ -1131,7 +1132,7 @@ async function generateEmbed({ message, interaction }, array, data) {
                     myMs(item[key], { long: true, length: 2, showAnd: true }) : null
                 const endsAt = key === 'endsAt' ? `${timestamp(item[key])} (${timestamp(item[key], 'R')})` : null
 
-                const docData = userStr || channel?.toString() || created || duration || endsAt || item[key]
+                const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key]
 
                 value.push(`**>** **${propName}:** ${docData}`)
             }
