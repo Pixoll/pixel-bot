@@ -10,9 +10,6 @@ const { embedColor, customEmoji } = require('../../utils')
  * @param {CommandoClient} client
  */
 module.exports = async (client) => {
-    /** @type {TextChannel} */
-    const channel = await client.channels.fetch('906565308381286470')
-
     /**
      * sends info of a guild
      * @param {ColorResolvable} color the color of the embed
@@ -20,6 +17,9 @@ module.exports = async (client) => {
      * @param {CommandoGuild} guild the guild to get info of
      */
     async function guildInfo(color, message, guild) {
+        /** @type {TextChannel} */
+        const channel = await client.channels.fetch('906565308381286470')
+
         const { ownerId, name, id } = guild
         const owner = await guild.fetchOwner()
 
@@ -92,10 +92,5 @@ module.exports = async (client) => {
     client.on('guildDelete', async guild => {
         client.emit('debug', 'The bot has left', guild.name)
         await guildInfo('RED', 'The bot has left a guild', guild)
-    })
-
-    client.on('guildUnavailable', async guild => {
-        client.emit('debug', 'The guild', guild.name, 'has become unavailable')
-        await guildInfo('GOLD', 'A guild has become unavailable', guild)
     })
 }
