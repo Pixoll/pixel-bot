@@ -76,7 +76,7 @@ module.exports = class HelpCommand extends Command {
                     }
                     if (c.deprecated) str = `~~\`${str.replace(/`/g, '')}\`~~`
                     return str
-                }).sort().join(' ')
+                }).sort().join(', ')
                 commandList.push({ name, value: list })
             }
 
@@ -140,7 +140,7 @@ module.exports = class HelpCommand extends Command {
                         🔹 **Reaction/Button roles:** up to 10 roles per message.
                     `)
                     .addField('Upcoming features', stripIndent`
-                        🔹 **Slash commands:** ETA ~2 months.
+                        🔹 **Slash commands:** ETA <1 month.
                         🔹 **Tickets system:** ETA 2-3 months.
                         🔹 **Giveaways system:** ETA 2-3 months.
                         🔹 **Chat filtering:** ETA 4-5 months.

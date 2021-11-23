@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { docId, basicEmbed, userException, confirmButtons } = require('../../utils')
+const { docId, basicEmbed, userException, confirmButtons, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -30,7 +30,24 @@ module.exports = class warnCommand extends Command {
                     type: 'string',
                     max: 512
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'user',
+                        name: 'member',
+                        description: 'The member to warn.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the warn.',
+                        required: true
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -41,28 +58,46 @@ module.exports = class warnCommand extends Command {
      * @param {GuildMember} args.member The member to warn
      * @param {string} args.reason The reason of the warn
      */
-    async run({ message }, { member, reason }) {
-        const { guild, author, guildId } = message
+    async run({ message, interaction }, { member, reason }) {
+        if (interaction) {
+            if (!(member instanceof GuildMember)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    })]
+                })
+            }
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guild, guildId } = message
+        const author = message?.author || interaction.user
         const { user } = member
 
         const uExcept = userException(user, author, this)
-        if (uExcept) return await message.replyEmbed(uExcept)
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
 
         if (user.bot) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'You can\'t warn a bot.'
             }))
         }
 
-        const confirm = await confirmButtons({ message }, 'warn', user, { reason })
-        if (!confirm) return
+        const confirmed = await confirmButtons({ message, interaction }, 'warn', user, { reason })
+        if (!confirmed) return
 
         await user.send(basicEmbed({
             color: 'GOLD',
             fieldName: `You have been warned on ${guild.name}`,
             fieldValue: stripIndent`
                 **Reason:** ${reason}
-                **Moderator:** ${author.toString()}
+                **Moderator:** ${author.toString()} ${author.tag}
             `
         })).catch(() => null)
 
@@ -76,7 +111,7 @@ module.exports = class warnCommand extends Command {
         })
         this.client.emit('guildMemberWarn', guild, author, user, reason)
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been warned`,

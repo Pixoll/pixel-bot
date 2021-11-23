@@ -226,12 +226,14 @@ function noReplyInDMs(msg) {
  * Replies to the corresponding instances
  * @param {CommandInstances} instances The instances to reply
  * @param {MessageOptions|string|MessageEmbed} options The options of the message
+ * @returns {Promise<?Message<boolean>>}
  */
 async function replyAll({ message, interaction }, options) {
     if (options instanceof MessageEmbed) options = { embeds: [options] }
     if (typeof options === 'string') options = { content: options }
-    await interaction?.editReply(options)
-    await message?.reply({ ...options, ...noReplyInDMs(message) })
+    if (interaction) return await interaction.editReply(options)
+    if (message) return await message.reply({ ...options, ...noReplyInDMs(message) })
+    return null
 }
 
 /**
@@ -627,7 +629,7 @@ function validURL(str) {
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
         '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
 
-    return !!pattern.test(str)
+    return pattern.test(str)
 }
 
 /**
@@ -1230,7 +1232,8 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     await interaction?.editReply({ components: [] })
 
     if (!pushed || pushed.customId === ids.no) {
-        await replyAll({ message, interaction }, 'Cancelled command.')
+        if (sendCancelled) await replyAll({ message, interaction }, { content: 'Cancelled command.', components: [] })
+        else await interaction?.editReply({ components: [] })
         return false
     }
 

@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { memberDetails, reasonDetails, basicEmbed, confirmButtons } = require('../../utils')
+const { memberDetails, reasonDetails, basicEmbed, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -34,7 +34,23 @@ module.exports = class UnmuteCommand extends Command {
                     max: 512,
                     default: 'No reason given.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'user',
+                        name: 'member',
+                        description: 'The member to unmute.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the unmute.'
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -45,14 +61,33 @@ module.exports = class UnmuteCommand extends Command {
      * @param {GuildMember} args.member The member to unmute
      * @param {string} args.reason The reason of the unmute
      */
-    async run({ message }, { member, reason }) {
-        const { guild, author } = message
+    async run({ message, interaction }, { member, reason }) {
+        if (interaction) {
+            if (!(member instanceof GuildMember)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    })]
+                })
+            }
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guild } = message || interaction
+        const author = message?.author || interaction.user
         const { active, setup } = guild.database
         const { user, roles } = member
 
         const data = await setup.fetch()
         if (!data || !data.mutedRole) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
@@ -62,13 +97,13 @@ module.exports = class UnmuteCommand extends Command {
         const role = await guild.roles.fetch(data.mutedRole)
 
         if (!roles.cache.has(role.id)) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is not muted.'
             }))
         }
 
-        const confirm = await confirmButtons({ message }, 'unmute', member.user, { reason })
-        if (!confirm) return
+        const confirmed = await confirmButtons({ message, interaction }, 'unmute', member.user, { reason })
+        if (!confirmed) return
 
         await roles.remove(role)
         this.client.emit('guildMemberUnmute', guild, author, user, reason)
@@ -76,7 +111,7 @@ module.exports = class UnmuteCommand extends Command {
         const mute = await active.fetch({ type: 'mute', user: { id: user.id } })
         if (mute) await active.delete(mute)
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been unmuted`,

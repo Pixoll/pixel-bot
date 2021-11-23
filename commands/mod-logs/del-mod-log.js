@@ -50,8 +50,8 @@ module.exports = class DelModLogCommand extends Command {
             }))
         }
 
-        const confirm = await confirmButtons({ message }, 'delete modlog', modlogId)
-        if (!confirm) return
+        const confirmed = await confirmButtons({ message }, 'delete modlog', modlogId)
+        if (!confirmed) return
         await db.delete(modLog)
 
         return await message.replyEmbed(basicEmbed({

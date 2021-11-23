@@ -85,8 +85,8 @@ module.exports = class ReasonCommand extends Command {
 
         const activeLog = await active.fetch(modlogId)
 
-        const confirm = await confirmButtons({ message, interaction }, 'update mod log reason', modlogId, { reason })
-        if (!confirm) return
+        const confirmed = await confirmButtons({ message, interaction }, 'update mod log reason', modlogId, { reason })
+        if (!confirmed) return
 
         await moderations.update(modLog, { reason })
         if (activeLog) await active.update(activeLog, { reason })

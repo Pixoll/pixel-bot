@@ -20,7 +20,7 @@ module.exports = (client) => {
             .setColor('RED')
             .setDescription(stripIndent`
 				${customEmoji('cross')} **An unexpected error happened**
-				Please contact ${owner.toString()} (${owner.tag}), or join the [support server](${serverInvite}).
+				Please contact ${owner.toString()} (${owner.tag}) by joining the [support server](${serverInvite}).
 			`)
             .addField('Please send this information as well', stripIndent`
                 **Type:** ${error.name}
@@ -109,7 +109,6 @@ module.exports = (client) => {
             embed.addField(msg, code(files || 'No files.'))
 
             await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] })
-            return
 
             if (!files) return
 

@@ -20,7 +20,7 @@ module.exports = (client) => {
 
         /** @type {GuildAuditLogs} */
         const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-        const kickLog = kickLogs.entries.first()
+        const kickLog = kickLogs?.entries.first()
         if (!kickLog || kickLog.action !== 'MEMBER_KICK') return
 
         const { executor, reason, target } = kickLog
@@ -42,7 +42,7 @@ module.exports = (client) => {
 
     client.on('guildBanAdd', async banLog => {
         if (!banLog.guild.available) return
-        await banLog.fetch().catch(() => null)
+        banLog = await banLog.fetch().catch(() => null)
         if (!banLog) return
 
         const { user, guild, reason } = banLog
@@ -52,7 +52,7 @@ module.exports = (client) => {
 
         /** @type {GuildAuditLogs} */
         const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-        const banLog2 = banLogs.entries.first()
+        const banLog2 = banLogs?.entries.first()
 
         let moderator
         if (banLog2?.action === 'MEMBER_BAN_ADD' && banLog2?.target.id === user.id) {
@@ -77,7 +77,7 @@ module.exports = (client) => {
 
     client.on('guildBanRemove', async unbanLog => {
         if (!unbanLog.guild.available) return
-        await unbanLog.fetch().catch(() => null)
+        unbanLog = await unbanLog.fetch().catch(() => null)
         if (!unbanLog) return
 
         const { user, guild } = unbanLog
@@ -87,7 +87,7 @@ module.exports = (client) => {
 
         /** @type {GuildAuditLogs} */
         const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
-        const unbanLog2 = unbanLogs.entries.first()
+        const unbanLog2 = unbanLogs?.entries.first()
 
         let reason, moderator
         if (unbanLog2?.action === 'MEMBER_BAN_REMOVE' && unbanLog2?.target.id === user.id) {

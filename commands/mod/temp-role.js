@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role, GuildMember } = require('discord.js')
 const {
-    memberDetails, timeDetails, roleDetails, reasonDetails, timestamp, isValidRole, getArgument
+    memberDetails, timeDetails, roleDetails, reasonDetails, timestamp, isValidRole, getArgument, replyAll
 } = require('../../utils')
 const { basicEmbed, docId } = require('../../utils')
 const { stripIndent } = require('common-tags')
@@ -17,13 +17,18 @@ module.exports = class TempRoleCommand extends Command {
             aliases: ['temprole'],
             group: 'mod',
             description: 'Assign a role that persists for a limited time.',
-            details: `${memberDetails()}\n${timeDetails('time')}\n${roleDetails()}\n${reasonDetails()}`,
-            format: 'temprole [member] [duration] [role] <reason>',
-            examples: ['temprole Pixoll 1d Moderator'],
+            details: `${roleDetails()}\n${memberDetails()}\n${timeDetails('time')}\n${reasonDetails()}`,
+            format: 'temprole [role] [member] [duration] <reason>',
+            examples: ['temprole Moderator Pixoll 1d'],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
             guildOnly: true,
             args: [
+                {
+                    key: 'role',
+                    prompt: 'What role would you want to give then?',
+                    type: 'role'
+                },
                 {
                     key: 'member',
                     prompt: 'What member do you want to give the role?',
@@ -35,18 +40,41 @@ module.exports = class TempRoleCommand extends Command {
                     type: ['date', 'duration']
                 },
                 {
-                    key: 'role',
-                    prompt: 'What role would you want to give then?',
-                    type: 'role'
-                },
-                {
                     key: 'reason',
                     prompt: 'Why are you\'re giving them the role?',
                     type: 'string',
                     max: 512,
                     default: 'No reason given.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'role',
+                        name: 'role',
+                        description: 'The role to give.',
+                        required: true
+                    },
+                    {
+                        type: 'user',
+                        name: 'member',
+                        description: 'The member to give the role.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'duration',
+                        description: 'For how long they should have the role.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'Why are you giving them the role.'
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -59,7 +87,41 @@ module.exports = class TempRoleCommand extends Command {
      * @param {Role} args.role The role to give
      * @param {string} args.reason The reason
      */
-    async run({ message }, { member, duration, role, reason }) {
+    async run({ message, interaction }, { member, duration, role, reason }) {
+        if (interaction) {
+            if (!isValidRole(await interaction.fetchReply(), role)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid role to use.'
+                    })]
+                })
+            }
+            if (!(member instanceof GuildMember)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    })]
+                })
+            }
+            const arg = this.argsCollector.args[1]
+            duration = await arg.parse(duration).catch(() => null) || null
+            if (!duration) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    })]
+                })
+            }
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
         if (typeof duration === 'number') duration = duration + Date.now()
         if (duration instanceof Date) duration = duration.getTime()
 
@@ -71,11 +133,12 @@ module.exports = class TempRoleCommand extends Command {
             }
         }
 
-        const { guild, guildId, author } = message
+        const { guild, guildId } = message || interaction
+        const author = message?.author || interaction.user
         const { user, roles } = member
 
         if (roles.cache.has(role.id)) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That member already has that role.'
             }))
         }
@@ -90,7 +153,7 @@ module.exports = class TempRoleCommand extends Command {
                     fieldValue: stripIndent`
                         **Expires:** ${timestamp(duration, 'R')}
                         **Reason:** ${reason}
-                        **Moderator:** ${author.toString()}
+                        **Moderator:** ${author.toString()} ${author.tag}
                     `
                 })]
             }).catch(() => null)
@@ -106,7 +169,7 @@ module.exports = class TempRoleCommand extends Command {
             duration
         })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Added role \`${role.name}\` to ${user.tag}`,

@@ -73,7 +73,7 @@ module.exports = class WhoIsCommand extends Command {
         if (member) {
             if (member.presence) {
                 for (const { type, name, state, details, url, timestamps } of member.presence.activities) {
-                    const status = details && !!state ? `${details}\n${state}` : details
+                    const status = details && state ? `${details}\n${state}` : details
                     let times = ''
                     if (timestamps) {
                         if (!timestamps.end) times = `Started ${timestamp(timestamps.start, 'R')}`
@@ -85,7 +85,7 @@ module.exports = class WhoIsCommand extends Command {
                         }
                     }
 
-                    if (type === 'CUSTOM' && !!state) userInfo.addField('Custom status:', state)
+                    if (type === 'CUSTOM' && state) userInfo.addField('Custom status:', state)
                     if (type === 'STREAMING') userInfo.addField(`Streaming ${name}`, url)
                     if (!['COMPETING', 'CUSTOM'].includes(type)) {
                         userInfo.addField(

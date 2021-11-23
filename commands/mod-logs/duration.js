@@ -102,10 +102,10 @@ module.exports = class DurationCommand extends Command {
         /** @type {string} */
         const longTime = myMs(duration - Date.now(), { long: true })
 
-        const confirm = await confirmButtons(
+        const confirmed = await confirmButtons(
             { message, interaction }, 'update mod log duration', modlogId, { duration: longTime }
         )
-        if (!confirm) return
+        if (!confirmed) return
 
         await moderations.update(modLog, { duration: longTime })
         await active.update(activeLog, { duration })

@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { docId, isMod, basicEmbed, memberDetails, confirmButtons } = require('../../utils')
+const { docId, isMod, basicEmbed, memberDetails, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -43,7 +43,7 @@ module.exports = class MultiBanCommand extends Command {
             format: 'multi-ban "[reason]" [members]',
             examples: ['multi-ban "Raid" Pixoll, 801615120027222016'],
             clientPermissions: ['BAN_MEMBERS'],
-            userPermissions: ['BAN_MEMBERS'],
+            userPermissions: ['ADMINISTRATOR'],
             guildOnly: true,
             args: [
                 {
@@ -66,7 +66,7 @@ module.exports = class MultiBanCommand extends Command {
                             const con2 = validMember(msg, await type.parse(str, msg))
                             valid.push(con2)
                         }
-                        return valid.filter(b => b !== true).length === array.length
+                        return valid.filter(b => b !== true).length !== array.length
                     },
                     parse: async (val, msg, arg) => {
                         const type = msg.client.registry.types.get('member')
@@ -84,7 +84,24 @@ module.exports = class MultiBanCommand extends Command {
                     },
                     error: 'None of the members you specified were valid. Please try again.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'string',
+                        name: 'members',
+                        description: 'The members to ban, separated by commas (max. 30 at once).',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the multi-ban.',
+                        required: true
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -95,19 +112,40 @@ module.exports = class MultiBanCommand extends Command {
      * @param {string} args.reason The reason of the ban
      * @param {GuildMember[]} args.members The members to ban
      */
-    async run({ message }, { reason, members }) {
-        const { guild, author, guildId } = message
+    async run({ message, interaction }, { reason, members }) {
+        if (interaction) {
+            const arg = this.argsCollector.args[1]
+            const msg = await interaction.fetchReply()
+            const isValid = await arg.validate(members, msg)
+            if (isValid !== true) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
+                })
+            }
+            members = await arg.parse(members, msg)
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guild, guildId } = message || interaction
+        const author = message?.author || interaction.user
         const manager = guild.members
 
         const embed = n => basicEmbed({
             color: 'GOLD', emoji: 'loading', description: `Banned ${n}/${members.length} members...`
         })
-        const toEdit = await message.replyEmbed(embed(0))
+        const toEdit = await message?.replyEmbed(embed(0)) || await interaction.channel.send({ embeds: [embed(0)] })
 
         const banned = []
         for (const { user } of members) {
-            const confirm = await confirmButtons({ message }, 'ban', user, { reason }, false)
-            if (!confirm) continue
+            const confirmed = await confirmButtons({ message, interaction }, 'ban', user, { reason }, false)
+            if (!confirmed) continue
 
             if (!user.bot) {
                 await user.send({
@@ -116,7 +154,7 @@ module.exports = class MultiBanCommand extends Command {
                         fieldName: `You have been banned from ${guild.name}`,
                         fieldValue: stripIndent`
                             **Reason:** ${reason}
-                            **Moderator:** ${author.toString()}
+                            **Moderator:** ${author.toString()} ${author.tag}
                         `
                     })]
                 }).catch(() => null)
@@ -143,12 +181,12 @@ module.exports = class MultiBanCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'Banned the following members:',
-            fieldValue: banned.map(u => `"${u.tag}"`).join(', ')
+            fieldValue: banned.map(u => u.toString()).join(', ')
         } : {
             color: 'RED', emoji: 'cross', description: 'No members were banned.'
         }
 
         await toEdit?.delete().catch(() => null)
-        await message.replyEmbed(basicEmbed(options))
+        await replyAll({ message, interaction }, { embeds: [basicEmbed(options)], components: [] })
     }
 }

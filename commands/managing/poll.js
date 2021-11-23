@@ -71,7 +71,7 @@ module.exports = class PollCommand extends Command {
                             {
                                 type: 'string',
                                 name: 'duration',
-                                description: 'How long the poll should last.',
+                                description: 'The duration of the poll.',
                                 required: true
                             },
                             {

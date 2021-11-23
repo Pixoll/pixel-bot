@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { GuildMember, TextChannel } = require('discord.js')
 const {
     docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails,
-    memberDetails, confirmButtons
+    memberDetails, confirmButtons, replyAll
 } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -38,7 +38,23 @@ module.exports = class KickCommand extends Command {
                     max: 512,
                     default: 'No reason given.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'user',
+                        name: 'member',
+                        description: 'The member to kick.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the kick.'
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -49,16 +65,37 @@ module.exports = class KickCommand extends Command {
      * @param {GuildMember} args.member The member to kick
      * @param {string} args.reason The reason of the kick
      */
-    async run({ message }, { member, reason }) {
-        const { guild, author, guildId } = message
+    async run({ message, interaction }, { member, reason }) {
+        if (interaction) {
+            if (!(member instanceof GuildMember)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    })]
+                })
+            }
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guild, guildId } = message || interaction
+        const author = message?.author || interaction.user
         const { user } = member
 
         const uExcept = userException(user, author, this)
-        if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
+
         const mExcept = memberException(member, this)
-        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
-        const confirm = await confirmButtons({ message }, 'kick', user, { reason })
-        if (!confirm) return
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
+
+        const confirmed = await confirmButtons({ message }, 'kick', user, { reason })
+        if (!confirmed) return
 
         if (!user.bot) {
             const embed = basicEmbed({
@@ -66,7 +103,7 @@ module.exports = class KickCommand extends Command {
                 fieldName: `You have been kicked from ${guild.name}`,
                 fieldValue: stripIndent`
                     **Reason:** ${reason}
-                    **Moderator:** ${author.toString()}
+                    **Moderator:** ${author.toString()} ${author.tag}
 
                     *The invite will expire in 1 week.*
                 `
@@ -94,7 +131,7 @@ module.exports = class KickCommand extends Command {
             reason
         })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been kicked`,

@@ -155,7 +155,7 @@ module.exports = class LockdownCommand extends Command {
             const isValid = await arg.validate(channels, msg)
             if (isValid !== true) {
                 return await interaction.editReply({
-                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: 'e' })]
+                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
                 })
             }
             channels = await arg.parse(channels, msg)

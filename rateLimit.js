@@ -17,12 +17,12 @@ module.exports = (client) => {
         if (!isRateLimit) return
 
         const data = {
-            global: msg.includes('Global  : true'),
-            method: msg.match(/Method +: .+/).map(m => m)[0].split(/ +/).pop(),
-            path: msg.match(/Path +: .+/).map(m => m)[0].split(/ +/).pop(),
-            route: msg.match(/Route +: .+/).map(m => m)[0].split(/ +/).pop(),
-            limit: Number.parseInt(msg.match(/Limit +: .+/).map(m => m)[0].split(/ +/).pop()),
-            timeout: Number.parseInt(msg.match(/Timeout +: .+/).map(m => m)[0].split(/ +/).pop()),
+            global: !!msg.match(/Global *: true/)?.map(m => m)[0].split(/ +/).pop(),
+            method: msg.match(/Method *: .+/)?.map(m => m)[0].split(/ +/).pop(),
+            path: msg.match(/Path *: .*/)?.map(m => m)[0].split(/ +/).pop(),
+            route: msg.match(/Route *: .*/)?.map(m => m)[0].split(/ +/).pop(),
+            limit: Number.parseInt(msg.match(/Limit *: .+/)?.map(m => m)[0].split(/ +/).pop()),
+            timeout: Number.parseInt(msg.match(/Timeout *: .+/)?.map(m => m)[0].split(/ +/).pop()),
         }
 
         await manager(data)

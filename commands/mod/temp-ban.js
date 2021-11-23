@@ -3,8 +3,9 @@ const { User, GuildMember, TextChannel } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const {
-    docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp,
-    inviteButton, confirmButtons
+    docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton,
+    confirmButtons,
+    replyAll
 } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { myMs } = require('../../utils')
@@ -45,7 +46,29 @@ module.exports = class TempBanCommand extends Command {
                     max: 512,
                     default: 'No reason given.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'user',
+                        name: 'user',
+                        description: 'The user to ban.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'duration',
+                        description: 'The duration of the ban.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the ban.'
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -57,20 +80,42 @@ module.exports = class TempBanCommand extends Command {
      * @param {number} args.duration The duration of the temp-ban
      * @param {string} args.reason The reason of the temp-ban
      */
-    async run({ message }, { user, duration, reason }) {
+    async run({ message, interaction }, { user, duration, reason }) {
+        if (interaction) {
+            user = user.user || user
+            const arg = this.argsCollector.args[1]
+            duration = await arg.parse(duration).catch(() => null) || null
+            if (!duration) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    })]
+                })
+            }
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
         if (typeof duration === 'number') duration = duration + Date.now()
         if (duration instanceof Date) duration = duration.getTime()
 
-        const { guild, author, guildId } = message
+        const { guild, guildId } = message || interaction
+        const author = message?.author || interaction.user
         const { members, bans, database } = guild
         const { moderations, active } = database
 
         const uExcept = userException(user, author, this)
-        if (uExcept) return await message.replyEmbed(uExcept)
+        if (uExcept) return replyAll({ message, interaction }, basicEmbed(uExcept))
 
         const isBanned = await bans.fetch(user).catch(() => null)
         if (isBanned) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is already banned.'
             }))
         }
@@ -78,18 +123,19 @@ module.exports = class TempBanCommand extends Command {
         /** @type {GuildMember} */
         const member = await members.fetch(user).catch(() => null)
         const mExcept = memberException(member, this)
-        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
-        const confirm = await confirmButtons({ message }, 'temp-ban', user, { reason })
-        if (!confirm) return
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
 
-        if (!user.bot && !!member) {
+        const confirmed = await confirmButtons({ message, interaction }, 'temp-ban', user, { reason })
+        if (!confirmed) return
+
+        if (!user.bot && member) {
             const embed = basicEmbed({
                 color: 'GOLD',
                 fieldName: `You have been temp-banned from ${guild.name}`,
                 fieldValue: stripIndent`
                     **Expires:** ${timestamp(duration, 'R')}
                     **Reason:** ${reason}
-                    **Moderator:** ${author.toString()}
+                    **Moderator:** ${author.toString()} ${author.tag}
 
                     *The invite will expire in 1 week.*
                 `
@@ -128,7 +174,7 @@ module.exports = class TempBanCommand extends Command {
             duration
         })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been banned`,

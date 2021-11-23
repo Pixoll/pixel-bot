@@ -140,8 +140,8 @@ module.exports = class ModLogCommand extends Command {
             return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
 
-        const confirm = await confirmButtons({ message, interaction }, 'delete mod log', modlog._id, modlog)
-        if (!confirm) return
+        const confirmed = await confirmButtons({ message, interaction }, 'delete mod log', modlog._id, modlog)
+        if (!confirmed) return
 
         const activeDB = this.db.guild.database.active
         const activeLog = await activeDB.fetch(`\`${modlog._id}\``)

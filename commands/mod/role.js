@@ -1,9 +1,11 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { Role, GuildMember, Collection } = require('discord.js')
-const { basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument } = require('../../utils')
+const {
+    basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument, replyAll
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -16,18 +18,18 @@ module.exports = class RoleCommand extends Command {
             description: 'Add or remove roles from a member.',
             details: `${memberDetails()}\n${roleDetails()}\n${roleDetails(null, true)}`,
             format: stripIndent`
-                role toggle [member] [roles] - Toggles the roles of a member.
-                role removeall [member] - Removes the member's roles.
-                role all [role] - Toggles a role on every member and bot.
+                role toggle [member] [roles] - Toggles the roles of a member (max. 10 at once).
+                role remove-all [member] - Removes the member's roles.
+                role all [role] - Toggles a role on every user and bot.
                 role bots [role] - Toggles a role on every bot.
-                role members [role] - Toggles a role on every member.
+                role users [role] - Toggles a role on every user.
             `,
             examples: [
                 'role toggle Pixoll Developer, Moderator',
-                'role removeall Pixoll',
+                'role remove-all Pixoll',
                 'role all Member',
                 'role bots Bots',
-                'role members Ping Role'
+                'role users Ping Role'
             ],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
@@ -38,7 +40,7 @@ module.exports = class RoleCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['toggle', 'removeall', 'all', 'bots', 'members']
+                    oneOf: ['toggle', 'remove-all', 'all', 'bots', 'users']
                 },
                 {
                     key: 'memberOrRole',
@@ -51,10 +53,12 @@ module.exports = class RoleCommand extends Command {
                     prompt: 'What roles do you want to toggle for that member?',
                     type: 'string',
                     validate: async (val, msg, arg) => {
-                        const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                        if (sc !== 'toggle') return true
+                        if (msg) {
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
+                            if (sc !== 'toggle') return true
+                        }
                         const type = msg.client.registry.types.get('role')
-                        const array = val.split(/\s*,\s*/).slice(0, 30)
+                        const array = val.split(/\s*,\s*/).slice(0, 10)
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
@@ -62,11 +66,15 @@ module.exports = class RoleCommand extends Command {
                             const con2 = isValidRole(msg, await type.parse(str, msg))
                             valid.push(con2)
                         }
-                        return valid.filter(b => b !== true).length === array.length
+                        return valid.filter(b => b !== true).length !== array.length
                     },
                     parse: async (val, msg, arg) => {
+                        if (msg) {
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
+                            if (sc !== 'toggle') return null
+                        }
                         const type = msg.client.registry.types.get('role')
-                        const array = val.split(/\s*,\s*/).slice(0, 30)
+                        const array = val.split(/\s*,\s*/).slice(0, 10)
                         const valid = []
                         for (const str of array) {
                             const con1 = await type.validate(str, msg, arg)
@@ -81,7 +89,75 @@ module.exports = class RoleCommand extends Command {
                     required: false,
                     error: 'None of the roles you specified were valid. Please try again.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'subcommand',
+                        name: 'toggle',
+                        description: 'Toggles the roles of a member.',
+                        options: [
+                            {
+                                type: 'user',
+                                name: 'member',
+                                description: 'The targeted member.',
+                                required: true
+                            },
+                            {
+                                type: 'string',
+                                name: 'roles',
+                                description: 'The roles to toggle, separated by commas (max. 10 at once).',
+                                required: true
+                            }
+                        ]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'remove-all',
+                        description: 'Removes the member\'s roles.',
+                        options: [{
+                            type: 'user',
+                            name: 'member',
+                            description: 'The targeted member.',
+                            required: true
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'all',
+                        description: 'Toggles a role on every user and bot.',
+                        options: [{
+                            type: 'role',
+                            name: 'role',
+                            description: 'The role to toggle.',
+                            required: true
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'bots',
+                        description: 'Toggles a role on every bot.',
+                        options: [{
+                            type: 'role',
+                            name: 'role',
+                            description: 'The role to toggle.',
+                            required: true
+                        }]
+                    },
+                    {
+                        type: 'subcommand',
+                        name: 'users',
+                        description: 'Toggles a role on every user.',
+                        options: [{
+                            type: 'role',
+                            name: 'role',
+                            description: 'The role to toggle.',
+                            required: true
+                        }]
+                    },
+                ]
+            },
+            test: true
         })
     }
 
@@ -89,33 +165,55 @@ module.exports = class RoleCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
-     * @param {'toggle'|'removeall'|'all'|'bots'|'members'} args.subCommand The sub-command
+     * @param {'toggle'|'remove-all'|'all'|'bots'|'users'} args.subCommand The sub-command
      * @param {Role|GuildMember} args.memberOrRole The role or member
      * @param {Role[]} args.roles The array of roles to toggle from the member
      */
-    async run({ message }, { subCommand, memberOrRole, roles }) {
+    async run({ message, interaction }, { subCommand, memberOrRole, roles, member, role }) {
         subCommand = subCommand.toLowerCase()
+
+        if (interaction) {
+            if (member && !(member instanceof GuildMember)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    })]
+                })
+            }
+            memberOrRole = member ?? role
+            if (roles) {
+                const arg = this.argsCollector.args[2]
+                const msg = await interaction.fetchReply()
+                const isValid = await arg.validate(roles, msg)
+                if (isValid !== true) {
+                    return await interaction.editReply({
+                        embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
+                    })
+                }
+                roles = await arg.parse(roles, msg)
+            }
+        }
 
         switch (subCommand) {
             case 'toggle':
-                return await this.toggle(message, memberOrRole, roles)
-            case 'removeall':
-                return await this.removeAll(message, memberOrRole)
+                return await this.toggle({ message, interaction }, memberOrRole, roles)
+            case 'remove-all':
+                return await this.removeAll({ message, interaction }, memberOrRole)
             case 'all':
-                return await this.all(message, memberOrRole)
+                return await this.all({ message, interaction }, memberOrRole)
             case 'bots':
-                return await this.bots(message, memberOrRole)
-            case 'members':
-                return await this.members(message, memberOrRole)
+                return await this.bots({ message, interaction }, memberOrRole)
+            case 'users':
+                return await this.users({ message, interaction }, memberOrRole)
         }
     }
 
     /**
      * The `all` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {Role} role The role to toggle in all members
      */
-    async all(message, role) {
+    async all({ message, interaction }, role) {
         if (message) {
             while (!(role instanceof Role) && !isValidRole(message, role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -139,10 +237,10 @@ module.exports = class RoleCommand extends Command {
 
     /**
      * The `bots` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {Role} role The role to toggle in all bot members
      */
-    async bots(message, role) {
+    async bots({ message, interaction }, role) {
         if (message) {
             while (!(role instanceof Role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -172,10 +270,10 @@ module.exports = class RoleCommand extends Command {
 
     /**
      * The `members` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {Role} role The role to toggle in all user members
      */
-    async members(message, role) {
+    async users({ message, interaction }, role) {
         if (message) {
             while (!(role instanceof Role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -205,10 +303,10 @@ module.exports = class RoleCommand extends Command {
 
     /**
      * The `removeall` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {GuildMember} member The member to remove the roles from
      */
-    async removeAll(message, member) {
+    async removeAll({ message, interaction }, member) {
         if (message) {
             while (!(member instanceof GuildMember)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -244,11 +342,11 @@ module.exports = class RoleCommand extends Command {
 
     /**
      * The `toggle` sub-command
-     * @param {CommandoMessage} message The message the command is being run for
+     * @param {CommandInstances} instances The instances the command is being run for
      * @param {GuildMember} member The member to toggle the roles from
      * @param {Role[]} roles The roles to toggle
      */
-    async toggle(message, member, roles) {
+    async toggle({ message, interaction }, member, roles) {
         if (message) {
             while (!(member instanceof GuildMember)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -268,9 +366,10 @@ module.exports = class RoleCommand extends Command {
         const alreadyHas = roles.filter(r => _roles.cache.has(r.id))
         const doesntHas = roles.filter(r => !_roles.cache.has(r.id))
 
-        const toDelete = await message.replyEmbed(basicEmbed({
+        const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling all roles...'
-        }))
+        })
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
         if (alreadyHas.length !== 0) {
             for (const role of alreadyHas) await _roles.remove(role)
@@ -282,8 +381,8 @@ module.exports = class RoleCommand extends Command {
         const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesntHas.map(r => '+' + r.name)]
             .filter(s => s).join(', ')
 
-        await toDelete.delete(() => null)
-        await message.replyEmbed(basicEmbed({
+        await toDelete?.delete().catch(() => null)
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldValue: rolesStr,

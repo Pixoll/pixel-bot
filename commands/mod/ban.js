@@ -2,7 +2,7 @@
 const { User, GuildMember } = require('discord.js')
 const { Command } = require('../../command-handler')
 const {
-    docId, basicEmbed, userException, memberException, reasonDetails, userDetails, confirmButtons
+    docId, basicEmbed, userException, memberException, reasonDetails, userDetails, confirmButtons, replyAll
 } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -37,7 +37,23 @@ module.exports = class BanCommand extends Command {
                     max: 512,
                     default: 'No reason given.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'user',
+                        name: 'user',
+                        description: 'The user to ban.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the ban.'
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -48,16 +64,29 @@ module.exports = class BanCommand extends Command {
      * @param {User} args.user The user to ban
      * @param {string} args.reason The reason of the ban
      */
-    async run({ message }, { user, reason }) {
-        const { guild, author, guildId } = message
+    async run({ message, interaction }, { user, reason }) {
+        if (interaction) {
+            user = user.user || user
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
+        const { guild, guildId } = message || interaction
         const { members, bans, database } = guild
+        const author = message?.author || interaction.user
 
         const uExcept = userException(user, author, this)
-        if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
 
         const isBanned = await bans.fetch(user).catch(() => null)
         if (isBanned) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is already banned.'
             }))
         }
@@ -65,18 +94,19 @@ module.exports = class BanCommand extends Command {
         /** @type {GuildMember} */
         const member = await members.fetch(user).catch(() => null)
         const mExcept = memberException(member, this)
-        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
-        const confirm = await confirmButtons({ message }, 'ban', user, { reason })
-        if (!confirm) return
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
 
-        if (!user.bot && !!member) {
+        const confirmed = await confirmButtons({ message, interaction }, 'ban', user, { reason })
+        if (!confirmed) return
+
+        if (!user.bot && member) {
             await user.send({
                 embeds: [basicEmbed({
                     color: 'GOLD',
                     fieldName: `You have been banned from ${guild.name}`,
                     fieldValue: stripIndent`
                         **Reason:** ${reason}
-                        **Moderator:** ${author.toString()}
+                        **Moderator:** ${author.toString()} ${author.tag}
                     `
                 })]
             }).catch(() => null)
@@ -95,7 +125,7 @@ module.exports = class BanCommand extends Command {
             reason
         })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been banned`,

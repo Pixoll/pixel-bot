@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const {
-    myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, confirmButtons
+    myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, confirmButtons, replyAll
 } = require('../../utils')
 const { docId, basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
@@ -40,7 +40,29 @@ module.exports = class MuteCommand extends Command {
                     max: 512,
                     default: 'No reason given.'
                 }
-            ]
+            ],
+            slash: {
+                options: [
+                    {
+                        type: 'user',
+                        name: 'member',
+                        description: 'The member to mute.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'duration',
+                        description: 'The duration of the mute.',
+                        required: true
+                    },
+                    {
+                        type: 'string',
+                        name: 'reason',
+                        description: 'The reason of the mute.'
+                    }
+                ]
+            },
+            test: true
         })
     }
 
@@ -52,17 +74,45 @@ module.exports = class MuteCommand extends Command {
      * @param {number|Date} args.duration The duration of the mute
      * @param {string} args.reason The reason of the mute
      */
-    async run({ message }, { member, duration, reason }) {
+    async run({ message, interaction }, { member, duration, reason }) {
+        if (interaction) {
+            if (!(member instanceof GuildMember)) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    })]
+                })
+            }
+            const arg = this.argsCollector.args[1]
+            duration = await arg.parse(duration).catch(() => null) || null
+            if (!duration) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    })]
+                })
+            }
+            reason ??= 'No reason given.'
+            if (reason.length > 512) {
+                return await interaction.editReply({
+                    embeds: [basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    })]
+                })
+            }
+        }
+
         if (typeof duration === 'number') duration = duration + Date.now()
         if (duration instanceof Date) duration = duration.getTime()
 
-        const { guild, author, guildId } = message
+        const { guild, guildId } = message || interaction
+        const author = message?.author || interaction.user
         const { moderations, active, setup } = guild.database
         const { user, roles } = member
 
         const data = await setup.fetch()
         if (!data || !data.mutedRole) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
@@ -70,15 +120,17 @@ module.exports = class MuteCommand extends Command {
         }
 
         const uExcept = userException(user, author, this)
-        if (uExcept) return await message.replyEmbed(basicEmbed(uExcept))
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
+
         const mExcept = memberException(member, this)
-        if (mExcept) return await message.replyEmbed(basicEmbed(mExcept))
-        const confirm = await confirmButtons({ message }, 'mute', member.user, { reason })
-        if (!confirm) return
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
+
+        const confirmed = await confirmButtons({ message, interaction }, 'mute', member.user, { reason })
+        if (!confirmed) return
 
         const role = await guild.roles.fetch(data.mutedRole)
         if (!role) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
@@ -86,7 +138,7 @@ module.exports = class MuteCommand extends Command {
         }
 
         if (roles.cache.has(role.id)) {
-            return await message.replyEmbed(basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is already muted.'
             }))
         }
@@ -102,7 +154,7 @@ module.exports = class MuteCommand extends Command {
                     fieldValue: stripIndent`
                         **Expires:** ${timestamp(duration, 'R')}
                         **Reason:** ${reason}
-                        **Moderator:** ${author.toString()}
+                        **Moderator:** ${author.toString()} ${author.tag}
                     `
                 })]
             }).catch(() => null)
@@ -130,7 +182,7 @@ module.exports = class MuteCommand extends Command {
             duration
         })
 
-        await message.replyEmbed(basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been muted`,
