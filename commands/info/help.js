@@ -70,7 +70,6 @@ module.exports = class HelpCommand extends Command {
                 const { name } = group.first().group
                 const list = group.map(c => {
                     let str = `\`${c.name}\``
-                    if (c.slash) str = `\`/${str.replace(/`/g, '')}\``
                     if ((guild && !c.isEnabledIn(guild)) || !c._globalEnabled) {
                         str = `\`—${str.replace(/`/g, '')}\``
                     }
@@ -95,17 +94,14 @@ module.exports = class HelpCommand extends Command {
                 .setColor('#4c9f4c')
                 .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
 
-            const slash = 'with a slash before their name (`/like this`), mean they\'re slash commands'
             const strikethrough = 'with a strikethrough (~~`like this`~~), mean they\'ve been marked as deprecated'
             const dash = oneLine`
                 with a dash before their name (\`—like this\`), mean they've been disabled,
                 either on the server you're in or everywhere
             `
-            const hasSlash = commandList.some(val => val.value.includes('/'))
             const hasDeprecated = commandList.some(val => val.value.includes('~~'))
             const hasDash = commandList.some(val => val.value.includes('—'))
             let page1 = []
-            if (hasSlash) page1.push(slash)
             if (hasDeprecated) page1.push(strikethrough)
             if (hasDash) page1.push(dash)
             page1 = page1.join('; those with ')
@@ -114,9 +110,8 @@ module.exports = class HelpCommand extends Command {
                 new MessageEmbed(base)
                     .setTitle('Commands list')
                     .setDescription(stripIndent`
-                        To use a command type: \`${prefix}<command>\`, for example: \`${prefix}prefix\`.
-                        You can also mention me to use a command, for example: \`@${user.tag} help\`.
-                        Type \`${prefix}help <command>\` for detailed information of a command.
+                        To use a command type \`${prefix}<command>\`, \`/<command>\` or \`@${user.tag} <command>\`.
+                        Type \`/help <command>\` for detailed information of a command.
 
                         ${page1 ? `Commands ${page1}.` : ''}
                     `)
@@ -128,19 +123,19 @@ module.exports = class HelpCommand extends Command {
                         misc commands, going from muting, banning, server information, setting reminders, etc.
                     `)
                     .addField('Current features', stripIndent`
+                        🔹 **Slash commands:** type \`/\` to get access to the commands list.
                         🔹 **Moderation:** warning, kicking, temp-banning, banning, muting, logging, etc.
                         🔹 **Welcome messages:** in a server channel.
                         🔹 **Audit logs:** ${oneLine`
                             new joins, permissions update, channels/roles update, etc. Specific channel logging soon!
                         `}
                         🔹 **Polls system:** ${oneLine`
-                        custom messages and reactions, automatically ends and determines the results.
+                            custom messages and reactions, automatically ends and determines the results.
                         `}
                         🔹 **Reminders system:** with both relative time and a specific date.
                         🔹 **Reaction/Button roles:** up to 10 roles per message.
                     `)
                     .addField('Upcoming features', stripIndent`
-                        🔹 **Slash commands:** ETA <1 month.
                         🔹 **Tickets system:** ETA 2-3 months.
                         🔹 **Giveaways system:** ETA 2-3 months.
                         🔹 **Chat filtering:** ETA 4-5 months.
