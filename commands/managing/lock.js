@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { TextChannel } = require('discord.js')
-const { basicEmbed, reasonDetails, channelDetails } = require('../../utils')
+const { basicEmbed, reasonDetails, channelDetails, replyAll } = require('../../utils')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
@@ -70,18 +70,15 @@ module.exports = class LockCommand extends Command {
             }
         }
 
-        const { guildId, channelId, guild } = message || interaction
+        const { guildId, guild } = message || interaction
         const permissions = channel.permissionOverwrites
         const { everyone } = guild.roles
 
         const perms = permissions.resolve(guildId)
         if (perms && perms.deny.has('SEND_MESSAGES')) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already locked.`
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await permissions.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 })
@@ -91,12 +88,8 @@ module.exports = class LockCommand extends Command {
             })]
         })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        if (channelId !== channel.id) {
-            await message?.replyEmbed(embed)
-        }
+        }))
     }
 }

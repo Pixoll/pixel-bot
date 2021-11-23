@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, memberDetails } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, memberDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -46,12 +46,9 @@ module.exports = class RolesCommand extends Command {
 
         const rolesCache = memberRoles || guildRoles.filter(role => role.id !== guildId)
         if (!rolesCache) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'I couldn\'t find any roles..'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message.replyEmbed(embed)
-            return
+            }))
         }
 
         const name = member?.user.username || guild.name
@@ -60,12 +57,9 @@ module.exports = class RolesCommand extends Command {
         const roles = rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) || null
 
         if (!roles) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'This member has no roles.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await generateEmbed({ message, interaction }, roles, {

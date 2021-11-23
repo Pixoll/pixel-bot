@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { noReplyInDMs, timeDetails, timestamp, basicEmbed } = require('../../utils')
+const { noReplyInDMs, timeDetails, timestamp, basicEmbed, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const letters = ['t', 'T', 'd', 'D', 'f', 'F', 'R']
@@ -67,8 +67,6 @@ module.exports = class TimestampCommand extends Command {
             timestamps.push(`\`${string}\` ${string}`)
         }
 
-        const options = { content: timestamps.join('\n'), ...noReplyInDMs(message) }
-        await interaction?.editReply(options)
-        await message?.reply(options)
+        await replyAll({ message, interaction }, timestamps.join('\n'))
     }
 }

@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { noReplyInDMs, embedColor } = require('../../utils')
+const { noReplyInDMs, embedColor, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -41,8 +41,6 @@ module.exports = class ServerIconCommand extends Command {
                     .setURL(icon)
             )
 
-        const options = { embeds: [embed], components: [row], ...noReplyInDMs(message) }
-        await interaction?.editReply(options)
-        await message?.reply(options)
+        await replyAll({ message, interaction }, { embeds: [embed], components: [row] })
     }
 }

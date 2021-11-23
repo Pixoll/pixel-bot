@@ -4,7 +4,7 @@ const { stripIndent } = require('common-tags')
 const { Collection } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, pluralize, confirmButtons } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll } = require('../../utils')
 const { ReminderSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -58,14 +58,11 @@ module.exports = class RemindersCommand extends Command {
 
         const data = await this.db.fetchMany({ user: author.id })
         if (data.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'You have no active reminders. Use the `reminder` command to add reminders.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         switch (subCommand) {
@@ -113,10 +110,8 @@ module.exports = class RemindersCommand extends Command {
             await this.db.delete(doc)
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Your reminders have been deleted.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

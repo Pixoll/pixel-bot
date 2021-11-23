@@ -223,6 +223,18 @@ function noReplyInDMs(msg) {
 }
 
 /**
+ * Replies to the corresponding instances
+ * @param {CommandInstances} instances The instances to reply
+ * @param {MessageOptions|string|MessageEmbed} options The options of the message
+ */
+async function replyAll({ message, interaction }, options) {
+    if (options instanceof MessageEmbed) options = { embeds: [options] }
+    if (typeof options === 'string') options = { content: options }
+    await interaction?.editReply(options)
+    await message?.reply({ ...options, ...noReplyInDMs(message) })
+}
+
+/**
  * Creates a basic collector with the given parameters.
  * @param {CommandInstances} instances The instances the command is being run for
  * @param {BasicEmbedOptions} embedOptions The options for the response messages.
@@ -252,17 +264,15 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
 
     const messages = await (message || interaction).channel.awaitMessages(collectorOptions)
     if (messages.size === 0) {
-        await interaction?.editReply('You didn\'t answer in time.')
-        await message?.reply('You didn\'t answer in time.')
+        await replyAll({ message, interaction }, { content: 'You didn\'t answer in time.' })
         return null
     }
     if (messages.first().content.toLowerCase() === 'cancel') {
-        await messages.first().reply({ content: 'Cancelled command.', ...noReplyInDMs(message) })
+        await replyAll({ message, interaction }, { content: 'Cancelled command.' })
         return null
     }
 
     if (shouldDelete) await toDelete?.delete()
-
     return messages.first()
 }
 
@@ -893,12 +903,10 @@ async function pagedEmbed({ message, interaction }, data, template) {
         )
 
     if (data.toUser && !isDMs) {
-        const content = stripIndent`
+        await replyAll({ message, interaction }, stripIndent`
             ${data.dmMsg || ''}
             **Didn\'t get the DM?** Then please allow DMs from server members.
-        `
-        await interaction?.editReply(content)
-        await message?.reply(content)
+        `)
     }
 
     if (message) await targetChan.sendTyping().catch(() => null)
@@ -1222,11 +1230,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     await interaction?.editReply({ components: [] })
 
     if (!pushed || pushed.customId === ids.no) {
-        const options = { content: 'Cancelled command.', ...noReplyInDMs(message) }
-        if (sendCancelled) {
-            await interaction?.editReply({ ...options, embeds: [] })
-            await message?.reply(options)
-        }
+        await replyAll({ message, interaction }, 'Cancelled command.')
         return false
     }
 
@@ -1355,6 +1359,7 @@ module.exports = {
     removeDashes,
     removeDuplicated,
     removeUnderscores,
+    replyAll,
     noReplyInDMs,
     sleep,
     sliceDots,

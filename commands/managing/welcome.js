@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, channelDetails, basicCollector, myMs } = require('../../utils')
+const { basicEmbed, channelDetails, basicCollector, myMs, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -83,10 +83,7 @@ module.exports = class WelcomeCommand extends Command {
      * @param {string} args.msg The welcome message to send
      */
     async run({ message, interaction }, { channel, msg, message: intMsg }) {
-        if (interaction) {
-            const sc = interaction.options.getSubcommand()
-            if (sc === 'set') msg = intMsg
-        }
+        if (interaction) msg = intMsg
 
         const { guild, guildId } = message || interaction
         this.db = guild.database.welcome
@@ -102,9 +99,7 @@ module.exports = class WelcomeCommand extends Command {
                 `)
                 .setTimestamp()
 
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            return await replyAll({ message, interaction }, embed)
         }
 
         if (message && !msg) {
@@ -128,10 +123,8 @@ module.exports = class WelcomeCommand extends Command {
             })
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

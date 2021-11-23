@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, generateEmbed, pluralize, abcOrder } = require('../../utils')
+const { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -57,12 +57,9 @@ module.exports = class DiscriminatorCommand extends Command {
             .map(m => `${m.toString()} ${m.user.tag}`)
 
         if (!match || match.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find any members.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await generateEmbed({ message, interaction }, match, {

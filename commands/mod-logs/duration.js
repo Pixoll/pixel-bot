@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
-const { myMs, basicEmbed, timeDetails, docId, confirmButtons } = require('../../utils')
+const { myMs, basicEmbed, timeDetails, docId, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -84,22 +84,16 @@ module.exports = class DurationCommand extends Command {
 
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const activeLog = await active.fetch(modlogId)
         if (!activeLog) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That punishment has expired.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         if (typeof duration === 'number') duration = duration + Date.now()
@@ -112,16 +106,15 @@ module.exports = class DurationCommand extends Command {
             { message, interaction }, 'update mod log duration', modlogId, { duration: longTime }
         )
         if (!confirm) return
+
         await moderations.update(modLog, { duration: longTime })
         await active.update(activeLog, { duration })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated duration for mod log \`${modlogId}\``,
             fieldValue: `**New duration:** ${longTime}`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { MessageEmbed } = require('discord.js')
-const { commandInfo, pagedEmbed, getArgument } = require('../../utils')
+const { commandInfo, pagedEmbed, getArgument, replyAll } = require('../../utils')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -49,12 +49,10 @@ module.exports = class HelpCommand extends Command {
         const owner = owners[0]
         const prefix = guild?.prefix || client.prefix
 
-        if (interaction) {
-            try {
-                command &&= registry.resolveCommand(command)
-            } catch {
-                command = null
-            }
+        try {
+            command &&= registry.resolveCommand(command)
+        } catch {
+            command = null
         }
 
         if (!command) {
@@ -243,7 +241,6 @@ module.exports = class HelpCommand extends Command {
             return await command.onBlock({ message, interaction }, 'userPermissions', { missing: hasPermission })
         }
 
-        await interaction?.editReply({ embeds: [commandInfo(command, guild)] })
-        await message?.replyEmbed(commandInfo(command, guild))
+        await replyAll({ message, interaction }, commandInfo(command, guild))
     }
 }

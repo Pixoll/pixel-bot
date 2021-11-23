@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -27,19 +27,16 @@ module.exports = class AdminisCommand extends Command {
 
         const admins = members.filter(m => m.permissions.has('ADMINISTRATOR') && !m.user.bot)
         if (!admins || admins.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no administrators.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const adminsList = admins.sort((a, b) => b.roles.highest.position - a.roles.highest.position)
             .map(mbr => ({
                 tag: mbr.user.tag,
-                list: mbr.roles.cache.filter(r => r.permissions.has('ADMINISTRATOR'))
-                    .sort((a, b) => b.position - a.position).map(r => r.name).join(', ') || 'None'
+                list: '**Roles:** ' + (mbr.roles.cache.filter(r => r.permissions.has('ADMINISTRATOR'))
+                    .sort((a, b) => b.position - a.position).map(r => r.name).join(', ') || 'None')
             }))
 
         await generateEmbed({ message, interaction }, adminsList, {

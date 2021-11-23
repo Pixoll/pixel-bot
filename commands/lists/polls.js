@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, pluralize } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -26,12 +26,9 @@ module.exports = class PollsCommand extends Command {
 
         const pollsData = await db.fetchMany()
         if (pollsData.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no active polls.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await generateEmbed({ message, interaction }, pollsData.toJSON(), {

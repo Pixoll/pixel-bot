@@ -2,6 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
+const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** @param {string[]} arr */
@@ -79,7 +80,6 @@ module.exports = class EmojisCommand extends Command {
             embed.addField('ㅤ', animated.shift().join(' '))
         }
 
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        await replyAll({ message, interaction }, embed)
     }
 }

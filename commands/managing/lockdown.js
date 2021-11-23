@@ -3,7 +3,7 @@
 const { Command } = require('../../command-handler')
 const { stripIndent, oneLine } = require('common-tags')
 const {
-    basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails
+    basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails, replyAll
 } = require('../../utils')
 const { CommandInstances } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
@@ -201,14 +201,11 @@ module.exports = class LockdownCommand extends Command {
      */
     async start({ message, interaction }, savedChannels, reason) {
         if (savedChannels.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
         reason ??= 'We\'ll be back shortly.'
 
@@ -243,19 +240,16 @@ module.exports = class LockdownCommand extends Command {
         await message?.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
-            const embed = basicEmbed({ color: 'GOLD', description: 'No changes were made.' })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            return await replyAll({ message, interaction }, basicEmbed({
+                color: 'GOLD', description: 'No changes were made.'
+            }))
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Locked ${amount}/${savedChannels.length} lockdown channels.`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -266,14 +260,11 @@ module.exports = class LockdownCommand extends Command {
      */
     async end({ message, interaction }, savedChannels, reason) {
         if (savedChannels.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
         reason ??= 'Thanks for waiting.'
 
@@ -308,19 +299,16 @@ module.exports = class LockdownCommand extends Command {
         await message?.channel.sendTyping().catch(() => null)
 
         if (amount === 0) {
-            const embed = basicEmbed({ color: 'GOLD', description: 'No changes were made.' })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            return await replyAll({ message, interaction }, basicEmbed({
+                color: 'GOLD', description: 'No changes were made.'
+            }))
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Unocked ${amount}/${savedChannels.length} lockdown channels.`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -330,14 +318,11 @@ module.exports = class LockdownCommand extends Command {
      */
     async channels({ message, interaction }, channelsData) {
         if (channelsData.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await generateEmbed({ message, interaction }, channelsData, {
@@ -364,12 +349,9 @@ module.exports = class LockdownCommand extends Command {
 
         const channelsList = channels.filter(c => !savedChannels.includes(c.id))
         if (channelsList.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The channels you specified have already been added.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const { guildId } = message || interaction
@@ -384,14 +366,12 @@ module.exports = class LockdownCommand extends Command {
             })
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been added:',
             fieldValue: channelsList.join(', ')
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -403,14 +383,11 @@ module.exports = class LockdownCommand extends Command {
      */
     async remove({ message, interaction }, data, savedChannels, channels) {
         if (savedChannels.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         if (message && !channels) {
@@ -421,25 +398,20 @@ module.exports = class LockdownCommand extends Command {
 
         const channelsList = channels.filter(c => savedChannels.includes(c.id))
         if (channelsList.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The channels you specified have not been added.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await this.db.update(data, {
             $pull: { lockChannels: { $in: channelsList.map(c => c.id) } }
         })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been removed:',
             fieldValue: channelsList.join(', ')
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

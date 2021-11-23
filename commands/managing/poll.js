@@ -1,9 +1,11 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
-const { myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex, validURL } = require('../../utils')
+const {
+    myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex, validURL, replyAll
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -231,11 +233,9 @@ module.exports = class PollCommand extends Command {
             endsAt: duration
         })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `The poll was successfully created [here](${sent.url}).`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -281,12 +281,9 @@ module.exports = class PollCommand extends Command {
             msg ? { channel: channel.id, message: msg.id } : { channel: channel.id }
         )
         if (!pollData) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the poll you were looking for.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message.replyEmbed(embed)
-            return
+            }))
         }
 
         /** @type {TextChannel} */
@@ -294,12 +291,9 @@ module.exports = class PollCommand extends Command {
         /** @type {Message} */
         const pollMsg = msg || await pollChannel?.messages.fetch(pollData.message)
         if (!pollMsg) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That poll message or the channel were deleted.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const reactions = pollMsg.reactions.cache.filter(r =>
@@ -340,10 +334,8 @@ module.exports = class PollCommand extends Command {
         await pollChannel.send({ embeds: [pollEmbed] })
         await this.db.delete(pollData)
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `[This poll](${pollMsg.url}) has been ended.`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

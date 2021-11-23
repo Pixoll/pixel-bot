@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, getArgument, confirmButtons } = require('../../utils')
+const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TodoSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -117,12 +117,9 @@ module.exports = class TodoCommand extends Command {
      */
     async view({ message, interaction }, todoData) {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const author = message?.author || interaction.user
@@ -155,14 +152,12 @@ module.exports = class TodoCommand extends Command {
         if (!todoData) await this.db.add({ user: author.id, list: [item] })
         else await this.db.update(todoData, { $push: { list: item } })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'Added the following item to your to-do list:',
             fieldValue: item
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -179,29 +174,21 @@ module.exports = class TodoCommand extends Command {
         }
 
         if (!todoData || !todoData.list || todoData.list.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         if (!todoData.list[--item]) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside your to-do list.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
         await this.db.update(todoData, { $pull: { list: todoData.list[item++] } })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Removed item \`${item}\` from your to-do list.`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -211,12 +198,9 @@ module.exports = class TodoCommand extends Command {
      */
     async clear({ message, interaction }, todoData) {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const confirmed = await confirmButtons({ message, interaction }, 'clear your to-do list')
@@ -224,10 +208,8 @@ module.exports = class TodoCommand extends Command {
 
         await this.db.delete(todoData)
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Your to-do list has been cleared.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

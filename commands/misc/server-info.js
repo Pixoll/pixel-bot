@@ -3,6 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoGuild } = require('../../command-handler/typings')
 const { MessageEmbed, PremiumTier } = require('discord.js')
 const { stripIndent } = require('common-tags')
+const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const ownerCrown = '<a:owner_crown:806558872440930425>'
@@ -68,7 +69,6 @@ module.exports = class ServerInfoCommand extends Command {
             .setFooter(`Server id: ${id} | Created at`)
             .setTimestamp(createdTimestamp)
 
-        await interaction?.editReply({ embeds: [serverInfo] })
-        await message?.replyEmbed(serverInfo)
+        await replyAll({ message, interaction }, serverInfo)
     }
 }

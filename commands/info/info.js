@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { version, description } = require('../../package.json')
-const { myMs } = require('../../utils')
+const { myMs, replyAll } = require('../../utils')
 const { MessageEmbed, version: djsVersion } = require('discord.js')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -53,7 +53,6 @@ module.exports = class InfoCommand extends Command {
             .setFooter(`Uptime: ${uptime}`)
             .setTimestamp()
 
-        await interaction?.editReply({ embeds: [info] })
-        await message?.replyEmbed(info)
+        await replyAll({ message, interaction }, info)
     }
 }

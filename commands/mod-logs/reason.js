@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, docId, confirmButtons } = require('../../utils')
+const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -78,12 +78,9 @@ module.exports = class ReasonCommand extends Command {
 
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const activeLog = await active.fetch(modlogId)
@@ -94,13 +91,11 @@ module.exports = class ReasonCommand extends Command {
         await moderations.update(modLog, { reason })
         if (activeLog) await active.update(activeLog, { reason })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated reason for mod log \`${modlogId}\``,
             fieldValue: `**New reason:** ${reason}`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

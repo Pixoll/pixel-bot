@@ -2,6 +2,7 @@
 const { MessageButton, MessageActionRow } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
+const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -38,11 +39,6 @@ module.exports = class InviteCommand extends Command {
         const row = new MessageActionRow()
             .addComponents(invite, support)
 
-        const reply = {
-            content: '\u200B',
-            components: [row]
-        }
-        await interaction?.editReply(reply)
-        await message?.reply(reply)
+        await replyAll({ message, interaction }, { content: '\u200B', components: [row] })
     }
 }

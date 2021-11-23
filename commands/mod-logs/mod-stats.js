@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { getDayDiff, code } = require('../../utils')
+const { getDayDiff, code, replyAll } = require('../../utils')
 const { ModerationSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -73,8 +73,7 @@ module.exports = class ModStatsCommand extends Command {
             .setFooter(`User id: ${user.id}`)
             .setTimestamp()
 
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        await replyAll({ message, interaction }, embed)
     }
 
     /**

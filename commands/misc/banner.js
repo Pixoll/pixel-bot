@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { userDetails, noReplyInDMs, basicEmbed, embedColor } = require('../../utils')
+const { userDetails, noReplyInDMs, basicEmbed, embedColor, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -44,12 +44,9 @@ module.exports = class BannerCommand extends Command {
 
         const banner = user.bannerURL({ dynamic: true, size: 2048 })
         if (!banner) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no banner on their profile.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const embed = new MessageEmbed()
@@ -66,8 +63,6 @@ module.exports = class BannerCommand extends Command {
                     .setURL(banner)
             )
 
-        const options = { embeds: [embed], components: [row], ...noReplyInDMs(message) }
-        await interaction?.editReply(options)
-        await message?.reply(options)
+        await replyAll({ message, interaction }, { embeds: [embed], components: [row] })
     }
 }

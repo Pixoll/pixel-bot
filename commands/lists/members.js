@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, roleDetails, abcOrder } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, roleDetails, abcOrder, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -43,12 +43,9 @@ module.exports = class MembersCommand extends Command {
             .map(m => `${m.toString()} ${m.user.tag}`)
 
         if (members.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: `The \`${role.name}\` role has no members.`
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const { guild } = message || interaction

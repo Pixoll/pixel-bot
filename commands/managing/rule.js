@@ -2,8 +2,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, basicCollector, myMs, embedColor, getArgument } = require('../../utils')
+const { CommandInstances } = require('../../command-handler/typings')
+const { basicEmbed, basicCollector, myMs, embedColor, getArgument, replyAll } = require('../../utils')
 const { RuleSchema } = require('../../schemas/types')
 const { MessageEmbed } = require('discord.js')
 /* eslint-enable no-unused-vars */
@@ -106,12 +106,9 @@ module.exports = class RuleCommand extends Command {
      */
     async view({ message, interaction }, rulesData, rule) {
         if (!rulesData || rulesData.rules.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         if (message && (!rule || rule > rulesData.rules.length)) {
@@ -128,8 +125,7 @@ module.exports = class RuleCommand extends Command {
             .addField(`Rule ${rule--}`, rulesData.rules[rule])
             .setTimestamp()
 
-        await interaction?.editReply({ embeds: [ruleEmbed] })
-        await message?.replyEmbed(ruleEmbed)
+        await replyAll({ message, interaction }, ruleEmbed)
     }
 
     /**
@@ -167,11 +163,9 @@ module.exports = class RuleCommand extends Command {
 
         const number = rulesData ? rulesData.rules.length + 1 : 1
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `The rule has been added under \`Rule ${number}\``
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -182,12 +176,9 @@ module.exports = class RuleCommand extends Command {
      */
     async remove({ message, interaction }, rulesData, rule) {
         if (!rulesData || rulesData.rules.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const { guild, client } = message || interaction
@@ -210,25 +201,20 @@ module.exports = class RuleCommand extends Command {
         }
 
         if (rule > rulesData.rules.length) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That rule doesn\'t exist.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         rule--
         await rulesData.updateOne({ $pull: { rules: rulesData.rules[rule] } })
         rule++
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Removed rule number ${rule--}:`,
             fieldValue: rulesData.rules[rule]
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

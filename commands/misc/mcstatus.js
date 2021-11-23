@@ -5,7 +5,7 @@ const { CommandInstances, CommandoMessage } = require('../../command-handler/typ
 const { MessageEmbed, MessageAttachment, MessageOptions } = require('discord.js')
 const { status: statusJava, statusBedrock } = require('minecraft-server-util')
 const { StatusResponse, BedrockStatusResponse } = require('minecraft-server-util/dist/model/StatusResponse')
-const { basicEmbed, getArgument, remDiscFormat, noReplyInDMs } = require('../../utils')
+const { basicEmbed, getArgument, remDiscFormat, noReplyInDMs, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -138,14 +138,11 @@ module.exports = class McStatusCommand extends Command {
         const savedServer = await this.db.fetch()
 
         if (!savedServer) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'Please run the `save:java` or `save:bedrock` sub-commands before using this.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const { type, ip, port } = savedServer
@@ -154,13 +151,7 @@ module.exports = class McStatusCommand extends Command {
             await this.getJavaStatus(ip, port) :
             await this.getBedrockStatus(ip, port)
 
-        if (response instanceof MessageEmbed) {
-            await interaction?.editReply({ embeds: [response] })
-            await message?.replyEmbed(response)
-            return
-        }
-        await interaction?.editReply(response)
-        await message?.reply({ ...response, ...noReplyInDMs(message) })
+        await replyAll({ message, interaction }, response)
     }
 
     /**
@@ -177,13 +168,7 @@ module.exports = class McStatusCommand extends Command {
         }
 
         const response = await this.getJavaStatus(ip, port)
-        if (response instanceof MessageEmbed) {
-            await interaction?.editReply({ embeds: [response] })
-            await message?.replyEmbed(response)
-            return
-        }
-        await interaction?.editReply(response)
-        await message?.reply({ ...response, ...noReplyInDMs(message) })
+        await replyAll({ message, interaction }, response)
     }
 
     /**
@@ -200,8 +185,7 @@ module.exports = class McStatusCommand extends Command {
         }
 
         const response = await this.getBedrockStatus(ip, port)
-        await interaction?.editReply({ embeds: [response] })
-        await message?.replyEmbed(response)
+        await replyAll({ message, interaction }, response)
     }
 
     /**
@@ -231,7 +215,7 @@ module.exports = class McStatusCommand extends Command {
             port: port
         })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'Saved Minecraft server data',
@@ -239,9 +223,7 @@ module.exports = class McStatusCommand extends Command {
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
             `
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**

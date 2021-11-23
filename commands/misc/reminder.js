@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, customEmoji, timestamp, timeDetails } = require('../../utils')
+const { basicEmbed, customEmoji, timestamp, timeDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -94,14 +94,12 @@ module.exports = class ReminderCommand extends Command {
 
         await (message || msg).react(customEmoji('cross'))
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `I'll remind you ${stamp} for:`,
             fieldValue: reminder,
             footer: 'React with ❌ to cancel the reminder.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

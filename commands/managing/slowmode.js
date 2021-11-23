@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { myMs, channelDetails, timeDetails } = require('../../utils')
+const { myMs, channelDetails, timeDetails, replyAll } = require('../../utils')
 const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
@@ -75,32 +75,24 @@ module.exports = class SlowmodeCommand extends Command {
         }
 
         if (channel.rateLimitPerUser === ratelimit) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The slowmode is already set to that value.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await channel.setRateLimitPerUser(ratelimit)
 
         if (ratelimit === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'GREEN', emoji: 'check', description: `Disabled slowmode in ${channel.toString()}`
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Changed slowmode in #${channel.name}`,
             fieldValue: `**New rate limit:** ${myMs(ratelimit * 1000, { long: true, showAnd: true })}`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

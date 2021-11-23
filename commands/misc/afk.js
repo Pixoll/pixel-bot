@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed } = require('../../utils')
+const { basicEmbed, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -55,32 +55,21 @@ module.exports = class AfkCommand extends Command {
         if (afkStatus) {
             if (status.toLowerCase() === 'off') {
                 await afkStatus.deleteOne()
-
-                const embed = basicEmbed({
+                return await replyAll({ message, interaction }, basicEmbed({
                     color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status`
-                })
-                await interaction?.editReply({ embeds: [embed] })
-                await message?.replyEmbed(embed)
-                return
+                }))
             }
 
             await afkStatus.updateOne({ status })
-
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'GREEN', emoji: 'check', fieldName: 'I updated your AFK status to:', fieldValue: status
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         if (status.toLowerCase() === 'off') {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'You can\'t set your status as `off`'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await db.add({
@@ -89,10 +78,8 @@ module.exports = class AfkCommand extends Command {
             status
         })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: 'I set your AFK status as:', fieldValue: status
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

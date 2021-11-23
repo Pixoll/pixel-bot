@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel, Role, MessageButton, MessageActionRow, MessageEmbed } = require('discord.js')
 const {
-    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor, basicEmbed
+    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor, basicEmbed, replyAll
 } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -142,12 +142,10 @@ module.exports = class ButtonRoleCommand extends Command {
 
         const { url } = await channel.send({ embeds: [embed], components: rows })
 
-        const reply = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `The buttons roles were successfully created [here](${url}).`
-        })
-        await interaction?.editReply({ embeds: [reply] })
-        await message?.replyEmbed(reply)
+        }))
     }
 }

@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, Role } = require('discord.js')
-const { getKeyPerms, roleDetails } = require('../../utils')
+const { getKeyPerms, roleDetails, replyAll } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -68,7 +68,6 @@ module.exports = class RoleInfoCommand extends Command {
 
         if (permissions !== 'None') roleInfo.addField('Mod permissions', permissions)
 
-        await interaction?.editReply({ embeds: [roleInfo] })
-        await message?.replyEmbed(roleInfo)
+        await replyAll({ message, interaction }, roleInfo)
     }
 }

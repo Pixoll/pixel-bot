@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel } = require('discord.js')
-const { basicEmbed, channelDetails, reasonDetails } = require('../../utils')
+const { basicEmbed, channelDetails, reasonDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -76,12 +76,9 @@ module.exports = class UnlockCommand extends Command {
 
         const perms = permissions.cache.find(p => p.id === guildId)
         if (!perms.deny.has('SEND_MESSAGES')) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })

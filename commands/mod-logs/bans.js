@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildBan, Collection, GuildAuditLogs } = require('discord.js')
-const { basicEmbed, generateEmbed, abcOrder, pluralize } = require('../../utils')
+const { basicEmbed, generateEmbed, abcOrder, pluralize, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -29,12 +29,9 @@ module.exports = class BansCommand extends Command {
         /** @type {Collection<string, GuildBan>} */
         const bans = await guild.bans.fetch().catch(() => null)
         if (!bans || bans.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no bans in this server.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         /** @type {GuildAuditLogs} */
@@ -57,9 +54,9 @@ module.exports = class BansCommand extends Command {
             })
         }
 
-        await generateEmbed({ message, interaction }, bansList.sort((a, b) =>
-            abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
-        ), {
+        const sorted = bansList.sort((a, b) => abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase()))
+
+        await generateEmbed({ message, interaction }, sorted, {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             keyTitle: { suffix: 'tag' }

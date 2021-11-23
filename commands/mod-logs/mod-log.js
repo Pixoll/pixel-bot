@@ -3,7 +3,7 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
-const { capitalize, basicEmbed, docId, confirmButtons, timestamp } = require('../../utils')
+const { capitalize, basicEmbed, docId, confirmButtons, timestamp, replyAll } = require('../../utils')
 const { ModerationSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -85,12 +85,9 @@ module.exports = class ModLogCommand extends Command {
 
         const modLog = await this.db.fetch(modlogId)
         if (!modLog) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         switch (subCommand) {
@@ -128,8 +125,7 @@ module.exports = class ModLogCommand extends Command {
             `)
             .setTimestamp()
 
-        await interaction?.editReply({ embeds: [modlogInfo] })
-        await message?.replyEmbed(modlogInfo)
+        await replyAll({ message, interaction }, modlogInfo)
     }
 
     /**
@@ -153,10 +149,8 @@ module.exports = class ModLogCommand extends Command {
         if (activeLog) await activeDB.delete(activeLog)
         await this.db.delete(modlog)
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Deleted mod log with id \`${modlog._id}\``
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

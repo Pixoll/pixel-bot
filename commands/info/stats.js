@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
-const { myMs, formatBytes } = require('../../utils')
+const { myMs, formatBytes, replyAll } = require('../../utils')
 const { MessageEmbed } = require('discord.js')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
@@ -42,7 +42,6 @@ module.exports = class StatsCommand extends Command {
             .addField('Uptime', uptime, true)
             .setTimestamp()
 
-        await interaction?.editReply({ embeds: [stats] })
-        await message?.replyEmbed(stats)
+        await replyAll({ message, interaction }, stats)
     }
 }

@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { Collection, MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { timeDetails, abcOrder, pagedEmbed, embedColor, basicEmbed } = require('../../utils')
+const { timeDetails, abcOrder, pagedEmbed, embedColor, basicEmbed, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const timeZones = new Collection([
@@ -161,9 +161,7 @@ module.exports = class TimesCommand extends Command {
                 `)
                 .setTimestamp()
 
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            return await replyAll({ message, interaction }, embed)
         }
 
         for (const data of timeZones) times.push(timeZone(...data))

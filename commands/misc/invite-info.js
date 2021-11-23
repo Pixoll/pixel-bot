@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, Invite } = require('discord.js')
-const { timestamp, basicEmbed } = require('../../utils')
+const { timestamp, basicEmbed, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -46,9 +46,7 @@ module.exports = class InviteInfoCommand extends Command {
         if (interaction) {
             invite = await this.client.fetchInvite(invite).catch(() => null)
             if (!invite) {
-                const embed = basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That invite is invalid.'
-                })
+                const embed = basicEmbed({ color: 'RED', emoji: 'cross', description: 'That invite is invalid.' })
                 return await interaction.editReply({ embeds: [embed] })
             }
         }
@@ -68,7 +66,6 @@ module.exports = class InviteInfoCommand extends Command {
             `)
             .setFooter(`Server id: ${guild.id}`)
 
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        await replyAll({ message, interaction }, embed)
     }
 }

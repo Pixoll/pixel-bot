@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
-const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags } = require('../../utils')
+const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -112,7 +112,6 @@ module.exports = class WhoIsCommand extends Command {
             userInfo.setImage(banner).addField('Banner', 'Look below:')
         }
 
-        await interaction?.editReply({ embeds: [userInfo] })
-        await message?.replyEmbed(userInfo)
+        await replyAll({ message, interaction }, userInfo)
     }
 }

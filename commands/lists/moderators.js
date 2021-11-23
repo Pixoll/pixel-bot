@@ -2,7 +2,7 @@
 const { oneLine } = require('common-tags')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { isMod, generateEmbed, basicEmbed, pluralize } = require('../../utils')
+const { isMod, generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -33,14 +33,11 @@ module.exports = class ModeratorsCommand extends Command {
         const members = guild.members.cache
         const mods = members?.filter(m => isMod(m, true) && !m.user.bot)
         if (!mods || mods.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no moderators, try running the `admins` command instead.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const modsList = mods.sort((a, b) => b.roles.highest.position - a.roles.highest.position)

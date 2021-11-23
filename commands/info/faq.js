@@ -4,7 +4,7 @@ const { Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs, confirmButtons } = require('../../utils')
+const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs, confirmButtons, replyAll } = require('../../utils')
 const { FaqSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -120,12 +120,9 @@ module.exports = class FaqCommand extends Command {
      */
     async view({ message, interaction }, faqData) {
         if (faqData.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await generateEmbed({ message, interaction }, faqData.toJSON(), {
@@ -167,11 +164,9 @@ module.exports = class FaqCommand extends Command {
 
         await this.db.add({ question, answer })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The new entry has been added to the FAQ list.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -192,33 +187,25 @@ module.exports = class FaqCommand extends Command {
         }
 
         if (faqData.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const doc = faqData.first(item).pop()
         if (!doc) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That item is invalid inside the FAQ list.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         await this.db.delete(doc)
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Removed entry ${item} from the FAQ list.`
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
@@ -232,12 +219,9 @@ module.exports = class FaqCommand extends Command {
         }
 
         if (faqData.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const confirmed = await confirmButtons({ message, interaction }, 'clear the FAQ list')
@@ -247,10 +231,8 @@ module.exports = class FaqCommand extends Command {
             await this.db.delete(doc)
         }
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The FAQ list has been cleared.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

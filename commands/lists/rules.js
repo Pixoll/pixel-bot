@@ -3,7 +3,7 @@
 const { stripIndent } = require('common-tags')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, confirmButtons } = require('../../utils')
+const { generateEmbed, basicEmbed, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -57,14 +57,11 @@ module.exports = class RulesCommand extends Command {
         const data = await this.db.fetch()
 
         if (!data || data.rules.length === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'The are no saved rules for this server. Use the `rule` command to add rules.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         switch (subCommand) {
@@ -110,12 +107,10 @@ module.exports = class RulesCommand extends Command {
 
         await this.db.delete(data)
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: 'All the server rules have been deleted.'
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 }

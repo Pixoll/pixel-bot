@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, userDetails } = require('../../utils')
+const { generateEmbed, basicEmbed, pluralize, userDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -47,12 +47,9 @@ module.exports = class InfractionsCommand extends Command {
 
         const mods = await db.fetchMany({ userId: user.id })
         if (mods.size === 0) {
-            const embed = basicEmbed({
+            return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no infractions.'
-            })
-            await interaction?.editReply({ embeds: [embed] })
-            await message?.replyEmbed(embed)
-            return
+            }))
         }
 
         const intMsg = await interaction?.fetchReply()
