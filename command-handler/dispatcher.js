@@ -4,7 +4,7 @@ const isPromise = require('is-promise')
 const CommandoRegistry = require('./registry')
 const { Message, MessageEmbed, CommandInteraction, MessageButton, MessageActionRow } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient } = require('./typings')
-const { oneLine } = require('common-tags')
+const { oneLine, stripIndent } = require('common-tags')
 const { probability, embedColor } = require('../utils')
 const FriendlyError = require('./errors/friendly')
 /* eslint-enable no-unused-vars */
@@ -174,6 +174,13 @@ class CommandDispatcher {
 		const command = this.registry.resolveCommand(commandName)
 		if (!command) return
 		const { groupId, memberName } = command
+
+		if (channel.type !== 'DM' && channel.permissionsFor(guild.me).missing('USE_APPLICATION_COMMANDS')) {
+			return user.send(stripIndent`
+				I cannot use slash commands in ${channel.toString()}.
+				Please get in contact with one of the admins of **${guild.name}** to fix this issue.
+			`)
+		}
 
 		// Obtain the member if we don't have it
 		if (channel.type !== 'DM' && !guild.members.cache.has(user.id)) {
