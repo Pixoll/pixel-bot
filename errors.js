@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient } = require('./command-handler/typings')
 const { CommandInstances, Command } = require('./command-handler/typings')
-const { MessageEmbed, TextChannel, Util } = require('discord.js')
-const { customEmoji, docId, code } = require('./utils')
+const { MessageEmbed, TextChannel, Util, CommandInteractionOption } = require('discord.js')
+const { customEmoji, docId, code, replyAll } = require('./utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -27,8 +27,7 @@ module.exports = (client) => {
                 **Error id:** ${id}
             `)
 
-        await interaction?.editReply({ embeds: [reply] })
-        await message?.replyEmbed(reply)
+        await replyAll({ message, interaction }, reply)
         await errorHandler(error, 'Command error', { message, interaction }, command, id)
     })
         .on('error', error => errorHandler(error, 'Client error'))
@@ -101,8 +100,20 @@ module.exports = (client) => {
                 ${where}
             `)
 
-            if (command && message) {
-                embed.addField('Command input', code(Util.escapeMarkdown(message.content).substr(0, 1018)))
+            if (command) {
+                let input = ''
+                if (message) input = message.cleanContent
+                else {
+                    input = `/${command.name}`
+                    /** @param {CommandInteractionOption} opt */
+                    function concat(opt) {
+                        if (opt.name && [undefined, null].includes(opt.value)) input += ` ${opt.name}`
+                        else input += ` ${opt.name}: "${opt.value}"`
+                        opt.options?.forEach(concat)
+                    }
+                    for (const option of interaction.options.data) concat(option)
+                }
+                embed.addField('Command input', code(Util.escapeMarkdown(input).substr(0, 1016), 'js'))
             }
 
             const msg = (error.name + whatCommand + ': ' + error.message).split('Require stack:').shift()

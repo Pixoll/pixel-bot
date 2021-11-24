@@ -231,7 +231,10 @@ function noReplyInDMs(msg) {
 async function replyAll({ message, interaction }, options) {
     if (options instanceof MessageEmbed) options = { embeds: [options] }
     if (typeof options === 'string') options = { content: options }
-    if (interaction) return await interaction.editReply(options)
+    if (interaction) {
+        if (interaction.deferred || interaction.replied) return await interaction.editReply(options)
+        else return await interaction.reply(options)
+    }
     if (message) return await message.reply({ ...options, ...noReplyInDMs(message) })
     return null
 }

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { oneLine } = require('common-tags')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled, sliceDots, code } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -25,18 +25,13 @@ module.exports = (client) => {
         if (message) string = message.cleanContent
         else {
             string = `/${command.name}`
-            for (const option of interaction.options.data) {
-                /** @param {option} opt */
-                function concat(opt) {
-                    if (opt.name && [undefined, null].includes(opt.value)) {
-                        string += ` ${opt.name}`
-                    } else {
-                        string += ` ${opt.name}: "${opt.value}"`
-                    }
-                    opt.options?.forEach(concat)
-                }
-                concat(option)
+            /** @param {CommandInteractionOption} opt */
+            function concat(opt) {
+                if (opt.name && [undefined, null].includes(opt.value)) string += ` ${opt.name}`
+                else string += ` ${opt.name}: "${opt.value}"`
+                opt.options?.forEach(concat)
             }
+            for (const option of interaction.options.data) concat(option)
         }
         const content = sliceDots(string, 1016)
 

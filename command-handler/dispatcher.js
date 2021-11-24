@@ -196,11 +196,7 @@ class CommandDispatcher {
 		}
 
 		// Defers the reply
-		try {
-			await interaction.deferReply({ ephemeral: Boolean(command.slash.ephemeral) })
-		} catch (err) {
-			throw new Error(err)
-		}
+		await interaction.deferReply({ ephemeral: Boolean(command.slash.ephemeral) }).catch(() => null)
 
 		// Make sure the command is usable in this context
 		if (command.dmOnly && guild) {
