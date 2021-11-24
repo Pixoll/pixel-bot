@@ -64,7 +64,7 @@ registry.registerCommandsIn(path.join(__dirname, '/commands'))
 client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
-    await database(client, 'auto-punish', 'chat-filter')
+    await database(client, 'auto-punish', 'chat-filter', 'guilds')
     errors(client)
     rateLimit(client)
 

@@ -12,7 +12,7 @@ const { replyAll } = require('../../utils')
  * @param {ModuleSchema} data The data to patch
  */
 function patchData(data) {
-    const _patch = b => b === false ? 'Disabled' : 'Enabled'
+    const _patch = b => b === true ? 'Enabled' : 'Disabled'
 
     const patch = {
         // autoMod: _patch(data?.autoMod),

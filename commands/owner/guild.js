@@ -87,7 +87,8 @@ module.exports = class GuildCommand extends Command {
      */
     async info(message, guild) {
         const serverInfo = this.client.registry.resolveCommand('server-info')
-        await serverInfo.run({ message }, guild)
+        const embed = await serverInfo.run({}, guild)
+        await message.replyEmbed(embed)
     }
 
     /**

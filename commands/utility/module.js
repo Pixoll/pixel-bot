@@ -9,9 +9,7 @@ const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
 const Obj = require('../../schemas').modules.schema.obj
-/** @type {string[]} */
 const modules = Object.keys(Obj).slice(1).map(addDashes)
-/** @type {string[]} */
 const auditLogs = Object.keys(Obj.auditLogs).map(addDashes)
 
 /**
@@ -19,7 +17,7 @@ const auditLogs = Object.keys(Obj.auditLogs).map(addDashes)
  * @param {ModuleSchema} data The data to patch
  */
 function patchData(data) {
-    const _patch = b => b !== false
+    const _patch = b => b === true
 
     const patch = {
         // autoMod: _patch(data?.autoMod),

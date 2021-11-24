@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { oneLine } = require('common-tags')
-const { MessageEmbed, ColorResolvable, TextChannel, TextBasedChannels } = require('discord.js')
+const { oneLine, stripIndent } = require('common-tags')
+const { MessageEmbed, ColorResolvable, TextChannel, TextBasedChannels, User, Util } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 const { embedColor, customEmoji } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -20,28 +20,28 @@ module.exports = async (client) => {
         /** @type {TextChannel} */
         const channel = await client.channels.fetch('906565308381286470')
 
-        const { ownerId, name, id } = guild
-        const owner = await guild.fetchOwner()
-
-        const ownedBy = owner.user || owner ? `${owner.toString()} ${owner.user?.tag || ''}` : ownerId
+        const { ownerId, name, id, memberCount } = guild
+        /** @type {User} */
+        const owner = await client.users.fetch(ownerId).catch(() => null)
+        const ownedBy = owner ? `${owner.toString()} ${owner?.tag || ''}` : ownerId
 
         const info = new MessageEmbed()
             .setColor(color)
             .setAuthor(message, guild.iconURL({ dynamic: true }))
             .setThumbnail(guild.iconURL({ dynamic: true, size: 2048 }))
-            .setDescription(`**${name}** is owned by ${ownedBy}`)
+            .setDescription(stripIndent`
+                **Name:** ${Util.escapeMarkdown(name)}
+                **Owner:** ${Util.escapeMarkdown(ownedBy)}
+                **Members:** ${memberCount.toLocaleString()}
+            `)
             .setFooter(`Guild id: ${id} | Owner id: ${ownerId}`)
             .setTimestamp()
-
-        const last = channel.lastMessage?.embeds[0] ?? new MessageEmbed()
-        const equalsLast = info.equals(last)
-        if (equalsLast) return
 
         await channel.send({ embeds: [info] })
     }
 
     client.on('guildCreate', async guild => {
-        client.emit('debug', 'The bot has joined', guild.name)
+        client.emit('debug', `The bot has joined "${guild.name}"`)
         await guildInfo('GREEN', 'The bot has joined a new guild', guild)
 
         const { channels, id, ownerId } = guild
@@ -65,18 +65,25 @@ module.exports = async (client) => {
             .setTitle(`Thanks for adding ${user.username}!`)
             .setDescription('Here\'s some useful information about the bot.')
             .addField(`${customEmoji('info')} Using commands`, oneLine`
-                To use commands just run \`${prefix}<command>\`! You can also mention the bot, like this:
-                \`@${user.tag} <command>\`. For a list of all commands or general information, run \`${prefix}help\`.
+                To use a command type \`${prefix}<command>\`, \`/<command>\` or \`@${user.tag} <command>\`!
+                For a list of all commands or general information, run \`/help\`.
             `)
-            .addField('⚙ Setting up the bot', oneLine`
-                To setup the bot just run \`${prefix}setup\`, this will setup every core setting for all modules of
-                the bot. If you want to setup an specific module, just run \`${prefix}setup [module]\`, you can see
-                the full list using \`${prefix}help setup\`.
+            .addField('⚙ Setting up the bot', stripIndent`
+                ${oneLine`
+                    To setup the bot just run \`/setup\`, this will setup every core setting for all modules of
+                    the bot. If you want to setup an specific module, just run \`/setup [module]\`, you can see
+                    the full list using \`/help setup\`.
+                `}
+                ${oneLine`
+                    Afterwards, make sure to run \`/module toggle\` to toggle the modules/sub-modules you want to use
+                    in this server.
+                `}
             `)
             .addField('🕒 Note about times and dates', oneLine`
-                The bot runs based off **London's time zone (UTC±0).** This means that when you used time-based commands,
-                like \`timestamp\`, \`reminder\` or \`time\`, all of the times you specify will be based on London's time.
-                For more information about the time system, please check **page 4** of the \`help\` command.
+                The bot runs based off the **Coordinated Universal Time (UTC).** This means that when you used
+                time-based commands, like \`timestamp\`, \`reminder\` or \`time\`, all of the times you specify
+                will be based on UTC's time. For more information about the time system, please check **page 4**
+                of the \`help\` command.
             `)
             .addField('🔗 Useful links', oneLine`
                 [Top.gg page](${topgg}) -
@@ -90,7 +97,7 @@ module.exports = async (client) => {
     })
 
     client.on('guildDelete', async guild => {
-        client.emit('debug', 'The bot has left', guild.name)
+        client.emit('debug', `The bot has left "${guild.name}"`)
         await guildInfo('RED', 'The bot has left a guild', guild)
     })
 }

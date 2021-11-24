@@ -98,11 +98,11 @@ async function isModuleEnabled(guild, module, subModule) {
         const status = []
         for (const prop in check) {
             if (typeof check[prop] === 'function') continue
-            status.push(check[prop] !== false)
+            status.push(check[prop] === true)
         }
-        return Boolean(status.filter(b => b)[0])
+        return !!status.filter(b => b)[0]
     }
-    return check !== false
+    return check === true
 }
 
 /**

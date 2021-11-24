@@ -38,8 +38,8 @@ module.exports = class ServerInfoCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {CommandoGuild} guild The guild to get information from
      */
-    async run({ message, interaction }, guild) {
-        const server = (message || interaction).guild || guild
+    async run({ message, interaction } = {}, guild) {
+        const server = (message || interaction)?.guild || guild
         const { name, channels, premiumTier, premiumSubscriptionCount, memberCount, roles, id, createdTimestamp } = server
         const owner = await server.fetchOwner()
 
@@ -56,19 +56,20 @@ module.exports = class ServerInfoCommand extends Command {
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
             .addField('Information', stripIndent`
                 **Owner:** ${owner.user.tag} ${ownerCrown}
-                **Channel categories:** ${categories}
-                **Text channels:** ${text}
-                **Voice channels:** ${voice}
+                **Channel categories:** ${categories.toLocaleString()}
+                **Text channels:** ${text.toLocaleString()}
+                **Voice channels:** ${voice.toLocaleString()}
             `, true)
             .addField('\u200B', stripIndent`
                 **Server boost lvl:** ${formatLvl(premiumTier)}
-                **Server boosts:** ${premiumSubscriptionCount} ${boost}
-                **Members:** ${memberCount}
-                **Roles:** ${_roles.size}
+                **Server boosts:** ${premiumSubscriptionCount.toLocaleString()} ${boost}
+                **Members:** ${memberCount.toLocaleString()}
+                **Roles:** ${_roles.size.toLocaleString()}
             `, true)
             .setFooter(`Server id: ${id} | Created at`)
             .setTimestamp(createdTimestamp)
 
+        if (guild) return serverInfo
         await replyAll({ message, interaction }, serverInfo)
     }
 }
