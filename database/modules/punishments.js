@@ -10,16 +10,16 @@ const { CommandoClient } = require('../../command-handler/typings')
 module.exports = async (client) => {
     async function checkPunishments() {
         const { users } = client
-        const guilds = client.guilds.cache
+        const guilds = client.guilds.cache.toJSON()
 
-        for (const [, guild] of guilds) {
+        for (const guild of guilds) {
             const { members, bans, database } = guild
             const db = database.active
 
             const docs = await db.fetchMany({ duration: { $lte: Date.now() } })
             for (const doc of docs.toJSON()) {
                 /** @type {User} */
-                const user = await users.fetch(doc.user.id).catch(() => null)
+                const user = await users.fetch(doc.userId).catch(() => null)
                 if (!user) continue
 
                 if (doc.type === 'temp-ban') {
@@ -55,7 +55,7 @@ module.exports = async (client) => {
             }
         }
 
-        setTimeout(checkPunishments, 1000)
+        setTimeout(async () => await checkPunishments(), 1000)
     }
 
     await checkPunishments()

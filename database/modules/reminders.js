@@ -56,7 +56,7 @@ module.exports = async (client) => {
             await db.delete(reminder)
         }
 
-        setTimeout(sendReminders, 1000)
+        setTimeout(async () => await sendReminders(), 1000)
     }
 
     await sendReminders()

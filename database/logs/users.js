@@ -56,11 +56,11 @@ module.exports = (client) => {
 
         const guilds = client.guilds.cache.toJSON()
         for (const guild of guilds) {
-            const status = await isModuleEnabled(guild, 'audit-logs', 'users')
-            if (!status) return
-
             const member = guild.members.cache.get(id)
             if (!member) continue
+
+            const status = await isModuleEnabled(guild, 'audit-logs', 'users')
+            if (!status) return
 
             guild.queuedLogs.push(embed)
         }
