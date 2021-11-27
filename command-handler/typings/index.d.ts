@@ -1648,7 +1648,7 @@ export interface CommandoClientEvents extends ClientEvents {
 	groupRegister: [group: CommandGroup, registry: CommandoRegistry]
 	groupStatusChange: [guild?: CommandoGuild, group: CommandGroup, enabled: boolean]
 	guildMemberMute: [guild: CommandoGuild, moderator: User, user: User, reason: string, duration: number]
-	guildMemberUnmute: [guild: CommandoGuild, moderator?: User, user: User, reason: string, expired?: boolean]
+	guildMemberUnmute: [guild: CommandoGuild, moderator?: User, user: User, reason: string]
 	guildMemberWarn: [guild: CommandoGuild, moderator: User, user: User, reason: string]
 	moduleStatusChange: [guild: CommandoGuild, module: string, enabled: boolean]
 	providerReady: [provider: SettingProvider]

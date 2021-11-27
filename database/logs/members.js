@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp } = require('../../utils')
+const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -22,6 +22,8 @@ const imgOptions = { dynamic: true, size: 2048 }
  */
 module.exports = (client) => {
     client.on('guildMemberAdd', async member => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
+
         const { guild, user } = member
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
@@ -49,6 +51,8 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberRemove', async member => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
+
         member = await member.fetch().catch(() => null)
         if (!member) return
 
@@ -76,6 +80,8 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberUpdate', async (oldMember, newMember) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberUpdate".`)
+
         const { guild } = newMember
         if (!guild.available) return
 

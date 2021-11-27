@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial } = require('../../utils')
+const { isModuleEnabled, fetchPartial, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,6 +11,8 @@ module.exports = (client) => {
     const botId = client.user.id
 
     client.on('guildMemberAdd', /** @param {CommandoMember} member */ async member => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
+
         const { guild, roles, id } = member
         if (id === botId) return
 
@@ -24,6 +26,8 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberRemove', /** @param {CommandoMember} member */ async member => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
+
         member = await fetchPartial(member)
         if (!member) return
 

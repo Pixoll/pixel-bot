@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { TextChannel, Message, Role, GuildMember } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { findCommonElement, fetchPartial } = require('../../utils')
+const { findCommonElement, fetchPartial, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,14 +10,16 @@ const { findCommonElement, fetchPartial } = require('../../utils')
  */
 module.exports = async (client) => {
     async function removeMissingData() {
-        const guilds = client.guilds.cache
+        const guilds = client.guilds.cache.toJSON()
         const channels = client.channels.cache
 
-        for (const [, guild] of guilds) {
+        for (const guild of guilds) {
+            client.emit('debug', `Running "${sliceFileName(__filename)}#expirePunishment" for "${guild.id}".`)
+
             const db = guild.database.reactionRoles
 
             const data = await db.fetchMany()
-            for (const [, doc] of data) {
+            for (const doc of data.toJSON()) {
                 /** @type {TextChannel} */
                 const channel = channels.get(doc.channel)
                 if (!channel) {
@@ -45,6 +47,8 @@ module.exports = async (client) => {
     await removeMissingData()
 
     client.on('messageReactionAdd', async (reaction, user) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionAdd".`)
+
         reaction = await fetchPartial(reaction)
         user = await fetchPartial(user)
 
@@ -74,6 +78,8 @@ module.exports = async (client) => {
     })
 
     client.on('messageReactionRemove', async (reaction, user) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionRemove".`)
+
         reaction = await reaction.fetch().catch(() => null)
         user = await user.fetch().catch(() => null)
         if (!reaction || !user) return

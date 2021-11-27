@@ -4,7 +4,7 @@ const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const {
     arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter,
-    locales, nsfwLevels, removeUnderscores, sysChannelFlags
+    locales, nsfwLevels, removeUnderscores, sysChannelFlags, sliceFileName
 } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -34,13 +34,13 @@ function imageLink(link) {
  */
 module.exports = (client) => {
     client.on('guildUpdate', async (oldGuild, newGuild) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildUpdate".`)
+
         const isEnabled = await isModuleEnabled(oldGuild, 'audit-logs', 'server')
         if (!isEnabled) return
 
         const logsChannel = await getLogsChannel(oldGuild)
         if (!logsChannel) return
-
-        const { id, client } = oldGuild
 
         const {
             name: name1, systemChannel: sysChan1, afkChannel: afkChan1, afkTimeout: afkTo1, ownerId: ownerId1,
@@ -49,7 +49,7 @@ module.exports = (client) => {
             mfaLevel: mfa1, widgetChannel: widgetChan1, widgetEnabled: widgetOn1, discoverySplash: discSplash1,
             publicUpdatesChannel: updateChan1, rulesChannel: rulesChan1, preferredLocale: lang1, nsfwLevel: nsfw1,
             partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1,
-            maximumBitrate: maxBitrate1
+            maximumBitrate: maxBitrate1, id
         } = oldGuild
         const {
             name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,

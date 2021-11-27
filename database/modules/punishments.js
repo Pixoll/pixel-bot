@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { User, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
+const { sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -13,6 +14,8 @@ module.exports = async (client) => {
         const guilds = client.guilds.cache.toJSON()
 
         for (const guild of guilds) {
+            client.emit('debug', `Running "${sliceFileName(__filename)}#expirePunishment" for "${guild.id}".`)
+
             const { members, bans, database } = guild
             const db = database.active
 

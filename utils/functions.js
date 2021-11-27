@@ -32,6 +32,17 @@ function probability(n) {
 }
 
 /**
+ * Slices the directory/name of the file to their last 2 references.
+ * @param {string} fileDir The directory/name of the file.
+ */
+function sliceFileName(fileDir) {
+    const arr = fileDir.split(/[/\\]+/g)
+    const fileName = arr.pop()
+    const folderName = arr.pop()
+    return `${folderName}/${fileName}`
+}
+
+/**
  * Orders an array in alphabetical order
  * @param {string} str1 The first string
  * @param {string} str2 The seconds string
@@ -1373,6 +1384,7 @@ module.exports = {
     noReplyInDMs,
     sleep,
     sliceDots,
+    sliceFileName,
     tempban,
     userException,
     validURL

@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
+const { sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -9,10 +10,12 @@ const { CommandoClient } = require('../../command-handler/typings')
  */
 module.exports = async (client) => {
     async function endPolls() {
-        const guilds = client.guilds.cache
+        const guilds = client.guilds.cache.toJSON()
         const channels = client.channels.cache
 
-        for (const [, guild] of guilds) {
+        for (const guild of guilds) {
+            client.emit('debug', `Running "${sliceFileName(__filename)}#pollEnd" for "${guild.id}".`)
+
             const db = guild.database.polls
 
             const pollsData = await db.fetchMany({ endsAt: { $lte: Date.now() } })

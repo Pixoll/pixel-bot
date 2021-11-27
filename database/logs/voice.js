@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, channelTypes } = require('../../utils')
+const { isModuleEnabled, channelTypes, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,6 +10,8 @@ const { isModuleEnabled, channelTypes } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('voiceStateUpdate', async (oldState, newState) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#voiceStateUpdate".`)
+
         const { guild, member, id } = oldState
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'voice')

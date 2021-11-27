@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildAuditLogs, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial, timestamp } = require('../../utils')
+const { isModuleEnabled, fetchPartial, timestamp, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,6 +11,8 @@ const { isModuleEnabled, fetchPartial, timestamp } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('guildMemberRemove', async _member => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
+
         /** @type {GuildMember} */
         const { guild, user, id } = await fetchPartial(_member)
         if (!guild.available || id === client.user.id) return
@@ -41,6 +43,8 @@ module.exports = (client) => {
     })
 
     client.on('guildBanAdd', async banLog => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildBanAdd".`)
+
         if (!banLog.guild.available) return
         banLog = await banLog.fetch().catch(() => null)
         if (!banLog) return
@@ -76,6 +80,8 @@ module.exports = (client) => {
     })
 
     client.on('guildBanRemove', async unbanLog => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildBanRemove".`)
+
         if (!unbanLog.guild.available) return
         unbanLog = await unbanLog.fetch().catch(() => null)
         if (!unbanLog) return
@@ -111,6 +117,8 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberMute', async (guild, mod, user, reason, duration) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberMute".`)
+
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
@@ -129,7 +137,9 @@ module.exports = (client) => {
         guild.queuedLogs.push(embed)
     })
 
-    client.on('guildMemberUnmute', async (guild, mod, user, reason, expired) => {
+    client.on('guildMemberUnmute', async (guild, mod, user, reason) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberUnmute".`)
+
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
@@ -150,6 +160,8 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberWarn', async (guild, mod, user, reason) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberWarn".`)
+
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
