@@ -1,11 +1,10 @@
 /* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { MessageEmbed, MessageAttachment, MessageOptions } = require('discord.js')
-const { status: statusJava, statusBedrock } = require('minecraft-server-util')
-const { StatusResponse, BedrockStatusResponse } = require('minecraft-server-util/dist/model/StatusResponse')
-const { basicEmbed, getArgument, remDiscFormat, noReplyInDMs, replyAll } = require('../../utils')
+const { CommandInstances } = require('../../command-handler/typings')
+const { MessageEmbed, MessageAttachment, MessageOptions, Util } = require('discord.js')
+const { status: statusJava, statusBedrock, JavaStatusResponse, BedrockStatusResponse } = require('minecraft-server-util')
+const { basicEmbed, getArgument, remDiscFormat, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -110,7 +109,7 @@ module.exports = class McStatusCommand extends Command {
     async run({ message, interaction }, { subCommand, ip, port }) {
         subCommand = subCommand.replace('_', ':').toLowerCase()
         const { guild } = message || interaction
-        this.db = guild.database.mcIps
+        this.db = guild?.database.mcIps
 
         switch (subCommand) {
             case 'check':
@@ -198,6 +197,10 @@ module.exports = class McStatusCommand extends Command {
         const { guildId, member } = message || interaction
         const { permissions } = member
 
+        if (!guildId) {
+            return await this.onBlock({ message, interaction }, 'guildOnly')
+        }
+
         if (!this.client.isOwner(message || interaction.user) && !permissions.has('ADMINISTRATOR')) {
             return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
@@ -236,6 +239,10 @@ module.exports = class McStatusCommand extends Command {
         const { guildId, member } = message || interaction
         const { permissions } = member
 
+        if (!guildId) {
+            return await this.onBlock({ message, interaction }, 'guildOnly')
+        }
+
         if (!this.client.isOwner(message || interaction.user) && !permissions.has('ADMINISTRATOR')) {
             return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
         }
@@ -253,7 +260,7 @@ module.exports = class McStatusCommand extends Command {
             port: port
         })
 
-        const embed = basicEmbed({
+        await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'Saved Minecraft server data',
@@ -261,26 +268,28 @@ module.exports = class McStatusCommand extends Command {
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
             `
-        })
-        await interaction?.editReply({ embeds: [embed] })
-        await message?.replyEmbed(embed)
+        }))
     }
 
     /**
      * Gets the status of a Java server
      * @param {string} ip The IP of the server to look for
      * @param {number} port the port of the server to look for
+     * @returns {Promise<MessageEmbed|MessageOptions>}
      */
     async getJavaStatus(ip, port) {
-        /** @type {StatusResponse} */
-        const status = await statusJava(ip, { port, timeout: 5000 }).catch(() => null)
+        const reqStart = Date.now()
+        /** @type {JavaStatusResponse} */
+        const status = await statusJava(ip, port).catch(() => null)
+        const ping = Date.now() - reqStart
+
         if (!status) {
             return basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the server you were looking for.'
             })
         }
 
-        const { description, samplePlayers, onlinePlayers, maxPlayers, version, favicon, roundTripLatency, host } = status
+        const { motd, version, favicon, players } = status
 
         // Server favicon
         const buffer = favicon ? new Buffer.from(favicon.split(',')[1], 'base64') : null
@@ -288,31 +297,28 @@ module.exports = class McStatusCommand extends Command {
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`Server IP: ${host}`, 'attachment://icon.png')
-            .addField('Description', remDiscFormat(description.toRaw()))
+            .setAuthor(`Server IP: ${ip}`, 'attachment://icon.png')
+            .addField('MOTD', Util.escapeMarkdown(motd.clean.trimStart()))
             .setThumbnail('attachment://icon.png')
             .setTimestamp()
 
-        if (samplePlayers?.length > 0) {
+        if (players.sample?.length > 0) {
             serverInfo.addField(
                 'Player list',
-                samplePlayers.map(p => `\`${p.name}\``).join(', ')
+                players.sample.map(p => `\`${p.name}\``).join(', ')
             )
         }
 
         serverInfo.addField('Information', stripIndent`
-            **>** **Online players:** ${onlinePlayers}/${maxPlayers}
-            **>** **Version:** ${version}
-            **>** **Ping:** ${roundTripLatency}ms
+            **Online players:** ${players.online}/${players.max}
+            **Version:** ${version.name}
+            **Ping:** ${ping}ms
         `)
 
-        /** @type {MessageOptions} */
-        const options = {
+        return {
             embeds: [serverInfo],
             files: [icon].filter(a => a)
         }
-
-        return options
     }
 
     /**
@@ -321,27 +327,27 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} port the port of the server to look for
      */
     async getBedrockStatus(ip, port) {
+        const reqStart = Date.now()
         /** @type {BedrockStatusResponse} */
-        const status = await statusBedrock(ip, { port, timeout: 5000 }).catch(() => null)
+        const status = await statusBedrock(ip, port).catch(() => null)
+        const ping = Date.now() - reqStart
+
         if (!status) {
             return basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the server you were looking for.'
             })
         }
 
-        const { motdLine1, motdLine2, onlinePlayers, maxPlayers, version, roundTripLatency, host } = status
+        const { motd, players, version } = status
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`Server IP: ${host}`)
-            .addField('Description', stripIndent`
-                ${remDiscFormat(motdLine1.toRaw())}
-                ${remDiscFormat(motdLine2.toRaw())}
-            `)
+            .setAuthor(`Server IP: ${ip}`)
+            .addField('MOTD', Util.escapeMarkdown(motd.clean.trimStart()))
             .addField('Information', stripIndent`
-                **Online players:** ${onlinePlayers}/${maxPlayers}
-                **Version:** ${version}
-                **Ping:** ${roundTripLatency}ms
+                **Online players:** ${players.online}/${players.max}
+                **Version:** ${version.name}
+                **Ping:** ${ping}ms
             `)
             .setTimestamp()
 

@@ -1,6 +1,6 @@
 {
   "name": "pixel",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
@@ -11,7 +11,7 @@
     "emoji-regex": "^10.0.0",
     "is-promise": "^4.0.0",
     "lodash": "^4.17.21",
-    "minecraft-server-util": "^3.6.0",
+    "minecraft-server-util": "^5.0.0",
     "mongoose": "5.13.10",
     "require-all": "^3.0.0"
   },
@@ -20,7 +20,7 @@
   },
   "engines": {
     "node": "16.x",
-    "npm": "7.x"
+    "npm": "8.x"
   },
   "repository": {
     "type": "git",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-node": "^11.1.0",

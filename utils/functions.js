@@ -37,7 +37,7 @@ function probability(n) {
  */
 function sliceFileName(fileDir) {
     const arr = fileDir.split(/[/\\]+/g)
-    const fileName = arr.pop()
+    const fileName = arr.pop().split('.').shift()
     const folderName = arr.pop()
     return `${folderName}/${fileName}`
 }

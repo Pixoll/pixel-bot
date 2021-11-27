@@ -49,13 +49,11 @@ class DatabaseManager {
             throw new TypeError('doc must me an object')
         }
         if (this.guild) doc.guild ||= this.guild.id
-        this.client.emit('debug', `Fetching document at "${this.constructor.name}#add".`)
         const existing = doc._id ? await this.schema.findById(`${doc._id}`) : await this.schema.findOne(doc)
         if (existing) {
             const updated = await this.update(existing, doc)
             return updated
         }
-        this.client.emit('debug', `Adding document at "${this.constructor.name}#add".`)
         const added = await new this.schema(doc).save()
         this.cache.set(`${added._id}`, added)
         return added
@@ -75,7 +73,6 @@ class DatabaseManager {
         if (typeof doc === 'string') {
             doc = await this.fetch(doc)
         }
-        this.client.emit('debug', `Deleting document at "${this.constructor.name}#delete".`)
         this.cache.delete(`${doc._id}`)
         await doc.deleteOne()
         return doc
@@ -103,7 +100,6 @@ class DatabaseManager {
         if (typeof toUpdate === 'undefined' || toUpdate === null) {
             throw new TypeError('toUpdate cannot be undefined or null.')
         }
-        this.client.emit('debug', `Updating document at "${this.constructor.name}#update".`)
         await toUpdate.updateOne(options)
         const newDoc = await this.schema.findById(`${toUpdate._id}`)
         this.cache.set(`${newDoc._id}`, newDoc)
@@ -116,7 +112,6 @@ class DatabaseManager {
      * @returns {Promise<?object>} The fetched document
      */
     async fetch(filter = {}) {
-        this.client.emit('debug', `Fetching document at "${this.constructor.name}#fetch".`)
         if (typeof filter === 'string') {
             const existing = this.cache.get(filter)
             if (existing) return existing
@@ -145,7 +140,6 @@ class DatabaseManager {
      * @returns {Promise<Collection<string, object>>} The fetched documents
      */
     async fetchMany(filter = {}) {
-        this.client.emit('debug', `Fetching documents at "${this.constructor.name}#fetchMany".`)
         if (this.cache.size === 0) return this.cache
 
         if (this.guild) filter.guild ??= this.guild.id

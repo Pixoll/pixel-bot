@@ -10,12 +10,12 @@ const { findCommonElement, fetchPartial, sliceFileName } = require('../../utils'
  */
 module.exports = async (client) => {
     async function removeMissingData() {
+        client.emit('debug', `Running "${sliceFileName(__filename)}#missingData".`)
+
         const guilds = client.guilds.cache.toJSON()
         const channels = client.channels.cache
 
         for (const guild of guilds) {
-            client.emit('debug', `Running "${sliceFileName(__filename)}#expirePunishment" for "${guild.id}".`)
-
             const db = guild.database.reactionRoles
 
             const data = await db.fetchMany()

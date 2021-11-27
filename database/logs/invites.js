@@ -57,8 +57,6 @@ module.exports = (client) => {
     })
 
     client.on('cMessageCreate', async message => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#cMessageCreate".`)
-
         const { guild, author, isCommand, content, channel, url } = message
         if (!guild || author.bot || isCommand) return
 

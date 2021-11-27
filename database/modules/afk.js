@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
-const { basicEmbed, sleep, timestamp, sliceFileName } = require('../../utils')
+const { basicEmbed, sleep, timestamp } = require('../../utils')
 const { CommandoClient } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
@@ -10,8 +10,6 @@ const { CommandoClient } = require('../../command-handler/typings')
  */
 module.exports = (client) => {
     client.on('cMessageCreate', async message => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#cMessageCreate".`)
-
         const { guild, author, isCommand, command } = message
 
         if (!guild || author.bot) return
@@ -34,8 +32,6 @@ module.exports = (client) => {
     })
 
     client.on('cMessageCreate', async message => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#cMessageCreate".`)
-
         const { guild, author, mentions } = message
         const { everyone, users } = mentions
 
