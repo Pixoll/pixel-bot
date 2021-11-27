@@ -2,8 +2,8 @@
 const { escapeRegex } = require('./util')
 const isPromise = require('is-promise')
 const CommandoRegistry = require('./registry')
-const { Message, MessageEmbed, CommandInteraction, MessageButton, MessageActionRow } = require('discord.js')
-const { CommandoMessage, Inhibition, Inhibitor, CommandoClient } = require('./typings')
+const { Message, MessageEmbed, MessageButton, MessageActionRow } = require('discord.js')
+const { CommandoMessage, Inhibition, Inhibitor, CommandoClient, CommandoInteraction } = require('./typings')
 const { oneLine, stripIndent } = require('common-tags')
 const { probability, embedColor } = require('../utils')
 const FriendlyError = require('./errors/friendly')
@@ -162,7 +162,7 @@ class CommandDispatcher {
 
 	/**
 	 * Handle a slash command interaction
-	 * @param {CommandInteraction} interaction The interaction to handle
+	 * @param {CommandoInteraction} interaction The interaction to handle
 	 * @return {Promise<void>}
 	 * @private
 	 */
@@ -170,19 +170,18 @@ class CommandDispatcher {
 		if (!interaction.isCommand()) return
 
 		// Get the matching command
-		const { commandName, channelId, channel, guild, user } = interaction
+		/** @type {CommandoInteraction} */
+		const { commandName, channelId, channel, guild, user, guildId, client } = interaction
 		const command = this.registry.resolveCommand(commandName)
 		if (!command) return
 		const { groupId, memberName } = command
 
-		if (channel.type !== 'DM') {
-			const missingSlash = channel.permissionsFor(guild.me).missing('USE_APPLICATION_COMMANDS')
-			if (missingSlash.length !== 0) {
-				return await user.send(stripIndent`
-				I cannot use slash commands in ${channel.toString()}.
-				Please get in contact with one of the admins of **${guild.name}** to fix this issue.
+		const missingSlash = guild?.me.permissionsIn(channel).missing('USE_APPLICATION_COMMANDS')
+		if (missingSlash && missingSlash.length !== 0) {
+			return await user.send(stripIndent`
+				It seems like I cannot **Use Application Commands** in this channel: ${channel.toString()}
+				Please try in another channel, or contact the admins of **${guild.name}** to solve this issue.
 			`).catch(() => null)
-			}
 		}
 
 		// Obtain the member if we don't have it
@@ -191,8 +190,8 @@ class CommandDispatcher {
 		}
 
 		// Obtain the member for the ClientUser if it doesn't already exist
-		if (channel.type !== 'DM' && !guild.members.cache.has(this.client.user.id)) {
-			await guild.members.fetch(this.client.user.id)
+		if (channel.type !== 'DM' && !guild.members.cache.has(client.user.id)) {
+			await guild.members.fetch(client.user.id)
 		}
 
 		// Defers the reply
@@ -200,42 +199,42 @@ class CommandDispatcher {
 
 		// Make sure the command is usable in this context
 		if (command.dmOnly && guild) {
-			this.client.emit('commandBlock', { interaction }, 'dmOnly')
+			client.emit('commandBlock', { interaction }, 'dmOnly')
 			return await command.onBlock({ interaction }, 'dmOnly')
 		}
 
 		// Make sure the command is usable in this context
 		if ((command.guildOnly || command.guildOwnerOnly) && !guild) {
-			this.client.emit('commandBlock', { interaction }, 'guildOnly')
+			client.emit('commandBlock', { interaction }, 'guildOnly')
 			return await command.onBlock({ interaction }, 'guildOnly')
 		}
 
 		// Ensure the channel is a NSFW one if required
 		if (command.nsfw && !channel.nsfw) {
-			this.client.emit('commandBlock', { interaction }, 'nsfw')
+			client.emit('commandBlock', { interaction }, 'nsfw')
 			return await command.onBlock({ interaction }, 'nsfw')
 		}
 
 		// Ensure the user has permission to use the command
-		const isOwner = this.client.isOwner(user)
+		const isOwner = client.isOwner(user)
 		const hasPermission = command.hasPermission({ interaction })
 		if (!isOwner && hasPermission !== true) {
 			if (typeof hasPermission === 'string') {
-				this.client.emit('commandBlock', { interaction }, hasPermission)
+				client.emit('commandBlock', { interaction }, hasPermission)
 				return await command.onBlock({ interaction }, hasPermission)
 			}
 			const data = { missing: hasPermission }
-			this.client.emit('commandBlock', { interaction }, 'userPermissions', data)
+			client.emit('commandBlock', { interaction }, 'userPermissions', data)
 			return await command.onBlock({ interaction }, 'userPermissions', data)
 		}
 
 		// Ensure the client user has the required permissions
 		if (channel.type !== 'DM' && command.clientPermissions) {
-			const missing = channel.permissionsFor(this.client.user).missing(command.clientPermissions)
+			const missing = channel.permissionsFor(client.user).missing(command.clientPermissions)
 			if (missing.length > 0) {
 				const data = { missing }
-				this.client.emit('commandBlock', { interaction }, 'clientPermissions', data)
-				return await this.command.onBlock({ interaction }, 'clientPermissions', data)
+				client.emit('commandBlock', { interaction }, 'clientPermissions', data)
+				return await command.onBlock({ interaction }, 'clientPermissions', data)
 			}
 		}
 
@@ -277,13 +276,13 @@ class CommandDispatcher {
 				concat(option)
 			}
 
-			this.client.emit('debug', `Running slash command "${groupId}:${memberName}" in channel "${channelId}".`)
+			client.emit('debug', `Running slash command "${groupId}:${memberName}" at "${guildId}-${channelId}".`)
 			const promise = command.run({ interaction }, options, false, {})
-			this.client.emit('commandRun', command, promise, { interaction }, options, false, {})
+			client.emit('commandRun', command, promise, { interaction }, options, false, {})
 			await promise
 
 			if (probability(2)) {
-				const { user, botInvite } = this.client
+				const { user, botInvite } = client
 				const embed = new MessageEmbed()
 					.setColor(embedColor)
 					.addField(`Enjoying ${user.username}?`, oneLine`
@@ -307,9 +306,13 @@ class CommandDispatcher {
 
 			return
 		} catch (err) {
-			this.client.emit('commandError', command, err, { interaction })
+			client.emit('commandError', command, err, { interaction })
 			if (err instanceof FriendlyError) {
-				return await interaction.reply(err.message)
+				if (interaction.deferred || interaction.replied) {
+					return await interaction.editReply({ content: err.message, components: [], embeds: [] })
+				} else {
+					return await interaction.reply(err.message)
+				}
 			} else {
 				return await command.onError(err, { interaction })
 			}
