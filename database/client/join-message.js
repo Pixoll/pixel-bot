@@ -14,17 +14,20 @@ module.exports = async (client) => {
         client.emit('debug', `Running "${sliceFileName(__filename)}".`)
 
         const { channels, id, ownerId } = guild
-        const owner = await client.users.fetch(ownerId)
 
         /** @type {TextBasedChannels} */
-        const channel = channels.cache.sort((a, b) => a.rawPosition - b.rawPosition)
+        let channel = channels.cache.sort((a, b) => a.rawPosition - b.rawPosition)
             .filter(ch => {
                 if (ch.type !== 'GUILD_TEXT') return false
                 const eveyonePerms = ch.permissionOverwrites.resolve(id)?.allow
                 if (!eveyonePerms) return false
                 const hasPerms = eveyonePerms.bitfield === 0n || eveyonePerms.has(['SEND_MESSAGES', 'VIEW_CHANNEL'])
                 return hasPerms
-            }).first() || await owner.createDM()
+            }).first()
+        if (!channel) {
+            const owner = await client.users.fetch(ownerId).catch(() => null)
+            channel = await owner?.createDM().catch(() => null)
+        }
 
         const topgg = 'https://top.gg/bot/802267523058761759'
         const { user, owners, prefix, options } = client
@@ -67,6 +70,6 @@ module.exports = async (client) => {
             `)
             .setFooter(`Created with ❤️ by ${owners[0].tag}`, owners[0].displayAvatarURL({ dynamic: true }))
 
-        await channel.send({ embeds: [embed] })
+        await channel?.send({ embeds: [embed] }).catch(() => null)
     })
 }

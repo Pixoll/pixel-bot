@@ -1058,8 +1058,8 @@ async function pagedEmbed({ message, interaction }, data, template) {
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not
  * @param {boolean} [data.dmMsg=''] The message to send to the user in DMs. Only if `toUser` is true
  * @param {boolean} [data.skipMaxButtons=false] Whether to skip the page start and page end buttons
- * @param {boolean} [data.hasObjects] Whether `array` contains objects inside or not
- * @param {boolean} [data.numbered] Whether to number the items or not
+ * @param {boolean} [data.hasObjects=true] Whether `array` contains objects inside or not
+ * @param {boolean} [data.numbered=false] Whether to number the items or not
  * @param {object} [data.keyTitle={}] A custom key data to use from the nested objects on the title
  * @param {string} [data.keyTitle.suffix] The name of the key to use as a suffix
  * @param {string} [data.keyTitle.prefix] The name of the key to use as a prefix
