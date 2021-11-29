@@ -1,6 +1,6 @@
 {
   "name": "pixel",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
@@ -33,9 +33,7 @@
   },
   "homepage": "https://github.com/Pixoll/pixel-bot/#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
-    "eslint": "^8.3.0",
+    "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-node": "^11.1.0",

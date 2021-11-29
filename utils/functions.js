@@ -177,15 +177,15 @@ function customEmoji(emoji = '', animated = false) {
 function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldValue, footer }) {
     if (!description && !fieldName) throw new Error('The argument description or fieldName must be specified')
 
-    const embedText = `${customEmoji(emoji)} ${fieldName || description}`
+    emoji = customEmoji(emoji)
 
     const embed = new MessageEmbed()
         .setColor(typeof color === 'string' ? color.toUpperCase() : color)
 
-    if (description) embed.setDescription(embedText)
+    if (description) embed.setDescription(`${emoji} ${description}`)
     if (fieldName) {
         if (!fieldValue) throw new Error('The argument fieldValue must be specified')
-        embed.addField(embedText, fieldValue)
+        embed.addField(`${emoji} ${fieldName}`, fieldValue)
     }
     if (footer) embed.setFooter(footer)
 
@@ -276,19 +276,20 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
         )}`
     }
 
-    const toDelete = await message?.replyEmbed(basicEmbed(embedOptions))
+    const toDelete = await replyAll({ message, interaction }, basicEmbed(embedOptions))
 
     const messages = await (message || interaction).channel.awaitMessages(collectorOptions)
+    if (message && shouldDelete) await toDelete?.delete().catch(() => null)
+
     if (messages.size === 0) {
-        await replyAll({ message, interaction }, { content: 'You didn\'t answer in time.' })
+        await replyAll({ message, interaction }, { content: 'You didn\'t answer in time.', embeds: [] })
         return null
     }
     if (messages.first().content.toLowerCase() === 'cancel') {
-        await replyAll({ message, interaction }, { content: 'Cancelled command.' })
+        await replyAll({ message, interaction }, { content: 'Cancelled command.', embeds: [] })
         return null
     }
 
-    if (shouldDelete) await toDelete?.delete()
     return messages.first()
 }
 

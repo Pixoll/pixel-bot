@@ -2,9 +2,9 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const {
-    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument, replyAll
+    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument, replyAll, isValidRole
 } = require('../../utils')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
@@ -296,6 +296,29 @@ module.exports = class SetupCommand extends Command {
             await toDelete?.delete()
         } else {
             const intMsg = await interaction.fetchReply()
+
+            if (!isValidRole(intMsg, mutedRole)) {
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'The chosen muted role is invalid. Please check the role hierarchy.'
+                }))
+            }
+            if (!isValidRole(intMsg, memberRole)) {
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'The chosen default member role is invalid. Please check the role hierarchy.'
+                }))
+            }
+            if (!isValidRole(intMsg, botRole)) {
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'The chosen default bot role is invalid. Please check the role hierarchy.'
+                }))
+            }
+
             for (const val of fullData.lockdownChannels.split(/ +/)) {
                 if (lockChannels.length === 30) break
                 const chan = textChanType.parse(val, intMsg)
@@ -303,22 +326,22 @@ module.exports = class SetupCommand extends Command {
                 lockChannels.push(chan)
             }
             if (lockChannels.length === 0) {
-                return await interaction.editReply(basicEmbed({
+                return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'None of the channels you specified were valid. Please try again.'
+                    description: 'None of the lockdown channels you specified were valid. Please try again.'
                 }))
             }
         }
 
         const msg = await basicCollector({ message, interaction }, {
             description: stripIndent`
-                This is all the data I got:
-                **>** **Audit logs channel:** ${logsChannel}
-                **>** **Default members role:** ${memberRole}
-                **>** **Default bots role:** ${botRole}
-                **>** **Muted members role:** ${mutedRole}
-                **>** **Lockdown channels:** ${lockChannels.map(c => c.toString()).join(', ')}
+                **This is all the data I got:**
+                Audit logs channel: ${logsChannel}
+                Default members role: ${memberRole}
+                Default bots role: ${botRole}
+                Muted members role: ${mutedRole}
+                Lockdown channels: ${lockChannels.map(c => c.toString()).join(', ')}
             `,
             fieldName: 'Is this data correct? If so, type `confirm` to proceed.'
         }, null, true)
