@@ -209,7 +209,7 @@ module.exports = class SetupCommand extends Command {
      * @param {string} fullData.lockdownChannels
      */
     async full({ message, interaction }, data, fullData) {
-        const { guildId, client } = message
+        const { guildId, client } = message || interaction
         const { types } = client.registry
         const textChanType = types.get('text-channel')
         const roleType = types.get('role')
