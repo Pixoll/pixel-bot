@@ -23,8 +23,7 @@ module.exports = class ChangelogCommand extends Command {
             group: 'info',
             description: 'Displays the changelog history of the bot.',
             guarded: true,
-            slash: true,
-            test: true
+            slash: true
         })
     }
 
