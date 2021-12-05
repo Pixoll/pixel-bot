@@ -67,30 +67,26 @@ module.exports = class KickCommand extends Command {
     async run({ message, interaction }, { member, reason }) {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                }))
             }
             reason ??= 'No reason given.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 
-        const { guild, guildId } = message || interaction
+        const { guild, guildId, member: mod } = message || interaction
         const author = message?.author || interaction.user
         const { user } = member
 
         const uExcept = userException(user, author, this)
         if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
 
-        const mExcept = memberException(member, this)
+        const mExcept = memberException(member, mod, this)
         if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
 
         const confirmed = await confirmButtons({ message }, 'kick', user, { reason })

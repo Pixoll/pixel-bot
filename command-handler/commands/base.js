@@ -9,6 +9,7 @@ const {
 	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult,
 	CommandBlockData, Throttle, CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo
 } = require('../typings')
+const { replyAll, isMod } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -127,6 +128,13 @@ class Command {
 		 * @type {?PermissionResolvable[]}
 		 */
 		this.userPermissions = info.userPermissions || null
+
+		/**
+		 * Whether this command's user permissions are based on "moderator" permissions
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.modPermissions = Boolean(info.modPermissions)
 
 		/**
 		 * Whether the command can only be used in NSFW channels
@@ -267,10 +275,10 @@ class Command {
 	 * @return Whether the user has permission, or an error message to respond with if they don't
 	 */
 	hasPermission({ message, interaction }, ownerOverride = true) {
-		const { channel, guild } = message || interaction
+		const { channel, guild, member } = message || interaction
 		const author = message?.author || interaction.user
 
-		if (!this.guildOwnerOnly && !this.ownerOnly && !this.userPermissions) return true
+		if (!this.guildOwnerOnly && !this.ownerOnly && !this.userPermissions && !this.modPermissions) return true
 		if (ownerOverride && this.client.isOwner(author)) return true
 
 		if (this.ownerOnly && (ownerOverride || !this.client.isOwner(author))) {
@@ -281,9 +289,14 @@ class Command {
 			return 'guildOwnerOnly'
 		}
 
-		if (channel.type !== 'DM' && this.userPermissions) {
-			const missing = channel.permissionsFor(author).missing(this.userPermissions, false)
-			if (missing.length > 0) return missing
+		if (channel.type !== 'DM') {
+			if (this.modPermissions && !isMod(member)) {
+				return 'modPermissions'
+			}
+			if (this.userPermissions) {
+				const missing = channel.permissionsFor(author).missing(this.userPermissions, false)
+				if (missing.length > 0) return missing
+			}
 		}
 
 		return true
@@ -315,65 +328,49 @@ class Command {
 	 * - nsfw: none
 	 * - throttling: `throttle` ({@link Object}), `remaining` ({@link number}) time in seconds
 	 * - userPermissions & clientPermissions: `missing` ({@link Array}<{@link string}>) permission names
-	 * @returns {Promise<?Message|?Array<Message>>}
+	 * @returns {Promise<?Message>}
 	 */
 	onBlock({ message, interaction }, reason, data) {
 		switch (reason) {
-			case 'dmOnly': {
-				const toSend = embed(`The \`${this.name}\` command can only be used in direct messages.`)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'guildOnly': {
-				const toSend = embed(`The \`${this.name}\` command can only be used in a server channel.`)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'guildOwnerOnly': {
-				const toSend = embed(`The \`${this.name}\` command can only be used by the server's owner.`)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'nsfw': {
-				const toSend = embed(`The \`${this.name}\` command can only be used in a NSFW channel.`)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'ownerOnly': {
-				const toSend = embed(`The \`${this.name}\` command can only be used by the bot's owner.`)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'userPermissions': {
-				const toSend = embed(
+			case 'dmOnly':
+				return replyAll({ message, interaction }, embed(
+					`The \`${this.name}\` command can only be used in direct messages.`
+				))
+			case 'guildOnly':
+				return replyAll({ message, interaction }, embed(
+					`The \`${this.name}\` command can only be used in a server channel.`
+				))
+			case 'guildOwnerOnly':
+				return replyAll({ message, interaction }, embed(
+					`The \`${this.name}\` command can only be used by the server's owner.`
+				))
+			case 'nsfw':
+				return replyAll({ message, interaction }, embed(
+					`The \`${this.name}\` command can only be used in a NSFW channel.`
+				))
+			case 'ownerOnly':
+				return replyAll({ message, interaction }, embed(
+					`The \`${this.name}\` command can only be used by the bot's owner.`
+				))
+			case 'userPermissions':
+				return replyAll({ message, interaction }, embed(
 					'You are missing the following permissions:',
 					data.missing.map(perm => `\`${permissions[perm]}\``).join(', ')
-				)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'clientPermissions': {
-				const toSend = embed(
+				))
+			case 'modPermissions':
+				return replyAll({ message, interaction }, embed(
+					`The \`${this.name}\` command can only be used by "moderators".`,
+					'For more information visit the `page 3` of the `help` command.'
+				))
+			case 'clientPermissions':
+				return replyAll({ message, interaction }, embed(
 					'The bot is missing the following permissions:',
 					data.missing.map(perm => `\`${permissions[perm]}\``).join(', ')
-				)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-				return
-			}
-			case 'throttling': {
-				const toSend = embed(oneLine`
-					Please wait **${data.remaining.toFixed(1)} seconds** before using the \`${this.name}\` command again.
-				`)
-				interaction?.editReply({ embeds: [toSend] })
-				message?.replyEmbed(toSend)
-			}
+				))
+			case 'throttling':
+				return replyAll({ message, interaction }, embed(
+					`Please wait **${data.remaining.toFixed(1)} seconds** before using the \`${this.name}\` command again.`
+				))
 		}
 	}
 

@@ -16,7 +16,7 @@ module.exports = class warnCommand extends Command {
             details: '`member` can be a member\'s username, id or mention. `reason` can be anything you want.',
             format: 'warn [member] [reason]',
             examples: ['warn Pixoll Stop posting NSFW'],
-            userPermissions: ['MANAGE_MESSAGES'],
+            modPermissions: true,
             guildOnly: true,
             args: [
                 {
@@ -60,22 +60,18 @@ module.exports = class warnCommand extends Command {
     async run({ message, interaction }, { member, reason }) {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                }))
             }
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 
-        const { guild, guildId } = message
+        const { guild, guildId } = message || interaction
         const author = message?.author || interaction.user
         const { user } = member
 

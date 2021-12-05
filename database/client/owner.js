@@ -33,7 +33,7 @@ module.exports = async (client) => {
                 **Owner:** ${Util.escapeMarkdown(ownedBy)}
                 **Members:** ${memberCount.toLocaleString()}
             `)
-            .setFooter(`Guild id: ${id} | Owner id: ${ownerId}`)
+            .setFooter(`Guild id: ${id} • Owner id: ${ownerId}`)
             .setTimestamp()
 
         await channel.send({ embeds: [info] })

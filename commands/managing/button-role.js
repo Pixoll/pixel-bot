@@ -99,9 +99,9 @@ module.exports = class ButtonRoleCommand extends Command {
             const arg = this.argsCollector.args[1]
             const isValid = await arg.validate(roles, intMsg, arg)
             if (isValid !== true) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: arg.error
+                }))
             }
             roles = await arg.parse(roles, intMsg, arg)
         }

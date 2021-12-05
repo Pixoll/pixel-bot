@@ -12,6 +12,7 @@ const { version } = require('../package.json')
 const { moderations, active } = require('../schemas')
 const { permissions } = require('../command-handler/util')
 const { Module, AuditLog } = require('../schemas/types')
+const { inviteMaxAge } = require('./constants')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -90,7 +91,7 @@ function removeDashes(str) {
     if (!str) return
     const arr = str.split('-')
     const first = arr.shift()
-    const rest = arr.map(s => capitalize(s)).join('')
+    const rest = arr.map(capitalize).join('')
     return first + rest
 }
 
@@ -246,7 +247,9 @@ async function replyAll({ message, interaction }, options) {
         if (interaction.deferred || interaction.replied) return await interaction.editReply(options)
         else return await interaction.reply(options)
     }
-    if (message) return await message.reply({ ...options, ...noReplyInDMs(message) })
+    if (message) {
+        return await message.reply({ ...options, ...noReplyInDMs(message) })
+    }
     return null
 }
 
@@ -335,16 +338,16 @@ function userException(user, author, { client, name }) {
 
 /**
  * Makes sure the moderation command is usable by the member
- * @param {GuildMember} member The member who ran the command
+ * @param {GuildMember} member The targeted member
+ * @param {GuildMember} moderator The member who ran the command
  * @param {Command} cmd The command that's being ran
  * @returns {?BasicEmbedOptions}
  */
-function memberException(member, { client, name }) {
+function memberException(member, moderator, { client, name }) {
     if (!member) return null
 
     /** @type {BasicEmbedOptions} */
     const options = { color: 'RED', emoji: 'cross' }
-
     if (!member.bannable) {
         return {
             ...options,
@@ -352,7 +355,21 @@ function memberException(member, { client, name }) {
             fieldValue: 'Please check the role hierarchy or server ownership.'
         }
     }
-    if (!client.isOwner(member) && isMod(member)) {
+
+    if (client.isOwner(moderator)) return null
+
+    const highestTarget = member.roles.highest
+    const highestMod = moderator.roles.highest
+    const bannable = highestMod.comparePositionTo(highestTarget) > 0
+    if (!bannable || client.isOwner(member)) {
+        return {
+            ...options,
+            fieldName: `You can't ${name} ${member.user.tag}`,
+            fieldValue: 'Please check the role hierarchy or server ownership.'
+        }
+    }
+
+    if (isMod(member)) {
         return {
             ...options,
             description: `That user is a mod/admin, you can't ${name} them.`
@@ -400,6 +417,8 @@ function isMod(roleOrMember, noAdmin) {
         const isTrue = values.filter(b => b === true)[0] ?? false
         return !permissions.has('ADMINISTRATOR') && isTrue
     }
+
+    if (permissions.has('ADMINISTRATOR')) return true
 
     for (const condition of conditions) {
         values.push(permissions.has(condition))
@@ -502,6 +521,54 @@ function sliceDots(string, length) {
 }
 
 /**
+ * Checks if the whole embed's structure exceeds the maximum string length (6,000).
+ * @param {MessageEmbed} embed The embed to check.
+ */
+function embedExceedsMax(embed) {
+    const { title, description, fields, footer, author } = embed
+    let length = 0
+
+    if (title) {
+        length += title.length
+        if (length > 6000) {
+            return { exceeded: true, trigger: 'title', index: null }
+        }
+    }
+
+    if (description) {
+        length += description.length
+        if (length > 6000) {
+            return { exceeded: true, trigger: 'description', index: null }
+        }
+    }
+
+    if (footer?.text) {
+        length += footer.text.length
+        if (length > 6000) {
+            return { exceeded: true, trigger: 'footer.text', index: null }
+        }
+    }
+
+    if (author?.name) {
+        length += author.name.length
+        if (length > 6000) {
+            return { exceeded: true, trigger: 'author.name', index: null }
+        }
+    }
+
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i]
+        length += field.name.length
+        length += field.value.length
+        if (length > 6000) {
+            return { exceeded: true, trigger: 'fields', index: i }
+        }
+    }
+
+    return { exceeded: false, trigger: null, index: null }
+}
+
+/**
  * Gives any date the following format: `30/12/2020, 23:59`
  * @param {Date|number} date The date in `Date` format or a number.
  * @deprecated
@@ -556,7 +623,7 @@ function getDayDiff(date) {
     const arr = string.split(/\/|,|-/, 3)
     const newDate = new Date(arr)
     const difference = new Date() - newDate.getTime()
-    const daysDiff = Math.trunc(difference / 86400000)
+    const daysDiff = Math.trunc(difference / 86_400_000)
     return daysDiff
 }
 
@@ -579,13 +646,22 @@ function arrayEquals(first, second) {
 
 /**
  * Compares and returns the difference between a set of arrays
- * @param {any[]} Old The old array
- * @param {any[]} New The new array
+ * @param {any[]} oldArr The old array
+ * @param {any[]} newArr The new array
+ * @returns {[any[], any[]]} `[added, removed]`
  */
 function compareArrays(oldArr = [], newArr = []) {
-    const arr1 = newArr.filter(val => !oldArr.includes(val))
-    const arr2 = oldArr.filter(val => !newArr.includes(val))
-    return [arr1, arr2]
+    const map1 = new Map()
+    oldArr.forEach(e => map1.set(e, true))
+    const removed = newArr.filter(e => !map1.has(e))
+    map1.clear()
+
+    const map2 = new Map()
+    newArr.forEach(e => map2.set(e, true))
+    const added = oldArr.filter(e => !map2.has(e))
+    map2.clear()
+
+    return [added, removed]
 }
 
 /**
@@ -754,7 +830,7 @@ async function kick(guild, bot, member, reason = 'No reason given.') {
     if (!member.user.bot) {
         const invite = await channels.cache.filter(ch =>
             !['category', 'store'].includes(ch.type)
-        ).first().createInvite({ maxAge: 604800, maxUses: 1 })
+        ).first().createInvite({ maxAge: inviteMaxAge, maxUses: 1 })
         await member.send(stripIndent`
             You have been **kicked** from **${guildName}**
             **Reason:** ${reason}
@@ -939,7 +1015,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
     let msg
     if (data.toUser && !isDMs) msg = await targetChan.send(msgOptions).catch(() => null)
     else {
-        if (interaction) msg = await interaction.editReply(msgOptions)
+        if (interaction) msg = await replyAll({ interaction }, msgOptions)
         else msg = await message.reply(msgOptions)
     }
 
@@ -962,7 +1038,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
     })
 
     const disableButton = (target, disabled = true) => {
-        const button = buttons.components.find(b => b.customId.endsWith(target))
+        const button = buttons?.components.find(b => b.customId.endsWith(target))
         if (!button) return
         button.setDisabled(disabled)
     }
@@ -1038,7 +1114,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
 
     collector.on('end', async () => {
         if (msg) await msg.edit({ components: [] }).catch(() => null)
-        else interaction.editReply({ components: [] }).catch(() => null)
+        else replyAll({ interaction }, { components: [] }).catch(() => null)
     })
 }
 
@@ -1225,7 +1301,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
         components: [new MessageActionRow().addComponents(yesButton, noButton)],
         ...noReplyInDMs(message)
     }
-    if (interaction) msg = await interaction.editReply(msgData)
+    if (interaction) msg = await replyAll({ interaction }, msgData)
     else msg = await message.reply(msgData)
 
     const pushed = await msg.awaitMessageComponent({
@@ -1245,7 +1321,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
 
     if (message) await msg?.delete()
 
-    await interaction?.editReply({ components: [] })
+    await replyAll({ interaction }, { components: [] })
 
     if (!pushed || pushed.customId === ids.no) {
         if (sendCancelled) {
@@ -1305,7 +1381,7 @@ function commandInfo(cmd, guild) {
         `)
         .addField('Usage', usage)
         .setFooter(
-            `Version: ${version} | Developer: ${owners[0].tag}`,
+            `Version: ${version} • Developer: ${owners[0].tag}`,
             user.displayAvatarURL({ dynamic: true })
         )
 
@@ -1357,6 +1433,7 @@ module.exports = {
     customEmoji,
     difference,
     docId,
+    embedExceedsMax,
     fetchPartial,
     findCommonElement,
     formatBytes,

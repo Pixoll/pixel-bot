@@ -15,7 +15,7 @@ module.exports = class InfractionsCommand extends Command {
             details: userDetails,
             format: 'infractions [user]',
             examples: ['infractions Pixoll'],
-            userPermissions: ['MANAGE_MESSAGES'],
+            modPermissions: true,
             guildOnly: true,
             args: [{
                 key: 'user',
@@ -73,7 +73,7 @@ module.exports = class InfractionsCommand extends Command {
         await generateEmbed({ message, interaction }, mods.toJSON(), {
             authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
-            title: ' |  ID:',
+            title: ' •  Id:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'userId', 'userTag'],
             useDocId: true,

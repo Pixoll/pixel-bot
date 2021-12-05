@@ -47,7 +47,7 @@ module.exports = class ModulesCommand extends Command {
             name: 'modules',
             group: 'utility',
             description: 'Check the status of all available modules and sub-modules.',
-            userPermissions: ['MANAGE_MESSAGES'],
+            modPermissions: true,
             guarded: true,
             guildOnly: true,
             slash: true

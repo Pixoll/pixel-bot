@@ -113,19 +113,15 @@ module.exports = class TimesCommand extends Command {
             const arg = this.argsCollector.args[0]
             hour = arg.parse(hour ?? 'now') || null
             if (!hour) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The hour you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The hour you specified is invalid.'
+                }))
             }
             place = place?.toLowerCase()
             if (place && !cities.map(c => c.toLowerCase()).includes(place)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The place you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The place you specified is invalid.'
+                }))
             }
         }
 

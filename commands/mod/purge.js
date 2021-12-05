@@ -283,9 +283,9 @@ module.exports = class PurgeCommand extends Command {
                 case 'after':
                     filter = await interaction.channel.messages.fetch(messageId).catch(() => null)
                     if (!filter) {
-                        return await interaction.editReply({
-                            embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: 'The message id is invalid.' })]
-                        })
+                        return await replyAll({ interaction }, basicEmbed({
+                            color: 'RED', emoji: 'cross', description: 'The message id is invalid.'
+                        }))
                     }
                     break
                 case 'match':

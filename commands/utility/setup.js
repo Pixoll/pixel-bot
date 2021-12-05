@@ -624,7 +624,7 @@ module.exports = class SetupCommand extends Command {
             }
         } else {
             if (channels.length === 0) {
-                return await interaction.editReply(basicEmbed({
+                return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'None of the channels you specified were valid. Please try again.'

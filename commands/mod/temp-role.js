@@ -89,35 +89,27 @@ module.exports = class TempRoleCommand extends Command {
     async run({ message, interaction }, { member, duration, role, reason }) {
         if (interaction) {
             if (!isValidRole(await interaction.fetchReply(), role)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid role to use.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid role to use.'
+                }))
             }
             if (!(member instanceof GuildMember)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                }))
             }
             const arg = this.argsCollector.args[1]
             duration = await arg.parse(duration).catch(() => null) || null
             if (!duration) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                }))
             }
             reason ??= 'No reason given.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 

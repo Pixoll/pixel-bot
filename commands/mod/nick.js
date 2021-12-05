@@ -68,20 +68,16 @@ module.exports = class NickCommand extends Command {
     async run({ message, interaction }, { member, nickname }) {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                }))
             }
             if (nickname.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED',
-                        emoji: 'cross',
-                        description: 'Please keep the nickname below or exactly 32 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'Please keep the nickname below or exactly 32 characters.'
+                }))
             }
         }
 

@@ -62,11 +62,9 @@ module.exports = class LockCommand extends Command {
             channel ??= interaction.channel
             reason ??= 'We\'ll be back shortly.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 

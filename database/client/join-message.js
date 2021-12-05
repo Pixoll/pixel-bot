@@ -55,6 +55,8 @@ module.exports = async (client) => {
                     Afterwards, make sure to run \`/module toggle\` to toggle the modules/sub-modules you want to use
                     in this server.
                 `}
+
+                *Note: All modules/sub-modules are disabled by default.*
             `)
             .addField('🕒 Note about times and dates', oneLine`
                 The bot runs based off the **Coordinated Universal Time (UTC).** This means that when you used

@@ -124,9 +124,9 @@ module.exports = class ToggleCommand extends Command {
                 command = value
             }
         } else if (!command) {
-            return await interaction.editReply({
-                embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.' })]
-            })
+            return await replyAll({ interaction }, basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.'
+            }))
         }
 
         if (command.guarded) {

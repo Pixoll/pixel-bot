@@ -4,8 +4,7 @@ require('./command-handler/extensions')
 const CommandoClient = require('./command-handler/client')
 const database = require('./database')
 const path = require('path')
-const errors = require('./errors')
-const rateLimit = require('./rateLimit')
+const { errors, rateLimit } = require('./errors')
 require('dotenv').config()
 
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES

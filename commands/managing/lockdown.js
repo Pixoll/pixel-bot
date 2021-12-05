@@ -154,9 +154,9 @@ module.exports = class LockdownCommand extends Command {
             const msg = await interaction.fetchReply()
             const isValid = await arg.validate(channels, msg)
             if (isValid !== true) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: arg.error
+                }))
             }
             channels = await arg.parse(channels, msg)
         }
@@ -219,7 +219,7 @@ module.exports = class LockdownCommand extends Command {
             color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
         })
         const toDelete = await message?.replyEmbed(locking)
-        await interaction?.editReply({ embeds: [locking] })
+        await replyAll({ interaction }, locking)
 
         let amount = 0
         for (const channel of savedChannels) {
@@ -274,11 +274,11 @@ module.exports = class LockdownCommand extends Command {
         const { guild, guildId } = message || interaction
         const { everyone } = guild.roles
 
-        const locking = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
+        const unlocking = basicEmbed({
+            color: 'GOLD', emoji: 'loading', description: 'Unlocking all lockdown channels, please wait...'
         })
-        const toDelete = await message?.replyEmbed(locking)
-        await interaction?.editReply({ embeds: [locking] })
+        const toDelete = await message?.replyEmbed(unlocking)
+        await replyAll({ interaction }, unlocking)
 
         let amount = 0
         for (const channel of savedChannels) {

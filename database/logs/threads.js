@@ -33,7 +33,7 @@ module.exports = (client) => {
                 `}
                 **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * myMs('1m')), 'R')}**
             `)
-            .setFooter(`Thread id: ${id} | Channel id: ${parent.id}`)
+            .setFooter(`Thread id: ${id} • Channel id: ${parent.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -57,7 +57,7 @@ module.exports = (client) => {
                 \`#${name}\` under ${parentType} channel ${parent.toString()}
                 **Member count:** ${members.cache.size}
             `)
-            .setFooter(`Thread id: ${id} | Channel id: ${parent.id}`)
+            .setFooter(`Thread id: ${id} • Channel id: ${parent.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -84,7 +84,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor(`Updated ${channelTypes[type].toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(newThread.toString())
-            .setFooter(`Thread id: ${id} | Channel id: ${parentId}`)
+            .setFooter(`Thread id: ${id} • Channel id: ${parentId}`)
             .setTimestamp()
 
         if (autoArchive1 !== autoArchive2) {

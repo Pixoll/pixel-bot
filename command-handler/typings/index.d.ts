@@ -323,6 +323,8 @@ export abstract class Command {
 	 * @default this.name
 	 */
 	public memberName: string
+	/** Whether this command's user permissions are based on "moderator" permissions */
+	public modPermissions: boolean
 	/** Name of this command */
 	public name: string
 	/**
@@ -378,7 +380,7 @@ export abstract class Command {
 	 * @param ownerOverride Whether the bot owner(s) will always have permission
 	 */
 	public hasPermission(instances: CommandInstances, ownerOverride?: boolean):
-		true | 'ownerOnly' | 'guildOwnerOnly' | PermissionString[]
+		true | 'ownerOnly' | 'guildOwnerOnly' | 'modPermissions' | PermissionString[]
 	/**
 	 * Checks if the command is enabled in a guild
 	 * @param guild Guild to check in
@@ -400,8 +402,7 @@ export abstract class Command {
 	 * - throttling: `throttle` ({@link Throttle}), `remaining` (number) time in seconds
 	 * - userPermissions & clientPermissions: `missing` (Array<{@link PermissionString}>) permission names
 	 */
-	public onBlock(instances: CommandInstances, reason: CommandBlockReason, data?: CommandBlockData):
-		Promise<Message | Message[]>
+	public onBlock(instances: CommandInstances, reason: CommandBlockReason, data?: CommandBlockData): Promise<Message>
 	/**
 	 * Called when the command produces an error while running
 	 * @param err Error that was thrown
@@ -416,7 +417,7 @@ export abstract class Command {
 		args: object | string | string[],
 		fromPattern: boolean,
 		result?: ArgumentCollectorResult
-	): Promise<Message | Message[]>
+	): Promise<Message>
 	/** Reloads the command */
 	public reload(): void
 	/**
@@ -1554,6 +1555,11 @@ export interface CommandInfo {
 	/** Permissions required by the user to use the command. */
 	userPermissions?: PermissionResolvable[]
 	/**
+	 * Whether this command's user permissions are based on "moderator" permissions
+	 * @default false
+	 */
+	modPermissions?: boolean
+	/**
 	 * Whether or not the default command handling should be used. If false, then only patterns will trigger the command.
 	 * @default true
 	 */
@@ -1710,6 +1716,7 @@ export type CommandBlockReason =
 	'guildOwnerOnly' |
 	'ownerOnly' |
 	'userPermissions' |
+	'modPermissions' |
 	'clientPermissions' |
 	'throttling'
 

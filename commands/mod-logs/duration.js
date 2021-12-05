@@ -71,11 +71,9 @@ module.exports = class DurationCommand extends Command {
             const arg = this.argsCollector.args[1]
             duration = await arg.parse(duration).catch(() => null) || null
             if (!duration) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                }))
             }
         }
 

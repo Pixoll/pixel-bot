@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../../command-handler/typings')
-const { getLogsChannel, sliceFileName } = require('../../utils')
+const { getLogsChannel, sliceFileName, difference } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -13,7 +13,7 @@ module.exports = (client) => {
 
         if (message.partial) return
         const { guild, author, embeds, channelId } = message
-        if (!guild || client.user.id !== author.id) return
+        if (!guild || client.user.id !== author.id || embeds.length === 0) return
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
@@ -45,7 +45,9 @@ module.exports = (client) => {
 
         if (oldMessage.partial || newMessage.partial) return
         const { guild, author, embeds, channelId, channel } = oldMessage
-        if (!guild || client.user.id !== author.id || embeds.length === 0) return
+        if (
+            !guild || client.user.id !== author.id || embeds.length === 0 || embeds.length === newMessage.embeds.length
+        ) return
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return

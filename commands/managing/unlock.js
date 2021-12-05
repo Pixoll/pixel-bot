@@ -62,11 +62,9 @@ module.exports = class UnlockCommand extends Command {
             channel ??= interaction.channel
             reason ??= 'We\'ll be back shortly.'
             if (reason.length > 512) {
-                return interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 
@@ -91,7 +89,7 @@ module.exports = class UnlockCommand extends Command {
         const embed = basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
         })
-        await interaction?.editReply({ embeds: [embed] })
+        await replyAll({ interaction }, embed)
         if (channelId !== channel.id) {
             await message?.replyEmbed(embed)
         }

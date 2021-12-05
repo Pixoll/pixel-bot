@@ -50,11 +50,9 @@ module.exports = class TimestampCommand extends Command {
             const arg = this.argsCollector.args[0]
             date = await arg.parse(date ?? 'now').catch(() => null) || null
             if (!date) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.'
+                }))
             }
         }
 

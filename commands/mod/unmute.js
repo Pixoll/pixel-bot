@@ -63,19 +63,15 @@ module.exports = class UnmuteCommand extends Command {
     async run({ message, interaction }, { member, reason }) {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                }))
             }
             reason ??= 'No reason given.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 

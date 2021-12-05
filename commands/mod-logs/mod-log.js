@@ -24,7 +24,7 @@ module.exports = class ModLogCommand extends Command {
                 modlog delete [modlog id] - Delete a mod log (admins only).
             `,
             examples: [`modlog ${docId()}`],
-            userPermissions: ['MANAGE_MESSAGES'],
+            modPermissions: true,
             guildOnly: true,
             args: [
                 {

@@ -151,11 +151,9 @@ module.exports = class RuleCommand extends Command {
                 rule = ruleMsg.content
             }
         } else if (rule.length > 1024) {
-            return await interaction.editReply({
-                embeds: [basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The rule must be at most 1024 characters long.'
-                })]
-            })
+            return await replyAll({ interaction }, basicEmbed({
+                color: 'RED', emoji: 'cross', description: 'The rule must be at most 1024 characters long.'
+            }))
         }
 
         if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })

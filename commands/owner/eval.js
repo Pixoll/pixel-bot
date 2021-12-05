@@ -84,14 +84,14 @@ module.exports = class EvalCommand extends Command {
         const append = `\n${appendPart}\n\`\`\``
         if (input) {
             return splitMessage(stripIndents`
-				*Executed in ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1000000}ms.*
+				*Executed in ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1_000_000}ms.*
 				\`\`\`js
 				${inspected}
 				\`\`\`
 			`, { maxLength: 1900, prepend, append })
         } else {
             return splitMessage(stripIndents`
-				*Callback executed after ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1000000}ms.*
+				*Callback executed after ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1_000_000}ms.*
 				\`\`\`js
 				${inspected}
 				\`\`\`

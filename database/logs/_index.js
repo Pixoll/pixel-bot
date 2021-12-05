@@ -14,13 +14,12 @@ module.exports = async (client) => {
         for (const guild of guilds) {
             const logsChannel = await getLogsChannel(guild)
             if (!logsChannel) {
-                guild.queuedLogs.splice(0, guild.queuedLogs)
+                guild.queuedLogs = []
                 continue
             }
 
-            const queued = guild.queuedLogs
-            while (queued.length > 0) {
-                const embeds = queued.splice(0, 10).filter(e => e)
+            while (guild.queuedLogs.length > 0) {
+                const embeds = guild.queuedLogs.splice(0, 10)
                 await logsChannel.send({ embeds }).catch(() => null)
             }
         }

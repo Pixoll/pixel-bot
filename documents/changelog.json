@@ -1,0 +1,58 @@
+[
+    {
+        "version": "2.0.0",
+        "changes": [
+            "Added slash commands."
+        ]
+    },
+    {
+        "version": "2.0.1",
+        "changes": [
+            "Bug fixes."
+        ]
+    },
+    {
+        "version": "2.0.2",
+        "changes": [
+            "Bug fixes and improvements."
+        ]
+    },
+    {
+        "version": "2.0.3",
+        "changes": [
+            "Bug fixes."
+        ]
+    },
+    {
+        "version": "2.0.4",
+        "changes": [
+            "Bug fixes."
+        ]
+    },
+    {
+        "version": "2.0.5",
+        "changes": [
+            "Fixed `setup` slash command. (`Cannot destructure property 'guildId' of 'message' as it is undefined.`)",
+            "Added role parameter checking for `setup` slash command.",
+            "Some embeds didn't render properly."
+        ]
+    },
+    {
+        "version": "2.1.0",
+        "changes": [
+            "Added `changelog` command.",
+            "Select menus/filters didn't work when there were no pages.",
+            "Fixed rare error when using slash commands: Message won't edit and bot crashes.",
+            "Improved the \"moderator\" permissions manager.",
+            "Fixed moderator action permissions and conditions. Moderators/admins were able to make moderation actions on members with higher hierarchy than them.",
+            "Fixed same audit-logs sending more than once occasionally."
+        ]
+    },
+    {
+        "version": "2.1.1",
+        "changes": [
+            "Added `legal` command.",
+            "Added the bot's **Terms of Service (ToS)** and **Privacy Policy.** Access them with the `legal` command."
+        ]
+    }
+]

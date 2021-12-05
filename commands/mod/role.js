@@ -173,11 +173,9 @@ module.exports = class RoleCommand extends Command {
 
         if (interaction) {
             if (member && !(member instanceof GuildMember)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                }))
             }
             memberOrRole = member ?? role
             if (roles) {
@@ -185,9 +183,9 @@ module.exports = class RoleCommand extends Command {
                 const msg = await interaction.fetchReply()
                 const isValid = await arg.validate(roles, msg)
                 if (isValid !== true) {
-                    return await interaction.editReply({
-                        embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
-                    })
+                    return await replyAll({ interaction }, basicEmbed({
+                        color: 'RED', emoji: 'cross', description: arg.error
+                    }))
                 }
                 roles = await arg.parse(roles, msg)
             }
@@ -214,10 +212,19 @@ module.exports = class RoleCommand extends Command {
      */
     async all({ message, interaction }, role) {
         if (message) {
-            while (!(role instanceof Role) && !isValidRole(message, role)) {
+            while (!(role instanceof Role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
                 if (cancelled) return
                 role = value
+            }
+        } else {
+            const intMsg = await interaction.fetchReply()
+            if (!isValidRole(intMsg, role)) {
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'The chosen role is invalid. Please check the role hierarchy.'
+                }))
             }
         }
 
@@ -257,6 +264,15 @@ module.exports = class RoleCommand extends Command {
                 if (cancelled) return
                 role = value
             }
+        } else {
+            const intMsg = await interaction.fetchReply()
+            if (!isValidRole(intMsg, role)) {
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'The chosen role is invalid. Please check the role hierarchy.'
+                }))
+            }
         }
 
         const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all bots`)
@@ -293,6 +309,15 @@ module.exports = class RoleCommand extends Command {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
                 if (cancelled) return
                 role = value
+            }
+        } else {
+            const intMsg = await interaction.fetchReply()
+            if (!isValidRole(intMsg, role)) {
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED',
+                    emoji: 'cross',
+                    description: 'The chosen role is invalid. Please check the role hierarchy.'
+                }))
             }
         }
 
@@ -343,19 +368,14 @@ module.exports = class RoleCommand extends Command {
         const confirmed = await confirmButtons({ message, interaction }, `remove all roles from ${member.toString()}`)
         if (!confirmed) return
 
-        const { guild, guildId } = message || interaction
-        const botRole = guild.me.roles.highest
-
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Removing all roles... Please be patient.'
         })
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
-        const memberRoles = roles.cache.filter(r => {
-            if (r.id === guildId) return false
-            return !r.managed && botRole.comparePositionTo(r) > 0
-        })
-        for (const [, role] of memberRoles) await roles.remove(role)
+        const intMsg = await interaction?.fetchReply()
+        const memberRoles = roles.cache.filter(r => isValidRole(intMsg || message, r)).toJSON()
+        for (const role of memberRoles) await roles.remove(role)
 
         await toDelete?.delete().catch(() => null)
         await replyAll({ message, interaction }, basicEmbed({
@@ -376,18 +396,17 @@ module.exports = class RoleCommand extends Command {
                 if (cancelled) return
                 member = value
             }
+            if (!roles) {
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
+                if (cancelled) return
+                roles = value
+            }
         }
 
-        if (message && !roles) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            roles = value
-        }
+        const memberRoles = member.roles
 
-        const { user, roles: _roles } = member
-
-        const alreadyHas = roles.filter(r => _roles.cache.has(r.id))
-        const doesntHas = roles.filter(r => !_roles.cache.has(r.id))
+        const alreadyHas = roles.filter(r => memberRoles.cache.has(r.id))
+        const doesntHas = roles.filter(r => !memberRoles.cache.has(r.id))
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling the roles... Please be patient.'
@@ -395,10 +414,10 @@ module.exports = class RoleCommand extends Command {
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
         if (alreadyHas.length !== 0) {
-            for (const role of alreadyHas) await _roles.remove(role)
+            for (const role of alreadyHas) await memberRoles.remove(role)
         }
         if (doesntHas.length !== 0) {
-            for (const role of doesntHas) await _roles.add(role)
+            for (const role of doesntHas) await memberRoles.add(role)
         }
 
         const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesntHas.map(r => '+' + r.name)]
@@ -409,7 +428,7 @@ module.exports = class RoleCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldValue: rolesStr,
-            fieldName: `Toggled the following roles for ${user.tag}:`
+            fieldName: `Toggled the following roles for ${member.user.tag}:`
         }))
     }
 }

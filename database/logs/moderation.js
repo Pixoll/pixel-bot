@@ -36,7 +36,7 @@ module.exports = (client) => {
                 ${executor.toString()} kicked ${user.toString()} ${user.tag}
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User id: ${id} | Mod id: ${executor.id}`)
+            .setFooter(`User id: ${id} • Mod id: ${executor.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -131,7 +131,7 @@ module.exports = (client) => {
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User id: ${user.id} | Mod id: ${mod.id}`)
+            .setFooter(`User id: ${user.id} • Mod id: ${mod.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -143,7 +143,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        const modFooter = mod ? ` | Mod id: ${mod.id}` : ''
+        const modFooter = mod ? ` • Mod id: ${mod.id}` : ''
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
@@ -173,7 +173,7 @@ module.exports = (client) => {
                 ${mod.toString()} warned ${user.toString()} ${user.tag}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User id: ${user.id} | Mod id: ${mod.id}`)
+            .setFooter(`User id: ${user.id} • Mod id: ${mod.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

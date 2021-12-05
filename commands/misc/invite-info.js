@@ -46,8 +46,9 @@ module.exports = class InviteInfoCommand extends Command {
         if (interaction) {
             invite = await this.client.fetchInvite(invite).catch(() => null)
             if (!invite) {
-                const embed = basicEmbed({ color: 'RED', emoji: 'cross', description: 'That invite is invalid.' })
-                return await interaction.editReply({ embeds: [embed] })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That invite is invalid.'
+                }))
             }
         }
 

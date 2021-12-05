@@ -20,6 +20,7 @@ module.exports = class ReminderCommand extends Command {
                 'remind 2w',
             ],
             guarded: true,
+            clientPermissions: ['ADD_REACTIONS'],
             args: [
                 {
                     key: 'time',
@@ -66,11 +67,9 @@ module.exports = class ReminderCommand extends Command {
             const arg = this.argsCollector.args[0]
             time = await arg.parse(time).catch(() => null) || null
             if (!time) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.'
+                }))
             }
             reminder ??= '`Not specified`'
         }

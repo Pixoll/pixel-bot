@@ -85,26 +85,22 @@ module.exports = class TempBanCommand extends Command {
             const arg = this.argsCollector.args[1]
             duration = await arg.parse(duration).catch(() => null) || null
             if (!duration) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                }))
             }
             reason ??= 'No reason given.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 
         if (typeof duration === 'number') duration = duration + Date.now()
         if (duration instanceof Date) duration = duration.getTime()
 
-        const { guild, guildId } = message || interaction
+        const { guild, guildId, member: mod } = message || interaction
         const author = message?.author || interaction.user
         const { members, bans, database } = guild
         const { moderations, active } = database
@@ -121,7 +117,7 @@ module.exports = class TempBanCommand extends Command {
 
         /** @type {GuildMember} */
         const member = await members.fetch(user).catch(() => null)
-        const mExcept = memberException(member, this)
+        const mExcept = memberException(member, mod, this)
         if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
 
         const confirmed = await confirmButtons({ message, interaction }, 'temp-ban', user, { reason })

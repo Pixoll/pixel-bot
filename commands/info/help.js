@@ -207,7 +207,7 @@ module.exports = class HelpCommand extends Command {
 
             const generate = page => ({
                 embed: pages[page].setFooter(
-                    `Page ${++page} of ${pages.length} | Version: ${version} | Developer: ${owner.tag}`,
+                    `Page ${page + 1} of ${pages.length} • Version: ${version} • Developer: ${owner.tag}`,
                     user.displayAvatarURL({ dynamic: true })
                 )
             })

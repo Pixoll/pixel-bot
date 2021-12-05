@@ -117,18 +117,16 @@ module.exports = class MultiBanCommand extends Command {
             const msg = await interaction.fetchReply()
             const isValid = await arg.validate(members, msg)
             if (isValid !== true) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({ color: 'RED', emoji: 'cross', description: arg.error })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: arg.error
+                }))
             }
             members = await arg.parse(members, msg)
             reason ??= 'No reason given.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 

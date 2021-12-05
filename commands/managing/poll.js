@@ -30,7 +30,7 @@ module.exports = class PollCommand extends Command {
                 'poll end #polls',
                 'poll end polls 890317796221792336'
             ],
-            userPermissions: ['MANAGE_MESSAGES'],
+            modPermissions: true,
             guildOnly: true,
             args: [
                 {
@@ -126,11 +126,9 @@ module.exports = class PollCommand extends Command {
             if (subCommand === 'create') {
                 durationOrMsg = await arg.parse(duration).catch(() => null) || null
                 if (!durationOrMsg || typeof durationOrMsg === 'string') {
-                    return await interaction.editReply({
-                        embeds: [basicEmbed({
-                            color: 'RED', emoji: 'cross', description: 'That duration is invalid.'
-                        })]
-                    })
+                    return await replyAll({ interaction }, basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'That duration is invalid.'
+                    }))
                 }
                 if (typeof durationOrMsg === 'number') durationOrMsg += Date.now()
                 if (durationOrMsg instanceof Date) durationOrMsg = durationOrMsg.getTime()
@@ -144,18 +142,14 @@ module.exports = class PollCommand extends Command {
                     if (allEmojis.get(emoji)) emojisArr.push(emoji)
                 }
                 if (emojisArr.length < 2) {
-                    return await interaction.editReply({
-                        embeds: [basicEmbed({
-                            color: 'RED', emoji: 'cross', description: 'You need to send at least 2 emojis.'
-                        })]
-                    })
+                    return await replyAll({ interaction }, basicEmbed({
+                        color: 'RED', emoji: 'cross', description: 'You need to send at least 2 emojis.'
+                    }))
                 }
             } else if (!validURL(messageUrl)) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That message url is invalid.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'That message url is invalid.'
+                }))
             }
         }
 
@@ -253,19 +247,15 @@ module.exports = class PollCommand extends Command {
             const [, chanId, msgId] = pollURL.match(/(\d+)[/-](\d+)$/)?.map(m => m) || []
             channel = await channels.fetch(chanId).catch(() => null)
             if (!channel) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'I couldn\'t get the channel from the url.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'I couldn\'t get the channel from the url.'
+                }))
             }
             msg = await channel.messages.fetch(msgId).catch(() => null)
             if (!msg) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'I couldn\'t get the message from the url.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'I couldn\'t get the message from the url.'
+                }))
             }
         } else {
             channel ??= message.channel

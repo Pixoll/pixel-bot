@@ -17,7 +17,7 @@ module.exports = class ModLogsCommand extends Command {
             details: userDetails,
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],
-            userPermissions: ['MANAGE_MESSAGES'],
+            modPermissions: true,
             guildOnly: true,
             args: [{
                 key: 'user',
@@ -80,7 +80,7 @@ module.exports = class ModLogsCommand extends Command {
                 ${pluralize('mod log', modLogs.size)}
             `,
             authorIconURL: avatarURL,
-            title: ' |  Id:',
+            title: ' •  Id:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['updatedAt', 'guild', user ? ('modId', 'modTag') : null],
             useDocId: true,

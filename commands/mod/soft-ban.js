@@ -71,15 +71,13 @@ module.exports = class SoftBanCommand extends Command {
             user = user.user || user
             reason ??= 'No reason given.'
             if (reason.length > 512) {
-                return await interaction.editReply({
-                    embeds: [basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                    })]
-                })
+                return await replyAll({ interaction }, basicEmbed({
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                }))
             }
         }
 
-        const { guild, guildId } = message
+        const { guild, guildId, member: mod } = message
         const { members, bans, database } = guild
         const author = message?.author || interaction.user
 
@@ -95,7 +93,7 @@ module.exports = class SoftBanCommand extends Command {
 
         /** @type {GuildMember} */
         const member = await members.fetch(user).catch(() => null)
-        const mExcept = memberException(member, this)
+        const mExcept = memberException(member, mod, this)
         if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
 
         const confirmed = await confirmButtons({ message }, 'soft-ban', user, { reason })

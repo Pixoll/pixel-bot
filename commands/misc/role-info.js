@@ -61,7 +61,7 @@ module.exports = class RoleInfoCommand extends Command {
                 **Position:** ${position}
                 **Members:** ${members.size}
             `)
-            .setFooter(`Role id: ${id} | Created at`)
+            .setFooter(`Role id: ${id} • Created at`)
             .setTimestamp(createdTimestamp)
 
         if (url) roleInfo.setThumbnail(url)

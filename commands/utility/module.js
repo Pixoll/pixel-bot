@@ -57,12 +57,12 @@ module.exports = class ModuleCommand extends Command {
                 \`sub-module\` can be either: ${auditLogs.map(sm => `\`${sm}\``).join(', ').replace(/,(?=[^,]*$)/, ' or')}.
             `,
             format: stripIndent`
-                modules diagnose [module] <sub-module> - Diagnose a module or sub-module.
-                modules toggle [module] <sub-module> - Toggle a module or sub-module on/off.
+                module diagnose [module] <sub-module> - Diagnose a module or sub-module.
+                module toggle [module] <sub-module> - Toggle a module or sub-module on/off.
             `,
             examples: [
-                'modules diagnose welcome',
-                'modules toggle audit-logs channels'
+                'module diagnose welcome',
+                'module toggle audit-logs channels'
             ],
             userPermissions: ['ADMINISTRATOR'],
             guarded: true,

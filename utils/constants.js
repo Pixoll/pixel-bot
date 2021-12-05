@@ -41,9 +41,9 @@ const timeDetails = tag => stripIndent`
 const reasonDetails = (reason = 'No reason given') =>
     `If \`reason\` is not specified, it will default as "${reason}".`
 
-const randomDate = Math.trunc(Date.now() / 1000000) * 1000 + 10 ** 5
+const randomDate = Math.trunc(Date.now() / 1_000_000) * 1000 + 10 ** 5
 
-const inviteMaxAge = 604800
+const inviteMaxAge = 604_800
 
 const defaultEmojiRegex = require('emoji-regex')()
 const gEmojiIdRegex = /\d{17,19}/g
