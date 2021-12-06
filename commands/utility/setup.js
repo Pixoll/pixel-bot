@@ -70,7 +70,7 @@ module.exports = class SetupCommand extends Command {
         super(client, {
             name: 'setup',
             group: 'utility',
-            description: 'Setup the bot to its core. The data collected from this command will never be deleted.',
+            description: 'Setup the bot to its core. Data collected will be deleted if the bot leaves the server.',
             details: `${channelDetails('text-channel')}\n${roleDetails()}\n${channelDetails('text-channels', true)}`,
             format: stripIndent`
                 setup <full> - Setup the bot completely to its core.

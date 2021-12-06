@@ -98,7 +98,7 @@ class Argument {
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.infinite = Boolean(info.infinite)
+		this.infinite = !!info.infinite
 
 		/**
 		 * Validator function for validating a value for the argument

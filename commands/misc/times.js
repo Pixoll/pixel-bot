@@ -145,7 +145,7 @@ module.exports = class TimesCommand extends Command {
             const tz = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase())
             const city = timeZones.get(tz)
             const { offset, time } = timeZone(tz, city)
-            const hour = Number.parseInt(time.split(':').shift())
+            const hour = parseInt(time.split(':').shift())
             const clock = hour - (hour > 12 ? 12 : 0)
 
             const embed = new MessageEmbed()
@@ -170,7 +170,7 @@ module.exports = class TimesCommand extends Command {
         const thirdPart = sorted.splice(0, divisor)
 
         const hours = date.getUTCHours()
-        const clock = hours - (hours > 12 ? 12 : 0)
+        const clock = hours - (hours > 12 ? 12 : 0) || 12
 
         const base = new MessageEmbed()
             .setColor(embedColor)

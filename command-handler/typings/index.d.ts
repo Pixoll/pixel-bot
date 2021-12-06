@@ -727,7 +727,8 @@ export class CommandoGuildManager extends CachedManager<Snowflake, CommandoGuild
 
 export class CommandoInteraction extends CommandInteraction {
 	public client: CommandoClient
-	public guild: CommandoGuild
+	public guild?: CommandoGuild
+	public member?: GuildMember
 }
 
 export class CommandoMember extends GuildMember {

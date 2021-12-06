@@ -63,6 +63,7 @@ const modules = model('modules', Schema({
     stickyRoles: Boolean,
     welcome: Boolean,
     auditLogs: {
+        boosts: Boolean,
         channels: Boolean,
         commands: Boolean,
         emojis: Boolean,

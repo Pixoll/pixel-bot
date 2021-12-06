@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoGuild } = require('../../command-handler/typings')
-const { MessageEmbed, PremiumTier } = require('discord.js')
+const { MessageEmbed, PremiumTier, Guild } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
@@ -38,7 +38,7 @@ module.exports = class ServerInfoCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {CommandoGuild} guild The guild to get information from
      */
-    async run({ message, interaction } = {}, guild) {
+    async run({ message, interaction }, guild) {
         const server = (message || interaction)?.guild || guild
         const { name, channels, premiumTier, premiumSubscriptionCount, memberCount, roles, id, createdTimestamp } = server
         const owner = await server.fetchOwner()
@@ -69,7 +69,7 @@ module.exports = class ServerInfoCommand extends Command {
             .setFooter(`Server id: ${id} • Created at`)
             .setTimestamp(createdTimestamp)
 
-        if (guild) return serverInfo
+        if (guild instanceof Guild) return serverInfo
         await replyAll({ message, interaction }, serverInfo)
     }
 }

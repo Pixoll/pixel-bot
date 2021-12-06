@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
-const { generateEmbed, abcOrder } = require('../../utils')
+const { generateEmbed, abcOrder, timestamp } = require('../../utils')
 const { CommandInstances } = require('../../command-handler/typings')
 const { version } = require('../../package.json')
 /* eslint-enable no-unused-vars */
@@ -11,7 +11,8 @@ const changelog = require('../../documents/changelog.json')
         if (version < val.version) return null
         const changes = val.changes.length === 1 ? val.changes[0] :
             val.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n')
-        return { version: val.version, changes }
+        const title = `Version ${val.version} - ${timestamp(val.timestamp, 'F')}`
+        return { title, changes }
     })
     .filter(log => log)
 
@@ -38,8 +39,7 @@ module.exports = class ChangelogCommand extends Command {
             number: 5,
             authorName: `${user.username}'s changelog`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
-            title: 'Version ',
-            keyTitle: { suffix: 'version' },
+            keyTitle: { suffix: 'title' },
             keys: ['changes']
         })
     }

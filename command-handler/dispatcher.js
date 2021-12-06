@@ -195,7 +195,7 @@ class CommandDispatcher {
 		}
 
 		// Defers the reply
-		await interaction.deferReply({ ephemeral: Boolean(command.slash.ephemeral) }).catch(() => null)
+		await interaction.deferReply({ ephemeral: !!command.slash.ephemeral }).catch(() => null)
 
 		// Make sure the command is usable in this context
 		if (command.dmOnly && guild) {
@@ -245,10 +245,10 @@ class CommandDispatcher {
 			for (const option of interaction.options.data) {
 				/** @param {option} opt */
 				function concat(opt) {
-					const name = removeDashes(opt.name)
-					if (name && [undefined, null].includes(opt.value)) {
-						options.subCommand = name
+					if (opt.name && [undefined, null].includes(opt.value)) {
+						options.subCommand = opt.name
 					} else {
+						const name = removeDashes(opt.name)
 						switch (opt.type) {
 							case 'BOOLEAN':
 							case 'INTEGER':

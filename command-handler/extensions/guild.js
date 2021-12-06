@@ -84,7 +84,7 @@ class CommandoGuild extends Guild {
 		command = this.client.registry.resolveCommand(command)
 		if (command.guarded) throw new Error('The command is guarded.')
 		if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
-		enabled = Boolean(enabled)
+		enabled = !!enabled
 		if (!this._commandsEnabled) {
 			/**
 			 * Map object of internal command statuses, mapped by command name
@@ -120,7 +120,7 @@ class CommandoGuild extends Guild {
 		group = this.client.registry.resolveGroup(group)
 		if (group.guarded) throw new Error('The group is guarded.')
 		if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
-		enabled = Boolean(enabled)
+		enabled = !!enabled
 		if (!this._groupsEnabled) {
 			/**
 			 * Internal map object of group statuses, mapped by group id

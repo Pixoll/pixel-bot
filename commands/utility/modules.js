@@ -20,6 +20,7 @@ function patchData(data) {
         welcome: _patch(data?.welcome),
         stickyRoles: _patch(data?.stickyRoles),
         auditLogs: {
+            boosts: _patch(data?.auditLogs?.boosts),
             channels: _patch(data?.auditLogs?.channels),
             commands: _patch(data?.auditLogs?.commands),
             emojis: _patch(data?.auditLogs?.emojis),
@@ -65,7 +66,7 @@ module.exports = class ModulesCommand extends Command {
         const patch = patchData(data)
         const { auditLogs, /* autoMod, chatFilter, */ welcome, stickyRoles } = patch
         const {
-            channels, commands, emojis, invites, members, messages, moderation,
+            boosts, channels, commands, emojis, invites, members, messages, moderation,
             modules, roles, server, stickers, threads, users, voice
         } = auditLogs
 
@@ -79,6 +80,7 @@ module.exports = class ModulesCommand extends Command {
                 **>** **Sticky roles:** ${stickyRoles}
                 **>** **Welcome messages:** ${welcome}
                 **>** **Audit logs:**
+                \u2800 ⤷ **Boosts:** ${boosts}
                 \u2800 ⤷ **Channels:** ${channels}
                 \u2800 ⤷ **Commands:** ${commands}
                 \u2800 ⤷ **Emojis:** ${emojis}

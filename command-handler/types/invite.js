@@ -21,7 +21,7 @@ class InviteArgumentType extends ArgumentType {
 	async validate(val) {
 		const invite = await this.client.fetchInvite(val).catch(() => null)
 		this.fetched = invite
-		return Boolean(invite)
+		return !!invite
 	}
 
 	/**

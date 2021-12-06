@@ -110,11 +110,11 @@ async function isModuleEnabled(guild, module, subModule) {
         const status = []
         for (const prop in check) {
             if (typeof check[prop] === 'function') continue
-            status.push(check[prop] === true)
+            status.push(!!check[prop])
         }
         return !!status.filter(b => b)[0]
     }
-    return check === true
+    return !!check
 }
 
 /**
@@ -244,11 +244,11 @@ async function replyAll({ message, interaction }, options) {
     if (options instanceof MessageEmbed) options = { embeds: [options] }
     if (typeof options === 'string') options = { content: options }
     if (interaction) {
-        if (interaction.deferred || interaction.replied) return await interaction.editReply(options)
-        else return await interaction.reply(options)
+        if (interaction.deferred || interaction.replied) return await interaction.editReply(options).catch(() => null)
+        else return await interaction.reply(options).catch(() => null)
     }
     if (message) {
-        return await message.reply({ ...options, ...noReplyInDMs(message) })
+        return await message.reply({ ...options, ...noReplyInDMs(message) }).catch(() => null)
     }
     return null
 }

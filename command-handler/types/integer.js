@@ -14,7 +14,7 @@ class IntegerArgumentType extends ArgumentType {
 	 * @return Whether the value is valid
 	 */
 	validate(val, msg, arg) {
-		const int = Number.parseInt(val)
+		const int = parseInt(val)
 		if (Number.isNaN(int)) return false
 
 		if (arg.oneOf && !arg.oneOf.includes(int)) {
@@ -35,7 +35,7 @@ class IntegerArgumentType extends ArgumentType {
 	 * @return Usable value
 	 */
 	parse(val) {
-		return Number.parseInt(val)
+		return parseInt(val)
 	}
 }
 

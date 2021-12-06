@@ -1,6 +1,19 @@
-import { Document } from 'mongoose'
+// import { Document } from 'mongoose'
 
-interface BaseSchema extends Document {
+/**
+ * A {@link https://developer.twitter.com/en/docs/twitter-ids Twitter snowflake},
+ * except the epoch is 2015-01-01T00:00:00.000Z.
+ *
+ * If we have a snowflake '266241948824764416' we can represent it as binary:
+ * ```
+ * 64                                          22     17     12          0
+ *  000000111011000111100001101001000101000000  00001  00000  000000000000
+ *       number of ms since Discord epoch       worker  pid    increment
+ * ```
+ */
+type Snowflake = string
+
+interface BaseSchema { // extends Document
     readonly createdAt?: Date
     readonly updatedAt?: Date
 }
@@ -9,21 +22,21 @@ type TimeBasedModeration = 'mute' | 'temp-ban'
 
 export interface ActiveSchema extends BaseSchema {
     type: TimeBasedModeration | 'temp-role'
-    guild: string
-    userId: string
+    guild: Snowflake
+    userId: Snowflake
     userTag: string
-    role: string
+    role: Snowflake
     duration: number
 }
 
 export interface AfkSchema extends BaseSchema {
-    guild: string
-    user: string
+    guild: Snowflake
+    user: Snowflake
     status: string
 }
 
 export interface DisabledSchema extends BaseSchema {
-    guild?: string
+    guild?: Snowflake
     global: boolean
     commands: string[]
     groups: string[]
@@ -44,29 +57,30 @@ export interface FaqSchema extends BaseSchema {
 
 export interface ModerationSchema extends BaseSchema {
     type: 'warn' | 'ban' | 'kick' | 'soft-ban' | TimeBasedModeration
-    guild: string
-    userId: string
+    guild: Snowflake
+    userId: Snowflake
     userTag: string
-    modId: string
+    modId: Snowflake
     modTag: string
     reason: string
     duration: string
 }
 
 export interface McIpSchema extends BaseSchema {
-    guild: string
+    guild: Snowflake
     type: 'java' | 'bedrock'
     ip: string
     port: number
 }
 
 export interface ModuleSchema extends BaseSchema {
-    guild: string
+    guild: Snowflake
     // autoMod: boolean
     // chatFilter: boolean
     welcome: boolean
     stickyRoles: boolean
     auditLogs: {
+        boosts: boolean
         channels: boolean
         commands: boolean
         emojis: boolean
@@ -85,68 +99,68 @@ export interface ModuleSchema extends BaseSchema {
 }
 
 export type Module = 'auto-mod' | 'chat-filter' | 'sticky-roles' | 'welcome' | 'audit-logs'
-export type AuditLog = 'channels' | 'commands' | 'emojis' | 'invites' | 'members' | 'messages' |
+export type AuditLog = 'boosts' | 'channels' | 'commands' | 'emojis' | 'invites' | 'members' | 'messages' |
     'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'users' | 'voice'
 
 export interface PrefixSchema extends BaseSchema {
     global: boolean
-    guild?: string
+    guild?: Snowflake
     prefix: string
 }
 
 export interface PollSchema extends BaseSchema {
-    guild: string
-    channel: string
-    message: string
-    emojis: string[]
+    guild: Snowflake
+    channel: Snowflake
+    message: Snowflake
+    emojis: (string | Snowflake)[]
     duration: string
     endsAt: number
 }
 
 export interface ReactionRoleSchema extends BaseSchema {
-    guild: string
-    channel: string
-    message: string
-    roles: string[]
-    emojis: string[]
+    guild: Snowflake
+    channel: Snowflake
+    message: Snowflake
+    roles: Snowflake[]
+    emojis: (string | Snowflake)[]
 }
 
 export interface ReminderSchema extends BaseSchema {
-    user: string
+    user: Snowflake
     reminder: string
     remindAt: number
-    message: string
+    message: Snowflake
     msgURL: string
-    channel: string
+    channel: Snowflake
 }
 
 export interface RuleSchema extends BaseSchema {
-    guild: string
+    guild: Snowflake
     rules: string[]
 }
 
 export interface SetupSchema extends BaseSchema {
-    guild: string
-    logsChannel: string
-    memberRole: string
-    botRole: string
-    mutedRole: string
-    lockChannels: string[]
+    guild: Snowflake
+    logsChannel: Snowflake
+    memberRole: Snowflake
+    botRole: Snowflake
+    mutedRole: Snowflake
+    lockChannels: Snowflake[]
 }
 
 export interface StickyRoleSchema extends BaseSchema {
-    guild: string
-    user: string
-    roles: string[]
+    guild: Snowflake
+    user: Snowflake
+    roles: Snowflake[]
 }
 
 export interface TodoSchema extends BaseSchema {
-    user: string
+    user: Snowflake
     list: string[]
 }
 
 export interface WelcomeSchema extends BaseSchema {
-    guild: string
-    channel: string
+    guild: Snowflake
+    channel: Snowflake
     message: string
 }

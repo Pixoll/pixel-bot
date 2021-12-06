@@ -3,31 +3,36 @@
         "version": "2.0.0",
         "changes": [
             "Added slash commands."
-        ]
+        ],
+        "timestamp": 1637307240000
     },
     {
         "version": "2.0.1",
         "changes": [
             "Bug fixes."
-        ]
+        ],
+        "timestamp": 1637708760000
     },
     {
         "version": "2.0.2",
         "changes": [
             "Bug fixes and improvements."
-        ]
+        ],
+        "timestamp": 1637709780000
     },
     {
         "version": "2.0.3",
         "changes": [
             "Bug fixes."
-        ]
+        ],
+        "timestamp": 1637783340000
     },
     {
         "version": "2.0.4",
         "changes": [
             "Bug fixes."
-        ]
+        ],
+        "timestamp": 1638054420000
     },
     {
         "version": "2.0.5",
@@ -35,10 +40,11 @@
             "Fixed `setup` slash command. (`Cannot destructure property 'guildId' of 'message' as it is undefined.`)",
             "Added role parameter checking for `setup` slash command.",
             "Some embeds didn't render properly."
-        ]
+        ],
+        "timestamp": 1638203340000
     },
     {
-        "version": "2.1.0",
+        "version": "2.1.0a",
         "changes": [
             "Added `changelog` command.",
             "Select menus/filters didn't work when there were no pages.",
@@ -46,10 +52,26 @@
             "Improved the \"moderator\" permissions manager.",
             "Fixed moderator action permissions and conditions. Moderators/admins were able to make moderation actions on members with higher hierarchy than them.",
             "Fixed same audit-logs sending more than once occasionally."
-        ]
+        ],
+        "timestamp": 1638716880000
     },
     {
-        "version": "2.1.1",
+        "version": "2.1.0b",
+        "changes": [
+            "Fixed `server-info` command: Information wasn't displaying.",
+            "Fixed `mcstatus`, `purge`, `role` and `setup` commands: Some slash sub-commands didn't work.",
+            "Fixed clock emoji on `times` command.",
+            "Removed \"Server id\" footer from server audit-logs.",
+            "Any data collected by the bot will now be deleted if it leaves the server.",
+            "Fixed `purge` command: Possible crashes when using the `after` sub-command.",
+            "The `to-do` command now displays the number of the new item.",
+            "Added `boosts` sub-module to audit-logs module.",
+            "Added timestamps on `changelog` command."
+        ],
+        "timestamp": 1638821340000
+    },
+    {
+        "version": "2.2.0",
         "changes": [
             "Added `legal` command.",
             "Added the bot's **Terms of Service (ToS)** and **Privacy Policy.** Access them with the `legal` command."

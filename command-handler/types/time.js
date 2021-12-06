@@ -53,10 +53,10 @@ class TimeArgumentType extends ArgumentType {
 
         const dateNums = [defDate.getUTCFullYear(), defDate.getUTCMonth(), defDate.getUTCDate()]
         const timeNums = matches[0]?.split(':').map((s, i) => {
-            const parsed = Number.parseInt(s)
+            const parsed = parseInt(s)
             if (i !== 0) return parsed
 
-            const offset = tzOffset + Number.parseInt(matches[2] ?? 0)
+            const offset = tzOffset + parseInt(matches[2] ?? 0)
             const formatter = timeParser.get(matches[1]?.toLowerCase()) ?? 0
             if (formatter === 12 && parsed === 12) {
                 return parsed - offset

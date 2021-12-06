@@ -41,7 +41,7 @@ module.exports = async (client) => {
             }
         }
 
-        setTimeout(removeMissingData, 60 * 60 * 1000)
+        setTimeout(async () => await removeMissingData(), 60 * 60 * 1000)
     }
 
     await removeMissingData()

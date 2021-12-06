@@ -94,28 +94,28 @@ class Command {
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.dmOnly = Boolean(info.dmOnly)
+		this.dmOnly = !!info.dmOnly
 
 		/**
 		 * Whether the command can only be run in a guild channel
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.guildOnly = Boolean(info.guildOnly)
+		this.guildOnly = !!info.guildOnly
 
 		/**
 		 * Whether the command can only be used by a server owner
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.guildOwnerOnly = Boolean(info.guildOwnerOnly)
+		this.guildOwnerOnly = !!info.guildOwnerOnly
 
 		/**
 		 * Whether the command can only be used by an owner
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.ownerOnly = Boolean(info.ownerOnly)
+		this.ownerOnly = !!info.ownerOnly
 
 		/**
 		 * Permissions required by the client to use the command.
@@ -134,14 +134,14 @@ class Command {
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.modPermissions = Boolean(info.modPermissions)
+		this.modPermissions = !!info.modPermissions
 
 		/**
 		 * Whether the command can only be used in NSFW channels
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.nsfw = Boolean(info.nsfw)
+		this.nsfw = !!info.nsfw
 
 		/**
 		 * Whether the default command handling is enabled for the command
@@ -203,28 +203,28 @@ class Command {
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.guarded = Boolean(info.guarded)
+		this.guarded = !!info.guarded
 
 		/**
 		 * Whether the command should be hidden from the help command
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.hidden = Boolean(info.hidden)
+		this.hidden = !!info.hidden
 
 		/**
 		 * Whether the command will be run when an unknown command is used
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.unknown = Boolean(info.unknown)
+		this.unknown = !!info.unknown
 
 		/**
 		 * Whether the command is marked as deprecated
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.deprecated = Boolean(info.deprecated)
+		this.deprecated = !!info.deprecated
 
 		/**
 		 * The name or alias of the command that is replacing the deprecated command.
@@ -265,7 +265,7 @@ class Command {
 		 * Whether this command will be registered in the test guild only or not
 		 * @default false
 		 */
-		this.test = Boolean(info.test)
+		this.test = !!info.test
 	}
 
 	/**
@@ -620,10 +620,10 @@ class Command {
 		if (info.patterns && (!Array.isArray(info.patterns) || info.patterns.some(pat => !(pat instanceof RegExp)))) {
 			throw new TypeError('Command patterns must be an Array of regular expressions.')
 		}
-		if (Boolean(info.deprecated) && typeof info.replacing !== 'string') {
+		if (!!info.deprecated && typeof info.replacing !== 'string') {
 			throw new TypeError('Command replacing must be a string.')
 		}
-		if (Boolean(info.deprecated) && info.replacing !== info.replacing.toLowerCase()) {
+		if (!!info.deprecated && info.replacing !== info.replacing.toLowerCase()) {
 			throw new TypeError('Command replacing must be lowercase.')
 		}
 		if ('slash' in info && (typeof info.slash !== 'object' && typeof info.slash !== 'boolean')) {
@@ -668,10 +668,10 @@ class Command {
 			if (info.slash.examples && (
 				!Array.isArray(info.slash.examples) || info.slash.examples.some(ex => typeof ex !== 'string')
 			)) throw new TypeError('Command slash examples must be an Array of strings.')
-			if (Boolean(info.slash.deprecated) && typeof info.slash.replacing !== 'string') {
+			if (!!info.slash.deprecated && typeof info.slash.replacing !== 'string') {
 				throw new TypeError('Command slash replacing must be a string.')
 			}
-			if (Boolean(info.slash.deprecated) && info.slash.replacing !== info.slash.replacing.toLowerCase()) {
+			if (!!info.slash.deprecated && info.slash.replacing !== info.slash.replacing.toLowerCase()) {
 				throw new TypeError('Command slash replacing must be lowercase.')
 			}
 			if ('options' in info.slash && (

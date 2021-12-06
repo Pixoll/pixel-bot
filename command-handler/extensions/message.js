@@ -267,7 +267,7 @@ class CommandoMessage extends Message {
 			args = collResult.values
 		}
 		args ??= this.parseArgs()
-		const fromPattern = Boolean(patternMatches)
+		const fromPattern = !!patternMatches
 
 		// Run the command
 		if (throttle) throttle.usages++

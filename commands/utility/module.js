@@ -25,6 +25,7 @@ function patchData(data) {
         welcome: _patch(data?.welcome),
         stickyRoles: _patch(data?.stickyRoles),
         auditLogs: {
+            boosts: _patch(data?.auditLogs?.boosts),
             channels: _patch(data?.auditLogs?.channels),
             commands: _patch(data?.auditLogs?.commands),
             emojis: _patch(data?.auditLogs?.emojis),

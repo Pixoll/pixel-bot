@@ -30,13 +30,13 @@ module.exports = class McStatusCommand extends Command {
                 mcstatus <check> - Status of the saved server.
                 mcstatus java [ip] <port> - Status of a Java server.
                 mcstatus bedrock [ip] <port> - Status of a Bedrock server.
-                mcstatus save:java [ip] <port> - Saves a Java server.
-                mcstatus save:bedrock [ip] <port> - Saves a Bedrock server.
+                mcstatus save-java [ip] <port> - Saves a Java server.
+                mcstatus save-bedrock [ip] <port> - Saves a Bedrock server.
             `,
             examples: [
                 'mcstatus java play.hypixel.net',
                 'mcstatus bedrock play.hyperlandsmc.net',
-                'mcstatus save:java play.hypixel.net'
+                'mcstatus save-java play.hypixel.net'
             ],
             args: [
                 {
@@ -44,7 +44,7 @@ module.exports = class McStatusCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['check', 'java', 'bedrock', 'save:java', 'save:bedrock'],
+                    oneOf: ['check', 'java', 'bedrock', 'save-java', 'save-bedrock'],
                     default: 'check'
                 },
                 {
@@ -102,12 +102,12 @@ module.exports = class McStatusCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
-     * @param {'check'|'java'|'bedrock'|'save:java'|'save:bedrock'} args.subCommand The sub-command
+     * @param {'check'|'java'|'bedrock'|'save-java'|'save-bedrock'} args.subCommand The sub-command
      * @param {string} args.ip The IP of the server to save/look for
      * @param {number} args.port The IP of the server to save/look for
      */
     async run({ message, interaction }, { subCommand, ip, port }) {
-        subCommand = subCommand.replace('_', ':').toLowerCase()
+        subCommand = subCommand.toLowerCase()
         const { guild } = message || interaction
         this.db = guild?.database.mcIps
 
@@ -118,9 +118,9 @@ module.exports = class McStatusCommand extends Command {
                 return await this.java({ message, interaction }, ip, port ?? 25565)
             case 'bedrock':
                 return await this.bedrock({ message, interaction }, ip, port ?? 19132)
-            case 'save:java':
+            case 'save-java':
                 return await this.saveJava({ message, interaction }, ip, port ?? 25565)
-            case 'save:bedrock':
+            case 'save-bedrock':
                 return await this.saveBedrock({ message, interaction }, ip, port ?? 19132)
         }
     }

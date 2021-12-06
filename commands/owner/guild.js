@@ -105,7 +105,7 @@ module.exports = class GuildCommand extends Command {
 
         await message.reply({
             content: `Click the button bellow to join **${guild.name}**`,
-            components: [inviteButton(invite)]
+            components: [inviteButton(invite, 'Join')]
         })
     }
 

@@ -67,7 +67,7 @@ class DateArgumentType extends ArgumentType {
         const defDate = new Date()
 
         const dateNums = matches[0]?.split(/[/\-.,]/g).map((s, i) => {
-            const parsed = Number.parseInt(s)
+            const parsed = parseInt(s)
             if (i === 0) return parsed
             if (i === 1) return parsed - 1
             return (s.length === 2 ? parsed + 2000 : parsed)
@@ -78,10 +78,10 @@ class DateArgumentType extends ArgumentType {
         dateNums.reverse()
 
         const timeNums = matches[1]?.split(':').map((s, i) => {
-            const parsed = Number.parseInt(s)
+            const parsed = parseInt(s)
             if (i !== 0) return parsed
 
-            const offset = tzOffset + Number.parseInt(matches[3] ?? 0)
+            const offset = tzOffset + parseInt(matches[3] ?? 0)
             const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
             if (formatter === 12 && parsed === 12) {
                 return parsed - offset

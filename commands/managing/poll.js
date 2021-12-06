@@ -138,7 +138,7 @@ module.exports = class PollCommand extends Command {
                 for (const emoji of match) {
                     if (emojisArr.includes(emoji)) continue
 
-                    if (!Number.parseInt(emoji)) emojisArr.push(emoji)
+                    if (!parseInt(emoji)) emojisArr.push(emoji)
                     if (allEmojis.get(emoji)) emojisArr.push(emoji)
                 }
                 if (emojisArr.length < 2) {
@@ -209,7 +209,7 @@ module.exports = class PollCommand extends Command {
                 for (const emoji of match) {
                     if (emojis.includes(emoji)) continue
 
-                    if (!Number.parseInt(emoji)) emojis.push(emoji)
+                    if (!parseInt(emoji)) emojis.push(emoji)
                     if (allEmojis.get(emoji)) emojis.push(emoji)
                 }
             }
@@ -244,7 +244,7 @@ module.exports = class PollCommand extends Command {
         const { channels } = guild
 
         if (interaction) {
-            const [, chanId, msgId] = pollURL.match(/(\d+)[/-](\d+)$/)?.map(m => m) || []
+            const [, chanId, msgId] = pollURL.match(/(\d{17,20})[/-](\d{17,20})$/)?.map(m => m) || []
             channel = await channels.fetch(chanId).catch(() => null)
             if (!channel) {
                 return await replyAll({ interaction }, basicEmbed({

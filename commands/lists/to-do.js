@@ -156,7 +156,7 @@ module.exports = class TodoCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            fieldName: 'Added the following item to your to-do list:',
+            fieldName: `Added item \`${todoData.list.length + 1}\` to your to-do list:`,
             fieldValue: item
         }))
     }
@@ -171,7 +171,7 @@ module.exports = class TodoCommand extends Command {
         if (message && !item) {
             const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
             if (cancelled) return
-            item = Math.abs(Number.parseInt(value || 0) || 0)
+            item = Math.abs(parseInt(value || 0) || 0)
         }
 
         if (!todoData || !todoData.list || todoData.list.length === 0) {

@@ -56,7 +56,10 @@ module.exports = async (client) => {
                     in this server.
                 `}
 
-                *Note: All modules/sub-modules are disabled by default.*
+                ${oneLine`
+                    *Note: All modules/sub-modules are disabled by default.
+                    Setup data will be deleted if the bot leaves the server.*
+                `}
             `)
             .addField('🕒 Note about times and dates', oneLine`
                 The bot runs based off the **Coordinated Universal Time (UTC).** This means that when you used

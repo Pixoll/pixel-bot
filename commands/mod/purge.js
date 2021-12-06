@@ -1,7 +1,6 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js')
 const { validURL, basicEmbed, userDetails, getArgument, sleep, replyAll } = require('../../utils')
 const { stripIndent, oneLine } = require('common-tags')
@@ -29,6 +28,8 @@ async function bulkDelete({ message, interaction }, messages) {
     }
 
     const { channel } = message || interaction
+    const ref = message || await interaction.fetchReply()
+    messages = messages.filter(msg => msg.id !== ref.id)
 
     /** @type {Collection<string,Message>} */
     const bulk = await channel.bulkDelete(messages)
@@ -37,10 +38,10 @@ async function bulkDelete({ message, interaction }, messages) {
         color: 'GREEN', emoji: 'check', description: `Deleted ${bulk.size} messages.`
     })
 
-    const _msg = await message?.fetch().catch(() => null) || await interaction.fetchReply()
-    const toDelete = await channel.send({ embeds: [embed] })
+    const _msg = await message?.fetch().catch(() => null)
+    const toDelete = await replyAll({ message, interaction }, embed)
 
-    if (_msg && !_msg.deleted) await _msg?.delete()
+    if (_msg && !_msg.deleted) await _msg?.delete().catch(() => null)
 
     await sleep(10)
     await toDelete?.delete().catch(() => null)
@@ -348,8 +349,7 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async all({ message, interaction }, amount) {
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         await bulkDelete({ message, interaction }, msgs)
     }
 
@@ -378,8 +378,7 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async bots({ message, interaction }, amount) {
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.author.bot)
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -390,8 +389,7 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async embeds({ message, interaction }, amount) {
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.embeds.length !== 0)
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -410,8 +408,7 @@ module.exports = class PurgeCommand extends Command {
         }
         filter = filter.toString()
 
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.content.toLowerCase().endsWith(filter))
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -422,8 +419,7 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async files({ message, interaction }, amount) {
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.attachments.size !== 0)
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -434,8 +430,7 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async links({ message, interaction }, amount) {
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => {
             for (const str of msg.content?.split(/ +/)) {
                 if (validURL(str)) return true
@@ -459,8 +454,7 @@ module.exports = class PurgeCommand extends Command {
         }
         filter = filter.toString()
 
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.content.includes(filter.toString()))
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -479,8 +473,7 @@ module.exports = class PurgeCommand extends Command {
         }
         filter = filter.toString()
 
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.content.startsWith(filter.toString()))
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -500,8 +493,7 @@ module.exports = class PurgeCommand extends Command {
             }
         }
 
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => msg.author.id === filter.id)
         await bulkDelete({ message, interaction }, filtered)
     }
@@ -512,8 +504,7 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async users({ message, interaction }, amount) {
-        const ref = message || await interaction.fetchReply()
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: ref.id })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
         const filtered = msgs.filter(msg => !msg.author.bot)
         await bulkDelete({ message, interaction }, filtered)
     }

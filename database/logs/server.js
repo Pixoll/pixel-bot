@@ -49,7 +49,7 @@ module.exports = (client) => {
             mfaLevel: mfa1, widgetChannel: widgetChan1, widgetEnabled: widgetOn1, discoverySplash: discSplash1,
             publicUpdatesChannel: updateChan1, rulesChannel: rulesChan1, preferredLocale: lang1, nsfwLevel: nsfw1,
             partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1,
-            maximumBitrate: maxBitrate1, id
+            maximumBitrate: maxBitrate1
         } = oldGuild
         const {
             name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,
@@ -66,7 +66,6 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated server', newGuild.iconURL(imgOptions))
-            .setFooter(`Server id: ${id}`)
             .setTimestamp()
 
         const imagesEmbed = new MessageEmbed(embed)

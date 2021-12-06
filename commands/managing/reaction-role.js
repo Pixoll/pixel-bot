@@ -134,7 +134,7 @@ module.exports = class ReactionRoleCommand extends Command {
                 if (roles.length === emojis.length) break
                 if (emojis.includes(emoji)) continue
 
-                if (!Number.parseInt(emoji)) emojis.push(emoji)
+                if (!parseInt(emoji)) emojis.push(emoji)
                 if (allEmojis.get(emoji)) emojis.push(emoji)
             }
         }

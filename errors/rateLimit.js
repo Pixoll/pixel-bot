@@ -21,8 +21,8 @@ module.exports = (client) => {
             method: msg.match(/Method *: .+/)?.map(m => m)[0].split(/ +/).pop(),
             path: msg.match(/Path *: .*/)?.map(m => m)[0].split(/ +/).pop(),
             route: msg.match(/Route *: .*/)?.map(m => m)[0].split(/ +/).pop(),
-            limit: Number.parseInt(msg.match(/Limit *: .+/)?.map(m => m)[0].split(/ +/).pop()),
-            timeout: Number.parseInt(msg.match(/Timeout *: .+/)?.map(m => m)[0].split(/ +/).pop()),
+            limit: parseInt(msg.match(/Limit *: .+/)?.map(m => m)[0].split(/ +/).pop()),
+            timeout: parseInt(msg.match(/Timeout *: .+/)?.map(m => m)[0].split(/ +/).pop()),
         }
 
         await manager(data)
@@ -55,10 +55,10 @@ module.exports = (client) => {
             return
         }
 
-        const isMessageCooldown = !!route.match(/\/channels\/\d+\/messages/)?.map(m => m)[0]
+        const isMessageCooldown = !!route.match(/\/channels\/\d{17,20}\/messages/)?.map(m => m)[0]
         if (isMessageCooldown) return
 
-        const isTypingCooldown = !!route.match(/\/channels\/\d{18}\/typing/)?.map(m => m)[0] && method === 'post'
+        const isTypingCooldown = !!route.match(/\/channels\/\d{17,20}\/typing/)?.map(m => m)[0] && method === 'post'
         if (isTypingCooldown) return
 
         console.log('rateLimit >', data)
