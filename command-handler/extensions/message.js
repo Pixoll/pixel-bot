@@ -96,7 +96,7 @@ class CommandoMessage extends Message {
 	 * Initialises the message for a command
 	 * @param {Command} [command] Command the message triggers
 	 * @param {string} [argString] Argument string for the command
-	 * @param {?Array<string>} [patternMatches] Command pattern matches (if from a pattern trigger)
+	 * @param {?string[]} [patternMatches] Command pattern matches (if from a pattern trigger)
 	 * @return {Message} This message
 	 * @private
 	 */
@@ -160,7 +160,7 @@ class CommandoMessage extends Message {
 
 	/**
 	 * Runs the command
-	 * @return {Promise<?Message|?Array<Message>>}
+	 * @return {Promise<?Message|?Message[]>}
 	 */
 	async run() {
 		const { guild, guildId, channel, channelId, author, webhookId, client, command, patternMatches, argString } = this
@@ -503,7 +503,7 @@ class CommandoMessage extends Message {
 
 	/**
 	 * Finalizes the command message by setting the responses and deleting any remaining prior ones
-	 * @param {?Array<Message|Message[]>} responses Responses to the message
+	 * @param {?(Message|Message[])[]} responses Responses to the message
 	 * @private
 	 */
 	finalize(responses) {

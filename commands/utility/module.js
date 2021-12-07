@@ -3,7 +3,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -23,6 +23,7 @@ function patchData(data) {
         // autoMod: _patch(data?.autoMod),
         // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
+        scamDetector: _patch(data?.scamDetector),
         stickyRoles: _patch(data?.stickyRoles),
         auditLogs: {
             boosts: _patch(data?.auditLogs?.boosts),

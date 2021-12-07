@@ -130,7 +130,7 @@ async function getLogsChannel(guild) {
 
 /**
  * A custom emoji.
- * @typedef {'cross'|'check'|'info'|'neutral'|'loading'|'boost'|'bot'} CustomEmoji
+ * @typedef {'cross'|'check'|'info'|'neutral'|'loading'|'boost'|'bot'|'online'|'dnd'|'idle'|'invis'} CustomEmoji
  */
 
 /**
@@ -142,21 +142,26 @@ async function getLogsChannel(guild) {
 function customEmoji(emoji = '', animated = false) {
     if (!emoji) return ''
 
-    if (emoji === 'loading') return '<a:loading:863666168053366814>'
-    if (emoji === 'neutral') return '<:neutral:819395069608984617>'
-    if (emoji === 'info') return '<:info:802617654262890527>'
-    if (emoji === 'boost') return '<a:boost:806364586231595028>'
-    if (emoji === 'bot') return '<:bot1:893998060965883904><:bot2:893998060718399528>'
-
-    if (animated) {
-        if (emoji === 'cross') return '<a:cross:863118691917889556>'
-        if (emoji === 'check') return '<a:check:863118691808706580>'
-    } else {
-        if (emoji === 'cross') return '<:cross:802617654442852394>'
-        if (emoji === 'check') return '<:check:802617654396715029>'
+    switch (emoji) {
+        case 'boost': return '<a:boost:806364586231595028>'
+        case 'bot': return '<:bot1:893998060965883904><:bot2:893998060718399528>'
+        case 'check': {
+            if (animated) return '<a:check:863118691808706580>'
+            return '<:check:802617654396715029>'
+        }
+        case 'cross': {
+            if (animated) return '<a:cross:863118691917889556>'
+            return '<:cross:802617654442852394>'
+        }
+        case 'dnd': return '<:dnd:806022690284240936>'
+        case 'idle': return '<:idle:806022690443624458>'
+        case 'info': return '<:info:802617654262890527>'
+        case 'invis': return '<:invis:806022690326315078>'
+        case 'loading': return '<a:loading:863666168053366814>'
+        case 'neutral': return '<:neutral:819395069608984617>'
+        case 'online': return '<:online:806022690196291625>'
+        default: return emoji
     }
-
-    return emoji
 }
 
 /**
@@ -1211,7 +1216,8 @@ async function generateEmbed({ message, interaction }, array, data) {
                     break
                 }
 
-                const propName = capitalize(key.replace('createdAt', 'date'))
+                const propName = capitalize(key.replace('createdAt', 'date')).replace('id', '')
+                if (propName.endsWith('tag')) continue
 
                 const userStr = key === 'userId' ? `<@${item.userId}> ${item.userTag}` : null
                 const modStr = key === 'modId' ? `<@${item.modId}> ${item.modTag}` : null
@@ -1225,7 +1231,7 @@ async function generateEmbed({ message, interaction }, array, data) {
 
                 const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key]
 
-                value.push(`**>** **${propName}:** ${docData}`)
+                value.push(`**${propName}:** ${docData}`)
             }
 
             embed.addField(

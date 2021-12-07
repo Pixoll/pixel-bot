@@ -160,7 +160,7 @@ class CommandoClient extends Client {
 	 * Owners of the bot, set by the {@link CommandoClientOptions#owner} option.
 	 * <info>If you simply need to check if a user is an owner of the bot, please instead use
 	 * {@link CommandoClient#isOwner}.</info>
-	 * @type {?Array<User>}
+	 * @type {?User[]}
 	 * @readonly
 	 */
 	get owners() {

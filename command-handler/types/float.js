@@ -14,8 +14,8 @@ class FloatArgumentType extends ArgumentType {
 	 * @return Whether the value is valid
 	 */
 	validate(val, msg, arg) {
-		const float = Number.parseFloat(val)
-		if (Number.isNaN(float)) return false
+		const float = parseFloat(val)
+		if (isNaN(float)) return false
 
 		if (arg.oneOf && !arg.oneOf.includes(float)) {
 			return `Please enter one of the following options: ${arg.oneOf.map(opt => `\`${opt}\``).join(', ')}`
@@ -35,7 +35,7 @@ class FloatArgumentType extends ArgumentType {
 	 * @return Usable value
 	 */
 	parse(val) {
-		return Number.parseFloat(val)
+		return parseFloat(val)
 	}
 }
 

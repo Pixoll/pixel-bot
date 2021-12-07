@@ -102,6 +102,8 @@ module.exports = class warnCommand extends Command {
             guild: guildId,
             userId: user.id,
             userTag: user.tag,
+            modId: author.id,
+            modTag: author.tag,
             reason
         })
         this.client.emit('guildMemberWarn', guild, author, user, reason)

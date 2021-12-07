@@ -312,7 +312,7 @@ class Command {
 	 * (see [RegExp#exec](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec)).
 	 * @param {boolean} fromPattern Whether or not the command is being run from a pattern match
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector (if applicable)
-	 * @return {Promise<?Message|?Array<Message>>}
+	 * @return {Promise<?Message|?Message[]>}
 	 * @abstract
 	 */
 	async run(instances, args, fromPattern, result) {
@@ -382,7 +382,7 @@ class Command {
 	 * @param {boolean} fromPattern Whether the args are pattern matches (see {@link Command#run})
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector
 	 * (if applicable see {@link Command#run})
-	 * @returns {Promise<?Message|?Array<Message>>}
+	 * @returns {Promise<?Message|?Message[]>}
 	 */
 	onError(err, { message }, args, fromPattern, result) {
 		return
