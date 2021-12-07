@@ -2,7 +2,7 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils')
+const { isModuleEnabled, sliceDots, code } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,8 +11,6 @@ const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils
  */
 module.exports = (client) => {
     client.on('commandRun', async (command, _, { message, interaction }) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandRun".`)
-
         const { guild, channel } = message || interaction
         const author = message?.author || interaction.user
         const isModCommand = !!command.userPermissions || command.ownerOnly ||
@@ -59,8 +57,6 @@ module.exports = (client) => {
     })
 
     client.on('commandPrefixChange', async (guild, prefix) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandPrefixChange".`)
-
         if (!guild) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
@@ -76,8 +72,6 @@ module.exports = (client) => {
     })
 
     client.on('commandStatusChange', async (guild, command, enabled) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandStatusChange".`)
-
         if (!guild) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')

@@ -47,8 +47,6 @@ module.exports = async (client) => {
     await removeMissingData()
 
     client.on('messageReactionAdd', async (reaction, user) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionAdd".`)
-
         reaction = await fetchPartial(reaction)
         user = await fetchPartial(user)
 
@@ -61,6 +59,7 @@ module.exports = async (client) => {
         const react = emoji.id || emoji.name
         if (user.bot || !guild) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionAdd".`)
         const { roles, members, database } = guild
 
         const data = await database.reactionRoles.fetch({ message: message.id })
@@ -78,8 +77,6 @@ module.exports = async (client) => {
     })
 
     client.on('messageReactionRemove', async (reaction, user) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionRemove".`)
-
         reaction = await reaction.fetch().catch(() => null)
         user = await user.fetch().catch(() => null)
         if (!reaction || !user) return
@@ -93,6 +90,7 @@ module.exports = async (client) => {
         const react = emoji.id || emoji.name
         if (user.bot || !guild) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionRemove".`)
         const { roles, members, database } = guild
 
         const data = await database.reactionRoles.fetch({ message: message.id })

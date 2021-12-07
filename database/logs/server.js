@@ -3,8 +3,8 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const {
-    arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter,
-    locales, nsfwLevels, removeUnderscores, sysChannelFlags, sliceFileName
+    arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter, locales,
+    nsfwLevels, removeUnderscores, sysChannelFlags
 } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -34,8 +34,6 @@ function imageLink(link) {
  */
 module.exports = (client) => {
     client.on('guildUpdate', async (oldGuild, newGuild) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildUpdate".`)
-
         const isEnabled = await isModuleEnabled(oldGuild, 'audit-logs', 'server')
         if (!isEnabled) return
 

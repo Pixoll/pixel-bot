@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, channelTypes, timestamp, myMs, sliceFileName } = require('../../utils')
+const { isModuleEnabled, channelTypes, timestamp, myMs } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,8 +11,6 @@ const { isModuleEnabled, channelTypes, timestamp, myMs, sliceFileName } = requir
  */
 module.exports = (client) => {
     client.on('threadCreate', async thread => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadCreate".`)
-
         const { guild, type, parent, id, autoArchiveDuration } = thread
         await thread.join().catch(() => null)
 
@@ -40,8 +38,6 @@ module.exports = (client) => {
     })
 
     client.on('threadDelete', async thread => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadDelete".`)
-
         const { guild, type, parent, id, name, members } = thread
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
@@ -64,8 +60,6 @@ module.exports = (client) => {
     })
 
     client.on('threadUpdate', async (oldThread, newThread) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadUpdate".`)
-
         const { guild } = newThread
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')

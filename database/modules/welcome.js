@@ -10,12 +10,12 @@ const { isModuleEnabled, sliceFileName } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('guildMemberAdd', /** @param {CommandoMember} member */ async ({ guild, user }) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
-
         if (user.bot) return
 
         const isEnabled = await isModuleEnabled(guild, 'welcome')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
 
         const data = await guild.database.welcome.fetch()
         if (!data) return

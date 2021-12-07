@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Invite, Collection } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils')
+const { isModuleEnabled, timestamp } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,8 +11,6 @@ const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('inviteCreate', async invite => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#inviteCreate".`)
-
         const { guild, inviter, maxUses, expiresAt, temporary, channel } = invite
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
@@ -36,8 +34,6 @@ module.exports = (client) => {
     })
 
     client.on('inviteDelete', async invite => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#inviteDelete".`)
-
         const { guild, channel } = invite
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')

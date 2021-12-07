@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, userFlags, compareArrays, customEmoji, sliceFileName } = require('../../utils')
+const { isModuleEnabled, userFlags, compareArrays, customEmoji } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -22,8 +22,6 @@ const imgOptions = { dynamic: true, size: 2048 }
  */
 module.exports = (client) => {
     client.on('userUpdate', async (oldUser, newUser) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#userUpdate".`)
-
         const { username: name1, discriminator: discrim1, avatar: avatar1, flags: flags1 } = oldUser
         const { username: name2, discriminator: discrim2, avatar: avatar2, flags: flags2, id, tag } = newUser
 

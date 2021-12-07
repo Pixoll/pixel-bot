@@ -10,11 +10,11 @@ const { sliceFileName } = require('../../utils')
  */
 module.exports = async (client) => {
     client.on('interactionCreate', async int => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#interactionCreate".`)
-
         if (!int.isButton()) return
         const { customId, channel } = int
         if (!customId.startsWith('button-role') || channel.type === 'DM') return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#interactionCreate".`)
 
         /** @type {Message} */
         const message = int.message

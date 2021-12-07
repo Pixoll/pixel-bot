@@ -2,8 +2,9 @@
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { myMs, rtcRegions, compareArrays, sliceFileName } = require('../../utils')
-const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes } = require('../../utils')
+const {
+    capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes, myMs, rtcRegions, compareArrays
+} = require('../../utils')
 const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
 
@@ -25,8 +26,6 @@ function format(perms) {
  */
 module.exports = (client) => {
     client.on('channelCreate', async channel => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelCreate".`)
-
         const { guild, id, type, parent } = channel
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
@@ -68,8 +67,6 @@ module.exports = (client) => {
     })
 
     client.on('channelDelete', async channel => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelDelete".`)
-
         if (channel.type === 'DM') return
         const { guild, id, name, type, parent } = channel
 
@@ -89,8 +86,6 @@ module.exports = (client) => {
     })
 
     client.on('channelPinsUpdate', async channel => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelPinsUpdate".`)
-
         if (channel.type === 'DM') return
         const { guild, id } = channel
 
@@ -108,8 +103,6 @@ module.exports = (client) => {
     })
 
     client.on('channelUpdate', async (oldChannel, newChannel) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelUpdate".`)
-
         if (oldChannel.type === 'DM') return
         if (newChannel.type === 'DM') return
         const { guild } = oldChannel

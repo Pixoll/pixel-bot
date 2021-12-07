@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Permissions } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays, sliceFileName } = require('../../utils')
+const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays } = require('../../utils')
 const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
 
@@ -29,8 +29,6 @@ function imageLink(link) {
  */
 module.exports = (client) => {
     client.on('roleCreate', async role => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleCreate".`)
-
         const { guild, id, hexColor, mentionable, hoist, tags, unicodeEmoji } = role
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
@@ -68,8 +66,6 @@ module.exports = (client) => {
     })
 
     client.on('roleDelete', async role => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleDelete".`)
-
         const { guild, id, name, hexColor, mentionable, hoist, tags, unicodeEmoji } = role
         if (!guild.available) return
 
@@ -108,8 +104,6 @@ module.exports = (client) => {
     })
 
     client.on('roleUpdate', async (oldRole, newRole) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleUpdate".`)
-
         const { guild, id } = oldRole
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')

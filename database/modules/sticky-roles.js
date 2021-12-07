@@ -11,13 +11,13 @@ module.exports = (client) => {
     const botId = client.user.id
 
     client.on('guildMemberAdd', /** @param {CommandoMember} member */ async member => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
-
         const { guild, roles, id } = member
         if (id === botId) return
 
         const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
 
         const rolesData = await guild.database.stickyRoles.fetch({ user: id })
         if (!rolesData) return
@@ -26,8 +26,6 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberRemove', /** @param {CommandoMember} member */ async member => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
-
         member = await fetchPartial(member)
         if (!member) return
 
@@ -36,6 +34,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
 
         const { setup, stickyRoles } = guild.database
         const data = await setup.fetch()

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = require('../../utils')
+const { sliceDots, isModuleEnabled, pluralize, formatBytes } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,8 +10,6 @@ const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = re
  */
 module.exports = (client) => {
     client.on('messageDelete', async message => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDelete".`)
-
         const { guild, author, content, attachments, channel, partial, stickers } = message
         if (partial || channel.type === 'DM' || author.bot) return
 
@@ -54,8 +52,6 @@ module.exports = (client) => {
     })
 
     client.on('messageDeleteBulk', async messages => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDeleteBulk".`)
-
         const message = messages.first()
 
         const { guild, channel } = message
@@ -75,8 +71,6 @@ module.exports = (client) => {
     })
 
     client.on('messageUpdate', async (oldMessage, newMessage) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageUpdate".`)
-
         const { content: content1 } = oldMessage
         newMessage = await newMessage.fetch().catch(() => null)
         if (!newMessage) return
