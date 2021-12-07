@@ -78,7 +78,7 @@
             "Fixed `warn` command: It wouldn't save the moderator in the database (missing data).",
             "Added on and off emojis to the `modules` command."
         ],
-        "timestamp": 1638821340000
+        "timestamp": 1638920340000
     },
     {
         "version": "2.3.0",
