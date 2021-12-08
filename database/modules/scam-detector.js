@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { isModuleEnabled, basicEmbed } = require('../../utils')
+const { isModuleEnabled, basicEmbed, sliceFileName } = require('../../utils')
 const { docId } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -40,6 +40,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'scam-detector')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}".`)
 
         const string = content + embeds.map(embed =>
             embed.description + embed.fields.map(field => field.value)
