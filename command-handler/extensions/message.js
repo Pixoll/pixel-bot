@@ -10,7 +10,6 @@ const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')
 const CommandFormatError = require('../errors/command-format')
 const { resolveString } = require('../util')
-const { embedColor } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -96,7 +95,7 @@ class CommandoMessage extends Message {
 	 * Initialises the message for a command
 	 * @param {Command} [command] Command the message triggers
 	 * @param {string} [argString] Argument string for the command
-	 * @param {?Array<string>} [patternMatches] Command pattern matches (if from a pattern trigger)
+	 * @param {?string[]} [patternMatches] Command pattern matches (if from a pattern trigger)
 	 * @return {Message} This message
 	 * @private
 	 */
@@ -160,7 +159,7 @@ class CommandoMessage extends Message {
 
 	/**
 	 * Runs the command
-	 * @return {Promise<?Message|?Array<Message>>}
+	 * @return {Promise<?Message|?Message[]>}
 	 */
 	async run() {
 		const { guild, guildId, channel, channelId, author, webhookId, client, command, patternMatches, argString } = this
@@ -291,7 +290,7 @@ class CommandoMessage extends Message {
 			if (probability(2)) {
 				const { user, botInvite } = client
 				const embed = new MessageEmbed()
-					.setColor(embedColor)
+					.setColor('#4c9f4c')
 					.addField(`Enjoying ${user.username}?`, oneLine`
 						The please consider voting for it! It helps the bot to become more noticed
 						between other bots. And perhaps consider adding it to any of your own servers
@@ -503,7 +502,7 @@ class CommandoMessage extends Message {
 
 	/**
 	 * Finalizes the command message by setting the responses and deleting any remaining prior ones
-	 * @param {?Array<Message|Message[]>} responses Responses to the message
+	 * @param {?(Message|Message[])[]} responses Responses to the message
 	 * @private
 	 */
 	finalize(responses) {

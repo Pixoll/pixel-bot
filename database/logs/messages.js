@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = require('../../utils')
+const { pluralize, sliceDots } = require('../../utils/format')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,13 +11,13 @@ const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = re
  */
 module.exports = (client) => {
     client.on('messageDelete', async message => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDelete".`)
-
         const { guild, author, content, attachments, channel, partial, stickers } = message
         if (partial || channel.type === 'DM' || author.bot) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/messages#messageDelete".')
 
         const deleted = sliceDots(content, 1024)
 
@@ -54,8 +55,6 @@ module.exports = (client) => {
     })
 
     client.on('messageDeleteBulk', async messages => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDeleteBulk".`)
-
         const message = messages.first()
 
         const { guild, channel } = message
@@ -63,6 +62,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/messages#messageDeleteBulk".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -75,8 +76,6 @@ module.exports = (client) => {
     })
 
     client.on('messageUpdate', async (oldMessage, newMessage) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageUpdate".`)
-
         const { content: content1 } = oldMessage
         newMessage = await newMessage.fetch().catch(() => null)
         if (!newMessage) return
@@ -87,6 +86,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/messages#messageUpdate".')
 
         const oldContent = content1 !== null ?
             sliceDots(content1, 1024) || '`Empty`' :
@@ -104,4 +105,29 @@ module.exports = (client) => {
 
         guild.queuedLogs.push(embed)
     })
+}
+
+/**
+ * Formats the bytes to its most divisable point
+ * @param {number|string} bytes The bytes to format
+ * @param {number} [decimals] The amount od decimals to display
+ * @param {boolean} [showUnit] Whether to display the units or not
+ */
+function formatBytes(bytes, decimals = 2, showUnit = true) {
+    if (bytes === 0) {
+        if (showUnit) return '0 B'
+        return '0'
+    }
+
+    const k = 1000
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const float = parseFloat(
+        (bytes / Math.pow(k, i)).toFixed(dm)
+    ).toString()
+
+    if (showUnit) return `${float} ${sizes[i]}`
+    return float
 }

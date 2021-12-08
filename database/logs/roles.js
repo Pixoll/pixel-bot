@@ -2,8 +2,9 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Permissions } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays, sliceFileName } = require('../../utils')
-const { permissions } = require('../../command-handler')
+const { isModuleEnabled, getKeyPerms, compareArrays } = require('../../utils/functions')
+const { permissions } = require('../../command-handler/util')
+const { customEmoji } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -29,12 +30,12 @@ function imageLink(link) {
  */
 module.exports = (client) => {
     client.on('roleCreate', async role => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleCreate".`)
-
         const { guild, id, hexColor, mentionable, hoist, tags, unicodeEmoji } = role
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/roles#roleCreate".')
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -68,13 +69,13 @@ module.exports = (client) => {
     })
 
     client.on('roleDelete', async role => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleDelete".`)
-
         const { guild, id, name, hexColor, mentionable, hoist, tags, unicodeEmoji } = role
         if (!guild.available) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/roles#roleDelete".')
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -108,12 +109,12 @@ module.exports = (client) => {
     })
 
     client.on('roleUpdate', async (oldRole, newRole) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleUpdate".`)
-
         const { guild, id } = oldRole
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/roles#roleUpdate".')
 
         const {
             name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1,

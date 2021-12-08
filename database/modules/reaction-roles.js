@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { TextChannel, Message, Role, GuildMember } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { findCommonElement, fetchPartial, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,7 +9,7 @@ const { findCommonElement, fetchPartial, sliceFileName } = require('../../utils'
  */
 module.exports = async (client) => {
     async function removeMissingData() {
-        client.emit('debug', `Running "${sliceFileName(__filename)}#missingData".`)
+        client.emit('debug', 'Running "modules/reaction-roles#missingData".')
 
         const guilds = client.guilds.cache.toJSON()
         const channels = client.channels.cache
@@ -47,10 +46,10 @@ module.exports = async (client) => {
     await removeMissingData()
 
     client.on('messageReactionAdd', async (reaction, user) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionAdd".`)
-
-        reaction = await fetchPartial(reaction)
-        user = await fetchPartial(user)
+        reaction = reaction.fetch().catch(() => null)
+        if (!reaction) return
+        user = user.fetch().catch(() => null)
+        if (!user) return
 
         let { message, emoji } = reaction
         message = await message.fetch().catch(() => null)
@@ -61,6 +60,7 @@ module.exports = async (client) => {
         const react = emoji.id || emoji.name
         if (user.bot || !guild) return
 
+        client.emit('debug', 'Running event "modules/reaction-roles#messageReactionAdd".')
         const { roles, members, database } = guild
 
         const data = await database.reactionRoles.fetch({ message: message.id })
@@ -78,8 +78,6 @@ module.exports = async (client) => {
     })
 
     client.on('messageReactionRemove', async (reaction, user) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionRemove".`)
-
         reaction = await reaction.fetch().catch(() => null)
         user = await user.fetch().catch(() => null)
         if (!reaction || !user) return
@@ -93,6 +91,7 @@ module.exports = async (client) => {
         const react = emoji.id || emoji.name
         if (user.bot || !guild) return
 
+        client.emit('debug', 'Running event "modules/reaction-roles#messageReactionRemove".')
         const { roles, members, database } = guild
 
         const data = await database.reactionRoles.fetch({ message: message.id })
@@ -108,4 +107,19 @@ module.exports = async (client) => {
 
         await member.roles.remove(role).catch(() => null)
     })
+}
+
+/**
+ * Loops over every element contained on both arrays and checks wether they have common elements.
+ * @param {array} first The first array.
+ * @param {array} second The second array.
+ * @returns {boolean}
+ */
+function findCommonElement(first, second) {
+    for (let i = 0; i < first?.length; i++) {
+        for (let j = 0; j < second?.length; j++) {
+            if (first[i] === second[j]) return true
+        }
+    }
+    return false
 }

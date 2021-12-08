@@ -1,11 +1,8 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role, GuildMember, Collection } = require('discord.js')
-const {
-    basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument, replyAll, confirmButtons
-} = require('../../utils')
+const { basicEmbed, isValidRole, removeDuplicated, getArgument, replyAll, confirmButtons } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -16,7 +13,11 @@ module.exports = class RoleCommand extends Command {
             name: 'role',
             group: 'mod',
             description: 'Add or remove roles from a member.',
-            details: `${memberDetails()}\n${roleDetails()}\n${roleDetails(null, true)}`,
+            details: stripIndent`
+                \`member\` can be either a member's name, mention or id.
+                \`role\` can be either a role's name, mention or id.
+                \`roles\` can be all the roles' names, mentions or ids, separated by commas (max. 10 at once).
+            `,
             format: stripIndent`
                 role toggle [member] [roles] - Toggles the roles of a member (max. 10 at once).
                 role remove-all [member] - Removes the member's roles.

@@ -2,14 +2,13 @@
 const path = require('path')
 const { PermissionResolvable, Message, GuildResolvable, User, MessageEmbed } = require('discord.js')
 const { APIApplicationCommand } = require('discord-api-types/payloads/v9')
-const { stripIndent, oneLine } = require('common-tags')
+const { stripIndent } = require('common-tags')
 const ArgumentCollector = require('./collector')
 const { permissions, slashOptionTypes, slashOptionChannelTypes } = require('../util')
 const {
-	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult,
-	CommandBlockData, Throttle, CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo
+	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, ArgumentCollectorResult, CommandBlockData, Throttle,
+	CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo
 } = require('../typings')
-const { replyAll, isMod } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -312,7 +311,7 @@ class Command {
 	 * (see [RegExp#exec](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec)).
 	 * @param {boolean} fromPattern Whether or not the command is being run from a pattern match
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector (if applicable)
-	 * @return {Promise<?Message|?Array<Message>>}
+	 * @return {Promise<?Message|?Message[]>}
 	 * @abstract
 	 */
 	async run(instances, args, fromPattern, result) {
@@ -382,7 +381,7 @@ class Command {
 	 * @param {boolean} fromPattern Whether the args are pattern matches (see {@link Command#run})
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector
 	 * (if applicable see {@link Command#run})
-	 * @returns {Promise<?Message|?Array<Message>>}
+	 * @returns {Promise<?Message|?Message[]>}
 	 */
 	onError(err, { message }, args, fromPattern, result) {
 		return
@@ -726,4 +725,72 @@ function embed(text, value) {
 	else embed.setDescription(text)
 
 	return embed
+}
+
+/**
+ * Checks if the role or member is considered a moderator by checking their permissions.
+ * @param {Role|GuildMember} roleOrMember A role or member.
+ * @param {boolean} noAdmin Whether to skip the `ADMINISTRATOR` permission or not.
+ */
+function isMod(roleOrMember, noAdmin) {
+    if (!roleOrMember) return
+    const { permissions } = roleOrMember
+
+    const conditions = [
+        'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
+        'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
+        'MUTE_MEMBERS'
+    ]
+
+    const values = []
+    if (noAdmin) {
+        for (const condition of conditions) {
+            values.push(permissions.has(condition))
+        }
+        const isTrue = values.filter(b => b === true)[0] ?? false
+        return !permissions.has('ADMINISTRATOR') && isTrue
+    }
+
+    if (permissions.has('ADMINISTRATOR')) return true
+
+    for (const condition of conditions) {
+        values.push(permissions.has(condition))
+    }
+    const isTrue = values.filter(b => b === true)[0] ?? false
+    return isTrue
+}
+
+/**
+ * Replies to the corresponding instances
+ * @param {CommandInstances} instances The instances to reply
+ * @param {MessageOptions|string|MessageEmbed} options The options of the message
+ * @returns {Promise<?Message<boolean>>}
+ */
+async function replyAll({ message, interaction }, options) {
+    if (options instanceof MessageEmbed) options = { embeds: [options] }
+    if (typeof options === 'string') options = { content: options }
+    if (interaction) {
+        if (interaction.deferred || interaction.replied) return await interaction.editReply(options).catch(() => null)
+        else return await interaction.reply(options).catch(() => null)
+    }
+    if (message) {
+        return await message.reply({ ...options, ...noReplyInDMs(message) }).catch(() => null)
+    }
+    return null
+}
+
+/**
+ * Determines whether a user should be pinged in a reply.
+ * If the message is in DMs, no ping should be sent.
+ * @param {Message} msg The message to reply.
+ * @returns Whether the user should be pinged or not.
+ */
+function noReplyInDMs(msg) {
+    if (!msg) return {}
+    /** @type {MessageOptions} */
+    const options = msg.channel.type === 'DM' ? {
+        allowedMentions: { repliedUser: false }
+    } : {}
+
+    return options
 }

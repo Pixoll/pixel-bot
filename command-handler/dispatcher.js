@@ -5,8 +5,8 @@ const CommandoRegistry = require('./registry')
 const { Message, MessageEmbed, MessageButton, MessageActionRow } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient, CommandoInteraction } = require('./typings')
 const { oneLine, stripIndent } = require('common-tags')
-const { probability, embedColor } = require('../utils')
 const FriendlyError = require('./errors/friendly')
+const { removeDashes } = require('../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** Handles parsing messages and running commands from them */
@@ -284,7 +284,7 @@ class CommandDispatcher {
 			if (probability(2)) {
 				const { user, botInvite } = client
 				const embed = new MessageEmbed()
-					.setColor(embedColor)
+					.setColor('#4c9f4c')
 					.addField(`Enjoying ${user.username}?`, oneLine`
 						The please consider voting for it! It helps the bot to become more noticed
 						between other bots. And perhaps consider adding it to any of your own servers
@@ -464,27 +464,10 @@ class CommandDispatcher {
 module.exports = CommandDispatcher
 
 /**
- * Removes dashes from the string and capitalizes the remaining strings
- * @param {string} str The string to parse
+ * Calculates the probability of something
+ * @param {number} n The probability (in decimals or percentage) to calculate
  */
-function removeDashes(str) {
-	if (!str) return
-	const arr = str.split('-')
-	const first = arr.shift()
-	const rest = arr.map(s => capitalize(s)).join('')
-	return first + rest
-}
-
-/**
- * Capitalizes every word of a string.
- * @param {string} str The string to capitalize.
- */
-function capitalize(str) {
-	if (!str) return ''
-
-	const splitStr = str.toLowerCase().split(/ +/)
-	for (let i = 0; i < splitStr.length; i++) {
-		splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
-	}
-	return splitStr.join(' ')
+function probability(n) {
+    if (n > 1) n /= 100
+    return !!n && Math.random() <= n
 }

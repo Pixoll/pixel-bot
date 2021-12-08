@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { get } = require('lodash')
-const { sliceDots, code } = require('../../utils')
+const { sliceDots } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -49,6 +49,6 @@ module.exports = class MsgInfoCommand extends Command {
         const response = `${typeof thing === 'object' ? JSON.stringify(thing, null, 4) : thing}`
         const string = sliceDots(response, 1950)
 
-        await message.direct(code(string, 'js'))
+        await message.direct(`\`\`\`\`js\n${string}\`\``)
     }
 }

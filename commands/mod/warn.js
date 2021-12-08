@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { docId, basicEmbed, userException, confirmButtons, replyAll } = require('../../utils')
+const { docId, basicEmbed, userException, confirmButtons, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -102,6 +102,8 @@ module.exports = class warnCommand extends Command {
             guild: guildId,
             userId: user.id,
             userTag: user.tag,
+            modId: author.id,
+            modTag: author.tag,
             reason
         })
         this.client.emit('guildMemberWarn', guild, author, user, reason)

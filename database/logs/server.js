@@ -1,12 +1,92 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
+const { capitalize } = require('lodash')
 const { CommandoClient } = require('../../command-handler/typings')
-const {
-    arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter,
-    locales, nsfwLevels, removeUnderscores, sysChannelFlags, sliceFileName
-} = require('../../utils')
+const { arrayEquals, isModuleEnabled } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
+
+const guildFeatures = {
+    ANIMATED_ICON: 'Animated icon',
+    BANNER: 'Banner',
+    COMMERCE: 'Commerce',
+    COMMUNITY: 'Community',
+    DISCOVERABLE: 'Discoverable',
+    FEATURABLE: 'Featurable',
+    INVITE_SPLASH: 'Invite splash',
+    MEMBER_VERIFICATION_GATE_ENABLED: 'Membership screening',
+    NEWS: 'News',
+    PARTNERED: 'Partened',
+    PREVIEW_ENABLED: 'Preview',
+    VANITY_URL: 'Vanity URL',
+    VERIFIED: 'Verified',
+    VIP_REGIONS: 'VIP Regions',
+    WELCOME_SCREEN_ENABLED: 'Welcome screen',
+    TICKETED_EVENTS_ENABLED: 'Ticketed events',
+    MONETIZATION_ENABLED: 'Monetization',
+    MORE_STICKERS: 'More stickers',
+    THREE_DAY_THREAD_ARCHIVE: 'Thread 3 day archive',
+    SEVEN_DAY_THREAD_ARCHIVE: 'Thread 1 week archive',
+    PRIVATE_THREADS: 'Private threads',
+}
+
+const verificationLevels = {
+    NONE: 'None',
+    LOW: 'Low',
+    MEDIUM: 'Medium',
+    HIGH: 'High',
+    VERY_HIGH: 'Highest',
+}
+
+const R18ContentFilter = {
+    DISABLED: 'Don\'t scan any media content',
+    MEMBERS_WITHOUT_ROLES: 'Scan media content from members without a role',
+    ALL_MEMBERS: 'Scan media content from all members',
+}
+
+const locales = new Map([
+    ['en-US', 'English (United States)'],
+    ['en-GB', 'English (Great Britain)'],
+    ['zh-CN', 'Chinese (China)'],
+    ['zh-TW', 'Chinese (Taiwan)'],
+    ['cs', 'Czech'],
+    ['da', 'Danish'],
+    ['nl', 'Dutch'],
+    ['fr', 'French'],
+    ['de', 'German'],
+    ['el', 'Greek'],
+    ['hu', 'Hungarian'],
+    ['it', 'Italian'],
+    ['ja', 'Japanese'],
+    ['ko', 'Korean'],
+    ['no', 'Norwegian'],
+    ['pl', 'Polish'],
+    ['pt-BR', 'Portuguese (Brazil)'],
+    ['ru', 'Russian'],
+    ['es-ES', 'Spanish (Spain)'],
+    ['sv-SE', 'Swedish'],
+    ['tr', 'Turkish'],
+    ['bg', 'Bulgarian'],
+    ['uk', 'Ukrainian'],
+    ['fi', 'Finnish'],
+    ['hr', 'Croatian'],
+    ['ro', 'Romanian'],
+    ['lt', 'Lithuanian'],
+])
+
+const nsfwLevels = {
+    DEFAULT: 'Default',
+    EXPLICIT: 'Explicit',
+    SAFE: 'Safe',
+    AGE_RESTRICTED: 'Age restricted',
+}
+
+const sysChannelFlags = {
+    SUPPRESS_JOIN_NOTIFICATIONS: 'Join messages',
+    SUPPRESS_PREMIUM_SUBSCRIPTIONS: 'Server boosts messages',
+    SUPPRESS_GUILD_REMINDER_NOTIFICATIONS: 'Server setup tips',
+}
 
 /**
  * Compares and returns the difference between the set of permissions
@@ -34,13 +114,10 @@ function imageLink(link) {
  */
 module.exports = (client) => {
     client.on('guildUpdate', async (oldGuild, newGuild) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildUpdate".`)
-
         const isEnabled = await isModuleEnabled(oldGuild, 'audit-logs', 'server')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(oldGuild)
-        if (!logsChannel) return
+        client.emit('debug', 'Running event "logs/server".')
 
         const {
             name: name1, systemChannel: sysChan1, afkChannel: afkChan1, afkTimeout: afkTo1, ownerId: ownerId1,
@@ -131,7 +208,7 @@ module.exports = (client) => {
         if (afkTo1 !== afkTo2) {
             embed.addField(
                 'AFK timeout',
-                `${myMs(afkTo1 * 1000, { long: true })} ➜ ${myMs(afkTo2 * 1000, { long: true })}`
+                `${ms(afkTo1 * 1000, { long: true })} ➜ ${ms(afkTo2 * 1000, { long: true })}`
             )
         }
 
@@ -254,4 +331,12 @@ module.exports = (client) => {
             newGuild.queuedLogs.push(embed)
         }
     })
+}
+
+/**
+ * Removes the underscores from a string and capitalizes it.
+ * @param {string} str The string to format.
+ */
+function removeUnderscores(str) {
+    return capitalize(str.replace(/_/g, ' '))
 }

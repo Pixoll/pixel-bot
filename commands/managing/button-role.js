@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel, Role, MessageButton, MessageActionRow, MessageEmbed } = require('discord.js')
-const {
-    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor, basicEmbed, replyAll
-} = require('../../utils')
+const { basicCollector, isValidRole, removeDuplicated, basicEmbed, replyAll } = require('../../utils/functions')
+const ms = require('../../utils/ms')
+const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -15,7 +15,10 @@ module.exports = class ButtonRoleCommand extends Command {
             aliases: ['brole', 'buttonrole'],
             group: 'managing',
             description: 'Create or remove button roles.',
-            details: `${channelDetails()}\n${roleDetails(null, true, 10)}`,
+            details: stripIndent`
+                \`channel\` can be either a channel's name, mention or id.
+                \`roles\` can be all the roles' names, mentions or ids, separated by commas (max. 10 at once).
+            `,
             format: 'buttonrole [channel] [roles]',
             examples: ['buttonrole #roles Giveaways, Polls'],
             userPermissions: ['MANAGE_ROLES'],
@@ -111,13 +114,13 @@ module.exports = class ButtonRoleCommand extends Command {
         if (message) {
             const msg = await basicCollector({ message }, {
                 fieldName: 'What message should I send with the buttons?'
-            }, { time: myMs('2m') })
+            }, { time: ms('2m') })
             if (!msg) return
             content = msg.content
         }
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setDescription(content)
 
         const buttons = []

@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils')
+const { isModuleEnabled, timestamp } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -22,12 +22,12 @@ const imgOptions = { dynamic: true, size: 2048 }
  */
 module.exports = (client) => {
     client.on('guildMemberAdd', async member => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
-
         const { guild, user } = member
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/members#guildMemberAdd".')
 
         const { tag, id, createdAt } = user
 
@@ -42,7 +42,7 @@ module.exports = (client) => {
 
         guild.queuedLogs.push(embed)
 
-        // if (Date.now() - createdTimestamp < myMs('3d')) {
+        // if (Date.now() - createdTimestamp < ms('3d')) {
         //     const autoMod = await isModuleEnabled(guild, 'audit-logs', 'autoMod')
         //     if (!autoMod) return
 
@@ -51,8 +51,6 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberRemove', async member => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
-
         member = await member.fetch().catch(() => null)
         if (!member) return
 
@@ -61,6 +59,8 @@ module.exports = (client) => {
 
         const status = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!status) return
+
+        client.emit('debug', 'Running event "logs/members#guildMemberRemove".')
 
         const { tag } = user
 
@@ -80,13 +80,13 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberUpdate', async (oldMember, newMember) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberUpdate".`)
-
         const { guild } = newMember
         if (!guild.available) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/members#guildMemberUpdate".')
 
         const { roles: roles1, nickname: nick1, avatar: avatar1 } = oldMember
         const { roles: roles2, nickname: nick2, avatar: avatar2, user, id } = newMember

@@ -1,12 +1,14 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
-const { basicEmbed, channelDetails, emojiRegex, basicCollector, myMs, getArgument, isValidRole } = require('../../utils')
+const { basicEmbed, basicCollector, getArgument, isValidRole } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 const { stripIndent, oneLine } = require('common-tags')
 const { ReactionRoleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
+
+const emojiRegex = new RegExp(`${require('emoji-regex')().source}|\\d{17,20}`, 'g')
 
 /** A command that can be run in a client */
 module.exports = class ReactionRoleCommand extends Command {
@@ -17,7 +19,7 @@ module.exports = class ReactionRoleCommand extends Command {
             group: 'managing',
             description: 'Create or remove reaction roles.',
             details: stripIndent`
-                ${channelDetails()}
+                \`channel\` can be either a channel's name, mention or id.
                 \`msg id\` has to be a message's id that's in the **same channel** that you specified.
             `,
             format: stripIndent`
@@ -104,7 +106,7 @@ module.exports = class ReactionRoleCommand extends Command {
                     What are the roles that you want to assign?
                     Please send them separated by commas (max. 10 at once).
                 `
-            }, { time: myMs('2m') })
+            }, { time: ms('2m') })
             if (!rolesMsg) return
 
             for (const str of rolesMsg.content.split(/\s*,\s*/).slice(0, 10)) {
@@ -126,7 +128,7 @@ module.exports = class ReactionRoleCommand extends Command {
                     Now, what emojis should the bot react with in the message?
                     These will be applied to the roles you specified in the same exact order.
                 `
-            }, { time: myMs('2m') })
+            }, { time: ms('2m') })
             if (!emojisMsg) return
 
             const match = emojisMsg.content.match(emojiRegex)?.map(e => e).filter(e => e) || []

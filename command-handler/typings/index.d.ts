@@ -400,7 +400,7 @@ export abstract class Command {
 	 * @param data Additional data associated with the block. Built-in reason data properties:
 	 * - guildOnly & nsfw & dmOnly: none
 	 * - throttling: `throttle` ({@link Throttle}), `remaining` (number) time in seconds
-	 * - userPermissions & clientPermissions: `missing` (Array<{@link PermissionString}>) permission names
+	 * - userPermissions & clientPermissions: `missing` ({@link PermissionString}[]) permission names
 	 */
 	public onBlock(instances: CommandInstances, reason: CommandBlockReason, data?: CommandBlockData): Promise<Message>
 	/**
@@ -728,7 +728,7 @@ export class CommandoGuildManager extends CachedManager<Snowflake, CommandoGuild
 export class CommandoInteraction extends CommandInteraction {
 	public client: CommandoClient
 	public guild?: CommandoGuild
-	public member?: GuildMember
+	public member?: CommandoMember
 }
 
 export class CommandoMember extends GuildMember {

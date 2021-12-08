@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { myMs } = require('../../utils')
+const ms = require('../../utils/ms')
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
 /* eslint-enable no-unused-vars */
@@ -39,7 +39,7 @@ class DateArgumentType extends ArgumentType {
         if (int <= Date.now()) {
             return 'Please enter a date that\'s in the future.'
         }
-        if (int > (Date.now() + myMs('1y'))) {
+        if (int > (Date.now() + ms('1y'))) {
             return 'The max. usable date is `1 year` in the future. Please try again.'
         }
 

@@ -1,14 +1,12 @@
 /* eslint-disable no-unused-vars */
 const { User, GuildMember, TextChannel } = require('discord.js')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const {
-    docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton,
-    confirmButtons,
-    replyAll
-} = require('../../utils')
+    docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll
+} = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
-const { myMs } = require('../../utils')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -19,7 +17,11 @@ module.exports = class TempBanCommand extends Command {
             aliases: ['tempban'],
             group: 'mod',
             description: 'Ban a user for a specified amount of time.',
-            details: `${userDetails}\n${timeDetails('duration')}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`user\` has to be a user's username, id or mention.
+                \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'tempban [user] [duration] <reason>',
             examples: [
                 'tempban Pixoll 1d',
@@ -158,7 +160,7 @@ module.exports = class TempBanCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(Date.now() - duration, { long: true })
+            duration: ms(Date.now() - duration, { long: true })
         })
         await active.add({
             _id: documentId,

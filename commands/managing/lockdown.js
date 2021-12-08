@@ -1,13 +1,11 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { stripIndent, oneLine } = require('common-tags')
-const {
-    basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails, replyAll
-} = require('../../utils')
+const { basicEmbed, generateEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
 const { CommandInstances } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
+const { pluralize } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -17,7 +15,13 @@ module.exports = class LockdownCommand extends Command {
             name: 'lockdown',
             group: 'managing',
             description: 'Lock every text channel that was specified when using the `setup` command',
-            details: `${reasonDetails()}\n${channelDetails('text-channels', true)}`,
+            details: stripIndent`
+                If \`reason\` is not specified, it will default as "We\'ll be back shortly" or "Thanks for waiting".
+                ${oneLine`
+                    \`text-channels\` can be all the text channels' names, mentions or ids, separated by spaces
+                    (max. 30 at once).
+                `}
+            `,
             format: stripIndent`
                 lockdown start <reason> - Start the lockdown.
                 lockdown end <reason> - End the lockdown.

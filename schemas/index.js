@@ -60,6 +60,7 @@ const modules = model('modules', Schema({
     guild: String,
     // autoMod: Boolean,
     // chatFilter: Boolean,
+    scamDetector: Boolean,
     stickyRoles: Boolean,
     welcome: Boolean,
     auditLogs: {

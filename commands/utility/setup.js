@@ -1,11 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const {
-    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument, replyAll, isValidRole
-} = require('../../utils')
+const { basicEmbed, basicCollector, isMod, getArgument, replyAll, isValidRole } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -71,7 +69,14 @@ module.exports = class SetupCommand extends Command {
             name: 'setup',
             group: 'utility',
             description: 'Setup the bot to its core. Data collected will be deleted if the bot leaves the server.',
-            details: `${channelDetails('text-channel')}\n${roleDetails()}\n${channelDetails('text-channels', true)}`,
+            details: stripIndent`
+                \`text-channel\` can be either a text-channel's name, mention or id.
+                \`role\` can be either a role's name, mention or id.
+                ${oneLine`
+                    \`text-channels\` can be all the text channels' names, mentions or ids, separated by spaces
+                    (max. 30 at once).
+                `}
+            `,
             format: stripIndent`
                 setup <full> - Setup the bot completely to its core.
                 setup view - View the current setup data of the server.
@@ -282,7 +287,7 @@ module.exports = class SetupCommand extends Command {
                 const msg = await basicCollector({ message }, {
                     description: `The role given to muted people will be ${mutedRole}.`,
                     fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-                }, { time: myMs('2m') }, true)
+                }, { time: ms('2m') }, true)
                 if (!msg) return
                 toDelete = msg
                 for (const val of msg.content.split(/ +/)) {
@@ -407,7 +412,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s setup data`, guild.iconURL({ dynamic: true }))
             .setDescription(toDisplay.join('\n'))
             .setFooter('Missing or wrong data? Try using the "reload" sub-command!')
@@ -614,7 +619,7 @@ module.exports = class SetupCommand extends Command {
             while (channels.length === 0) {
                 const msg = await basicCollector({ message }, {
                     fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-                }, { time: myMs('2m') }, true)
+                }, { time: ms('2m') }, true)
                 if (!msg) return
                 for (const val of msg.content.split(/ +/)) {
                     if (channels.length === 30) break
