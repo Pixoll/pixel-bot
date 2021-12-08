@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { MessageEmbed } = require('discord.js')
-const { commandInfo, pagedEmbed, getArgument, replyAll } = require('../../utils')
+const { commandInfo, pagedEmbed, getArgument, replyAll } = require('../../utils/functions')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')

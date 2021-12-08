@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { isModuleEnabled, basicEmbed, sliceFileName } = require('../../utils')
-const { docId } = require('../../utils')
+const { isModuleEnabled, basicEmbed, sliceFileName, docId } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 const fakeSitesNames = [

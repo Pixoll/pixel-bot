@@ -1,9 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, basicCollector, myMs, embedColor, getArgument, replyAll } = require('../../utils')
+const { basicEmbed, basicCollector, getArgument, replyAll } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 const { RuleSchema } = require('../../schemas/types')
 const { MessageEmbed } = require('discord.js')
 /* eslint-enable no-unused-vars */
@@ -120,7 +120,7 @@ module.exports = class RuleCommand extends Command {
         const { guild } = message || interaction
 
         const ruleEmbed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s rules`, guild.iconURL({ dynamic: true }))
             .addField(`Rule ${rule--}`, rulesData.rules[rule])
             .setTimestamp()
@@ -146,7 +146,7 @@ module.exports = class RuleCommand extends Command {
             while (!rule || rule.length > 1024 || typeof rule === 'number') {
                 const ruleMsg = await basicCollector({ message }, {
                     fieldName: 'What rule do you want to add?'
-                }, { time: myMs('2m') })
+                }, { time: ms('2m') })
                 if (!ruleMsg) return
                 rule = ruleMsg.content
             }
@@ -192,7 +192,7 @@ module.exports = class RuleCommand extends Command {
             while (typeof rule !== 'number' || rule < 1) {
                 const ruleMsg = await basicCollector({ message }, {
                     fieldName: 'What rule do you want to remove?'
-                }, { time: myMs('2m') })
+                }, { time: ms('2m') })
                 if (!ruleMsg) return
                 rule = Number(ruleMsg.content)
             }

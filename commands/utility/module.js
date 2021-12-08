@@ -1,10 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils')
+const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils/functions')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 

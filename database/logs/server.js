@@ -2,10 +2,11 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
+const { arrayEquals, isModuleEnabled, removeUnderscores, sliceFileName } = require('../../utils/functions')
 const {
-    arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter, locales,
-    nsfwLevels, removeUnderscores, sysChannelFlags, sliceFileName
-} = require('../../utils')
+    guildFeatures, verificationLevels, R18ContentFilter, locales, nsfwLevels, sysChannelFlags
+} = require('../../utils/constants')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -128,7 +129,7 @@ module.exports = (client) => {
         if (afkTo1 !== afkTo2) {
             embed.addField(
                 'AFK timeout',
-                `${myMs(afkTo1 * 1000, { long: true })} ➜ ${myMs(afkTo2 * 1000, { long: true })}`
+                `${ms(afkTo1 * 1000, { long: true })} ➜ ${ms(afkTo2 * 1000, { long: true })}`
             )
         }
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
-const { myMs } = require('../../utils')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 class DurationArgumentType extends ArgumentType {
@@ -16,21 +16,21 @@ class DurationArgumentType extends ArgumentType {
      */
     validate(val, msg, arg) {
         /** @type {number} */
-        const int = myMs(val, { number: true })
+        const int = ms(val, { number: true })
 
         if (!int || int < 1000) {
             return 'Please enter a valid duration format. Use the `help` command for more information.'
         }
 
-        if (int > myMs('1y')) {
+        if (int > ms('1y')) {
             return 'The max. usable duration is `1 year`. Please try again.'
         }
 
         if (arg.min !== null && typeof arg.min !== 'undefined' && int < arg.min) {
-            return `Please enter a duration above or exactly ${myMs(arg.min)}.`
+            return `Please enter a duration above or exactly ${ms(arg.min)}.`
         }
         if (arg.max !== null && typeof arg.max !== 'undefined' && int > arg.max) {
-            return `Please enter a duration below or exactly ${myMs(arg.max)}.`
+            return `Please enter a duration below or exactly ${ms(arg.max)}.`
         }
 
         return true
@@ -41,7 +41,7 @@ class DurationArgumentType extends ArgumentType {
      * @return {number} Usable value
      */
     parse(val) {
-        return myMs(val, { number: true })
+        return ms(val, { number: true })
     }
 }
 

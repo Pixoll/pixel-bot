@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { noReplyInDMs, embedColor, replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -28,7 +28,7 @@ module.exports = class ServerIconCommand extends Command {
         const icon = guild.iconURL({ dynamic: true, size: 2048 })
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(guild.name, guild.iconURL({ dynamic: true }))
             .setImage(icon)
             .setTimestamp()

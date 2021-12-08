@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { TextChannel, Message, Role, GuildMember } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { findCommonElement, fetchPartial, sliceFileName } = require('../../utils')
+const { findCommonElement, fetchPartial, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

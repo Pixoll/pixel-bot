@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel, Role, MessageButton, MessageActionRow, MessageEmbed } = require('discord.js')
-const {
-    channelDetails, basicCollector, myMs, roleDetails, isValidRole, removeDuplicated, embedColor, basicEmbed, replyAll
-} = require('../../utils')
+const { basicCollector, isValidRole, removeDuplicated, basicEmbed, replyAll } = require('../../utils/functions')
+const { channelDetails, roleDetails } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -111,13 +111,13 @@ module.exports = class ButtonRoleCommand extends Command {
         if (message) {
             const msg = await basicCollector({ message }, {
                 fieldName: 'What message should I send with the buttons?'
-            }, { time: myMs('2m') })
+            }, { time: ms('2m') })
             if (!msg) return
             content = msg.content
         }
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setDescription(content)
 
         const buttons = []

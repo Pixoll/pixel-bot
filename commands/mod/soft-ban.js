@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, TextChannel, GuildMember } = require('discord.js')
 const {
-    docId, basicEmbed, userDetails, reasonDetails, userException, memberException, inviteButton, inviteMaxAge,
-    confirmButtons,
-    replyAll
-} = require('../../utils')
+    docId, basicEmbed, userException, memberException, inviteButton, confirmButtons, replyAll
+} = require('../../utils/functions')
+const { userDetails, reasonDetails, inviteMaxAge } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 

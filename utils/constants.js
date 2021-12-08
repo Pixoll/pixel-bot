@@ -50,8 +50,6 @@ const gEmojiIdRegex = /\d{17,20}/g
 const guildEmojiRegex = /<a?:(?:\w+):(?:\d{17,20})>/g
 const emojiRegex = new RegExp(`${defaultEmojiRegex.source}|${gEmojiIdRegex.source}`, 'g')
 
-const embedColor = '#4c9f4c'
-
 const channelTypes = {
     GUILD_TEXT: 'Text',
     DM: 'Direct messages',
@@ -221,7 +219,6 @@ module.exports = {
     defaultEmojiRegex,
     disabledFilterMenu,
     disabledPageButtons,
-    embedColor,
     emojiRegex,
     guildEmojiRegex,
     guildFeatures,

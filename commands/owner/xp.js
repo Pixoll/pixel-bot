@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { myMs, code, abcOrder } = require('../../utils')
+const { code, abcOrder } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -73,7 +74,7 @@ module.exports = class xpCommand extends Command {
 
                 if (suffix === 'x') return `- ${val} ${task}`
 
-                const time = myMs(myMs(val)).replace(', ', '')
+                const time = ms(ms(val)).replace(', ', '')
                 return `- ${time} ${task}`
             }).join('\n')
 

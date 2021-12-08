@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { basicEmbed, memberDetails, replyAll } = require('../../utils')
+const { basicEmbed, replyAll } = require('../../utils/functions')
+const { memberDetails } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 

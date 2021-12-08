@@ -149,7 +149,7 @@ Structures.extend('Guild', Guild => {
 
 /* eslint-disable no-unused-vars */
 const { CommandResolvable, CommandGroupResolvable, CommandoClient } = require('../typings')
-const { Command } = require('../')
+const Command = require('../commands/base')
 const { User, MessageEmbed } = require('discord.js')
 const GuildDatabaseManager = require('../database/GuildDatabaseManager')
 /* eslint-enable no-unused-vars */

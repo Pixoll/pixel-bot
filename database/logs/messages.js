@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = require('../../utils')
+const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

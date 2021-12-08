@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
-const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags, replyAll } = require('../../utils')
+const { getKeyPerms, timestamp, customEmoji, capitalize, replyAll } = require('../../utils/functions')
+const { userDetails, userFlags } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -78,7 +80,7 @@ module.exports = class WhoIsCommand extends Command {
                     if (timestamps) {
                         if (!timestamps.end) times = `Started ${timestamp(timestamps.start, 'R')}`
                         else {
-                            times = `${myMs(
+                            times = `${ms(
                                 timestamps.end.getTime() - (timestamps.start?.getTime() || Date.now()),
                                 { long: true, showAnd: true }
                             )} left`

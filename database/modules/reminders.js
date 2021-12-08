@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, User, TextBasedChannels, Message, MessageOptions, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { myMs, noReplyInDMs, fetchPartial, sliceFileName } = require('../../utils')
-const { basicEmbed } = require('../../utils')
+const { noReplyInDMs, fetchPartial, sliceFileName, basicEmbed } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -36,7 +36,7 @@ module.exports = async (client) => {
             /** @type {Message} */
             const msg = await channel.messages.fetch(reminder.message).catch(() => null)
 
-            const time = myMs(Date.now() - reminder.createdAt, { long: true, length: 1 })
+            const time = ms(Date.now() - reminder.createdAt, { long: true, length: 1 })
 
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')

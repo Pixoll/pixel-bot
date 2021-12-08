@@ -1,13 +1,11 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
-const {
-    myMs, channelDetails, timeDetails, getArgument, basicCollector, emojiRegex, validURL, replyAll
-} = require('../../utils')
+const { getArgument, basicCollector, validURL, replyAll, basicEmbed } = require('../../utils/functions')
+const { channelDetails, timeDetails, emojiRegex } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 const { stripIndent } = require('common-tags')
-const { basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -194,7 +192,7 @@ module.exports = class PollCommand extends Command {
 
             const pollMsg = await basicCollector({ message }, {
                 fieldName: 'What will the message of the poll be?'
-            }, { time: myMs('2m') })
+            }, { time: ms('2m') })
             if (!pollMsg) return
             msg = pollMsg.content
 
@@ -202,7 +200,7 @@ module.exports = class PollCommand extends Command {
             while (emojis.length < 2) {
                 const emojisMsg = await basicCollector({ message }, {
                     fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**'
-                }, { time: myMs('2m') })
+                }, { time: ms('2m') })
                 if (!emojisMsg) return
 
                 const match = emojisMsg.content.match(emojiRegex)?.map(e => e).filter(e => e) || []
@@ -223,7 +221,7 @@ module.exports = class PollCommand extends Command {
             channel: channel.id,
             message: sent.id,
             emojis,
-            duration: myMs(duration - this.now, { long: true }),
+            duration: ms(duration - this.now, { long: true }),
             endsAt: duration
         })
 

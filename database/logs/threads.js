@@ -2,7 +2,9 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, channelTypes, timestamp, myMs, sliceFileName } = require('../../utils')
+const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils/functions')
+const { channelTypes } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -31,7 +33,7 @@ module.exports = (client) => {
                     ${guildMember.toString()} created ${chanType} ${thread.toString()}
                     under ${parentType} channel ${parent.toString()}
                 `}
-                **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * myMs('1m')), 'R')}**
+                **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * ms('1m')), 'R')}**
             `)
             .setFooter(`Thread id: ${id} • Channel id: ${parent.id}`)
             .setTimestamp()
@@ -88,8 +90,8 @@ module.exports = (client) => {
             .setTimestamp()
 
         if (autoArchive1 !== autoArchive2) {
-            const archiveIn1 = myMs(autoArchive1 * myMs('1m'), { long: true })
-            const archiveIn2 = myMs(autoArchive2 * myMs('1m'), { long: true })
+            const archiveIn1 = ms(autoArchive1 * ms('1m'), { long: true })
+            const archiveIn2 = ms(autoArchive2 * ms('1m'), { long: true })
 
             embed.addField('Archive after inactivity', `${archiveIn1} ➜ ${archiveIn2}`)
         }
@@ -101,8 +103,8 @@ module.exports = (client) => {
         if (locked1 !== locked2) embed.addField('Anyone can unarchive', locked2 ? 'Yes ➜ No' : 'No ➜ Yes')
 
         if (rateLimit1 !== rateLimit2) {
-            const slowmo1 = rateLimit1 ? myMs(rateLimit1 * 1000, { long: true }) : 'Off'
-            const slowmo2 = rateLimit2 ? myMs(rateLimit2 * 1000, { long: true }) : 'Off'
+            const slowmo1 = rateLimit1 ? ms(rateLimit1 * 1000, { long: true }) : 'Off'
+            const slowmo2 = rateLimit2 ? ms(rateLimit2 * 1000, { long: true }) : 'Off'
             embed.addField('Slowmode', `${slowmo1} ➜ ${slowmo2}`)
         }
 

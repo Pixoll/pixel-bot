@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceFileName } = require('../../utils')
+const { isModuleEnabled, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

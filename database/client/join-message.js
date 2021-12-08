@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed, TextBasedChannels } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { embedColor, customEmoji, sliceFileName } = require('../../utils')
+const { customEmoji, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -33,7 +33,7 @@ module.exports = async (client) => {
         const { user, owners, prefix, options } = client
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setTitle(`Thanks for adding ${user.username}!`)
             .setDescription('Here\'s some useful information about the bot.')
             .addField(`${customEmoji('info')} Using commands`, stripIndent`

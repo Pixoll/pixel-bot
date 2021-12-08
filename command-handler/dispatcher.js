@@ -5,7 +5,6 @@ const CommandoRegistry = require('./registry')
 const { Message, MessageEmbed, MessageButton, MessageActionRow } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient, CommandoInteraction } = require('./typings')
 const { oneLine, stripIndent } = require('common-tags')
-const { probability, embedColor } = require('../utils')
 const FriendlyError = require('./errors/friendly')
 /* eslint-enable no-unused-vars */
 
@@ -284,7 +283,7 @@ class CommandDispatcher {
 			if (probability(2)) {
 				const { user, botInvite } = client
 				const embed = new MessageEmbed()
-					.setColor(embedColor)
+					.setColor('#4c9f4c')
 					.addField(`Enjoying ${user.username}?`, oneLine`
 						The please consider voting for it! It helps the bot to become more noticed
 						between other bots. And perhaps consider adding it to any of your own servers
@@ -487,4 +486,13 @@ function capitalize(str) {
 		splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
 	}
 	return splitStr.join(' ')
+}
+
+/**
+ * Calculates the probability of something
+ * @param {number} n The probability (in decimals or percentage) to calculate
+ */
+function probability(n) {
+    if (n > 1) n /= 100
+    return !!n && Math.random() <= n
 }

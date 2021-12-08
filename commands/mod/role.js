@@ -1,11 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role, GuildMember, Collection } = require('discord.js')
-const {
-    basicEmbed, roleDetails, memberDetails, isValidRole, removeDuplicated, getArgument, replyAll, confirmButtons
-} = require('../../utils')
+const { basicEmbed, isValidRole, removeDuplicated, getArgument, replyAll, confirmButtons } = require('../../utils/functions')
+const { roleDetails, memberDetails } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 

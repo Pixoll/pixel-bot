@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Message, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceFileName } = require('../../utils')
+const { sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton, GuildMember, MessageEmbed } = require('discord.js')
-const { noReplyInDMs, memberDetails, embedColor, replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
+const { memberDetails } = require('../../utils/constants')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -46,7 +47,7 @@ module.exports = class MemberAvatarCommand extends Command {
         const avatar = member.displayAvatarURL({ dynamic: true, size: 2048 })
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(`${user.tag} • AKA. ${displayName}`, user.displayAvatarURL({ dynamic: true }))
             .setImage(avatar)
             .setTimestamp()

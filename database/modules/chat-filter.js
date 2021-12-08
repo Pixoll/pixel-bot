@@ -2,8 +2,8 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { myMs, isModuleEnabled, basicEmbed } = require('../../utils')
-const { isMod, validURL, docId } = require('../../utils')
+const { isModuleEnabled, basicEmbed, isMod, validURL, docId } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 const { moderations, active, setup, modules } = require('../../schemas')
 /* eslint-enable no-unused-vars */
 
@@ -133,7 +133,7 @@ module.exports = (client) => {
     //             type: 'mute',
     //             guild: message.guild.id,
     //             user: client.user.id,
-    //             duration: Date.now() + myMs('1m')
+    //             duration: Date.now() + ms('1m')
     //         }).save()
     //     })
     // })

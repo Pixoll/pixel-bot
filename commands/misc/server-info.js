@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances, CommandoGuild } = require('../../command-handler/typings')
 const { MessageEmbed, PremiumTier, Guild } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 const ownerCrown = '<a:owner_crown:806558872440930425>'

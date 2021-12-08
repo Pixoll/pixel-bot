@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { generateEmbed, abcOrder, timestamp } = require('../../utils')
+const Command = require('../../command-handler/commands/base')
+const { generateEmbed, abcOrder, timestamp } = require('../../utils/functions')
 const { CommandInstances } = require('../../command-handler/typings')
 const { version } = require('../../package.json')
 /* eslint-enable no-unused-vars */

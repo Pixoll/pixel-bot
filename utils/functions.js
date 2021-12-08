@@ -7,7 +7,7 @@ const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = 
 const CGuildClass = require('../command-handler/extensions/guild')
 const { transform, isEqual, isArray, isObject } = require('lodash')
 const { stripIndent, oneLine } = require('common-tags')
-const { myMs, timestamp } = require('./custom-ms')
+const ms = require('./ms')
 const { version } = require('../package.json')
 const { moderations, active } = require('../schemas')
 const { permissions } = require('../command-handler/util')
@@ -240,6 +240,30 @@ function noReplyInDMs(msg) {
 }
 
 /**
+ * Parses the specified time into a Discord template
+ * @param {number|Date} time The time to parse (in milliseconds)
+ * @param {'t'|'T'|'d'|'D'|'f'|'F'|'R'} [format] The format of the timestamp
+ * - `t`: Short time ➜ `16:20`
+ * - `T`: Long time ➜ `16:20:30`
+ * - `d`: Short date ➜ `20/04/2021`
+ * - `D`: Long date ➜ `20 April 2021`
+ * - `f`: Short date/time ➜ `20 April 2021 16:20`
+ * - `F`: Long date/time ➜ `Tuesday, 20 April 2021 16:20`
+ * - `R`: Relative time ➜ `2 months ago`
+ */
+function timestamp(time, format = 'f') {
+    if (!time) return
+    if (time instanceof Date) time = time.getTime()
+
+    const trunc = Math.trunc(time / 1000)
+    const rem = trunc % 60
+    const roundUp = rem >= 20
+    const epoch = trunc - rem + (roundUp ? 60 : 0)
+
+    return `<t:${epoch}:${format}>`
+}
+
+/**
  * Replies to the corresponding instances
  * @param {CommandInstances} instances The instances to reply
  * @param {MessageOptions|string|MessageEmbed} options The options of the message
@@ -279,7 +303,7 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
     if (!embedOptions.color) embedOptions.color = 'BLUE'
     if (!embedOptions.fieldValue) embedOptions.fieldValue = 'Respond with `cancel` to cancel the command.'
     if (!embedOptions.footer) {
-        embedOptions.footer = `The command will automatically be cancelled in ${myMs(
+        embedOptions.footer = `The command will automatically be cancelled in ${ms(
             collectorOptions.time, { long: true, length: 1 }
         )}`
     }
@@ -781,7 +805,7 @@ async function tempban(guild, bot, user, time, reason = 'No reason given.') {
 
     if (reason.length > 512 || !member?.bannable || isMod(member)) return
 
-    const duration = myMs(time, { long: true })
+    const duration = ms(time, { long: true })
 
     if (member && !user.bot) {
         const invite = await channels.cache.filter(({ type }) =>
@@ -875,7 +899,7 @@ async function mute(guild, bot, member, role, time, reason = 'No reason given.')
 
     if (reason.length > 512 || !member.manageable || isMod(member) || member.roles.cache.has(role.id)) return
 
-    const duration = myMs(time, { long: true })
+    const duration = ms(time, { long: true })
 
     if (!member.user.bot) {
         await member.send(stripIndent`
@@ -1226,7 +1250,7 @@ async function generateEmbed({ message, interaction }, array, data) {
 
                 const created = key === 'createdAt' ? timestamp(item[key]) : null
                 const duration = key === 'duration' && Number(item[key]) ?
-                    myMs(item[key], { long: true, length: 2, showAnd: true }) : null
+                    ms(item[key], { long: true, length: 2, showAnd: true }) : null
                 const endsAt = key === 'endsAt' ? `${timestamp(item[key])} (${timestamp(item[key], 'R')})` : null
 
                 const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key]
@@ -1321,7 +1345,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
             }
             return true
         },
-        time: myMs('30s'),
+        time: ms('30s'),
         componentType: 'BUTTON'
     }).catch(() => null)
 
@@ -1398,7 +1422,7 @@ function commandInfo(cmd, guild) {
         Aliases: aliases.join(', ') || null,
         Slash: slash ? 'Yes' : 'No',
         Cooldown: throttling ?
-            `${pluralize('usage', throttling.usages)} per ${myMs(throttling.duration * 1000, { long: true })}` :
+            `${pluralize('usage', throttling.usages)} per ${ms(throttling.duration * 1000, { long: true })}` :
             null,
         Guarded: guarded ? 'Yes' : 'No',
         Status: !guarded ? (cmd.isEnabledIn(guild) ? 'Enabled' : 'Disabled') : null,
@@ -1470,6 +1494,7 @@ module.exports = {
     sliceDots,
     sliceFileName,
     tempban,
+    timestamp,
     userException,
     validURL
 }

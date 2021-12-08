@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { myMs, formatBytes, replyAll } = require('../../utils')
+const Command = require('../../command-handler/commands/base')
+const { formatBytes, replyAll } = require('../../utils/functions')
+const ms = require('../../utils/ms')
 const { MessageEmbed } = require('discord.js')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
@@ -26,7 +27,7 @@ module.exports = class StatsCommand extends Command {
         const guilds = this.client.guilds.cache
         const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString()
 
-        const uptime = myMs(_uptime, { long: true, length: 2, showMs: false }).toString()
+        const uptime = ms(_uptime, { long: true, length: 2, showMs: false }).toString()
 
         // The memory usage in MB
         const { heapUsed, rss } = process.memoryUsage()

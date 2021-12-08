@@ -4,7 +4,8 @@ const { connect } = require('mongoose')
 const { isAsyncFunction } = require('util/types')
 const { CommandoClient } = require('../command-handler/typings')
 const schemas = require('../schemas')
-const { myMs, removeDashes } = require('../utils')
+const { removeDashes } = require('../utils/functions')
+const ms = require('../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -44,7 +45,7 @@ module.exports = async (client, ...exclude) => {
 
     client.emit('debug', 'Caching process has finished for all guilds')
     const end1 = Date.now()
-    const time1 = myMs(end1 - now1, { showMs: true, noCommas: true })
+    const time1 = ms(end1 - now1, { showMs: true, noCommas: true })
     await client.owners[0].send(`**Debug message:** Finished database caching (took \`${time1}\`).`)
 
     // Loads all the bot's features
@@ -65,6 +66,6 @@ module.exports = async (client, ...exclude) => {
     }
     client.emit('debug', 'Loaded client features')
     const end2 = Date.now()
-    const time2 = myMs(end2 - now2, { showMs: true, noCommas: true })
+    const time2 = ms(end2 - now2, { showMs: true, noCommas: true })
     await client.owners[0].send(`**Debug message:** Loaded all features (took \`${time2}\`).`)
 }

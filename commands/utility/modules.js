@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { ModuleSchema } = require('../../schemas/types')
-const { replyAll, customEmoji } = require('../../utils')
+const { replyAll, customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

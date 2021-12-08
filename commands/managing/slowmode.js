@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { myMs, channelDetails, timeDetails, replyAll } = require('../../utils')
-const { basicEmbed } = require('../../utils')
+const { replyAll, basicEmbed } = require('../../utils/functions')
+const { channelDetails, timeDetails } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
 /* eslint-enable no-unused-vars */
@@ -92,7 +93,7 @@ module.exports = class SlowmodeCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Changed slowmode in #${channel.name}`,
-            fieldValue: `**New rate limit:** ${myMs(ratelimit * 1000, { long: true, showAnd: true })}`
+            fieldValue: `**New rate limit:** ${ms(ratelimit * 1000, { long: true, showAnd: true })}`
         }))
     }
 }

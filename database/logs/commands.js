@@ -2,7 +2,7 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils')
+const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

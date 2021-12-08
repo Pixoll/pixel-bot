@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
 const {
-    myMs, timeDetails, reasonDetails, memberDetails, userException, memberException, timestamp, confirmButtons, replyAll
-} = require('../../utils')
-const { docId, basicEmbed } = require('../../utils')
+    userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed
+} = require('../../utils/functions')
+const { timeDetails, reasonDetails, memberDetails } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -164,7 +165,7 @@ module.exports = class MuteCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(duration - Date.now(), { long: true })
+            duration: ms(duration - Date.now(), { long: true })
         })
         await active.add({
             _id: documentId,

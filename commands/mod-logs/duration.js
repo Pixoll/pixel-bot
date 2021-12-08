@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
-const { myMs, basicEmbed, timeDetails, docId, confirmButtons, replyAll } = require('../../utils')
+const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions')
+const { timeDetails } = require('../../utils/constants')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -98,7 +100,7 @@ module.exports = class DurationCommand extends Command {
         if (duration instanceof Date) duration = duration.getTime()
 
         /** @type {string} */
-        const longTime = myMs(duration - Date.now(), { long: true })
+        const longTime = ms(duration - Date.now(), { long: true })
 
         const confirmed = await confirmButtons(
             { message, interaction }, 'update mod log duration', modlogId, { duration: longTime }

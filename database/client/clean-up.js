@@ -2,7 +2,7 @@
 const { Document } = require('mongoose')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = require('../../schemas')
-const { sliceFileName } = require('../../utils')
+const { sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 const today = new Date().getUTCDate()

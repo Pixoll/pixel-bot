@@ -3,10 +3,11 @@ const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const {
-    capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes, myMs, rtcRegions, compareArrays,
-    sliceFileName
-} = require('../../utils')
-const { permissions } = require('../../command-handler')
+    capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, compareArrays, sliceFileName
+} = require('../../utils/functions')
+const { channelTypes, rtcRegions } = require('../../utils/constants')
+const ms = require('../../utils/ms')
+const { permissions } = require('../../command-handler/util')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -204,10 +205,10 @@ module.exports = (client) => {
             }
             if (autoArchive1 !== autoArchive2) {
                 const str1 = typeof autoArchive1 === 'number' ?
-                    myMs(autoArchive1 * myMs('1m'), { long: true }) :
+                    ms(autoArchive1 * ms('1m'), { long: true }) :
                     capitalize(autoArchive1)
                 const str2 = typeof autoArchive2 === 'number' ?
-                    myMs(autoArchive2 * myMs('1m'), { long: true }) :
+                    ms(autoArchive2 * ms('1m'), { long: true }) :
                     capitalize(autoArchive2)
                 embed.addField('Archive after innactivity', `${str1} ➜ ${str2}`)
             }
@@ -216,8 +217,8 @@ module.exports = (client) => {
                 const rate1 = oldChannel.rateLimitPerUser
                 const rate2 = newChannel.rateLimitPerUser
                 if (rate1 !== rate2) {
-                    const slowmo1 = rate1 ? myMs(rate1 * 1000, { long: true }) : 'Off'
-                    const slowmo2 = rate2 ? myMs(rate2 * 1000, { long: true }) : 'Off'
+                    const slowmo1 = rate1 ? ms(rate1 * 1000, { long: true }) : 'Off'
+                    const slowmo2 = rate2 ? ms(rate2 * 1000, { long: true }) : 'Off'
                     embed.addField('Slowmode', `${slowmo1} ➜ ${slowmo2}`)
                 }
             }

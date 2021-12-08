@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../../command-handler/typings')
-const { getLogsChannel, sliceFileName } = require('../../utils')
+const { getLogsChannel, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

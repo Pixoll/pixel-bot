@@ -1,10 +1,8 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { stripIndent, oneLine } = require('common-tags')
-const {
-    basicEmbed, generateEmbed, pluralize, getArgument, channelDetails, confirmButtons, reasonDetails, replyAll
-} = require('../../utils')
+const { basicEmbed, generateEmbed, pluralize, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
+const { channelDetails, reasonDetails } = require('../../utils/constants')
 const { CommandInstances } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')

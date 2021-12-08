@@ -2,7 +2,7 @@
 const util = require('util')
 const { Util: { splitMessage } } = require('discord.js')
 const { stripIndents } = require('common-tags')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 

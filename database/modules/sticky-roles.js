@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial, sliceFileName } = require('../../utils')
+const { isModuleEnabled, fetchPartial, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

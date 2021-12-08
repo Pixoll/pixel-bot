@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, addDashes, removeDashes } = require('../../utils')
+const { generateEmbed, basicEmbed, addDashes, removeDashes } = require('../../utils/functions')
 const Database = require('../../schemas')
 /* eslint-enable no-unused-vars */
 

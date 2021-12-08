@@ -1,14 +1,13 @@
 /* eslint-disable no-unused-vars */
 const { User, GuildMember, TextChannel } = require('discord.js')
-const { Command } = require('../../command-handler')
+const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const {
-    docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton,
-    confirmButtons,
-    replyAll
-} = require('../../utils')
+    docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll
+} = require('../../utils/functions')
+const { timeDetails, userDetails, reasonDetails } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
-const { myMs } = require('../../utils')
+const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -158,7 +157,7 @@ module.exports = class TempBanCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(Date.now() - duration, { long: true })
+            duration: ms(Date.now() - duration, { long: true })
         })
         await active.add({
             _id: documentId,

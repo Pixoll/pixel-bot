@@ -10,7 +10,6 @@ const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')
 const CommandFormatError = require('../errors/command-format')
 const { resolveString } = require('../util')
-const { embedColor } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -291,7 +290,7 @@ class CommandoMessage extends Message {
 			if (probability(2)) {
 				const { user, botInvite } = client
 				const embed = new MessageEmbed()
-					.setColor(embedColor)
+					.setColor('#4c9f4c')
 					.addField(`Enjoying ${user.username}?`, oneLine`
 						The please consider voting for it! It helps the bot to become more noticed
 						between other bots. And perhaps consider adding it to any of your own servers

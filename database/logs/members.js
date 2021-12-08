@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils')
+const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -42,7 +42,7 @@ module.exports = (client) => {
 
         guild.queuedLogs.push(embed)
 
-        // if (Date.now() - createdTimestamp < myMs('3d')) {
+        // if (Date.now() - createdTimestamp < ms('3d')) {
         //     const autoMod = await isModuleEnabled(guild, 'audit-logs', 'autoMod')
         //     if (!autoMod) return
 

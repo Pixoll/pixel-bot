@@ -2,7 +2,7 @@
 const { CommandoClient } = require('../command-handler/typings')
 const { CommandInstances, Command } = require('../command-handler/typings')
 const { MessageEmbed, TextChannel, Util, CommandInteractionOption } = require('discord.js')
-const { customEmoji, docId, code, replyAll } = require('../utils')
+const { customEmoji, docId, code, replyAll } = require('../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
