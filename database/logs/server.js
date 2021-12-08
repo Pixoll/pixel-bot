@@ -4,7 +4,7 @@ const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const {
     arrayEquals, isModuleEnabled, getLogsChannel, myMs, guildFeatures, verificationLevels, R18ContentFilter, locales,
-    nsfwLevels, removeUnderscores, sysChannelFlags
+    nsfwLevels, removeUnderscores, sysChannelFlags, sliceFileName
 } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
@@ -37,8 +37,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(oldGuild, 'audit-logs', 'server')
         if (!isEnabled) return
 
-        const logsChannel = await getLogsChannel(oldGuild)
-        if (!logsChannel) return
+        client.emit('debug', `Running event "${sliceFileName(__filename)}".`)
 
         const {
             name: name1, systemChannel: sysChan1, afkChannel: afkChan1, afkTimeout: afkTo1, ownerId: ownerId1,

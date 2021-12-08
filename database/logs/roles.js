@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Permissions } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays } = require('../../utils')
+const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays, sliceFileName } = require('../../utils')
 const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
 
@@ -33,6 +33,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleCreate".`)
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -72,6 +74,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleDelete".`)
+
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
         const url = role.iconURL({ size: 2048 }) || colorURL
@@ -108,6 +112,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#roleUpdate".`)
 
         const {
             name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1,

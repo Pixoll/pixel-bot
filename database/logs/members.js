@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp } = require('../../utils')
+const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -26,6 +26,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
 
         const { tag, id, createdAt } = user
 
@@ -58,6 +60,8 @@ module.exports = (client) => {
         const status = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!status) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
+
         const { tag } = user
 
         const rolesList = roles.cache.filter(r => r.id !== guild.id)
@@ -81,6 +85,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberUpdate".`)
 
         const { roles: roles1, nickname: nick1, avatar: avatar1 } = oldMember
         const { roles: roles2, nickname: nick2, avatar: avatar2, user, id } = newMember

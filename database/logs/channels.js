@@ -3,7 +3,8 @@ const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const {
-    capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes, myMs, rtcRegions, compareArrays
+    capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes, myMs, rtcRegions, compareArrays,
+    sliceFileName
 } = require('../../utils')
 const { permissions } = require('../../command-handler')
 /* eslint-enable no-unused-vars */
@@ -30,6 +31,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelCreate".`)
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -73,6 +76,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelDelete".`)
+
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
         const embed = new MessageEmbed()
@@ -109,6 +114,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelUpdate".`)
 
         const { name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, id } = oldChannel
         const { name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2 } = newChannel

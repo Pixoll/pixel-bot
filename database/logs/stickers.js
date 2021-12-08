@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled } = require('../../utils')
+const { isModuleEnabled, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -15,6 +15,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerCreate".`)
 
         /** @type {User} */
         const user = await sticker.fetchUser().catch(() => null)
@@ -43,6 +45,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerDelete".`)
+
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted sticker', guild.iconURL({ dynamic: true }))
@@ -63,6 +67,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerUpdate".`)
 
         const { name: name1, description: description1, tags: tags1 } = oldSticker
         const { name: name2, description: description2, tags: tags2 } = newSticker

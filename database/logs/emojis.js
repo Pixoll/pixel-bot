@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled } = require('../../utils')
+const { isModuleEnabled, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -14,6 +14,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#emojiCreate".`)
 
         /** @type {User} */
         const author = await emoji.fetchAuthor().catch(() => null)
@@ -38,6 +40,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
         if (!isEnabled) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#emojiDelete".`)
+
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor('Deleted emoji', guild.iconURL({ dynamic: true }))
@@ -54,6 +58,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'emojis')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#emojiUpdate".`)
 
         const embed = new MessageEmbed()
             .setColor('BLUE')

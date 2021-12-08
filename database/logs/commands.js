@@ -2,7 +2,7 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceDots, code } = require('../../utils')
+const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -20,6 +20,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandRun".`)
 
         let string
         if (message) string = message.cleanContent
@@ -62,6 +64,8 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandPrefixChange".`)
+
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor('Updated command prefix', guild.iconURL({ dynamic: true }))
@@ -76,6 +80,8 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
+
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandStatusChange".`)
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
