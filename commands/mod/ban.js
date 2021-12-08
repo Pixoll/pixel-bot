@@ -1,7 +1,9 @@
 /* eslint-disable no-unused-vars */
 const { User, GuildMember } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
-const { docId, basicEmbed, userException, memberException, confirmButtons, replyAll } = require('../../utils/functions')
+const { Command } = require('../../command-handler')
+const {
+    docId, basicEmbed, userException, memberException, reasonDetails, userDetails, confirmButtons, replyAll
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
@@ -13,10 +15,7 @@ module.exports = class BanCommand extends Command {
             name: 'ban',
             group: 'mod',
             description: 'Ban a user permanently.',
-            details: stripIndent`
-                \`user\` has to be a user's username, id or mention.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${userDetails}\n${reasonDetails()}`,
             format: 'ban [user] <reason>',
             examples: [
                 'ban Pixoll',

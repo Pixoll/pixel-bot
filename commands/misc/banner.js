@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
+const { userDetails, noReplyInDMs, basicEmbed, embedColor, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -12,7 +12,7 @@ module.exports = class BannerCommand extends Command {
             name: 'banner',
             group: 'misc',
             description: 'Displays a user\'s banner, or yours if you don\'t specify any.',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: userDetails,
             format: 'banner <user>',
             examples: ['banner Pixoll'],
             args: [{
@@ -50,7 +50,7 @@ module.exports = class BannerCommand extends Command {
         }
 
         const embed = new MessageEmbed()
-            .setColor('#4c9f4c')
+            .setColor(embedColor)
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
             .setImage(banner)
             .setTimestamp()

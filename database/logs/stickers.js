@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled } = require('../../utils/functions')
+const { isModuleEnabled, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,12 +11,12 @@ const { isModuleEnabled } = require('../../utils/functions')
  */
 module.exports = (client) => {
     client.on('stickerCreate', async sticker => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerCreate".`)
+
         const { guild, url, id, description, name, tags } = sticker
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/stickers#stickerCreate".')
 
         /** @type {User} */
         const user = await sticker.fetchUser().catch(() => null)
@@ -40,12 +40,12 @@ module.exports = (client) => {
     })
 
     client.on('stickerDelete', async sticker => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerDelete".`)
+
         const { guild, url, id, description, name, tags } = sticker
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/stickers#stickerDelete".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -63,12 +63,12 @@ module.exports = (client) => {
     })
 
     client.on('stickerUpdate', async (oldSticker, newSticker) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerUpdate".`)
+
         const { guild, url, id } = newSticker
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/stickers#stickerUpdate".')
 
         const { name: name1, description: description1, tags: tags1 } = oldSticker
         const { name: name2, description: description2, tags: tags2 } = newSticker

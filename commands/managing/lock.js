@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { TextChannel } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
+const { basicEmbed, reasonDetails, channelDetails, replyAll } = require('../../utils')
 const { CommandInstances } = require('../../command-handler/typings')
-const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,10 +12,7 @@ module.exports = class LockCommand extends Command {
             name: 'lock',
             group: 'managing',
             description: 'Locks a channel, revoking the `Send Messages` permission from @everyone.',
-            details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
-                If \`reason\` is not specified, it will default as "We\'ll be back shortly".
-            `,
+            details: `${channelDetails()}\n${reasonDetails('We\'ll be back shortly')}`,
             format: 'lock [channel] <reason>',
             examples: ['lock #chat We\'ll be back shortly'],
             clientPermissions: ['MANAGE_CHANNELS'],

@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { oneLine } = require('common-tags')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
-const { generateEmbed, basicEmbed, replyAll } = require('../../utils/functions')
-const { pluralize } = require('../../utils/format')
+const { generateEmbed, basicEmbed, pluralize, userDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -15,7 +14,7 @@ module.exports = class ModLogsCommand extends Command {
             aliases: ['modlogs'],
             group: 'mod-logs',
             description: 'Displays all moderator logs of the server of a specific moderator, or all if none is specified',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: userDetails,
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],
             modPermissions: true,

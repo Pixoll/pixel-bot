@@ -429,7 +429,7 @@ class Argument {
 		if (!info.type && (!info.validate || !info.parse)) {
 			throw new Error('Argument must have both validate and parse since it doesn\'t have a type.')
 		}
-		if (typeof info.wait !== 'undefined' && (typeof info.wait !== 'number' || isNaN(info.wait))) {
+		if (typeof info.wait !== 'undefined' && (typeof info.wait !== 'number' || Number.isNaN(info.wait))) {
 			throw new TypeError('Argument wait must be a number.')
 		}
 	}

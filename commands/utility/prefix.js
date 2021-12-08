@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { stripIndent } = require('common-tags')
-const { basicEmbed } = require('../../utils/functions')
+const { basicEmbed } = require('../../utils')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 

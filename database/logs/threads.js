@@ -2,24 +2,8 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp } = require('../../utils/functions')
-const ms = require('../../utils/ms')
+const { isModuleEnabled, channelTypes, timestamp, myMs, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
-
-const channelTypes = {
-    GUILD_TEXT: 'Text',
-    DM: 'Direct messages',
-    GUILD_VOICE: 'Voice',
-    GROUP_DM: 'Group direct messages',
-    GUILD_CATEGORY: 'Category',
-    GUILD_NEWS: 'News',
-    GUILD_STORE: 'Store',
-    UNKNOWN: 'Unknown',
-    GUILD_NEWS_THREAD: 'News thread',
-    GUILD_PUBLIC_THREAD: 'Public thread',
-    GUILD_PRIVATE_THREAD: 'Private thread',
-    GUILD_STAGE_VOICE: 'Stage',
-}
 
 /**
  * Handles all of the thread logs.
@@ -27,13 +11,13 @@ const channelTypes = {
  */
 module.exports = (client) => {
     client.on('threadCreate', async thread => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadCreate".`)
+
         const { guild, type, parent, id, autoArchiveDuration } = thread
         await thread.join().catch(() => null)
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/threads#threadCreate".')
 
         const { guildMember } = await thread.fetchOwner()
         const chanType = channelTypes[type].toLowerCase()
@@ -47,7 +31,7 @@ module.exports = (client) => {
                     ${guildMember.toString()} created ${chanType} ${thread.toString()}
                     under ${parentType} channel ${parent.toString()}
                 `}
-                **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * ms('1m')), 'R')}**
+                **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * myMs('1m')), 'R')}**
             `)
             .setFooter(`Thread id: ${id} • Channel id: ${parent.id}`)
             .setTimestamp()
@@ -56,12 +40,12 @@ module.exports = (client) => {
     })
 
     client.on('threadDelete', async thread => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadDelete".`)
+
         const { guild, type, parent, id, name, members } = thread
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/threads#threadDelete".')
 
         const chanType = channelTypes[type].toLowerCase()
         const parentType = channelTypes[parent.type].toLowerCase()
@@ -80,12 +64,12 @@ module.exports = (client) => {
     })
 
     client.on('threadUpdate', async (oldThread, newThread) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadUpdate".`)
+
         const { guild } = newThread
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/threads#threadUpdate".')
 
         const {
             autoArchiveDuration: autoArchive1, archived: archived1, name: name1, locked: locked1,
@@ -104,8 +88,8 @@ module.exports = (client) => {
             .setTimestamp()
 
         if (autoArchive1 !== autoArchive2) {
-            const archiveIn1 = ms(autoArchive1 * ms('1m'), { long: true })
-            const archiveIn2 = ms(autoArchive2 * ms('1m'), { long: true })
+            const archiveIn1 = myMs(autoArchive1 * myMs('1m'), { long: true })
+            const archiveIn2 = myMs(autoArchive2 * myMs('1m'), { long: true })
 
             embed.addField('Archive after inactivity', `${archiveIn1} ➜ ${archiveIn2}`)
         }
@@ -117,8 +101,8 @@ module.exports = (client) => {
         if (locked1 !== locked2) embed.addField('Anyone can unarchive', locked2 ? 'Yes ➜ No' : 'No ➜ Yes')
 
         if (rateLimit1 !== rateLimit2) {
-            const slowmo1 = rateLimit1 ? ms(rateLimit1 * 1000, { long: true }) : 'Off'
-            const slowmo2 = rateLimit2 ? ms(rateLimit2 * 1000, { long: true }) : 'Off'
+            const slowmo1 = rateLimit1 ? myMs(rateLimit1 * 1000, { long: true }) : 'Off'
+            const slowmo2 = rateLimit2 ? myMs(rateLimit2 * 1000, { long: true }) : 'Off'
             embed.addField('Slowmode', `${slowmo1} ➜ ${slowmo2}`)
         }
 

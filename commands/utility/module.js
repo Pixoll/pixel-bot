@@ -1,12 +1,11 @@
+/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
+const { Command } = require('../../command-handler')
+const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
+const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
-const { addDashes, removeDashes } = require('../../utils/format')
-const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
 
 const Obj = require('../../schemas').modules.schema.obj
@@ -24,7 +23,6 @@ function patchData(data) {
         // autoMod: _patch(data?.autoMod),
         // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
-        scamDetector: _patch(data?.scamDetector),
         stickyRoles: _patch(data?.stickyRoles),
         auditLogs: {
             boosts: _patch(data?.auditLogs?.boosts),

@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { version, description } = require('../../package.json')
-const { replyAll } = require('../../utils/functions')
-const ms = require('../../utils/ms')
+const { myMs, replyAll } = require('../../utils')
 const { MessageEmbed, version: djsVersion } = require('discord.js')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -29,7 +28,7 @@ module.exports = class InfoCommand extends Command {
         const { user, owners, options, uptime: _uptime } = this.client
         const guilds = this.client.guilds.cache
 
-        const uptime = ms(_uptime, { long: true, length: 2, showMs: false })
+        const uptime = myMs(_uptime, { long: true, length: 2, showMs: false })
         const topgg = 'https://top.gg/bot/802267523058761759'
         const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString()
 

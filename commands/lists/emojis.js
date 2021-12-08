@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
-const { replyAll } = require('../../utils/functions')
+const { replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** @param {string[]} arr */

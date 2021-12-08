@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, User, TextBasedChannels, Message, MessageOptions, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { noReplyInDMs, basicEmbed } = require('../../utils/functions')
-const ms = require('../../utils/ms')
+const { myMs, noReplyInDMs, fetchPartial, sliceFileName } = require('../../utils')
+const { basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -17,8 +17,7 @@ module.exports = async (client) => {
         const { users, channels } = client
 
         for (const reminder of data.toJSON()) {
-            client.emit('debug', 'Running "modules/reminders#sendReminder".')
-
+            client.emit('debug', `Running "${sliceFileName(__filename)}#expireReminder".`)
             /** @type {User} */
             const user = await users.fetch(reminder.user).catch(() => null)
             if (!user) continue
@@ -36,7 +35,7 @@ module.exports = async (client) => {
             /** @type {Message} */
             const msg = await channel.messages.fetch(reminder.message).catch(() => null)
 
-            const time = ms(Date.now() - reminder.createdAt, { long: true, length: 1 })
+            const time = myMs(Date.now() - reminder.createdAt, { long: true, length: 1 })
 
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')
@@ -65,15 +64,14 @@ module.exports = async (client) => {
 
     // Cancells the reminders
     client.on('messageReactionAdd', async (reaction, user) => {
-        reaction = reaction.fetch().catch(() => null)
-        if (!reaction) return
-        user = user.fetch().catch(() => null)
-        if (!user) return
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionAdd".`)
+
+        reaction = await fetchPartial(reaction)
+        user = await fetchPartial(user)
+        if (!reaction || !user) return
 
         const { message, emoji } = reaction
         if (user.bot || emoji.id !== '802617654442852394') return
-
-        client.emit('debug', 'Running event "modules/reminders#messageReactionAdd".')
 
         const data = await db.fetch({ user: user.id, message: message.id })
         if (!data) return

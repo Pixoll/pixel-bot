@@ -2,8 +2,7 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots } = require('../../utils/format')
-const { isModuleEnabled } = require('../../utils/functions')
+const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -12,6 +11,8 @@ const { isModuleEnabled } = require('../../utils/functions')
  */
 module.exports = (client) => {
     client.on('commandRun', async (command, _, { message, interaction }) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandRun".`)
+
         const { guild, channel } = message || interaction
         const author = message?.author || interaction.user
         const isModCommand = !!command.userPermissions || command.ownerOnly ||
@@ -21,8 +22,6 @@ module.exports = (client) => {
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/commands#commandRun".')
 
         let string
         if (message) string = message.cleanContent
@@ -52,7 +51,7 @@ module.exports = (client) => {
                 ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
                 ${url ? `[Jump to message](${url})` : ''}
             `)
-            .addField('Message', `\`\`\`${content}\`\`\``)
+            .addField('Message', code(content))
             .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 
@@ -60,12 +59,12 @@ module.exports = (client) => {
     })
 
     client.on('commandPrefixChange', async (guild, prefix) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandPrefixChange".`)
+
         if (!guild) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/commands#commandPrefixChange".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -77,12 +76,12 @@ module.exports = (client) => {
     })
 
     client.on('commandStatusChange', async (guild, command, enabled) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandStatusChange".`)
+
         if (!guild) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/commands#commandStatusChange".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')

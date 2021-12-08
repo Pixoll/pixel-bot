@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { GuildMember, TextChannel } = require('discord.js')
 const {
-    docId, basicEmbed, memberException, userException, inviteButton, confirmButtons, replyAll
-} = require('../../utils/functions')
+    docId, basicEmbed, memberException, userException, inviteMaxAge, inviteButton, reasonDetails,
+    memberDetails, confirmButtons, replyAll
+} = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
@@ -15,10 +16,7 @@ module.exports = class KickCommand extends Command {
             name: 'kick',
             group: 'mod',
             description: 'Kick a member.',
-            details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
-                If \`reason\` is not specified, it will default as "No reason given".
-            `,
+            details: `${memberDetails()}\n${reasonDetails()}`,
             format: 'kick [member] <reason>',
             examples: [
                 'kick Pixoll',
@@ -109,7 +107,7 @@ module.exports = class KickCommand extends Command {
             /** @type {TextChannel} */
             const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
             const button = inviteButton(
-                await channel.createInvite({ maxAge: 604_800, maxUses: 1 })
+                await channel.createInvite({ maxAge: inviteMaxAge, maxUses: 1 })
             )
 
             await user.send({ embeds: [embed], components: [button] }).catch(() => null)

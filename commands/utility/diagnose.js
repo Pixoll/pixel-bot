@@ -1,11 +1,10 @@
+/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
-const CommandGroup = require('../../command-handler/commands/group')
-const { permissions } = require('../../command-handler/util')
+const { Command, permissions, CommandGroup } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { getArgument, replyAll, basicEmbed } = require('../../utils/functions')
+const { getArgument, replyAll, basicEmbed } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

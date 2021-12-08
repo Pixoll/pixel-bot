@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { getDayDiff, replyAll } = require('../../utils/functions')
+const { getDayDiff, code, replyAll } = require('../../utils')
 const { ModerationSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -64,7 +64,7 @@ module.exports = class ModStatsCommand extends Command {
         const warns = this.getStats(stats, 'warn', 'Warns', pad)
         const total = this.getStats(stats, ['mute', 'ban', 'temp-ban', 'kick', 'warn'], 'Total', pad)
 
-        const table = `\`\`\`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}\`\`\``
+        const table = code(`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}`)
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')

@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
+const { basicEmbed, memberDetails, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -15,8 +15,7 @@ module.exports = class NickCommand extends Command {
             group: 'mod',
             description: 'Change the nickname of a member or remove it.',
             details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
-                \`nick\` will be the member's new nickname.
+                ${memberDetails()} \`nick\` will be the member's new nickname.
                 Setting \`nick\` as \`remove\` will remove the member's current nickname.
             `,
             format: 'nick [member] [nick]',

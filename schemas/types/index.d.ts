@@ -14,7 +14,6 @@
 type Snowflake = string
 
 interface BaseSchema { // extends Document
-    readonly _id: string
     readonly createdAt?: Date
     readonly updatedAt?: Date
 }
@@ -79,7 +78,6 @@ export interface ModuleSchema extends BaseSchema {
     // autoMod: boolean
     // chatFilter: boolean
     welcome: boolean
-    scamDetector: boolean
     stickyRoles: boolean
     auditLogs: {
         boosts: boolean
@@ -100,7 +98,7 @@ export interface ModuleSchema extends BaseSchema {
     }
 }
 
-export type Module = 'audit-logs' | 'auto-mod' | 'chat-filter' | 'scam-detector' | 'sticky-roles' | 'welcome'
+export type Module = 'auto-mod' | 'chat-filter' | 'sticky-roles' | 'welcome' | 'audit-logs'
 export type AuditLog = 'boosts' | 'channels' | 'commands' | 'emojis' | 'invites' | 'members' | 'messages' |
     'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'users' | 'voice'
 

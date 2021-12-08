@@ -73,16 +73,6 @@
     {
         "version": "2.2.0",
         "changes": [
-            "Added \"Scam detector\" module. Automatically bans people when it detects a fake Discord Nitro link. More types of scams will be added in the future.",
-            "Fixed embed dysplaying of `mod-logs` and `infractions` commands.",
-            "Fixed `warn` command: It wouldn't save the moderator in the database (missing data).",
-            "Added on and off emojis to the `modules` command."
-        ],
-        "timestamp": 1638920340000
-    },
-    {
-        "version": "2.3.0",
-        "changes": [
             "Added `legal` command.",
             "Added the bot's **Terms of Service (ToS)** and **Privacy Policy.** Access them with the `legal` command."
         ]

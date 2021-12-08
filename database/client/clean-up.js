@@ -2,6 +2,7 @@
 const { Document } = require('mongoose')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = require('../../schemas')
+const { sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const today = new Date().getUTCDate()
@@ -13,7 +14,7 @@ const today = new Date().getUTCDate()
  */
 module.exports = async (client, forceCleanup = false) => {
     client.on('guildDelete', /** @param {CommandoGuild} guild */ async guild => {
-        client.emit('debug', 'Running event "client/clean-up".')
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildDelete".`)
 
         const {
             active, afk, disabled, mcIps, moderations, modules, polls, prefixes, reactionRoles, rules, setup, stickyRoles,

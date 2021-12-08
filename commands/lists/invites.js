@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Invite, Collection } = require('discord.js')
-const { generateEmbed, basicEmbed, replyAll } = require('../../utils/functions')
-const { pluralize } = require('../../utils/format')
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

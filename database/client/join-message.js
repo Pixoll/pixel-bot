@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed, TextBasedChannels } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji } = require('../../utils/format')
+const { embedColor, customEmoji, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,7 +11,7 @@ const { customEmoji } = require('../../utils/format')
  */
 module.exports = async (client) => {
     client.on('guildCreate', async guild => {
-        client.emit('debug', 'Running "client/join-message".')
+        client.emit('debug', `Running "${sliceFileName(__filename)}".`)
 
         const { channels, id, ownerId } = guild
 
@@ -33,7 +33,7 @@ module.exports = async (client) => {
         const { user, owners, prefix, options } = client
 
         const embed = new MessageEmbed()
-            .setColor('#4c9f4c')
+            .setColor(embedColor)
             .setTitle(`Thanks for adding ${user.username}!`)
             .setDescription('Here\'s some useful information about the bot.')
             .addField(`${customEmoji('info')} Using commands`, stripIndent`

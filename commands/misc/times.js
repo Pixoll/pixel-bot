@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { Collection, MessageEmbed } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { abcOrder, pagedEmbed, basicEmbed, replyAll } = require('../../utils/functions')
+const { timeDetails, abcOrder, pagedEmbed, embedColor, basicEmbed, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const timeZones = new Collection([
@@ -59,8 +59,7 @@ module.exports = class TimesCommand extends Command {
             group: 'misc',
             description: 'Displays the time in multiple timezones.',
             details: stripIndent`
-                \`hour\` uses the bot's time formatting, for more information use the \`help\` command.
-                Type \`now\` to get the current time.
+                ${timeDetails('hour')} Type \`now\` to get the current time.
                 \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}
             `,
             format: 'times <hour> <place>',
@@ -150,7 +149,7 @@ module.exports = class TimesCommand extends Command {
             const clock = hour - (hour > 12 ? 12 : 0)
 
             const embed = new MessageEmbed()
-                .setColor('#4c9f4c')
+                .setColor(embedColor)
                 .setTitle(`:clock${clock}: Time in ${city}`)
                 .setDescription(stripIndent`
                     **Time:** ${time}
@@ -174,7 +173,7 @@ module.exports = class TimesCommand extends Command {
         const clock = hours - (hours > 12 ? 12 : 0) || 12
 
         const base = new MessageEmbed()
-            .setColor('#4c9f4c')
+            .setColor(embedColor)
             .setTitle(`:clock${clock}: Times around the world`)
             .setTimestamp()
 

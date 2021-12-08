@@ -1,9 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, timestamp, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
-const { customEmoji } = require('../../utils/format')
+const { basicEmbed, customEmoji, timestamp, timeDetails, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -14,10 +12,7 @@ module.exports = class ReminderCommand extends Command {
             aliases: ['remindme', 'remind'],
             group: 'misc',
             description: 'Set a reminder, and forget.',
-            details: stripIndent`
-                \`time\` uses the bot's time formatting, for more information use the \`help\` command.
-                If \`reminder\` is not specified, it will default to "Not specified".
-            `,
+            details: timeDetails('time') + '\nIf `reminder` is not specified, it will default to "Not specified".',
             format: 'reminder [time] <reminder>',
             examples: [
                 'reminder 02/02/2022 Pixoll\'s b-day!',

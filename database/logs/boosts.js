@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
+const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji } = require('../../utils/format')
-const { isModuleEnabled, timestamp } = require('../../utils/functions')
+const { isModuleEnabled, timestamp, sliceFileName, customEmoji } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,14 +11,14 @@ const { isModuleEnabled, timestamp } = require('../../utils/functions')
  */
 module.exports = (client) => {
     client.on('guildMemberUpdate', async (oldMember, newMember) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberUpdate".`)
+
         const { premiumSinceTimestamp: boostTime2, guild, user, id } = newMember
         const { premiumSinceTimestamp: boostTime1, partial } = oldMember
         if (!guild.available || partial || boostTime1 === boostTime2) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'boosts')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/boosts".')
 
         const action = boostTime1 === null ? 'started' : 'stopped'
         const emoji = action === 'started' ? customEmoji('boost') : ''

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled } = require('../../utils/functions')
+const { isModuleEnabled, sliceFileName } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,12 +10,12 @@ const { isModuleEnabled } = require('../../utils/functions')
  */
 module.exports = (client) => {
     client.on('moduleStatusChange', async (guild, module, enabled) => {
+        client.emit('debug', `Running event "${sliceFileName(__filename)}#moduleStatusChange".`)
+
         if (!guild) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'modules')
         if (!isEnabled) return
-
-        client.emit('debug', 'Running event "logs/modules".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')

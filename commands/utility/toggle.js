@@ -1,7 +1,7 @@
+/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
-const CommandGroup = require('../../command-handler/commands/group')
-const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
+const { Command, CommandGroup } = require('../../command-handler')
+const { basicEmbed, getArgument, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { CommandInstances, Command: CommandType, CommandGroup: CommandGroupType } = require('../../command-handler/typings')
 const { DisabledSchema } = require('../../schemas/types')

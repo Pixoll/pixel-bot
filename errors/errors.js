@@ -2,9 +2,8 @@
 const { CommandoClient } = require('../command-handler/typings')
 const { CommandInstances, Command } = require('../command-handler/typings')
 const { MessageEmbed, TextChannel, Util, CommandInteractionOption } = require('discord.js')
-const { docId, replyAll } = require('../utils/functions')
+const { customEmoji, docId, code, replyAll } = require('../utils')
 const { stripIndent } = require('common-tags')
-const { customEmoji } = require('../utils/format')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -114,11 +113,11 @@ module.exports = (client) => {
                     }
                     for (const option of interaction.options.data) concat(option)
                 }
-                embed.addField('Command input', `\`\`\`js\n${Util.escapeMarkdown(input).substr(0, 1016)}\`\`\``)
+                embed.addField('Command input', code(Util.escapeMarkdown(input).substr(0, 1016), 'js'))
             }
 
             const msg = (error.name + whatCommand + ': ' + error.message).split('Require stack:').shift()
-            embed.addField(msg, `\`\`\`${files || 'No files.'}\`\`\``)
+            embed.addField(msg, code(files || 'No files.'))
 
             await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] })
 
@@ -130,7 +129,7 @@ module.exports = (client) => {
                 name: error.name,
                 message: error.message,
                 command: command?.name,
-                files: `\`\`\`${files}\`\`\``
+                files: code(files)
             })
         } else {
             console.warn(error)

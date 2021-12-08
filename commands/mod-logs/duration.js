@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions')
-const ms = require('../../utils/ms')
+const { myMs, basicEmbed, timeDetails, docId, confirmButtons, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -18,7 +17,7 @@ module.exports = class DurationCommand extends Command {
                     \`modlog id\` has to be a valid mod log id.
                     To see all the mod logs in this server use the \`modlogs\` command.
                 `}
-                \`new duration\` uses the bot's time formatting, for more information use the \`help\` command.
+                ${timeDetails('new duration')}
             `,
             format: 'duration [modlog id] [new duration]',
             examples: [
@@ -99,7 +98,7 @@ module.exports = class DurationCommand extends Command {
         if (duration instanceof Date) duration = duration.getTime()
 
         /** @type {string} */
-        const longTime = ms(duration - Date.now(), { long: true })
+        const longTime = myMs(duration - Date.now(), { long: true })
 
         const confirmed = await confirmButtons(
             { message, interaction }, 'update mod log duration', modlogId, { duration: longTime }

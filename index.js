@@ -34,8 +34,10 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
-const debugExclude =
-    /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection completed|while executing a request/
+const debugExclude = new RegExp(
+    'Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection completed|' +
+    'while executing a request'
+)
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
@@ -64,7 +66,7 @@ registry.registerCommandsIn(path.join(__dirname, '/commands'))
 client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
-    await database(client, 'auto-punish', 'chat-filter')
+    await database(client, 'auto-punish', 'chat-filter', 'scam-detector')
     errors(client)
     rateLimit(client)
 

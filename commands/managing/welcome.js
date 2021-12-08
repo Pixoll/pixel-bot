@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { TextChannel, MessageEmbed } = require('discord.js')
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, basicCollector, replyAll } = require('../../utils/functions')
-const ms = require('../../utils/ms')
+const { basicEmbed, channelDetails, basicCollector, myMs, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -15,7 +14,7 @@ module.exports = class WelcomeCommand extends Command {
             group: 'managing',
             description: 'Setup welcoming messages that can be sent in DMs and in a specific channel of your server.',
             details: stripIndent`
-                \`text-channel\` can be either a text-channel's name, mention or id.
+                ${channelDetails('text-channel')}
                 You can use the following fields, which will be replaced when the welcome message is sent:
                 **>** **{user}:** Tags the new member with a mention.
                 **>** **{server_name}:** This server's name.
@@ -106,7 +105,7 @@ module.exports = class WelcomeCommand extends Command {
         if (message && !msg) {
             const welcomeMsg = await basicCollector({ message }, {
                 fieldName: `What message would you like me to send in #${channel.name}?`
-            }, { time: ms('2m') })
+            }, { time: myMs('2m') })
             if (!welcomeMsg) return
             msg = welcomeMsg.content
         }

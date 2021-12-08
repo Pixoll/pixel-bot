@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { timestamp, basicEmbed, replyAll } = require('../../utils/functions')
+const { noReplyInDMs, timeDetails, timestamp, basicEmbed, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 const letters = ['t', 'T', 'd', 'D', 'f', 'F', 'R']
@@ -14,7 +14,7 @@ module.exports = class TimestampCommand extends Command {
             aliases: ['tstamp'],
             group: 'misc',
             description: 'Get the Discord timestamp of any time you want.',
-            details: '`time` uses the bot\'s time formatting, for more information use the `help` command.',
+            details: timeDetails('date'),
             format: 'timestamp <date>',
             examples: [
                 'timestamp 3pm',

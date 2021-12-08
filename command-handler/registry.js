@@ -113,7 +113,7 @@ class CommandoRegistry {
 	/* eslint-disable no-tabs */
 	/**
 	 * Registers multiple groups
-	 * @param {CommandGroup[]|Function[]|Object[]|string[][]} groups An array of CommandGroup instances,
+	 * @param {CommandGroup[]|Function[]|Object[]|Array<string[]>} groups An array of CommandGroup instances,
 	 * constructors, plain objects (with id, name, and guarded properties),
 	 * or arrays of {@link CommandoRegistry#registerGroup} parameters
 	 * @return {CommandoRegistry}

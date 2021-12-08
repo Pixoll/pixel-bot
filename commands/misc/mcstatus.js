@@ -1,9 +1,10 @@
+/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, MessageAttachment, MessageOptions, Util } = require('discord.js')
 const { status: statusJava, statusBedrock, JavaStatusResponse, BedrockStatusResponse } = require('minecraft-server-util')
-const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
+const { basicEmbed, getArgument, remDiscFormat, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 

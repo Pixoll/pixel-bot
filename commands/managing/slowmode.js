@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { replyAll, basicEmbed } = require('../../utils/functions')
-const ms = require('../../utils/ms')
+const { myMs, channelDetails, timeDetails, replyAll } = require('../../utils')
+const { basicEmbed } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
 /* eslint-enable no-unused-vars */
@@ -16,8 +16,7 @@ module.exports = class SlowmodeCommand extends Command {
             group: 'managing',
             description: 'Enable, change or disable slowmode/rate limit on a channel.',
             details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
-                \`time\` uses the bot's time formatting, for more information use the \`help\` command.
+                ${channelDetails()}\n${timeDetails('time')}
                 Setting \`time\` as \`0\` or \`off\` will disable the slowmode on the specified channel.
             `,
             format: 'slowmode [channel] [time]',
@@ -93,7 +92,7 @@ module.exports = class SlowmodeCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Changed slowmode in #${channel.name}`,
-            fieldValue: `**New rate limit:** ${ms(ratelimit * 1000, { long: true, showAnd: true })}`
+            fieldValue: `**New rate limit:** ${myMs(ratelimit * 1000, { long: true, showAnd: true })}`
         }))
     }
 }

@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role } = require('discord.js')
-const { generateEmbed, basicEmbed, abcOrder, replyAll } = require('../../utils/functions')
-const { pluralize } = require('../../utils/format')
+const { generateEmbed, basicEmbed, pluralize, roleDetails, abcOrder, replyAll } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +12,7 @@ module.exports = class MembersCommand extends Command {
             name: 'members',
             group: 'lists',
             description: 'Displays a list of members in a role.',
-            details: '`role` can be either a role\'s name, mention or id.',
+            details: roleDetails(),
             format: 'members [role]',
             examples: ['members Staff'],
             guildOnly: true,

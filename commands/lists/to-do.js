@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
-const Command = require('../../command-handler/commands/base')
+const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
+const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils')
 const { stripIndent } = require('common-tags')
 const { TodoSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
-const { basicEmbed, sleep, timestamp } = require('../../utils/functions')
+const { basicEmbed, sleep, timestamp } = require('../../utils')
 const { CommandoClient } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
