@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, customEmoji, timestamp, replyAll } = require('../../utils/functions')
+const { basicEmbed, timestamp, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
+const { customEmoji } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

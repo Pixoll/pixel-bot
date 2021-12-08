@@ -2,7 +2,8 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, compareArrays, customEmoji } = require('../../utils/functions')
+const { customEmoji } = require('../../utils/format')
+const { isModuleEnabled, compareArrays } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 const userFlags = {

@@ -3,7 +3,8 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { oneLine } = require('common-tags')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { generateEmbed, basicEmbed, replyAll } = require('../../utils/functions')
+const { pluralize } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

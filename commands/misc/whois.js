@@ -2,8 +2,10 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
-const { getKeyPerms, timestamp, customEmoji, capitalize, replyAll } = require('../../utils/functions')
+const { getKeyPerms, timestamp, replyAll } = require('../../utils/functions')
 const ms = require('../../utils/ms')
+const { capitalize } = require('lodash')
+const { customEmoji } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 const userFlags = {

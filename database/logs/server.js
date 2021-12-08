@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
+const { capitalize } = require('lodash')
 const { CommandoClient } = require('../../command-handler/typings')
-const { arrayEquals, isModuleEnabled, capitalize } = require('../../utils/functions')
+const { arrayEquals, isModuleEnabled } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 

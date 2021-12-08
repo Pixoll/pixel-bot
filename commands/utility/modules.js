@@ -4,7 +4,8 @@ const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { ModuleSchema } = require('../../schemas/types')
-const { replyAll, customEmoji } = require('../../utils/functions')
+const { customEmoji } = require('../../utils/format')
+const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**

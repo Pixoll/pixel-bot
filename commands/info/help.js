@@ -1,12 +1,13 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { MessageEmbed } = require('discord.js')
-const { pagedEmbed, getArgument, replyAll, pluralize } = require('../../utils/functions')
+const { pagedEmbed, getArgument, replyAll } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
 const { permissions } = require('../../command-handler/util')
+const { pluralize } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

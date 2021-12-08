@@ -2,9 +2,11 @@
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites, Util } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { capitalize, sliceDots, customEmoji, isModuleEnabled, compareArrays } = require('../../utils/functions')
+const { isModuleEnabled, compareArrays } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 const { permissions } = require('../../command-handler/util')
+const { capitalize } = require('lodash')
+const { customEmoji, sliceDots } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 const channelTypes = {

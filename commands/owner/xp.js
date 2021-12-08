@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
+const { stripIndent } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { code, abcOrder } = require('../../utils/functions')
+const { abcOrder } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
@@ -79,7 +80,10 @@ module.exports = class xpCommand extends Command {
             }).join('\n')
 
         await message?.delete()
-        const m = await message.say(`${week}\n${code(`!xp ${XP}\n${command}`)}`)
+        const m = await message.say(stripIndent`
+            ${week}
+            \`\`\`!xp ${XP}\n${command}\`\`\`
+        `)
         await m.pin()
 
         const msgs = await message.channel.messages.fetch({ after: m.id })

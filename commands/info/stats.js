@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
-const { formatBytes, replyAll } = require('../../utils/functions')
+const { replyAll } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 const { MessageEmbed } = require('discord.js')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -45,4 +45,29 @@ module.exports = class StatsCommand extends Command {
 
         await replyAll({ message, interaction }, stats)
     }
+}
+
+/**
+ * Formats the bytes to its most divisable point
+ * @param {number|string} bytes The bytes to format
+ * @param {number} [decimals] The amount od decimals to display
+ * @param {boolean} [showUnit] Whether to display the units or not
+ */
+function formatBytes(bytes, decimals = 2, showUnit = true) {
+    if (bytes === 0) {
+        if (showUnit) return '0 B'
+        return '0'
+    }
+
+    const k = 1000
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const float = parseFloat(
+        (bytes / Math.pow(k, i)).toFixed(dm)
+    ).toString()
+
+    if (showUnit) return `${float} ${sizes[i]}`
+    return float
 }

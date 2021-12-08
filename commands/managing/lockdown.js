@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 const Command = require('../../command-handler/commands/base')
 const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, generateEmbed, pluralize, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
+const { basicEmbed, generateEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
 const { CommandInstances } = require('../../command-handler/typings')
 const { SetupSchema } = require('../../schemas/types')
 const { TextChannel } = require('discord.js')
+const { pluralize } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

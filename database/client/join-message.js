@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed, TextBasedChannels } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji } = require('../../utils/functions')
+const { customEmoji } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /**

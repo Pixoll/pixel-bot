@@ -4,7 +4,7 @@ const { connect } = require('mongoose')
 const { isAsyncFunction } = require('util/types')
 const { CommandoClient } = require('../command-handler/typings')
 const schemas = require('../schemas')
-const { removeDashes } = require('../utils/functions')
+const { removeDashes } = require('../utils/format')
 const ms = require('../utils/ms')
 /* eslint-enable no-unused-vars */
 

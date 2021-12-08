@@ -5,11 +5,12 @@ const {
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
 const CGuildClass = require('../command-handler/extensions/guild')
-const { transform, isEqual, isArray, isObject } = require('lodash')
+const { transform, isEqual, isArray, isObject, capitalize } = require('lodash')
 const { stripIndent } = require('common-tags')
 const ms = require('./ms')
 const { permissions } = require('../command-handler/util')
 const { Module, AuditLog } = require('../schemas/types')
+const { customEmoji, removeDashes } = require('./format')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -29,38 +30,6 @@ function abcOrder(str1, str2) {
     if (str1 < str2) return -1
     if (str1 > str2) return 1
     return 0
-}
-
-/**
- * Parses a string to have code block style
- * @param {string} str The string to parse
- * @param {string} [lang] The language to use for this block
- */
-function code(str, lang = '') {
-    return `\`\`\`${lang}\n${Util.escapeMarkdown(str)}\n\`\`\``
-}
-
-/**
- * Adds dashes to the string on every upper case letter
- * @param {string} str The string to parse
- * @param {boolean} [under] Wether to use underscores instead or not
- */
-function addDashes(str, under = false) {
-    if (!str) return
-    if (typeof under !== 'boolean') under = false
-    return str.replace(/[A-Z]/g, under ? '_$&' : '-$&').toLowerCase()
-}
-
-/**
- * Removes dashes from the string and capitalizes the remaining strings
- * @param {string} str The string to parse
- */
-function removeDashes(str) {
-    if (!str) return
-    const arr = str.split('-')
-    const first = arr.shift()
-    const rest = arr.map(capitalize).join('')
-    return first + rest
 }
 
 /**
@@ -97,42 +66,6 @@ async function getLogsChannel(guild) {
 }
 
 /**
- * A custom emoji.
- * @typedef {'cross'|'check'|'info'|'neutral'|'loading'|'boost'|'bot'|'online'|'dnd'|'idle'|'invis'} CustomEmoji
- */
-
-/**
- * Returns a certain emoji depending on the specified string.
- * @param {CustomEmoji} [emoji] The emoji you want to get.
- * @param {boolean} [animated] If the emoji you want is animated.
- * @returns {string}
- */
-function customEmoji(emoji = '', animated = false) {
-    if (!emoji) return ''
-
-    switch (emoji) {
-        case 'boost': return '<a:boost:806364586231595028>'
-        case 'bot': return '<:bot1:893998060965883904><:bot2:893998060718399528>'
-        case 'check': {
-            if (animated) return '<a:check:863118691808706580>'
-            return '<:check:802617654396715029>'
-        }
-        case 'cross': {
-            if (animated) return '<a:cross:863118691917889556>'
-            return '<:cross:802617654442852394>'
-        }
-        case 'dnd': return '<:dnd:806022690284240936>'
-        case 'idle': return '<:idle:806022690443624458>'
-        case 'info': return '<:info:802617654262890527>'
-        case 'invis': return '<:invis:806022690326315078>'
-        case 'loading': return '<a:loading:863666168053366814>'
-        case 'neutral': return '<:neutral:819395069608984617>'
-        case 'online': return '<:online:806022690196291625>'
-        default: return emoji
-    }
-}
-
-/**
  * Options for the basic embed.
  * @typedef {Object} BasicEmbedOptions
  * @property {string} description The description of the embed.
@@ -164,31 +97,6 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
     if (footer) embed.setFooter(footer)
 
     return embed
-}
-
-/**
- * Formats the bytes to its most divisable point
- * @param {number|string} bytes The bytes to format
- * @param {number} [decimals] The amount od decimals to display
- * @param {boolean} [showUnit] Whether to display the units or not
- */
-function formatBytes(bytes, decimals = 2, showUnit = true) {
-    if (bytes === 0) {
-        if (showUnit) return '0 B'
-        return '0'
-    }
-
-    const k = 1000
-    const dm = decimals < 0 ? 0 : decimals
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    const float = parseFloat(
-        (bytes / Math.pow(k, i)).toFixed(dm)
-    ).toString()
-
-    if (showUnit) return `${float} ${sizes[i]}`
-    return float
 }
 
 /**
@@ -444,56 +352,6 @@ function getKeyPerms(roleOrMember) {
     if (filtered.length === 0) return 'None'
 
     return filtered.map(perm => permissions[perm.toString()]).join(', ')
-}
-
-/**
- * Capitalizes every word of a string.
- * @param {string} str The string to capitalize.
- */
-function capitalize(str) {
-    if (!str) return ''
-
-    const splitStr = str.toLowerCase().split(/ +/)
-    for (let i = 0; i < splitStr.length; i++) {
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
-    }
-    return splitStr.join(' ')
-}
-
-/**
- * Pluralizes a string, adding `s` or `es` at the end of it
- * @param {string} string The string to pluralize
- * @param {number} number The number to check with
- * @param {boolean} showNum If it should show the number
- */
-function pluralize(string, number, showNum = true) {
-    if (number === 1) {
-        if (!showNum) return string
-        return `${number} ${string}`
-    }
-
-    let es
-    for (const end of ['ch', 'sh', 's', 'x', 'z']) {
-        if (string.endsWith(end)) es = true
-    }
-
-    if (!showNum) return string + (es ? 'es' : 's')
-    return `${number} ${string}${es ? 'es' : 's'}`
-}
-
-/**
- * Slices the string at the specified length, and adds `...` if the length of the original is greater than the modified
- * @param {string} string The string to slice
- * @param {number} length The length of the sliced string
- */
-function sliceDots(string, length) {
-    if (!string) return
-
-    const og = string
-    const sliced = string.slice(0, length - 3)
-    const dots = og.length > sliced.length ? '...' : ''
-
-    return sliced + dots
 }
 
 // /**
@@ -1075,19 +933,14 @@ async function confirmButtons({ message, interaction }, action, target, data = {
 
 module.exports = {
     abcOrder,
-    addDashes,
     arrayEquals,
     basicCollector,
     basicEmbed,
-    capitalize,
-    code,
     confirmButtons,
     compareArrays,
-    customEmoji,
     difference,
     docId,
     // embedExceedsMax,
-    formatBytes,
     generateEmbed,
     getArgument,
     getDayDiff,
@@ -1099,13 +952,10 @@ module.exports = {
     isValidRole,
     memberException,
     pagedEmbed,
-    pluralize,
-    removeDashes,
     removeDuplicated,
     replyAll,
     noReplyInDMs,
     sleep,
-    sliceDots,
     timestamp,
     userException,
     validURL

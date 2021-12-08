@@ -2,7 +2,8 @@
 const { oneLine } = require('common-tags')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { isMod, generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { pluralize } = require('../../utils/format')
+const { isMod, generateEmbed, basicEmbed, replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

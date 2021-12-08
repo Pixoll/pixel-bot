@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots, isModuleEnabled, pluralize, formatBytes } = require('../../utils/functions')
+const { pluralize, sliceDots } = require('../../utils/format')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -104,4 +105,29 @@ module.exports = (client) => {
 
         guild.queuedLogs.push(embed)
     })
+}
+
+/**
+ * Formats the bytes to its most divisable point
+ * @param {number|string} bytes The bytes to format
+ * @param {number} [decimals] The amount od decimals to display
+ * @param {boolean} [showUnit] Whether to display the units or not
+ */
+function formatBytes(bytes, decimals = 2, showUnit = true) {
+    if (bytes === 0) {
+        if (showUnit) return '0 B'
+        return '0'
+    }
+
+    const k = 1000
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const float = parseFloat(
+        (bytes / Math.pow(k, i)).toFixed(dm)
+    ).toString()
+
+    if (showUnit) return `${float} ${sizes[i]}`
+    return float
 }

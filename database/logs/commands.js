@@ -2,7 +2,8 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceDots, code } = require('../../utils/functions')
+const { sliceDots } = require('../../utils/format')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -51,7 +52,7 @@ module.exports = (client) => {
                 ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
                 ${url ? `[Jump to message](${url})` : ''}
             `)
-            .addField('Message', code(content))
+            .addField('Message', `\`\`\`${content}\`\`\``)
             .setFooter(`Author id: ${author.id}`)
             .setTimestamp()
 

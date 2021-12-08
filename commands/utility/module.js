@@ -3,8 +3,10 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils/functions')
+const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
+const { addDashes, removeDashes } = require('../../utils/format')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
 
 const Obj = require('../../schemas').modules.schema.obj

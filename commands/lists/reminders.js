@@ -3,8 +3,9 @@ const { stripIndent } = require('common-tags')
 const { Collection } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll } = require('../../utils/functions')
+const { generateEmbed, basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
 const { ReminderSchema } = require('../../schemas/types')
+const { pluralize } = require('../../utils/format')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
