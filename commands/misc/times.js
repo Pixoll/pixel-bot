@@ -4,7 +4,6 @@ const { Collection, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { abcOrder, pagedEmbed, basicEmbed, replyAll } = require('../../utils/functions')
-const { timeDetails } = require('../../utils/constants')
 /* eslint-enable no-unused-vars */
 
 const timeZones = new Collection([
@@ -60,7 +59,8 @@ module.exports = class TimesCommand extends Command {
             group: 'misc',
             description: 'Displays the time in multiple timezones.',
             details: stripIndent`
-                ${timeDetails('hour')} Type \`now\` to get the current time.
+                \`hour\` uses the bot's time formatting, for more information use the \`help\` command.
+                Type \`now\` to get the current time.
                 \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}
             `,
             format: 'times <hour> <place>',

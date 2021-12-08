@@ -3,7 +3,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
 const { replyAll } = require('../../utils/functions')
-const { userDetails } = require('../../utils/constants')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -14,7 +13,7 @@ module.exports = class AvatarCommand extends Command {
             aliases: ['av'],
             group: 'misc',
             description: 'Displays a user\'s avatar, or yours if you don\'t specify any.',
-            details: userDetails,
+            details: '`user` has to be a user\'s username, id or mention.',
             format: 'avatar <user>',
             examples: ['avatar Pixoll'],
             args: [{

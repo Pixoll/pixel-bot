@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial, sliceFileName } = require('../../utils/functions')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -17,7 +17,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
+        client.emit('debug', 'Running event "modules/sticky-roles#guildMemberAdd".')
 
         const rolesData = await guild.database.stickyRoles.fetch({ user: id })
         if (!rolesData) return
@@ -26,7 +26,7 @@ module.exports = (client) => {
     })
 
     client.on('guildMemberRemove', /** @param {CommandoMember} member */ async member => {
-        member = await fetchPartial(member)
+        member = member.fetch().catch(() => null)
         if (!member) return
 
         const { guild, id, roles } = member
@@ -35,7 +35,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'sticky-roles')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
+        client.emit('debug', 'Running event "modules/sticky-roles#guildMemberRemove".')
 
         const { setup, stickyRoles } = guild.database
         const data = await setup.fetch()

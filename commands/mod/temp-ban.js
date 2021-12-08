@@ -5,7 +5,6 @@ const { CommandInstances } = require('../../command-handler/typings')
 const {
     docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll
 } = require('../../utils/functions')
-const { timeDetails, userDetails, reasonDetails } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
@@ -18,7 +17,11 @@ module.exports = class TempBanCommand extends Command {
             aliases: ['tempban'],
             group: 'mod',
             description: 'Ban a user for a specified amount of time.',
-            details: `${userDetails}\n${timeDetails('duration')}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`user\` has to be a user's username, id or mention.
+                \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'tempban [user] [duration] <reason>',
             examples: [
                 'tempban Pixoll 1d',

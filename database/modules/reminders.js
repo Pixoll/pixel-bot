@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, User, TextBasedChannels, Message, MessageOptions, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { noReplyInDMs, fetchPartial, sliceFileName, basicEmbed } = require('../../utils/functions')
+const { noReplyInDMs, basicEmbed } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
@@ -17,7 +17,7 @@ module.exports = async (client) => {
         const { users, channels } = client
 
         for (const reminder of data.toJSON()) {
-            client.emit('debug', `Running "${sliceFileName(__filename)}#sendReminder".`)
+            client.emit('debug', 'Running "modules/reminders#sendReminder".')
 
             /** @type {User} */
             const user = await users.fetch(reminder.user).catch(() => null)
@@ -65,14 +65,15 @@ module.exports = async (client) => {
 
     // Cancells the reminders
     client.on('messageReactionAdd', async (reaction, user) => {
-        reaction = await fetchPartial(reaction)
-        user = await fetchPartial(user)
-        if (!reaction || !user) return
+        reaction = reaction.fetch().catch(() => null)
+        if (!reaction) return
+        user = user.fetch().catch(() => null)
+        if (!user) return
 
         const { message, emoji } = reaction
         if (user.bot || emoji.id !== '802617654442852394') return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageReactionAdd".`)
+        client.emit('debug', 'Running event "modules/reminders#messageReactionAdd".')
 
         const data = await db.fetch({ user: user.id, message: message.id })
         if (!data) return

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Message, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -14,7 +13,7 @@ module.exports = async (client) => {
         const { customId, channel } = int
         if (!customId.startsWith('button-role') || channel.type === 'DM') return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#interactionCreate".`)
+        client.emit('debug', 'Running event "modules/button-roles".')
 
         /** @type {Message} */
         const message = int.message

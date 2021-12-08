@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceFileName } = require('../../utils/functions')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -16,7 +16,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerCreate".`)
+        client.emit('debug', 'Running event "logs/stickers#stickerCreate".')
 
         /** @type {User} */
         const user = await sticker.fetchUser().catch(() => null)
@@ -45,7 +45,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerDelete".`)
+        client.emit('debug', 'Running event "logs/stickers#stickerDelete".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -68,7 +68,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#stickerUpdate".`)
+        client.emit('debug', 'Running event "logs/stickers#stickerUpdate".')
 
         const { name: name1, description: description1, tags: tags1 } = oldSticker
         const { name: name2, description: description2, tags: tags2 } = newSticker

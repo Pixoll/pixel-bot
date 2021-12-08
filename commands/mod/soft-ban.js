@@ -5,7 +5,6 @@ const { User, TextChannel, GuildMember } = require('discord.js')
 const {
     docId, basicEmbed, userException, memberException, inviteButton, confirmButtons, replyAll
 } = require('../../utils/functions')
-const { userDetails, reasonDetails, inviteMaxAge } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -17,7 +16,10 @@ module.exports = class SoftBanCommand extends Command {
             aliases: ['softban'],
             group: 'mod',
             description: 'Soft-ban a user (Ban to delete their messages and then immediately unban).',
-            details: `${userDetails}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`user\` has to be a user's username, id or mention.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'softban [user] <reason>',
             examples: [
                 'softban Pixoll',
@@ -113,7 +115,7 @@ module.exports = class SoftBanCommand extends Command {
             /** @type {TextChannel} */
             const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
             const button = inviteButton(
-                await channel.createInvite({ maxAge: inviteMaxAge, maxUses: 1 })
+                await channel.createInvite({ maxAge: 604_800, maxUses: 1 })
             )
 
             await user.send({ embeds: [embed], components: [button] }).catch(() => null)

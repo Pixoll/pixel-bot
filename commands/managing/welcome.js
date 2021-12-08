@@ -4,7 +4,6 @@ const { TextChannel, MessageEmbed } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, replyAll } = require('../../utils/functions')
-const { channelDetails } = require('../../utils/constants')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
@@ -16,7 +15,7 @@ module.exports = class WelcomeCommand extends Command {
             group: 'managing',
             description: 'Setup welcoming messages that can be sent in DMs and in a specific channel of your server.',
             details: stripIndent`
-                ${channelDetails('text-channel')}
+                \`text-channel\` can be either a text-channel's name, mention or id.
                 You can use the following fields, which will be replaced when the welcome message is sent:
                 **>** **{user}:** Tags the new member with a mention.
                 **>** **{server_name}:** This server's name.

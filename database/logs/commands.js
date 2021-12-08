@@ -2,7 +2,7 @@
 const { oneLine } = require('common-tags')
 const { MessageEmbed, CommandInteractionOption } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceDots, code, sliceFileName } = require('../../utils/functions')
+const { isModuleEnabled, sliceDots, code } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -21,7 +21,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandRun".`)
+        client.emit('debug', 'Running event "logs/commands#commandRun".')
 
         let string
         if (message) string = message.cleanContent
@@ -64,7 +64,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandPrefixChange".`)
+        client.emit('debug', 'Running event "logs/commands#commandPrefixChange".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -81,7 +81,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#commandStatusChange".`)
+        client.emit('debug', 'Running event "logs/commands#commandStatusChange".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')

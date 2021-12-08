@@ -3,7 +3,7 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton, GuildMember, MessageEmbed } = require('discord.js')
 const { replyAll } = require('../../utils/functions')
-const { memberDetails } = require('../../utils/constants')
+const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -14,7 +14,10 @@ module.exports = class MemberAvatarCommand extends Command {
             aliases: ['memberavatar', 'mavatar', 'mav'],
             group: 'misc',
             description: 'Displays a member\'s server avatar, or yours if you don\'t specify any.',
-            details: memberDetails() + '\nIf no server avatar was found, it will display the user\'s avatar instead.',
+            details: stripIndent`
+                \`member\` can be either a member's name, mention or id.
+                If no server avatar was found, it will display the user's avatar instead.
+            `,
             format: 'mavatar <member>',
             examples: ['mavatar Pixoll'],
             guildOnly: true,

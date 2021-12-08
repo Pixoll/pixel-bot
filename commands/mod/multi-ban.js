@@ -4,7 +4,6 @@ const { CommandInstances, CommandoMessage } = require('../../command-handler/typ
 const { GuildMember } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { docId, isMod, basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
-const { memberDetails } = require('../../utils/constants')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -39,7 +38,7 @@ module.exports = class MultiBanCommand extends Command {
             description: 'Ban multiple members at the same time (max. 30 at once).',
             details: stripIndent`
                 \`reason\` **has** to be surrounded by quotes.
-                ${memberDetails(null, true)}
+                \`members\` can be all the members' names, mentions or ids, separated by commas (max. 30 at once).
             `,
             format: 'multi-ban "[reason]" [members]',
             examples: ['multi-ban "Raid" Pixoll, 801615120027222016'],

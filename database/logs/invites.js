@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, Invite, Collection } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils/functions')
+const { isModuleEnabled, timestamp } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -16,7 +16,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#inviteCreate".`)
+        client.emit('debug', 'Running event "logs/invites#inviteCreate".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -41,7 +41,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#inviteDelete".`)
+        client.emit('debug', 'Running event "logs/invites#inviteDelete".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -63,7 +63,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#cMessageCreate".`)
+        client.emit('debug', 'Running event "logs/invites#cMessageCreate".')
 
         /** @type {Collection<string,Invite>} */
         const invites = await guild.invites.fetch().catch(() => null)

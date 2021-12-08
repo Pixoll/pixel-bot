@@ -5,7 +5,6 @@ const { GuildMember } = require('discord.js')
 const {
     userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed
 } = require('../../utils/functions')
-const { timeDetails, reasonDetails, memberDetails } = require('../../utils/constants')
 const ms = require('../../utils/ms')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
@@ -17,7 +16,11 @@ module.exports = class MuteCommand extends Command {
             name: 'mute',
             group: 'mod',
             description: 'Mute a member so they cannot type or speak.',
-            details: `${memberDetails()}\n${timeDetails('duration')}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`member\` can be either a member's name, mention or id.
+                \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'mute [member] [duration] <reason>',
             examples: ['mute Pixoll 2h', 'mute Pixoll 6h Excessive swearing'],
             clientPermissions: ['MANAGE_ROLES'],

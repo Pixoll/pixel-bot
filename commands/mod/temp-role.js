@@ -3,7 +3,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { Role, GuildMember } = require('discord.js')
 const { timestamp, isValidRole, getArgument, replyAll, basicEmbed, docId } = require('../../utils/functions')
-const { memberDetails, timeDetails, roleDetails, reasonDetails } = require('../../utils/constants')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -15,7 +14,12 @@ module.exports = class TempRoleCommand extends Command {
             aliases: ['temprole'],
             group: 'mod',
             description: 'Assign a role that persists for a limited time.',
-            details: `${roleDetails()}\n${memberDetails()}\n${timeDetails('time')}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`role\` can be either a role's name, mention or id.
+                \`member\` can be either a member's name, mention or id.
+                \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'temprole [role] [member] [duration] <reason>',
             examples: ['temprole Moderator Pixoll 1d'],
             clientPermissions: ['MANAGE_ROLES'],

@@ -2,7 +2,6 @@
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, replyAll } = require('../../utils/functions')
-const { userDetails } = require('../../utils/constants')
 const { User, GuildBan } = require('discord.js')
 /* eslint-enable no-unused-vars */
 
@@ -14,7 +13,7 @@ module.exports = class BanCheckCommand extends Command {
             aliases: ['bancheck', 'checkban'],
             group: 'mod',
             description: 'Check if a user is banned.',
-            details: userDetails,
+            details: '`user` has to be a user\'s username, id or mention.',
             format: 'bancheck [user]',
             examples: ['bancheck Pixoll'],
             clientPermissions: ['BAN_MEMBERS'],

@@ -3,7 +3,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js')
 const { validURL, basicEmbed, getArgument, sleep, replyAll } = require('../../utils/functions')
-const { userDetails } = require('../../utils/constants')
 const { stripIndent, oneLine } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -75,7 +74,7 @@ module.exports = class PurgeCommand extends Command {
             description: 'Delete a number of messages from a channel (limit of 100).',
             details: stripIndent`
                 \`number\` has be a number from 1 to 100.
-                ${userDetails}
+                \`user\` has to be a user's username, id or mention.
                 \`msg id\` has to be a message's id that's in the **same channel** as where you use this command.
             `,
             format: stripIndent`

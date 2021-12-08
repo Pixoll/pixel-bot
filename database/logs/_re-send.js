@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../../command-handler/typings')
-const { getLogsChannel, sliceFileName } = require('../../utils/functions')
+const { getLogsChannel } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -13,7 +13,7 @@ module.exports = (client) => {
         const { guild, author, embeds, channelId } = message
         if (!guild || client.user.id !== author.id || embeds.length === 0) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDelete".`)
+        client.emit('debug', 'Running event "logs/_re-send#messageDelete".')
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
@@ -28,7 +28,7 @@ module.exports = (client) => {
         const { guild, author, channelId } = notPartial.first()
         if (!guild || client.user.id !== author.id) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDeleteBulk".`)
+        client.emit('debug', 'Running event "_re-send#messageDeleteBulk".')
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
@@ -47,7 +47,7 @@ module.exports = (client) => {
             !guild || client.user.id !== author.id || embeds.length === 0 || embeds.length === newMessage.embeds.length
         ) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageUpdate".`)
+        client.emit('debug', 'Running event "_re-send#messageUpdate".')
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return

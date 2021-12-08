@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
-const { isModuleEnabled, basicEmbed, sliceFileName, docId } = require('../../utils/functions')
+const { isModuleEnabled, basicEmbed, docId } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 const fakeSitesNames = [
@@ -40,7 +40,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'scam-detector')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}".`)
+        client.emit('debug', 'Running event "modules/scam-detector".')
 
         const string = content + embeds.map(embed =>
             embed.description + embed.fields.map(field => field.value)

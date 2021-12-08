@@ -2,10 +2,24 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp, sliceFileName } = require('../../utils/functions')
-const { channelTypes } = require('../../utils/constants')
+const { isModuleEnabled, timestamp } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
+
+const channelTypes = {
+    GUILD_TEXT: 'Text',
+    DM: 'Direct messages',
+    GUILD_VOICE: 'Voice',
+    GROUP_DM: 'Group direct messages',
+    GUILD_CATEGORY: 'Category',
+    GUILD_NEWS: 'News',
+    GUILD_STORE: 'Store',
+    UNKNOWN: 'Unknown',
+    GUILD_NEWS_THREAD: 'News thread',
+    GUILD_PUBLIC_THREAD: 'Public thread',
+    GUILD_PRIVATE_THREAD: 'Private thread',
+    GUILD_STAGE_VOICE: 'Stage',
+}
 
 /**
  * Handles all of the thread logs.
@@ -19,7 +33,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadCreate".`)
+        client.emit('debug', 'Running event "logs/threads#threadCreate".')
 
         const { guildMember } = await thread.fetchOwner()
         const chanType = channelTypes[type].toLowerCase()
@@ -47,7 +61,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadDelete".`)
+        client.emit('debug', 'Running event "logs/threads#threadDelete".')
 
         const chanType = channelTypes[type].toLowerCase()
         const parentType = channelTypes[parent.type].toLowerCase()
@@ -71,7 +85,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#threadUpdate".`)
+        client.emit('debug', 'Running event "logs/threads#threadUpdate".')
 
         const {
             autoArchiveDuration: autoArchive1, archived: archived1, name: name1, locked: locked1,

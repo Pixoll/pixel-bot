@@ -3,7 +3,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions')
-const { timeDetails } = require('../../utils/constants')
 const ms = require('../../utils/ms')
 /* eslint-enable no-unused-vars */
 
@@ -19,7 +18,7 @@ module.exports = class DurationCommand extends Command {
                     \`modlog id\` has to be a valid mod log id.
                     To see all the mod logs in this server use the \`modlogs\` command.
                 `}
-                ${timeDetails('new duration')}
+                \`new duration\` uses the bot's time formatting, for more information use the \`help\` command.
             `,
             format: 'duration [modlog id] [new duration]',
             examples: [

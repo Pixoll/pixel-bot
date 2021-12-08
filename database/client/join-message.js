@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed, TextBasedChannels } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { customEmoji, sliceFileName } = require('../../utils/functions')
+const { customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,7 +11,7 @@ const { customEmoji, sliceFileName } = require('../../utils/functions')
  */
 module.exports = async (client) => {
     client.on('guildCreate', async guild => {
-        client.emit('debug', `Running "${sliceFileName(__filename)}".`)
+        client.emit('debug', 'Running "client/join-message".')
 
         const { channels, id, ownerId } = guild
 

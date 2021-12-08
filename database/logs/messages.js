@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { sliceDots, isModuleEnabled, pluralize, formatBytes, sliceFileName } = require('../../utils/functions')
+const { sliceDots, isModuleEnabled, pluralize, formatBytes } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -16,7 +16,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDelete".`)
+        client.emit('debug', 'Running event "logs/messages#messageDelete".')
 
         const deleted = sliceDots(content, 1024)
 
@@ -62,7 +62,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDeleteBulk".`)
+        client.emit('debug', 'Running event "logs/messages#messageDeleteBulk".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
@@ -86,7 +86,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageUpdate".`)
+        client.emit('debug', 'Running event "logs/messages#messageUpdate".')
 
         const oldContent = content1 !== null ?
             sliceDots(content1, 1024) || '`Empty`' :

@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
-const { sliceFileName } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -12,7 +11,7 @@ module.exports = (client) => {
         const { guild, user, roles, id } = member
         if (id === client.user.id) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
+        client.emit('debug', 'Running event "modules/default-roles".')
 
         const data = await guild.database.setup.fetch()
         if (!data) return

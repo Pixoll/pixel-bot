@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp, customEmoji, sliceFileName } = require('../../utils/functions')
+const { isModuleEnabled, timestamp, customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -17,7 +17,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'boosts')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}".`)
+        client.emit('debug', 'Running event "logs/boosts".')
 
         const action = boostTime1 === null ? 'started' : 'stopped'
         const emoji = action === 'started' ? customEmoji('boost') : ''

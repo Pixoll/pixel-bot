@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, GuildAuditLogs, GuildMember } = require('discord.js')
+const { MessageEmbed, GuildAuditLogs } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, fetchPartial, timestamp, sliceFileName } = require('../../utils/functions')
+const { isModuleEnabled, timestamp } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,15 +10,17 @@ const { isModuleEnabled, fetchPartial, timestamp, sliceFileName } = require('../
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('guildMemberRemove', async _member => {
-        /** @type {GuildMember} */
-        const { guild, user, id } = await fetchPartial(_member)
+    client.on('guildMemberRemove', async member => {
+        member = member.fetch().catch(() => null)
+        if (!member) return
+
+        const { guild, user, id } = member
         if (!guild.available || id === client.user.id) return
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberRemove".`)
+        client.emit('debug', 'Running event "logs/moderation#guildMemberRemove".')
 
         /** @type {GuildAuditLogs} */
         const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -52,7 +54,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildBanAdd".`)
+        client.emit('debug', 'Running event "logs/moderation#guildBanAdd".')
 
         /** @type {GuildAuditLogs} */
         const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -89,7 +91,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildBanRemove".`)
+        client.emit('debug', 'Running event "logs/moderation#guildBanRemove".')
 
         /** @type {GuildAuditLogs} */
         const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -120,7 +122,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberMute".`)
+        client.emit('debug', 'Running event "logs/moderation#guildMemberMute".')
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
@@ -141,7 +143,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberUnmute".`)
+        client.emit('debug', 'Running event "logs/moderation#guildMemberUnmute".')
 
         const modFooter = mod ? ` • Mod id: ${mod.id}` : ''
 
@@ -163,7 +165,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberWarn".`)
+        client.emit('debug', 'Running event "logs/moderation#guildMemberWarn".')
 
         const embed = new MessageEmbed()
             .setColor('GOLD')

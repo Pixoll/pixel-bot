@@ -3,11 +3,12 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { TextChannel, Role, Message } = require('discord.js')
 const { basicEmbed, basicCollector, getArgument, isValidRole } = require('../../utils/functions')
-const { channelDetails, emojiRegex } = require('../../utils/constants')
 const ms = require('../../utils/ms')
 const { stripIndent, oneLine } = require('common-tags')
 const { ReactionRoleSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
+
+const emojiRegex = new RegExp(`${require('emoji-regex')().source}|\\d{17,20}`, 'g')
 
 /** A command that can be run in a client */
 module.exports = class ReactionRoleCommand extends Command {
@@ -18,7 +19,7 @@ module.exports = class ReactionRoleCommand extends Command {
             group: 'managing',
             description: 'Create or remove reaction roles.',
             details: stripIndent`
-                ${channelDetails()}
+                \`channel\` can be either a channel's name, mention or id.
                 \`msg id\` has to be a message's id that's in the **same channel** that you specified.
             `,
             format: stripIndent`

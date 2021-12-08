@@ -3,7 +3,6 @@ const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { basicEmbed, basicCollector, isMod, getArgument, replyAll, isValidRole } = require('../../utils/functions')
-const { channelDetails, roleDetails } = require('../../utils/constants')
 const ms = require('../../utils/ms')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
@@ -70,7 +69,14 @@ module.exports = class SetupCommand extends Command {
             name: 'setup',
             group: 'utility',
             description: 'Setup the bot to its core. Data collected will be deleted if the bot leaves the server.',
-            details: `${channelDetails('text-channel')}\n${roleDetails()}\n${channelDetails('text-channels', true)}`,
+            details: stripIndent`
+                \`text-channel\` can be either a text-channel's name, mention or id.
+                \`role\` can be either a role's name, mention or id.
+                ${oneLine`
+                    \`text-channels\` can be all the text channels' names, mentions or ids, separated by spaces
+                    (max. 30 at once).
+                `}
+            `,
             format: stripIndent`
                 setup <full> - Setup the bot completely to its core.
                 setup view - View the current setup data of the server.

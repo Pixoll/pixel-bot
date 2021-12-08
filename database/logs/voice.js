@@ -1,9 +1,23 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceFileName } = require('../../utils/functions')
-const { channelTypes } = require('../../utils/constants')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
+
+const channelTypes = {
+    GUILD_TEXT: 'Text',
+    DM: 'Direct messages',
+    GUILD_VOICE: 'Voice',
+    GROUP_DM: 'Group direct messages',
+    GUILD_CATEGORY: 'Category',
+    GUILD_NEWS: 'News',
+    GUILD_STORE: 'Store',
+    UNKNOWN: 'Unknown',
+    GUILD_NEWS_THREAD: 'News thread',
+    GUILD_PUBLIC_THREAD: 'Public thread',
+    GUILD_PRIVATE_THREAD: 'Private thread',
+    GUILD_STAGE_VOICE: 'Stage',
+}
 
 /**
  * Handles all of the voice logs.
@@ -16,7 +30,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'voice')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}".`)
+        client.emit('debug', 'Running event "logs/voice".')
 
         const { channel: channel1, serverMute: mute1, serverDeaf: deaf1 } = oldState
         const { channel: channel2, serverMute: mute2, serverDeaf: deaf2 } = newState

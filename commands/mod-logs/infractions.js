@@ -3,7 +3,6 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
 const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
-const { userDetails } = require('../../utils/constants')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +12,7 @@ module.exports = class InfractionsCommand extends Command {
             name: 'infractions',
             group: 'mod-logs',
             description: 'Displays a list of infractions of a user.',
-            details: userDetails,
+            details: '`user` has to be a user\'s username, id or mention.',
             format: 'infractions [user]',
             examples: ['infractions Pixoll'],
             modPermissions: true,

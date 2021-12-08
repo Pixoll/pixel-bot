@@ -3,10 +3,11 @@ const Command = require('../../command-handler/commands/base')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
 const { getArgument, basicCollector, validURL, replyAll, basicEmbed } = require('../../utils/functions')
-const { channelDetails, timeDetails, emojiRegex } = require('../../utils/constants')
 const ms = require('../../utils/ms')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
+
+const emojiRegex = new RegExp(`${require('emoji-regex')().source}|\\d{17,20}`, 'g')
 
 /** A command that can be run in a client */
 module.exports = class PollCommand extends Command {
@@ -16,7 +17,8 @@ module.exports = class PollCommand extends Command {
             group: 'managing',
             description: 'Create or end a poll.',
             details: stripIndent`
-                ${channelDetails()}\n${timeDetails('duration')}
+                \`channel\` can be either a channel's name, mention or id.
+                \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 \`msg id\` has to be a message's id that's in the **same channel** that you specified.
             `,
             format: stripIndent`

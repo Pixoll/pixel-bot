@@ -1,14 +1,43 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags')
-const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
+const { MessageEmbed, GuildMember, Role, PermissionOverwrites, Util } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const {
-    capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, compareArrays, sliceFileName
-} = require('../../utils/functions')
-const { channelTypes, rtcRegions } = require('../../utils/constants')
+const { capitalize, sliceDots, customEmoji, isModuleEnabled, compareArrays } = require('../../utils/functions')
 const ms = require('../../utils/ms')
 const { permissions } = require('../../command-handler/util')
 /* eslint-enable no-unused-vars */
+
+const channelTypes = {
+    GUILD_TEXT: 'Text',
+    DM: 'Direct messages',
+    GUILD_VOICE: 'Voice',
+    GROUP_DM: 'Group direct messages',
+    GUILD_CATEGORY: 'Category',
+    GUILD_NEWS: 'News',
+    GUILD_STORE: 'Store',
+    UNKNOWN: 'Unknown',
+    GUILD_NEWS_THREAD: 'News thread',
+    GUILD_PUBLIC_THREAD: 'Public thread',
+    GUILD_PRIVATE_THREAD: 'Private thread',
+    GUILD_STAGE_VOICE: 'Stage',
+}
+
+const rtcRegions = new Map([
+    [null, 'Automatic'],
+    ['brazil', 'Brazil'],
+    ['europe', 'Europe'],
+    ['hongkong', 'Hong Kong'],
+    ['india', 'India'],
+    ['japan', 'Japan'],
+    ['russia', 'Russia'],
+    ['singapore', 'Singapore'],
+    ['southafrica', 'South Africa'],
+    ['sydney', 'Sydney'],
+    ['us-central', 'US Central'],
+    ['us-east', 'US East'],
+    ['us-south', 'US South'],
+    ['us-west', 'US West']
+])
 
 /**
  * Formats the {@link PermissionOverwrites} into an array of string
@@ -33,7 +62,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelCreate".`)
+        client.emit('debug', 'Running event "logs/channels#channelCreate".')
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -77,7 +106,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelDelete".`)
+        client.emit('debug', 'Running event "logs/channels#channelDelete".')
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -116,7 +145,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelUpdate".`)
+        client.emit('debug', 'Running event "logs/channels#channelUpdate".')
 
         const { name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, id } = oldChannel
         const { name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2 } = newChannel
@@ -143,7 +172,7 @@ module.exports = (client) => {
             const target = await guild[diff.type + 's'].fetch(diff.id)
             if (target) {
                 const mention = target.toString()
-                const name = remDiscFormat(target.user?.tag || target.name)
+                const name = Util.escapeMarkdown(target.user?.tag || target.name)
 
                 embed.addField(`${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
             }
@@ -160,7 +189,7 @@ module.exports = (client) => {
             const target = guild[perms1.type + 's'].cache.get(perms1.id)
 
             const mention = target.toString()
-            const name = remDiscFormat(target.user?.tag)
+            const name = Util.escapeMarkdown(target.user?.tag)
 
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)
