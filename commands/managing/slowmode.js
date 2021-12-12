@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { myMs, channelDetails, timeDetails, replyAll } = require('../../utils')
-const { basicEmbed } = require('../../utils')
+const { replyAll, basicEmbed } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 const { TextChannel } = require('discord.js')
+const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -16,7 +16,8 @@ module.exports = class SlowmodeCommand extends Command {
             group: 'managing',
             description: 'Enable, change or disable slowmode/rate limit on a channel.',
             details: stripIndent`
-                ${channelDetails()}\n${timeDetails('time')}
+                \`channel\` can be either a channel's name, mention or id.
+                \`time\` uses the bot's time formatting, for more information use the \`help\` command.
                 Setting \`time\` as \`0\` or \`off\` will disable the slowmode on the specified channel.
             `,
             format: 'slowmode [channel] [time]',

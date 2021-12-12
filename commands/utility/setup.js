@@ -1,11 +1,8 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel, Role } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const {
-    channelDetails, roleDetails, embedColor, basicEmbed, basicCollector, myMs, isMod, getArgument, replyAll, isValidRole
-} = require('../../utils')
+const { basicEmbed, basicCollector, isMod, getArgument, replyAll, isValidRole } = require('../../utils/functions')
 const { oneLine, stripIndent } = require('common-tags')
 const { SetupSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -19,14 +16,8 @@ const { SetupSchema } = require('../../schemas/types')
 function defaultDoc(guildId, key, value) {
     /** @type {SetupSchema} */
     const doc = {
-        guild: guildId,
-        logsChannel: undefined,
-        memberRole: undefined,
-        botRole: undefined,
-        mutedRole: undefined,
-        lockChannels: [],
+        guild: guildId
     }
-
     doc[key] = value
 
     return doc
@@ -71,7 +62,11 @@ module.exports = class SetupCommand extends Command {
             name: 'setup',
             group: 'utility',
             description: 'Setup the bot to its core. Data collected will be deleted if the bot leaves the server.',
-            details: `${channelDetails('text-channel')}\n${roleDetails()}\n${channelDetails('text-channels', true)}`,
+            details: stripIndent`
+                \`text-channel\` can be either a text channel's name, mention or id.
+                \`role\` can be either a role's name, mention or id.
+                \`text-channels\` to be all the text channels' names, mentions or ids, separated by spaces (max. 30 at once).
+            `,
             format: stripIndent`
                 setup <full> - Setup the bot completely to its core.
                 setup view - View the current setup data of the server.
@@ -282,7 +277,7 @@ module.exports = class SetupCommand extends Command {
                 const msg = await basicCollector({ message }, {
                     description: `The role given to muted people will be ${mutedRole}.`,
                     fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-                }, { time: myMs('2m') }, true)
+                }, { time: 2 * 60_000 }, true)
                 if (!msg) return
                 toDelete = msg
                 for (const val of msg.content.split(/ +/)) {
@@ -384,20 +379,19 @@ module.exports = class SetupCommand extends Command {
         }
 
         const { guild } = message || interaction
-        const { roles, channels } = guild
 
-        const logsChannel = await channels.fetch(data.logsChannel)
-        const memberRole = await roles.fetch(data.memberRole)
-        const botRole = await roles.fetch(data.botRole)
-        const mutedRole = await roles.fetch(data.mutedRole)
-        const lockdownChannels = data.lockChannels.map(c => `<#${c}>`).slice(0, 78)
+        const logsChannel = data.logsChannel ? `<#${data.logsChannel}>` : null
+        const memberRole = data.memberRole ? `<@&${data.memberRole}> (${data.memberRole})` : null
+        const botRole = data.botRole ? `<@&${data.botRole}> (${data.botRole})` : null
+        const mutedRole = data.mutedRole ? `<@&${data.mutedRole}> (${data.mutedRole})` : null
+        const lockdownChannels = data.lockChannels?.map(c => `<#${c}>`).slice(0, 78).join(', ') || null
 
         const toDisplay = [
-            { key: 'Audit logs channel', value: logsChannel?.toString() || null },
-            { key: 'Default members role', value: memberRole?.name || null },
-            { key: 'Default bots role', value: botRole?.name || null },
-            { key: 'Muted members role', value: mutedRole?.name || null },
-            { key: 'Lockdown channels', value: lockdownChannels.join(', ') || null },
+            { key: 'Audit logs channel', value: logsChannel },
+            { key: 'Default members role', value: memberRole },
+            { key: 'Default bots role', value: botRole },
+            { key: 'Muted members role', value: mutedRole },
+            { key: 'Lockdown channels', value: lockdownChannels },
         ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`)
 
         if (toDisplay.length === 0) {
@@ -407,7 +401,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s setup data`, guild.iconURL({ dynamic: true }))
             .setDescription(toDisplay.join('\n'))
             .setFooter('Missing or wrong data? Try using the "reload" sub-command!')
@@ -488,7 +482,8 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        await this.db.add(defaultDoc((message || interaction).guildId, 'logsChannel', channel.id))
+        const { guildId } = message || interaction
+        await this.db.add(defaultDoc(guildId, 'logsChannel', channel.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -514,7 +509,8 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        await this.db.add(defaultDoc((message || interaction).guildId, 'mutedRole', role.id))
+        const { guildId } = message || interaction
+        await this.db.add(defaultDoc(guildId, 'mutedRole', role.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -540,7 +536,8 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        await this.db.add(defaultDoc((message || interaction).guildId, 'memberRole', role.id))
+        const { guildId } = message || interaction
+        await this.db.add(defaultDoc(guildId, 'memberRole', role.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -566,7 +563,8 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        await this.db.add(defaultDoc((message || interaction).guildId, 'botRole', role.id))
+        const { guildId } = message || interaction
+        await this.db.add(defaultDoc(guildId, 'botRole', role.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -593,7 +591,7 @@ module.exports = class SetupCommand extends Command {
             }
         }
 
-        const { client } = message || interaction
+        const { client, guildId } = message || interaction
         const { types } = client.registry
         /** @type {TextChannelType} */
         const textChanType = types.get('text-channel')
@@ -614,7 +612,7 @@ module.exports = class SetupCommand extends Command {
             while (channels.length === 0) {
                 const msg = await basicCollector({ message }, {
                     fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-                }, { time: myMs('2m') }, true)
+                }, { time: 2 * 60_000 }, true)
                 if (!msg) return
                 for (const val of msg.content.split(/ +/)) {
                     if (channels.length === 30) break
@@ -633,7 +631,7 @@ module.exports = class SetupCommand extends Command {
         }
 
         if (data) await this.db.update(data, { $push: { lockChannels: { $each: channels.map(c => c.id) } } })
-        else await this.db.add(defaultDoc((message || interaction).guildId, 'lockChannels', channels.map(c => c.id)))
+        else await this.db.add(defaultDoc(guildId, 'lockChannels', channels.map(c => c.id)))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`

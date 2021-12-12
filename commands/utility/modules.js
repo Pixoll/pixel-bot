@@ -4,7 +4,7 @@ const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { ModuleSchema } = require('../../schemas/types')
-const { replyAll } = require('../../utils')
+const { replyAll, customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -12,7 +12,7 @@ const { replyAll } = require('../../utils')
  * @param {ModuleSchema} data The data to patch
  */
 function patchData(data) {
-    const _patch = b => b === true ? 'Enabled' : 'Disabled'
+    const _patch = b => b === true ? `Enabled ${customEmoji('online')}` : `Disabled ${customEmoji('dnd')}`
 
     const patch = {
         // autoMod: _patch(data?.autoMod),
@@ -70,31 +70,31 @@ module.exports = class ModulesCommand extends Command {
             modules, roles, server, stickers, threads, users, voice
         } = auditLogs
 
-        // **>** **Automatic moderation:** ${autoMod}
-        // **>** **Chat filter:** ${chatFilter}
+        // **Automatic moderation:** ${autoMod}
+        // **Chat filter:** ${chatFilter}
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                **>** **Sticky roles:** ${stickyRoles}
-                **>** **Welcome messages:** ${welcome}
-                **>** **Audit logs:**
-                \u2800 ⤷ **Boosts:** ${boosts}
-                \u2800 ⤷ **Channels:** ${channels}
-                \u2800 ⤷ **Commands:** ${commands}
-                \u2800 ⤷ **Emojis:** ${emojis}
-                \u2800 ⤷ **Invites:** ${invites}
-                \u2800 ⤷ **Members:** ${members}
-                \u2800 ⤷ **Messages:** ${messages}
-                \u2800 ⤷ **Moderation:** ${moderation}
-                \u2800 ⤷ **Modules:** ${modules}
-                \u2800 ⤷ **Roles:** ${roles}
-                \u2800 ⤷ **Server:** ${server}
-                \u2800 ⤷ **Stickers:** ${stickers}
-                \u2800 ⤷ **Threads:** ${threads}
-                \u2800 ⤷ **Users:** ${users}
-                \u2800 ⤷ **Voice:** ${voice}
+                **Sticky roles:** ${stickyRoles}
+                **Welcome messages:** ${welcome}
+                **Audit logs:**
+                \u2800⤷ **Boosts:** ${boosts}
+                \u2800⤷ **Channels:** ${channels}
+                \u2800⤷ **Commands:** ${commands}
+                \u2800⤷ **Emojis:** ${emojis}
+                \u2800⤷ **Invites:** ${invites}
+                \u2800⤷ **Members:** ${members}
+                \u2800⤷ **Messages:** ${messages}
+                \u2800⤷ **Moderation:** ${moderation}
+                \u2800⤷ **Modules:** ${modules}
+                \u2800⤷ **Roles:** ${roles}
+                \u2800⤷ **Server:** ${server}
+                \u2800⤷ **Stickers:** ${stickers}
+                \u2800⤷ **Threads:** ${threads}
+                \u2800⤷ **Users:** ${users}
+                \u2800⤷ **Voice:** ${voice}
             `)
             .setTimestamp()
 

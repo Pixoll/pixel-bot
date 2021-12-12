@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, Role } = require('discord.js')
-const { getKeyPerms, roleDetails, replyAll } = require('../../utils')
+const { getKeyPerms, replyAll } = require('../../utils/functions')
 const { stripIndent, oneLine } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -16,7 +16,7 @@ module.exports = class RoleInfoCommand extends Command {
             description: oneLine`
                 Displays multiple information about a role, such as color, position, members and mod permissions.
             `,
-            details: roleDetails(),
+            details: '`role` can be either a role\'s name, mention or id.',
             format: 'roleinfo [role]',
             examples: ['roleinfo Staff'],
             guildOnly: true,

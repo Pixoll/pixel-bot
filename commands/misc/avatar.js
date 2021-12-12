@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { userDetails, noReplyInDMs, embedColor, replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +13,7 @@ module.exports = class AvatarCommand extends Command {
             aliases: ['av'],
             group: 'misc',
             description: 'Displays a user\'s avatar, or yours if you don\'t specify any.',
-            details: userDetails,
+            details: '`user` has to be a user\'s username, id or mention.',
             format: 'avatar <user>',
             examples: ['avatar Pixoll'],
             args: [{
@@ -45,7 +45,7 @@ module.exports = class AvatarCommand extends Command {
         const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 })
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
             .setImage(avatar)
             .setTimestamp()

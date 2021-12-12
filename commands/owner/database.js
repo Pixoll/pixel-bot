@@ -1,9 +1,22 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, addDashes, removeDashes } = require('../../utils')
+const { generateEmbed, basicEmbed, addDashes } = require('../../utils/functions')
 const Database = require('../../schemas')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
+
+/**
+ * Removes dashes from the string and capitalizes the remaining strings
+ * @param {string} str The string to parse
+ */
+function removeDashes(str) {
+    if (!str) return
+    const arr = str.split('-')
+    const first = arr.shift()
+    const rest = arr.map(capitalize).join('')
+    return first + rest
+}
 
 /** A command that can be run in a client */
 module.exports = class DatabaseCommand extends Command {

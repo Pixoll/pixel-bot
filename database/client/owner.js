@@ -16,12 +16,15 @@ module.exports = async (client) => {
      * @param {CommandoGuild} guild the guild to get info of
      */
     async function guildInfo(color, message, guild) {
+        const { channels, users } = client
+
         /** @type {TextChannel} */
-        const channel = await client.channels.fetch('906565308381286470')
+        const channel = await channels.fetch('906565308381286470').catch(() => null)
+        if (!channel) return
 
         const { ownerId, name, id, memberCount } = guild
         /** @type {User} */
-        const owner = await client.users.fetch(ownerId).catch(() => null)
+        const owner = await users.fetch(ownerId).catch(() => null)
         const ownedBy = owner ? `${owner.toString()} ${owner?.tag || ''}` : ownerId
 
         const info = new MessageEmbed()

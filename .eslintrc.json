@@ -12,10 +12,7 @@
     },
     "rules": {
         "comma-dangle": "off",
-        "eol-last": [
-            "warn",
-            "never"
-        ],
+        "eol-last": "warn",
         "indent": "off",
         "max-len": [
             "error",

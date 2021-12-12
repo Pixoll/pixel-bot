@@ -2,7 +2,8 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { GuildMember } = require('discord.js')
-const { memberDetails, reasonDetails, basicEmbed, confirmButtons, replyAll } = require('../../utils')
+const { basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -12,7 +13,10 @@ module.exports = class UnmuteCommand extends Command {
             name: 'unmute',
             group: 'mod',
             description: 'Unmute a member.',
-            details: `${memberDetails()}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`member\` can be either a member's name, mention or id.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'unmute [member] <reason>',
             examples: [
                 'unmute Pixoll',

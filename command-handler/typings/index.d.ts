@@ -217,7 +217,7 @@ export class ClientDatabaseManager {
 	constructor(client: CommandoClient)
 
 	/** Client for this database */
-	public readonly client: CommandoClient
+	public client: CommandoClient
 
 	public disabled: DatabaseManager<DisabledSchema>
 	public errors: DatabaseManager<ErrorSchema>
@@ -386,7 +386,7 @@ export abstract class Command {
 	 * @param guild Guild to check in
 	 * @param bypassGroup Whether to bypass checking the group's status
 	 */
-	public isEnabledIn(guild: GuildResolvable, bypassGroup?: boolean): boolean
+	public isEnabledIn(guild?: GuildResolvable, bypassGroup?: boolean): boolean
 	/**
 	 * Checks if the command is usable for an instance
 	 * @param instances The instances
@@ -400,7 +400,7 @@ export abstract class Command {
 	 * @param data Additional data associated with the block. Built-in reason data properties:
 	 * - guildOnly & nsfw & dmOnly: none
 	 * - throttling: `throttle` ({@link Throttle}), `remaining` (number) time in seconds
-	 * - userPermissions & clientPermissions: `missing` (Array<{@link PermissionString}>) permission names
+	 * - userPermissions & clientPermissions: `missing` ({@link PermissionString}[]) permission names
 	 */
 	public onBlock(instances: CommandInstances, reason: CommandBlockReason, data?: CommandBlockData): Promise<Message>
 	/**
@@ -415,7 +415,7 @@ export abstract class Command {
 		err: Error,
 		instances: CommandInstances,
 		args: object | string | string[],
-		fromPattern: boolean,
+		fromPattern?: boolean,
 		result?: ArgumentCollectorResult
 	): Promise<Message>
 	/** Reloads the command */
@@ -434,7 +434,7 @@ export abstract class Command {
 	public abstract run(
 		instances: CommandInstances,
 		args: object | string | string[],
-		fromPattern: boolean,
+		fromPattern?: boolean,
 		result?: ArgumentCollectorResult
 	): Promise<Message | Message[] | null> | null
 	/**
@@ -442,7 +442,7 @@ export abstract class Command {
 	 * @param guild Guild to enable/disable the command in
 	 * @param enabled Whether the command should be enabled or disabled
 	 */
-	public setEnabledIn(guild: GuildResolvable, enabled: boolean): void
+	public setEnabledIn(guild?: GuildResolvable, enabled: boolean): void
 	/** Unloads the command */
 	public unload(): void
 	/**
@@ -599,7 +599,7 @@ export class CommandGroup {
 	 * @param guild Guild to check in
 	 * @returns Whether or not the group is enabled
 	 */
-	public isEnabledIn(guild: GuildResolvable): boolean
+	public isEnabledIn(guild?: GuildResolvable): boolean
 	/** Reloads all of the group's commands */
 	public reload(): void
 	/**
@@ -607,7 +607,7 @@ export class CommandGroup {
 	 * @param guild Guild to enable/disable the group in
 	 * @param enabled Whether the group should be enabled or disabled
 	 */
-	public setEnabledIn(guild: GuildResolvable, enabled: boolean): void
+	public setEnabledIn(guild?: GuildResolvable, enabled: boolean): void
 }
 
 /** Discord.js Client with a command framework */
@@ -636,16 +636,12 @@ export class CommandoClient extends Client {
 	 * - If you simply need to check if a user is an owner of the bot, please instead use {@link CommandoClient#isOwner}.
 	 */
 	public readonly owners: User[]
-	/** The client's setting provider */
-	public provider: SettingProvider
 	/** The client's command registry */
 	public registry: CommandoRegistry
 	/** The client's database manager */
 	public database: ClientDatabaseManager
 	/** The guilds' database manager, mapped by the guilds ids */
 	public databases: Collection<string, GuildDatabaseManager>
-	/** Shortcut to use setting provider methods for the global settings */
-	public settings: GuildSettingsHelper
 	public guilds: CommandoGuildManager
 
 	/**
@@ -653,32 +649,25 @@ export class CommandoClient extends Client {
 	 * @param user User to check for ownership
 	 */
 	public isOwner(user: UserResolvable): boolean
-	/**
-	 * Sets the setting provider to use, and initialises it once the client is ready
-	 * @param provider Provider to use
-	 */
-	public setProvider(provider: SettingProvider | Promise<SettingProvider>): Promise<void>
 
 	public on<K extends keyof CommandoClientEvents>(event: K, listener: (...args: CommandoClientEvents[K]) => void): this
 	public once<K extends keyof CommandoClientEvents>(event: K, listener: (...args: CommandoClientEvents[K]) => void): this
 	public emit<K extends keyof CommandoClientEvents>(event: K, ...args: CommandoClientEvents[K]): boolean
 }
 
-// export { CommandoClient as Client }
-
 /** A fancier Guild for fancier people. */
 export class CommandoGuild extends Guild {
-	/** The database manager for the guild */
-	public database: GuildDatabaseManager
 	/** Internal command prefix for the guild, controlled by the {@link CommandoGuild#prefix} getter/setter */
 	private _prefix: string
 	/** Map object of internal command statuses, mapped by command name */
 	private _commandsEnabled: object
 	/** Internal map object of group statuses, mapped by group id */
 	private _groupsEnabled: object
-	/** Shortcut to use setting provider methods for this guild */
-	private _settings: GuildSettingsHelper
 
+	/** The client of this guild */
+	public client: CommandoClient
+	/** The database manager for the guild */
+	public database: GuildDatabaseManager
 	/**
 	 * Command prefix in the guild. An empty string indicates that there is no prefix, and only mentions will be used.
 	 * Setting to `null` means that the prefix from {@link CommandoClient#prefix} will be used instead.
@@ -686,8 +675,6 @@ export class CommandoGuild extends Guild {
 	public prefix: string
 	/** The queued logs for this guild */
 	public queuedLogs: MessageEmbed[]
-	/** Shortcut to use setting provider methods for this guild */
-	public readonly settings: GuildSettingsHelper
 
 	/**
 	 * Creates a command usage string using the guild's prefix
@@ -728,7 +715,7 @@ export class CommandoGuildManager extends CachedManager<Snowflake, CommandoGuild
 export class CommandoInteraction extends CommandInteraction {
 	public client: CommandoClient
 	public guild?: CommandoGuild
-	public member?: GuildMember
+	public member?: CommandoMember
 }
 
 export class CommandoMember extends GuildMember {
@@ -934,7 +921,7 @@ export class CommandoRegistry {
 	 * const path = require('path')
 	 * registry.registerCommandsIn(path.join(__dirname, 'commands'))
 	 */
-	public registerCommandsIn(options: string | {}): CommandoRegistry
+	public registerCommandsIn(options: string | RequireAllOptions): CommandoRegistry
 	/**
 	 * Registers the default commands to the registry
 	 * @param commands Object specifying which commands to register
@@ -993,7 +980,7 @@ export class CommandoRegistry {
 	 * Registers all argument types in a directory. The files must export an ArgumentType class constructor or instance.
 	 * @param options The path to the directory, or a require-all options object
 	 */
-	public registerTypesIn(options: string | {}): CommandoRegistry
+	public registerTypesIn(options: string | RequireAllOptions): CommandoRegistry
 	/**
 	 * Reregisters a command (does not support changing name, group, or memberName)
 	 * @param command New command
@@ -1029,16 +1016,13 @@ export class CommandoRegistry {
 /** A database schema manager (MongoDB) */
 export class DatabaseManager<T> {
 	/**
-	 * @param client The client this manager is for
-	 * @param guild The guild this manager is for
 	 * @param schema The schema of this manager
+	 * @param guild The guild this manager is for
 	 */
-	public constructor(client: CommandoClient, guild: CommandoGuild, schema: Model<T, {}, {}>)
+	public constructor(schema: Model<T, {}, {}>, guild: CommandoGuild)
 
-	/** Client for this database */
-	public readonly client: CommandoClient
 	/** Guild for this database */
-	public readonly guild?: CommandoGuild
+	public guild?: CommandoGuild
 	/** The name of the schema this manager is for */
 	public schema: DataModel<T>
 	/** The cache for this manager */
@@ -1095,15 +1079,12 @@ export class FriendlyError extends Error {
 /** All guilds' database manager (MongoDB) */
 export class GuildDatabaseManager {
 	/**
-	 * @param client The client this database is for
 	 * @param guild The guild this database is for
 	 */
-	public constructor(client: CommandoClient, guild: CommandoGuild)
+	public constructor(guild: CommandoGuild)
 
-	/** Client for this database */
-	public readonly client: CommandoClient
 	/** Guild for this database */
-	public readonly guild: CommandoGuild
+	public guild: CommandoGuild
 
 	public active: DatabaseManager<ActiveSchema>
 	public afk: DatabaseManager<AfkSchema>
@@ -1123,269 +1104,8 @@ export class GuildDatabaseManager {
 	private init(data: Collection<string, Collection<string, DataModel>>): this
 }
 
-/** Helper class to use {@link SettingProvider} methods for a specific Guild */
-export class GuildSettingsHelper {
-	/**
-	 * @param client Client to use the provider of
-	 * @param guild Guild the settings are for
-	 */
-	public constructor(client: CommandoClient, guild: CommandoGuild)
-
-	/** Client to use the provider of */
-	public readonly client: CommandoClient
-	/** Guild the settings are for */
-	public guild: CommandoGuild
-
-	/**
-	 * Removes all settings in the guild
-	 *  @see {@link SettingProvider#clear}
-	 */
-	public clear(): Promise<void>
-	/**
-	 * Gets a setting in the guild
-	 * @param key Name of the setting
-	 * @param defVal Value to default to if the setting isn't set
-	 *  @see {@link SettingProvider#get}
-	 */
-	public get(key: string, defVal?: any): any
-	/**
-	 * Removes a setting from the guild
-	 * @param key Name of the setting
-	 * @returns Old value of the setting
-	 *  @see {@link SettingProvider#remove}
-	 */
-	public remove(key: string): Promise<any>
-	/**
-	 * Sets a setting for the guild
-	 * @param key Name of the setting
-	 * @param val Value of the setting
-	 * @returns New value of the setting
-	 *  @see {@link SettingProvider#set}
-	 */
-	public set(key: string, val: any): Promise<any>
-}
-
-/** Loads and stores settings associated with guilds */
-export abstract class SettingProvider {
-	/**
-	 * Removes all settings in a guild
-	 * @param guild Guild to clear the settings of
-	 */
-	public abstract clear(guild: Guild | string): Promise<void>
-	/** Destroys the provider, removing any event listeners. */
-	public abstract destroy(): Promise<void>
-	/**
-	 * Obtains a setting for a guild
-	 * @param guild Guild the setting is associated with (or 'global')
-	 * @param key Name of the setting
-	 * @param defVal Value to default to if the setting isn't set on the guild
-	 */
-	public abstract get(guild: Guild | string, key: string, defVal?: any): any
-	/**
-	 * Initialises the provider by connecting to databases and/or caching all data in memory.
-	 * {@link CommandoClient#setProvider} will automatically call this once the client is ready.
-	 * @param client Client that will be using the provider
-	 */
-	public abstract init(client: CommandoClient): Promise<void>
-	/**
-	 * Removes a setting from a guild
-	 * @param guild Guild the setting is associated with (or 'global')
-	 * @param key Name of the setting
-	 * @returns Old value of the setting
-	 */
-	public abstract remove(guild: Guild | string, key: string): Promise<any>
-	/**
-	 * Sets a setting for a guild
-	 * @param guild Guild to associate the setting with (or 'global')
-	 * @param key Name of the setting
-	 * @param val Value of the setting
-	 * @returns New value of the setting
-	 */
-	public abstract set(guild: Guild | string, key: string, val: any): Promise<any>
-
-	/**
-	 * Obtains the id of the provided guild, or throws an error if it isn't valid
-	 * @param guild Guild to get the id of
-	 * @returns id of the guild, or 'global'
-	 */
-	public static getGuildId(guild: Guild | string): string
-}
-
-/** Uses an SQLite database to store settings with guilds */
-export class SQLiteProvider extends SettingProvider {
-	/**
-	 * @param db Database for the provider
-	 */
-	public constructor(db: any | Promise<any>)
-
-	/** Client that the provider is for (set once the client is ready, after using {@link CommandoClient#setProvider}) */
-	public readonly client: CommandoClient
-	/** Database that will be used for storing/retrieving settings */
-	public db: any
-	/** Prepared statement to delete an entire settings row */
-	private deleteStmt: any
-	/** Prepared statement to insert or replace a settings row */
-	private insertOrReplaceStmt: any
-	/** Listeners on the Client, mapped by the event name */
-	private listeners: Map<any, any>
-	/** Settings cached in memory, mapped by guild id (or 'global') */
-	private settings: Map<any, any>
-
-	/**
-	 * Removes all settings in a guild
-	 * @param guild Guild to clear the settings of
-	 */
-	public clear(guild: Guild | string): Promise<void>
-	/** Destroys the provider, removing any event listeners. */
-	public destroy(): Promise<void>
-	/**
-	 * Obtains a setting for a guild
-	 * @param guild Guild the setting is associated with (or 'global')
-	 * @param key Name of the setting
-	 * @param defVal Value to default to if the setting isn't set on the guild
-	 */
-	public get(guild: Guild | string, key: string, defVal?: any): any
-	/**
-	 * Initialises the provider by connecting to databases and/or caching all data in memory.
-	 * {@link CommandoClient#setProvider} will automatically call this once the client is ready.
-	 * @param client Client that will be using the provider
-	 */
-	public init(client: CommandoClient): Promise<void>
-	/**
-	 * Removes a setting from a guild
-	 * @param guild Guild the setting is associated with (or 'global')
-	 * @param key Name of the setting
-	 * @returns Old value of the setting
-	 */
-	public remove(guild: Guild | string, key: string): Promise<any>
-	/**
-	 * Sets a setting for a guild
-	 * @param guild Guild to associate the setting with (or 'global')
-	 * @param key Name of the setting
-	 * @param val Value of the setting
-	 * @returns New value of the setting
-	 */
-	public set(guild: Guild | string, key: string, val: any): Promise<any>
-	/**
-	 * Loads all settings for a guild
-	 * @param guild Guild id to load the settings of (or 'global')
-	 * @param settings Settings to load
-	 */
-	private setupGuild(guild: string, settings: {}): void
-	/**
-	 * Sets up a command's status in a guild from the guild's settings
-	 * @param guild Guild to set the status in
-	 * @param command Command to set the status of
-	 * @param settings Settings of the guild
-	 */
-	private setupGuildCommand(guild: CommandoGuild, command: Command, settings: {}): void
-	/**
-	 * Sets up a command group's status in a guild from the guild's settings
-	 * @param guild Guild to set the status in
-	 * @param group Group to set the status of
-	 * @param settings Settings of the guild
-	 */
-	private setupGuildGroup(guild: CommandoGuild, group: CommandGroup, settings: {}): void
-	/**
-	 * Updates a global setting on all other shards if using the {@link ShardingManager}.
-	 * @param key Key of the setting to update
-	 * @param val Value of the setting
-	 */
-	private updateOtherShards(key: string, val: any): void
-}
-
-/** Uses an SQLite database to store settings with guilds */
-export class SyncSQLiteProvider extends SettingProvider {
-	/**
-	 * @param db Database Connection for the provider
-	 */
-	public constructor(db: any | Promise<any>)
-
-	/** Client that the provider is for (set once the client is ready, after using {@link CommandoClient#setProvider}) */
-	public readonly client: CommandoClient
-	/** Database that will be used for storing/retrieving settings */
-	public db: any
-	/** Prepared statement to delete an entire settings row */
-	private deleteStmt: any
-	/** Prepared statement to insert or replace a settings row */
-	private insertOrReplaceStmt: any
-	/** Listeners on the Client, mapped by the event name */
-	private listeners: Map<any, any>
-	/** Settings cached in memory, mapped by guild id (or 'global') */
-	private settings: Map<any, any>
-
-	/**
-	 * Removes all settings in a guild
-	 * @param guild Guild to clear the settings of
-	 */
-	public clear(guild: Guild | string): Promise<void>
-	/** Destroys the provider, removing any event listeners. */
-	public destroy(): Promise<void>
-	/**
-	 * Obtains a setting for a guild
-	 * @param guild Guild the setting is associated with (or 'global')
-	 * @param key Name of the setting
-	 * @param defVal Value to default to if the setting isn't set on the guild
-	 */
-	public get(guild: Guild | string, key: string, defVal?: any): any
-	/**
-	 * Initialises the provider by connecting to databases and/or caching all data in memory.
-	 * {@link CommandoClient#setProvider} will automatically call this once the client is ready.
-	 * @param client Client that will be using the provider
-	 */
-	public init(client: CommandoClient): Promise<void>
-	/**
-	 * Removes a setting from a guild
-	 * @param guild Guild the setting is associated with (or 'global')
-	 * @param key Name of the setting
-	 * @returns Old value of the setting
-	 */
-	public remove(guild: Guild | string, key: string): Promise<any>
-	/**
-	 * Sets a setting for a guild
-	 * @param guild Guild to associate the setting with (or 'global')
-	 * @param key Name of the setting
-	 * @param val Value of the setting
-	 * @returns New value of the setting
-	 */
-	public set(guild: Guild | string, key: string, val: any): Promise<any>
-	/**
-	 * Loads all settings for a guild
-	 * @param guild Guild id to load the settings of (or 'global')
-	 * @param settings Settings to load
-	 */
-	private setupGuild(guild: string, settings: {}): void
-	/**
-	 * Sets up a command's status in a guild from the guild's settings
-	 * @param guild Guild to set the status in
-	 * @param command Command to set the status of
-	 * @param settings Settings of the guild
-	 */
-	private setupGuildCommand(guild: CommandoGuild, command: Command, settings: {}): void
-	/**
-	 * Sets up a command group's status in a guild from the guild's settings
-	 * @param guild Guild to set the status in
-	 * @param group Group to set the status of
-	 * @param settings Settings of the guild
-	 */
-	private setupGuildGroup(guild: CommandoGuild, group: CommandGroup, settings: {}): void
-	/**
-	 * Updates a global setting on all other shards if using the {@link ShardingManager}.
-	 * @param key Key of the setting to update
-	 * @param val Value of the setting
-	 */
-	private updateOtherShards(key: string, val: any): void
-}
-
 export class util {
 	public static disambiguation(items: any[], label: string, property?: string): string
-	public static escapeRegex(str: string): string
-	public static paginate<T>(items: T[], page?: number, pageLength?: number): {
-		items: T[],
-		page: number,
-		maxPage: number,
-		pageLength: number
-	}
 	public static readonly permissions: { [K in PermissionString]: string }
 }
 
@@ -1645,7 +1365,7 @@ export interface CommandoClientEvents extends ClientEvents {
 	commandReregister: [newCommand: Command, oldCommand: Command]
 	commandRun: [
 		command: Command, promise: Promise<any>, instances: CommandInstances,
-		args: object | string | string[], fromPattern: boolean, result?: ArgumentCollectorResult
+		args: object | string | string[], fromPattern?: boolean, result?: ArgumentCollectorResult
 	]
 	commandStatusChange: [guild?: CommandoGuild, command: Command, enabled: boolean]
 	commandUnregister: [command: Command]
@@ -1658,7 +1378,6 @@ export interface CommandoClientEvents extends ClientEvents {
 	guildMemberUnmute: [guild: CommandoGuild, moderator?: User, user: User, reason: string]
 	guildMemberWarn: [guild: CommandoGuild, moderator: User, user: User, reason: string]
 	moduleStatusChange: [guild: CommandoGuild, module: string, enabled: boolean]
-	providerReady: [provider: SettingProvider]
 	typeRegister: [type: ArgumentType, registry: CommandoRegistry]
 	unknownCommand: [message: CommandoMessage]
 }
@@ -2011,3 +1730,12 @@ export type SlashCommandChannelType = 'guild-text' | 'guild-voice' | 'guild-cate
 	'guild-news-thread' | 'guild-public-thread' | 'guild-private-thread' | 'guild-stage-voice'
 
 export type StringResolvable = string | string[] | object
+
+export interface RequireAllOptions {
+    dirname: string
+    filter?: ((name: string, path: string) => string | false) | RegExp
+    excludeDirs?: RegExp
+    map?: ((name: string, path: string) => string)
+    resolve?: ((module: any) => any)
+    recursive?: boolean
+}

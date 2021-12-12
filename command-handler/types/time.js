@@ -63,7 +63,7 @@ class TimeArgumentType extends ArgumentType {
             }
             return parsed + formatter - offset
         }) || [defDate.getUTCHours(), defDate.getUTCMinutes()]
-        const arr = [...dateNums, ...timeNums].filter(n => n !== undefined)
+        const arr = [...dateNums, ...timeNums].filter(n => typeof n !== 'undefined')
         const date = new Date(...arr)
         return date
     }

@@ -9,8 +9,6 @@ const { oneLine, stripIndent } = require('common-tags')
 const Command = require('../commands/base')
 const FriendlyError = require('../errors/friendly')
 const CommandFormatError = require('../errors/command-format')
-const { resolveString } = require('../util')
-const { embedColor } = require('../../utils')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -24,9 +22,7 @@ class CommandoMessage extends Message {
 	 */
 	constructor(client, data) {
 		super(client, { id: data.id })
-		for (const prop in data) {
-			this[prop] = data[prop]
-		}
+		Object.assign(this, data)
 
 		this._commando = true
 
@@ -96,7 +92,7 @@ class CommandoMessage extends Message {
 	 * Initialises the message for a command
 	 * @param {Command} [command] Command the message triggers
 	 * @param {string} [argString] Argument string for the command
-	 * @param {?Array<string>} [patternMatches] Command pattern matches (if from a pattern trigger)
+	 * @param {?string[]} [patternMatches] Command pattern matches (if from a pattern trigger)
 	 * @return {Message} This message
 	 * @private
 	 */
@@ -117,11 +113,9 @@ class CommandoMessage extends Message {
 	 * @return {string}
 	 */
 	usage(argString, prefix, user = this.client.user) {
-		if (typeof prefix === 'undefined') {
-			if (this.guild) prefix = this.guild.prefix
-			else prefix = this.client.prefix
-		}
-		return this.command.usage(argString, prefix, user)
+		const { guild, client, command } = this
+		prefix ??= guild?.prefix ?? client.prefix
+		return command.usage(argString, prefix, user)
 	}
 
 	/**
@@ -133,10 +127,8 @@ class CommandoMessage extends Message {
 	 * @return {string}
 	 */
 	anyUsage(command, prefix, user = this.client.user) {
-		if (typeof prefix === 'undefined') {
-			if (this.guild) prefix = this.guild.prefix
-			else prefix = this.client.prefix
-		}
+		const { guild, client } = this
+		prefix ??= guild?.prefix ?? client.prefix
 		return Command.usage(command, prefix, user)
 	}
 
@@ -146,21 +138,23 @@ class CommandoMessage extends Message {
 	 * @see {@link Command#run}
 	 */
 	parseArgs() {
-		switch (this.command.argsType) {
+		const { command, argString } = this
+		const { argsType, argsSingleQuotes, argsCount } = command
+		switch (argsType) {
 			case 'single':
-				return this.argString.trim().replace(
-					this.command.argsSingleQuotes ? /^("|')([^]*)\1$/g : /^(")([^]*)"$/g, '$2'
+				return argString.trim().replace(
+					argsSingleQuotes ? /^("|')([^]*)\1$/g : /^(")([^]*)"$/g, '$2'
 				)
 			case 'multiple':
-				return this.constructor.parseArgs(this.argString, this.command.argsCount, this.command.argsSingleQuotes)
+				return this.constructor.parseArgs(argString, argsCount, argsSingleQuotes)
 			default:
-				throw new RangeError(`Unknown argsType "${this.command.argsType}".`)
+				throw new RangeError(`Unknown argsType "${argsType}".`)
 		}
 	}
 
 	/**
 	 * Runs the command
-	 * @return {Promise<?Message|?Array<Message>>}
+	 * @return {Promise<?Message|?Message[]>}
 	 */
 	async run() {
 		const { guild, guildId, channel, channelId, author, webhookId, client, command, patternMatches, argString } = this
@@ -204,9 +198,8 @@ class CommandoMessage extends Message {
 		}
 
 		// Ensure the user has permission to use the command
-		const isOwner = client.isOwner(author)
 		const hasPermission = command.hasPermission({ message: this })
-		if (!isOwner && hasPermission !== true) {
+		if (hasPermission !== true) {
 			if (typeof hasPermission === 'string') {
 				client.emit('commandBlock', { message: this }, hasPermission)
 				return await command.onBlock({ message: this }, hasPermission)
@@ -272,13 +265,16 @@ class CommandoMessage extends Message {
 		// Run the command
 		if (throttle) throttle.usages++
 		try {
-			client.emit('debug', `Running message command "${groupId}:${memberName}" at "${guildId}-${channelId}".`)
+			const location = guildId ? `${guildId}:${channelId}` : `DM:${author.id}`
+			client.emit('debug', `Running message command "${groupId}:${memberName}" at "${location}".`)
 			await channel.sendTyping().catch(() => null)
 			const promise = command.run({ message: this }, args, fromPattern, collResult)
 
 			client.emit('commandRun', command, promise, { message: this }, args, fromPattern, collResult)
 			const retVal = await promise
-			if (!(retVal instanceof Message || Array.isArray(retVal) || retVal === null || retVal === undefined)) {
+			const isValid = retVal instanceof Message || Array.isArray(retVal) || retVal === null ||
+				typeof retVal === 'undefined'
+			if (!isValid) {
 				const retValType = retVal !== null ? (
 					retVal?.constructor ? retVal.constructor.name : typeof retVal
 				) : null
@@ -291,7 +287,7 @@ class CommandoMessage extends Message {
 			if (probability(2)) {
 				const { user, botInvite } = client
 				const embed = new MessageEmbed()
-					.setColor(embedColor)
+					.setColor('#4c9f4c')
 					.addField(`Enjoying ${user.username}?`, oneLine`
 						The please consider voting for it! It helps the bot to become more noticed
 						between other bots. And perhaps consider adding it to any of your own servers
@@ -332,6 +328,7 @@ class CommandoMessage extends Message {
 	 * Options for the response
 	 * @typedef {Object} ResponseOptions
 	 * @property {ResponseType} [type] Type of the response
+	 * @property {string} [content] Content of the response
 	 * @property {MessageOptions} [options] Options of the response
 	 * @property {string} [lang] Language of the response, if its type is `code`
 	 * @property {boolean} [fromEdit] If the response is from an edited message
@@ -344,32 +341,33 @@ class CommandoMessage extends Message {
 	 * @private
 	 */
 	respond({ type = 'reply', content = '', options = {}, lang = '', fromEdit = false }) {
-		const shouldEdit = this.responses && !fromEdit
+		const { responses, channel, guild, client, author } = this
+		const shouldEdit = responses && !fromEdit
 
-		if (type === 'reply' && this.channel.type === 'dm') type = 'plain'
+		if (type === 'reply' && channel.type === 'DM') type = 'plain'
 		if (type !== 'direct') {
-			if (this.guild && !this.channel.permissionsFor(this.client.user).has('SEND_MESSAGES')) {
+			if (guild && !channel.permissionsFor(client.user).has('SEND_MESSAGES')) {
 				type = 'direct'
 			}
 		}
 
 		if (content) options.content = resolveString(content)
-		options = { ...options, ...noReplyInDMs(this) }
+		Object.assign(options, noReplyInDMs(this))
 
 		switch (type) {
 			case 'plain':
-				if (!shouldEdit) return this.channel.send(options)
-				return this.editCurrentResponse(channelIdOrDM(this.channel), { type, options })
+				if (!shouldEdit) return channel.send(options)
+				return this.editCurrentResponse(channelIdOrDM(channel), { type, options })
 			case 'reply':
-				if (!shouldEdit) return super.reply(options)
-				return this.editCurrentResponse(channelIdOrDM(this.channel), { type, options })
+				if (!shouldEdit) return this.reply(options)
+				return this.editCurrentResponse(channelIdOrDM(channel), { type, options })
 			case 'direct':
-				if (!shouldEdit) return this.author.send(options)
-				return this.editCurrentResponse('dm', { type, options })
+				if (!shouldEdit) return author.send(options)
+				return this.editCurrentResponse('DM', { type, options })
 			case 'code':
 				options.content = `\`\`\`${lang}\n${escapeMarkdown(content, true)}\n\`\`\``
-				if (!shouldEdit) return this.channel.send(options)
-				return this.editCurrentResponse(channelIdOrDM(this.channel), { type, options })
+				if (!shouldEdit) return channel.send(options)
+				return this.editCurrentResponse(channelIdOrDM(channel), { type, options })
 			default:
 				throw new RangeError(`Unknown response type "${type}".`)
 		}
@@ -385,17 +383,18 @@ class CommandoMessage extends Message {
 	editResponse(response, { type, options }) {
 		if (!response) return this.respond({ type, options, fromEdit: true })
 
-		if (Array.isArray(options.content)) {
+		const { content } = options
+		if (Array.isArray(content)) {
 			const promises = []
 			if (Array.isArray(response)) {
-				for (let i = 0; i < options.content.length; i++) {
-					if (response.length > i) promises.push(response[i].edit(`${options.content[i]}`/* , options */))
-					else promises.push(response[0].channel.send(`${options.content[i]}`))
+				for (let i = 0; i < content.length; i++) {
+					if (response.length > i) promises.push(response[i].edit(`${content[i]}`/* , options */))
+					else promises.push(response[0].channel.send(`${content[i]}`))
 				}
 			} else {
-				promises.push(response.edit(`${options.content[0]}`/* , options */))
-				for (let i = 1; i < options.content.length; i++) {
-					promises.push(response.channel.send(`${options.content[i]}`))
+				promises.push(response.edit(`${content[0]}`/* , options */))
+				for (let i = 1; i < content.length; i++) {
+					promises.push(response.channel.send(`${content[i]}`))
 				}
 			}
 			return Promise.all(promises)
@@ -432,8 +431,9 @@ class CommandoMessage extends Message {
 	say(content, options) {
 		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
-			content = ''
+			content = null
 		}
+		if (typeof options !== 'object') options = {}
 		return this.respond({ type: 'plain', content, options })
 	}
 
@@ -446,8 +446,9 @@ class CommandoMessage extends Message {
 	direct(content, options) {
 		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
-			content = ''
+			content = null
 		}
+		if (typeof options !== 'object') options = {}
 		return this.respond({ type: 'direct', content, options })
 	}
 
@@ -461,7 +462,7 @@ class CommandoMessage extends Message {
 	code(lang, content, options) {
 		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
-			content = ''
+			content = null
 		}
 		if (typeof options !== 'object') options = {}
 		return this.respond({ type: 'code', content, lang, options })
@@ -474,10 +475,10 @@ class CommandoMessage extends Message {
 	 * @param {MessageOptions} [options] Options for the message
 	 * @return {Promise<Message>}
 	 */
-	embed(embed, content = '', options) {
+	embed(embed, content, options) {
 		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
-			content = ''
+			content = null
 		}
 		if (typeof options !== 'object') options = {}
 		options.embeds = Array.isArray(embed) ? embed : [embed]
@@ -494,7 +495,7 @@ class CommandoMessage extends Message {
 	replyEmbed(embed, content = '', options) {
 		if (!options && typeof content === 'object' && !Array.isArray(content)) {
 			options = content
-			content = ''
+			content = null
 		}
 		if (typeof options !== 'object') options = {}
 		options.embeds = Array.isArray(embed) ? embed : [embed]
@@ -503,7 +504,7 @@ class CommandoMessage extends Message {
 
 	/**
 	 * Finalizes the command message by setting the responses and deleting any remaining prior ones
-	 * @param {?Array<Message|Message[]>} responses Responses to the message
+	 * @param {?(Message|Message[])[]} responses Responses to the message
 	 * @private
 	 */
 	finalize(responses) {
@@ -578,17 +579,16 @@ class CommandoMessage extends Message {
  */
 function removeSmartQuotes(argString, allowSingleQuote = true) {
 	let replacementArgString = argString
-	const singleSmartQuote = /[‘’]/g
+	const singleSmartQuote = /[\u2018\u2019]/g
 	const doubleSmartQuote = /[“”]/g
 	if (allowSingleQuote) replacementArgString = argString.replace(singleSmartQuote, '\'')
-	return replacementArgString
-		.replace(doubleSmartQuote, '"')
+	return replacementArgString.replace(doubleSmartQuote, '"')
 }
 
 /** @param {TextBasedChannels} channel */
 function channelIdOrDM(channel) {
 	if (channel.type !== 'DM') return channel.id
-	return 'dm'
+	return 'DM'
 }
 
 /**
@@ -616,3 +616,14 @@ function probability(n) {
 }
 
 module.exports = CommandoMessage
+
+/**
+ * Resolves a StringResolvable to a string.
+ * @param {StringResolvable} data The string resolvable to resolve
+ * @returns {string}
+ */
+function resolveString(data) {
+	if (typeof data === 'string') return data
+	if (Array.isArray(data)) return data.join('\n')
+	return String(data)
+}

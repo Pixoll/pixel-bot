@@ -1,7 +1,18 @@
 /* eslint-disable no-unused-vars */
-const { CommandoClient } = require('../../command-handler/typings')
-const { getLogsChannel } = require('../../utils')
+const { TextChannel } = require('discord.js')
+const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
+
+/**
+ * Gets the audit-logs channel
+ * @param {CommandoGuild} guild The guild to look into
+ * @returns {Promise<?TextChannel>}
+ */
+async function getLogsChannel(guild) {
+    const data = await guild.database.setup.fetch()
+    const channel = guild.channels.resolve(data?.logsChannel)
+    return channel
+}
 
 /**
  * Re-sends audit-logs when deleted.

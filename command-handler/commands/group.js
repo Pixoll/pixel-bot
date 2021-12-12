@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Collection, GuildResolvable } = require('discord.js')
-const { CommandoClient, Command } = require('../typings')
+const { Collection } = require('discord.js')
+const { CommandoClient, Command, CommandoGuild } = require('../typings')
 /* eslint-enable no-unused-vars */
 
 /** A group for commands. Whodathunkit? */
@@ -33,7 +33,7 @@ class CommandGroup {
 		 * Name of this group
 		 * @type {string}
 		 */
-		this.name = name || id
+		this.name = name ?? id
 
 		/**
 		 * The commands in this group (added upon their registration)
@@ -58,31 +58,33 @@ class CommandGroup {
 
 	/**
 	 * Enables or disables the group in a guild
-	 * @param {?GuildResolvable} guild Guild to enable/disable the group in
+	 * @param {?CommandoGuild} guild Guild to enable/disable the group in
 	 * @param {boolean} enabled Whether the group should be enabled or disabled
 	 */
 	setEnabledIn(guild, enabled) {
+		const { client, guarded } = this
 		if (typeof guild === 'undefined') throw new TypeError('Guild must not be undefined.')
 		if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
-		if (this.guarded) throw new Error('The group is guarded.')
+		if (guarded) throw new Error('The group is guarded.')
 		if (!guild) {
 			this._globalEnabled = enabled
-			this.client.emit('groupStatusChange', null, this, enabled)
+			client.emit('groupStatusChange', null, this, enabled)
 			return
 		}
-		guild = this.client.guilds.resolve(guild)
+		guild = client.guilds.resolve(guild)
 		guild.setGroupEnabled(this, enabled)
 	}
 
 	/**
 	 * Checks if the group is enabled in a guild
-	 * @param {?GuildResolvable} guild Guild to check in
+	 * @param {?CommandoGuild} guild Guild to check in
 	 * @return {boolean} Whether or not the group is enabled
 	 */
 	isEnabledIn(guild) {
-		if (this.guarded) return true
-		if (!guild) return this._globalEnabled
-		guild = this.client.guilds.resolve(guild)
+		const { client, _globalEnabled, guarded } = this
+		if (guarded) return true
+		if (!guild) return _globalEnabled
+		guild = client.guilds.resolve(guild)
 		return guild.isGroupEnabled(this)
 	}
 

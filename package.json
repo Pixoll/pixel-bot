@@ -1,18 +1,18 @@
 {
   "name": "pixel",
-  "version": "2.1.0b",
+  "version": "2.1.1",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
-    "common-tags": "^1.8.0",
+    "common-tags": "^1.8.2",
     "discord.js": "^13.3.1",
     "discord.js-structures": "^1.0.3",
     "dotenv": "^10.0.0",
     "emoji-regex": "^10.0.0",
     "is-promise": "^4.0.0",
     "lodash": "^4.17.21",
-    "minecraft-server-util": "^5.0.0",
-    "mongoose": "5.13.10",
+    "minecraft-server-util": "^5.1.2",
+    "mongoose": "^6.1.1",
     "require-all": "^3.0.0"
   },
   "scripts": {

@@ -1,11 +1,44 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags')
-const { MessageEmbed, GuildMember, Role, PermissionOverwrites } = require('discord.js')
+const { MessageEmbed, GuildMember, Role, PermissionOverwrites, Util } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { myMs, rtcRegions, compareArrays, sliceFileName } = require('../../utils')
-const { capitalize, sliceDots, customEmoji, remDiscFormat, isModuleEnabled, channelTypes } = require('../../utils')
+const { compareArrays, sliceDots, customEmoji, isModuleEnabled } = require('../../utils/functions')
 const { permissions } = require('../../command-handler')
+const { capitalize } = require('lodash')
+const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
+
+const channelTypes = {
+    GUILD_TEXT: 'Text',
+    DM: 'Direct messages',
+    GUILD_VOICE: 'Voice',
+    GROUP_DM: 'Group direct messages',
+    GUILD_CATEGORY: 'Category',
+    GUILD_NEWS: 'News',
+    GUILD_STORE: 'Store',
+    UNKNOWN: 'Unknown',
+    GUILD_NEWS_THREAD: 'News thread',
+    GUILD_PUBLIC_THREAD: 'Public thread',
+    GUILD_PRIVATE_THREAD: 'Private thread',
+    GUILD_STAGE_VOICE: 'Stage',
+}
+
+const rtcRegions = new Map([
+    [null, 'Automatic'],
+    ['brazil', 'Brazil'],
+    ['europe', 'Europe'],
+    ['hongkong', 'Hong Kong'],
+    ['india', 'India'],
+    ['japan', 'Japan'],
+    ['russia', 'Russia'],
+    ['singapore', 'Singapore'],
+    ['southafrica', 'South Africa'],
+    ['sydney', 'Sydney'],
+    ['us-central', 'US Central'],
+    ['us-east', 'US East'],
+    ['us-south', 'US South'],
+    ['us-west', 'US West']
+])
 
 /**
  * Formats the {@link PermissionOverwrites} into an array of string
@@ -14,8 +47,8 @@ const { permissions } = require('../../command-handler')
  */
 function format(perms) {
     return [
-        perms?.deny.toArray(false).map(perm => permissions[perm.toString()]) || [],
-        perms?.allow.toArray(false).map(perm => permissions[perm.toString()]) || []
+        perms?.deny.toArray(false).map(perm => permissions[perm]) || [],
+        perms?.allow.toArray(false).map(perm => permissions[perm]) || []
     ]
 }
 
@@ -25,12 +58,12 @@ function format(perms) {
  */
 module.exports = (client) => {
     client.on('channelCreate', async channel => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelCreate".`)
-
         const { guild, id, type, parent } = channel
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/channels#channelCreate".')
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -68,13 +101,13 @@ module.exports = (client) => {
     })
 
     client.on('channelDelete', async channel => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelDelete".`)
-
         if (channel.type === 'DM') return
         const { guild, id, name, type, parent } = channel
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/channels#channelDelete".')
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
@@ -89,13 +122,13 @@ module.exports = (client) => {
     })
 
     client.on('channelPinsUpdate', async channel => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelPinsUpdate".`)
-
         if (channel.type === 'DM') return
         const { guild, id } = channel
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/channels#channelPinsUpdate".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -108,14 +141,14 @@ module.exports = (client) => {
     })
 
     client.on('channelUpdate', async (oldChannel, newChannel) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#channelUpdate".`)
-
         if (oldChannel.type === 'DM') return
         if (newChannel.type === 'DM') return
         const { guild } = oldChannel
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/channels#channelUpdate".')
 
         const { name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, id } = oldChannel
         const { name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2 } = newChannel
@@ -142,7 +175,7 @@ module.exports = (client) => {
             const target = await guild[diff.type + 's'].fetch(diff.id)
             if (target) {
                 const mention = target.toString()
-                const name = remDiscFormat(target.user?.tag || target.name)
+                const name = Util.escapeMarkdown(target.user?.tag || target.name)
 
                 embed.addField(`${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
             }
@@ -159,7 +192,7 @@ module.exports = (client) => {
             const target = guild[perms1.type + 's'].cache.get(perms1.id)
 
             const mention = target.toString()
-            const name = remDiscFormat(target.user?.tag)
+            const name = Util.escapeMarkdown(target.user?.tag)
 
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)
@@ -204,10 +237,10 @@ module.exports = (client) => {
             }
             if (autoArchive1 !== autoArchive2) {
                 const str1 = typeof autoArchive1 === 'number' ?
-                    myMs(autoArchive1 * myMs('1m'), { long: true }) :
+                    myMs(autoArchive1 * 60_000, { long: true }) :
                     capitalize(autoArchive1)
                 const str2 = typeof autoArchive2 === 'number' ?
-                    myMs(autoArchive2 * myMs('1m'), { long: true }) :
+                    myMs(autoArchive2 * 60_000, { long: true }) :
                     capitalize(autoArchive2)
                 embed.addField('Archive after innactivity', `${str1} ➜ ${str2}`)
             }

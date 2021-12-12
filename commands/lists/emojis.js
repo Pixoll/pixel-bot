@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed } = require('discord.js')
-const { replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** @param {string[]} arr */

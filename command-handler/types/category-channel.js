@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const ArgumentType = require('./base')
 const { disambiguation } = require('../util')
-const { Util: { escapeMarkdown }, GuildChannel, CategoryChannel } = require('discord.js')
+const { Util, GuildChannel, CategoryChannel } = require('discord.js')
 const { CommandoMessage, Argument } = require('../typings')
 /* eslint-enable no-unused-vars */
 
@@ -17,38 +17,41 @@ class CategoryChannelArgumentType extends ArgumentType {
 	 * @return Whether the value is valid
 	 */
 	validate(val, msg, arg) {
+		const { client, guild } = msg
+		const { oneOf } = arg
+
 		const matches = val.match(/^(?:<#)?([0-9]+)>?$/)
 		if (matches) {
 			try {
-				const channel = msg.client.channels.resolve(matches[1])
+				const channel = client.channels.resolve(matches[1])
 				if (!channel || channel.type !== 'GUILD_CATEGORY') return false
-				if (arg.oneOf && !arg.oneOf.includes(channel.id)) return false
+				if (oneOf && !oneOf.includes(channel.id)) return false
 				return true
 			} catch (err) {
 				return false
 			}
 		}
 
-		if (!msg.guild) return false
+		if (!guild) return false
 
 		const search = val.toLowerCase()
-		let channels = msg.guild.channels.cache.filter(channelFilterInexact(search))
+		let channels = guild.channels.cache.filter(channelFilterInexact(search))
 		if (channels.size === 0) return false
 		if (channels.size === 1) {
-			if (arg.oneOf && !arg.oneOf.includes(channels.first().id)) return false
+			if (oneOf && !oneOf.includes(channels.first().id)) return false
 			return true
 		}
 
 		const exactChannels = channels.filter(channelFilterExact(search))
 		if (exactChannels.size === 1) {
-			if (arg.oneOf && !arg.oneOf.includes(exactChannels.first().id)) return false
+			if (oneOf && !oneOf.includes(exactChannels.first().id)) return false
 			return true
 		}
 		if (exactChannels.size > 0) channels = exactChannels
 
 		return channels.size <= 15 ?
 			`${disambiguation(
-				channels.map(chan => escapeMarkdown(chan.name)), 'categories', null
+				channels.map(chan => Util.escapeMarkdown(chan.name)), 'categories', null
 			)}\n` :
 			'Multiple categories found. Please be more specific.'
 	}

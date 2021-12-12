@@ -3,12 +3,10 @@ const { User, GuildMember, TextChannel } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const {
-    docId, basicEmbed, timeDetails, userDetails, reasonDetails, userException, memberException, timestamp, inviteButton,
-    confirmButtons,
-    replyAll
-} = require('../../utils')
+    docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll
+} = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
-const { myMs } = require('../../utils')
+const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -19,7 +17,11 @@ module.exports = class TempBanCommand extends Command {
             aliases: ['tempban'],
             group: 'mod',
             description: 'Ban a user for a specified amount of time.',
-            details: `${userDetails}\n${timeDetails('duration')}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`user\` has to be a user's username, id or mention.
+                \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'tempban [user] [duration] <reason>',
             examples: [
                 'tempban Pixoll 1d',

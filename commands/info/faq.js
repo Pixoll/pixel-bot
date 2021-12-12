@@ -1,10 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, basicCollector, getArgument, myMs, confirmButtons, replyAll } = require('../../utils')
+const { generateEmbed, basicEmbed, basicCollector, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
 const { FaqSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 
@@ -149,7 +148,7 @@ module.exports = class FaqCommand extends Command {
         if (!question) {
             const questionMsg = await basicCollector({ message, interaction }, {
                 fieldName: 'What question do you want to answer?'
-            }, { time: myMs('2m') })
+            }, { time: 2 * 60_000 })
             if (!questionMsg) return
             question = questionMsg.content
         }
@@ -157,7 +156,7 @@ module.exports = class FaqCommand extends Command {
         if (!answer) {
             const answerMsg = await basicCollector({ message, interaction }, {
                 fieldName: 'Now, what would be it\'s answer?'
-            }, { time: myMs('2m') })
+            }, { time: 2 * 60_000 })
             if (!answerMsg) return
             answer = answerMsg.content
         }

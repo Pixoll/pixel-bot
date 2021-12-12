@@ -18,6 +18,8 @@ module.exports = async (client) => {
 
             const docs = await db.fetchMany({ duration: { $lte: Date.now() } })
             for (const doc of docs.toJSON()) {
+                client.emit('debug', 'Running event "modules/punishments#expired".')
+
                 /** @type {User} */
                 const user = await users.fetch(doc.userId).catch(() => null)
                 if (!user) continue
@@ -39,7 +41,7 @@ module.exports = async (client) => {
                     if (!data) continue
                     if (member.roles.cache.has(data.mutedRole)) {
                         await member.roles.remove(data.mutedRole)
-                        client.emit('guildMemberUnmute', guild, client.user, user, 'Mute has expired.', true)
+                        client.emit('guildMemberUnmute', guild, client.user, user, 'Mute has expired.')
                     }
                     continue
                 }

@@ -1,7 +1,6 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command, CommandGroup } = require('../../command-handler')
-const { basicEmbed, getArgument, replyAll } = require('../../utils')
+const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 const { CommandInstances, Command: CommandType, CommandGroup: CommandGroupType } = require('../../command-handler/typings')
 const { DisabledSchema } = require('../../schemas/types')
@@ -139,11 +138,10 @@ module.exports = class ToggleCommand extends Command {
 
         const { guildId } = message || interaction
 
-        const isEnabled = guildId ? command.isEnabledIn(guildId, true) : command._globalEnabled
+        const isEnabled = command.isEnabledIn(guildId, true)
         const global = guildId ? '' : ' globally'
 
-        if (guildId) command.setEnabledIn(guildId, !isEnabled)
-        else command._globalEnabled = !isEnabled
+        command.setEnabledIn(guildId, !isEnabled)
 
         if (data) {
             await this.db.update(data, isEnabled ?

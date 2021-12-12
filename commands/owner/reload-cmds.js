@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, confirmButtons } = require('../../utils')
+const { basicEmbed, confirmButtons } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

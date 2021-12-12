@@ -1,10 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags')
 const { TextChannel, Invite, Collection } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
-const { basicEmbed, getArgument, embedColor, inviteButton, confirmButtons } = require('../../utils')
+const { basicEmbed, getArgument, inviteButton, confirmButtons } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -126,7 +125,7 @@ module.exports = class GuildCommand extends Command {
 
         await guildOwner.send({
             embeds: [basicEmbed({
-                color: embedColor,
+                color: '#4c9f4c',
                 fieldName: `Dear owner of ${guild.name}`,
                 fieldValue: stripIndent`
                     The owner of this bot, ${botOwner.toString()}, has decided to remove the bot from your server.

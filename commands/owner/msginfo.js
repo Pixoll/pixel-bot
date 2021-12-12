@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
 const { get } = require('lodash')
-const { sliceDots, code } = require('../../utils')
+const { sliceDots, code } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

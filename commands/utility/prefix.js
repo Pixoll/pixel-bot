@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { stripIndent } = require('common-tags')
-const { basicEmbed } = require('../../utils')
+const { basicEmbed } = require('../../utils/functions')
 const { CommandInstances } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
@@ -92,11 +92,9 @@ module.exports = class PrefixCommand extends Command {
         }))
 
         if (!guild) {
-            client.user.setPresence({
-                activities: [{
-                    name: `for ${newPrefix}help`,
-                    type: 'WATCHING'
-                }]
+            client.user.setActivity({
+                name: `for ${newPrefix}help`,
+                type: 'WATCHING'
             })
         }
     }

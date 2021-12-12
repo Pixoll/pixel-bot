@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
-const { myMs } = require('../../utils')
+const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
 class DurationArgumentType extends ArgumentType {

@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { version, description } = require('../../package.json')
-const { myMs, replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
+const myMs = require('../../utils/my-ms')
 const { MessageEmbed, version: djsVersion } = require('discord.js')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
@@ -25,10 +26,10 @@ module.exports = class InfoCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { user, owners, options, uptime: _uptime } = this.client
+        const { user, owners, options, uptime } = this.client
         const guilds = this.client.guilds.cache
 
-        const uptime = myMs(_uptime, { long: true, length: 2, showMs: false })
+        const uptimeStr = myMs(uptime, { long: true, length: 2, showMs: false })
         const topgg = 'https://top.gg/bot/802267523058761759'
         const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString()
 
@@ -50,7 +51,7 @@ module.exports = class InfoCommand extends Command {
                 [Invite the bot](${topgg}/invite) -
                 [Vote here](${topgg}/vote)
             `, true)
-            .setFooter(`Uptime: ${uptime}`)
+            .setFooter(`Uptime: ${uptimeStr}`)
             .setTimestamp()
 
         await replyAll({ message, interaction }, info)

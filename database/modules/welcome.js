@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed, TextChannel } = require('discord.js')
 const { CommandoClient, CommandoMember } = require('../../command-handler/typings')
-const { isModuleEnabled, sliceFileName } = require('../../utils')
+const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,12 +10,12 @@ const { isModuleEnabled, sliceFileName } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('guildMemberAdd', /** @param {CommandoMember} member */ async ({ guild, user }) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#guildMemberAdd".`)
-
         if (user.bot) return
 
         const isEnabled = await isModuleEnabled(guild, 'welcome')
         if (!isEnabled) return
+
+        client.emit('debug', 'Running event "modules/welcome".')
 
         const data = await guild.database.welcome.fetch()
         if (!data) return

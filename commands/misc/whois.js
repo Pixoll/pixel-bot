@@ -2,8 +2,26 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
-const { getKeyPerms, timestamp, userDetails, customEmoji, myMs, capitalize, userFlags, replyAll } = require('../../utils')
+const { getKeyPerms, timestamp, customEmoji, replyAll } = require('../../utils/functions')
+const myMs = require('../../utils/my-ms')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
+
+const userFlags = {
+    HOUSE_BRAVERY: '<:bravery:894110822786281532>',
+    HOUSE_BRILLIANCE: '<:brilliance:894110822626885663> ',
+    HOUSE_BALANCE: '<:balance:894110823553855518>',
+    HYPESQUAD_EVENTS: '<:hypesquad:894113047763898369>',
+    DISCORD_EMPLOYEE: '<:discord_staff:894115772832546856>',
+    PARTNERED_SERVER_OWNER: '<:partner:894116243785785344>',
+    BUGHUNTER_LEVEL_1: '<:bug_hunter:894117053714292746>',
+    BUGHUNTER_LEVEL_2: '<:bug_buster:894117053856878592>',
+    EARLY_SUPPORTER: '<:early_supporter:894117997264896080>',
+    EARLY_VERIFIED_BOT_DEVELOPER: '<:verified_developer:894117997378142238>',
+    DISCORD_CERTIFIED_MODERATOR: '<:certified_moderator:894118624447586304>',
+    VERIFIED_BOT: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
+    TEAM_USER: '',
+}
 
 /** A command that can be run in a client */
 module.exports = class WhoIsCommand extends Command {
@@ -13,7 +31,7 @@ module.exports = class WhoIsCommand extends Command {
             aliases: ['user-info', 'userinfo'],
             group: 'misc',
             description: 'Displays a user\'s information.',
-            details: userDetails,
+            details: '`user` has to be a user\'s username, id or mention.',
             format: 'whois <user>',
             examples: ['whois Pixoll'],
             args: [{

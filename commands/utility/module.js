@@ -1,12 +1,24 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, capitalize, getArgument, addDashes, removeDashes, replyAll } = require('../../utils')
+const { CommandInstances } = require('../../command-handler/typings')
+const { basicEmbed, getArgument, addDashes, replyAll } = require('../../utils/functions')
 const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
+
+/**
+ * Removes dashes from the string and capitalizes the remaining strings
+ * @param {string} str The string to parse
+ */
+function removeDashes(str) {
+    if (!str) return
+    const arr = str.split('-')
+    const first = arr.shift()
+    const rest = arr.map(capitalize).join('')
+    return first + rest
+}
 
 const Obj = require('../../schemas').modules.schema.obj
 const modules = Object.keys(Obj).slice(1).map(addDashes)

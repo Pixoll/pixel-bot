@@ -1,10 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel } = require('discord.js')
 const { Command, permissions, CommandGroup } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { getArgument, replyAll, basicEmbed } = require('../../utils')
+const { getArgument, replyAll, basicEmbed } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -182,7 +181,7 @@ module.exports = class DiagnoseCommand extends Command {
             const channel = (message || interaction).channel
 
             const perms = channel.permissionsFor(guild.me).missing(command.clientPermissions)
-            const missing = perms?.map(str => `\`${permissions[str.toString()]}\``).join(', ') || 'None'
+            const missing = perms?.map(str => `\`${permissions[str]}\``).join(', ') || 'None'
 
             diagnose.addField('Missing permissions', missing)
         }

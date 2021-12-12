@@ -2,30 +2,22 @@
 const { Collection } = require('discord.js')
 const isEqual = require('lodash.isequal')
 const { Model } = require('mongoose')
-const { CommandoGuild, CommandoClient, DataModel } = require('../typings')
+const { CommandoGuild, DataModel } = require('../typings')
 /* eslint-enable no-unused-vars */
 
 /** A database schema manager (MongoDB) */
 class DatabaseManager {
     /**
-     * @param {CommandoClient} client The client this manager is for
-     * @param {CommandoGuild} guild The guild this manager is for
      * @param {Model<any, {}, {}>} schema The schema of this manager
+     * @param {CommandoGuild} [guild] The guild this manager is for
      */
-    constructor(client, guild, schema) {
-        /**
-         * Client for this database
-         * @type {CommandoClient}
-         * @readonly
-         */
-        this.client = client
-
+    constructor(schema, guild) {
         /**
          * Guild for this database
          * @type {?CommandoGuild}
          * @readonly
          */
-        this.guild = guild || null
+        this.guild = guild ?? null
 
         /**
          * The name of the schema this manager is for
@@ -48,13 +40,14 @@ class DatabaseManager {
         if (typeof doc !== 'object') {
             throw new TypeError('doc must me an object')
         }
-        if (this.guild) doc.guild ||= this.guild.id
-        const existing = doc._id ? await this.schema.findById(`${doc._id}`) : await this.schema.findOne(doc)
+        const { guild, schema } = this
+        if (guild) doc.guild ??= guild.id
+        const existing = doc._id ? await schema.findById(`${doc._id}`) : await schema.findOne(doc)
         if (existing) {
             const updated = await this.update(existing, doc)
             return updated
         }
-        const added = await new this.schema(doc).save()
+        const added = await new schema(doc).save()
         this.cache.set(`${added._id}`, added)
         return added
     }
@@ -112,21 +105,22 @@ class DatabaseManager {
      * @returns {Promise<?object>} The fetched document
      */
     async fetch(filter = {}) {
+        const { guild, schema } = this
         if (typeof filter === 'string') {
             const existing = this.cache.get(filter)
             if (existing) return existing
-            const data = await this.schema.findById(filter)
+            const data = await schema.findById(filter)
             if (data) this.cache.set(`${data._id}`, data)
             return data
         }
 
-        if (this.cache.size === 0) return undefined
+        if (this.cache.size === 0) return null
 
-        if (this.guild) filter.guild ??= this.guild.id
+        if (guild) filter.guild ??= guild.id
         const existing = this.cache.find(docsFilter(filter))
         if (existing) return existing
 
-        const doc = await this.schema.findOne(filter)
+        const doc = await schema.findOne(filter)
         if (doc) {
             this.cache.set(`${doc._id}`, doc)
             return doc
@@ -141,15 +135,16 @@ class DatabaseManager {
      */
     async fetchMany(filter = {}) {
         if (this.cache.size === 0) return this.cache
+        const { guild, schema } = this
 
-        if (this.guild) filter.guild ??= this.guild.id
+        if (guild) filter.guild ??= guild.id
         const filtered = this.cache.filter(docsFilter(filter))
         if (filtered.size !== 0) return filtered
 
-        const data = await this.schema.find(filter)
+        const data = await schema.find(filter)
         const fetched = new Collection()
         for (const doc of data) {
-            if (!this.guild && doc.guild) continue
+            if (!guild && doc.guild) continue
             if (!this.cache.get(`${doc._id}`)) {
                 this.cache.set(`${doc._id}`, doc)
             }

@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { embedColor, basicEmbed } = require('../../utils')
+const { basicEmbed } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -33,12 +33,13 @@ module.exports = class PingCommand extends Command {
         )
         const heartbeat = Math.round(this.client.ws.ping || 0)
 
+        const type = message ? 'Messages' : 'Interactions'
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setTitle('🏓 Pong!')
             .setDescription(stripIndent`
-                **Your ping:** ${roundtrip}ms
-                **Bot's ping:** ${heartbeat}ms
+                **${type} ping:** ${roundtrip}ms
+                **API ping:** ${heartbeat}ms
             `)
 
         await interaction?.editReply({ embeds: [embed] })

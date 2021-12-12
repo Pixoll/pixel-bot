@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { Collection, MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { timeDetails, abcOrder, pagedEmbed, embedColor, basicEmbed, replyAll } = require('../../utils')
+const { abcOrder, pagedEmbed, basicEmbed, replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 const timeZones = new Collection([
@@ -59,7 +59,8 @@ module.exports = class TimesCommand extends Command {
             group: 'misc',
             description: 'Displays the time in multiple timezones.',
             details: stripIndent`
-                ${timeDetails('hour')} Type \`now\` to get the current time.
+                \`hour\` uses the bot's time formatting, for more information use the \`help\` command.
+                Type \`now\` to get the current time.
                 \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}
             `,
             format: 'times <hour> <place>',
@@ -126,7 +127,7 @@ module.exports = class TimesCommand extends Command {
         }
 
         const date = hour || new Date()
-        const toMatch = message?.parseArgs().trim() || interaction.options.getString('hour')
+        const toMatch = message?.parseArgs().trim() ?? interaction?.options.getString('hour')
         const is12Hour = !!toMatch?.match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0]
 
         const times = []
@@ -149,7 +150,7 @@ module.exports = class TimesCommand extends Command {
             const clock = hour - (hour > 12 ? 12 : 0)
 
             const embed = new MessageEmbed()
-                .setColor(embedColor)
+                .setColor('#4c9f4c')
                 .setTitle(`:clock${clock}: Time in ${city}`)
                 .setDescription(stripIndent`
                     **Time:** ${time}
@@ -173,7 +174,7 @@ module.exports = class TimesCommand extends Command {
         const clock = hours - (hours > 12 ? 12 : 0) || 12
 
         const base = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setTitle(`:clock${clock}: Times around the world`)
             .setTimestamp()
 

@@ -1,18 +1,15 @@
 /* eslint-disable no-unused-vars */
 const {
-    MessageEmbed, GuildMember, User, Role, MessageOptions, TextChannel, GuildChannel, Message, ColorResolvable,
-    AwaitMessagesOptions, MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util
+    MessageEmbed, GuildMember, User, Role, MessageOptions, GuildChannel, Message, ColorResolvable, AwaitMessagesOptions,
+    MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util
 } = require('discord.js')
 const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
 const CGuildClass = require('../command-handler/extensions/guild')
-const { transform, isEqual, isArray, isObject } = require('lodash')
-const { stripIndent, oneLine } = require('common-tags')
-const { myMs, timestamp } = require('./custom-ms')
-const { version } = require('../package.json')
-const { moderations, active } = require('../schemas')
+const { transform, isEqual, isArray, isObject, capitalize } = require('lodash')
+const { stripIndent } = require('common-tags')
+const myMs = require('./my-ms')
 const { permissions } = require('../command-handler/util')
 const { Module, AuditLog } = require('../schemas/types')
-const { inviteMaxAge } = require('./constants')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -21,26 +18,6 @@ const { inviteMaxAge } = require('./constants')
  */
 function sleep(s) {
     return new Promise(resolve => setTimeout(resolve, s * 1000))
-}
-
-/**
- * Calculates the probability of something
- * @param {number} n The probability (in decimals or percentage) to calculate
- */
-function probability(n) {
-    if (n > 1) n /= 100
-    return !!n && Math.random() <= n
-}
-
-/**
- * Slices the directory/name of the file to their last 2 references.
- * @param {string} fileDir The directory/name of the file.
- */
-function sliceFileName(fileDir) {
-    const arr = fileDir.split(/[/\\]+/g)
-    const fileName = arr.pop().split('.').shift()
-    const folderName = arr.pop()
-    return `${folderName}/${fileName}`
 }
 
 /**
@@ -61,15 +38,6 @@ function abcOrder(str1, str2) {
  */
 function code(str, lang = '') {
     return `\`\`\`${lang}\n${Util.escapeMarkdown(str)}\n\`\`\``
-}
-
-/**
- * Fetches the provided partial object
- * @param {*} object The partial object
- */
-async function fetchPartial(object) {
-    if (object.partial) return await object.fetch().catch(() => object)
-    return object
 }
 
 /**
@@ -118,19 +86,8 @@ async function isModuleEnabled(guild, module, subModule) {
 }
 
 /**
- * Gets the audit-logs channel
- * @param {CommandoGuild} guild The guild to look into
- * @returns {Promise<?TextChannel>}
- */
-async function getLogsChannel(guild) {
-    const data = await guild.database.setup.fetch()
-    const channel = guild.channels.resolve(data?.logsChannel)
-    return channel
-}
-
-/**
  * A custom emoji.
- * @typedef {'cross'|'check'|'info'|'neutral'|'loading'|'boost'|'bot'} CustomEmoji
+ * @typedef {'cross'|'check'|'info'|'neutral'|'loading'|'boost'|'bot'|'online'|'dnd'|'idle'|'invis'} CustomEmoji
  */
 
 /**
@@ -142,21 +99,26 @@ async function getLogsChannel(guild) {
 function customEmoji(emoji = '', animated = false) {
     if (!emoji) return ''
 
-    if (emoji === 'loading') return '<a:loading:863666168053366814>'
-    if (emoji === 'neutral') return '<:neutral:819395069608984617>'
-    if (emoji === 'info') return '<:info:802617654262890527>'
-    if (emoji === 'boost') return '<a:boost:806364586231595028>'
-    if (emoji === 'bot') return '<:bot1:893998060965883904><:bot2:893998060718399528>'
-
-    if (animated) {
-        if (emoji === 'cross') return '<a:cross:863118691917889556>'
-        if (emoji === 'check') return '<a:check:863118691808706580>'
-    } else {
-        if (emoji === 'cross') return '<:cross:802617654442852394>'
-        if (emoji === 'check') return '<:check:802617654396715029>'
+    switch (emoji) {
+        case 'boost': return '<a:boost:806364586231595028>'
+        case 'bot': return '<:bot1:893998060965883904><:bot2:893998060718399528>'
+        case 'check': {
+            if (animated) return '<a:check:863118691808706580>'
+            return '<:check:802617654396715029>'
+        }
+        case 'cross': {
+            if (animated) return '<a:cross:863118691917889556>'
+            return '<:cross:802617654442852394>'
+        }
+        case 'dnd': return '<:dnd:806022690284240936>'
+        case 'idle': return '<:idle:806022690443624458>'
+        case 'info': return '<:info:802617654262890527>'
+        case 'invis': return '<:invis:806022690326315078>'
+        case 'loading': return '<a:loading:863666168053366814>'
+        case 'neutral': return '<:neutral:819395069608984617>'
+        case 'online': return '<:online:806022690196291625>'
+        default: return emoji
     }
-
-    return emoji
 }
 
 /**
@@ -194,28 +156,27 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
 }
 
 /**
- * Formats the bytes to its most divisable point
- * @param {number|string} bytes The bytes to format
- * @param {number} [decimals] The amount od decimals to display
- * @param {boolean} [showUnit] Whether to display the units or not
+ * Parses the specified time into a Discord template
+ * @param {number|Date} time The time to parse (in milliseconds)
+ * @param {'t'|'T'|'d'|'D'|'f'|'F'|'R'} [format] The format of the timestamp
+ * - `t`: Short time ➜ `16:20`
+ * - `T`: Long time ➜ `16:20:30`
+ * - `d`: Short date ➜ `20/04/2021`
+ * - `D`: Long date ➜ `20 April 2021`
+ * - `f`: Short date/time ➜ `20 April 2021 16:20`
+ * - `F`: Long date/time ➜ `Tuesday, 20 April 2021 16:20`
+ * - `R`: Relative time ➜ `2 months ago`
  */
-function formatBytes(bytes, decimals = 2, showUnit = true) {
-    if (bytes === 0) {
-        if (showUnit) return '0 B'
-        return '0'
-    }
+function timestamp(time, format = 'f') {
+    if (!time) return
+    if (time instanceof Date) time = time.getTime()
 
-    const k = 1000
-    const dm = decimals < 0 ? 0 : decimals
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+    const trunc = Math.trunc(time / 1000)
+    const rem = trunc % 60
+    const roundUp = rem >= 20
+    const epoch = trunc - rem + (roundUp ? 60 : 0)
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    const float = parseFloat(
-        (bytes / Math.pow(k, i)).toFixed(dm)
-    ).toString()
-
-    if (showUnit) return `${float} ${sizes[i]}`
-    return float
+    return `<t:${epoch}:${format}>`
 }
 
 /**
@@ -446,33 +407,7 @@ function getKeyPerms(roleOrMember) {
     const filtered = perms.toArray().filter(perm => filter.includes(perm))
     if (filtered.length === 0) return 'None'
 
-    return filtered.map(perm => permissions[perm.toString()]).join(', ')
-}
-
-/**
- * Format's a permission into a string.
- * @param {string} perm The permission to format.
- * @param {boolean} [codeLike] If the resulting string should be surrounded by \`these\`.
- */
-function removeUnderscores(perm, codeLike) {
-    const string = capitalize(perm.replace(/_/g, ' '))
-
-    if (codeLike) return `\`${string}\``
-    return string
-}
-
-/**
- * Capitalizes every word of a string.
- * @param {string} str The string to capitalize.
- */
-function capitalize(str) {
-    if (!str) return ''
-
-    const splitStr = str.toLowerCase().split(/ +/)
-    for (let i = 0; i < splitStr.length; i++) {
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
-    }
-    return splitStr.join(' ')
+    return filtered.map(perm => permissions[perm]).join(', ')
 }
 
 /**
@@ -497,15 +432,6 @@ function pluralize(string, number, showNum = true) {
 }
 
 /**
- * Removes Discord's formatting from a string.
- * @param {string} str The string.
- */
-function remDiscFormat(str) {
-    if (!str) return ''
-    return str.replace(/\||_|\*|`|~|>/g, '\\$&')
-}
-
-/**
  * Slices the string at the specified length, and adds `...` if the length of the original is greater than the modified
  * @param {string} string The string to slice
  * @param {number} length The length of the sliced string
@@ -520,112 +446,53 @@ function sliceDots(string, length) {
     return sliced + dots
 }
 
-/**
- * Checks if the whole embed's structure exceeds the maximum string length (6,000).
- * @param {MessageEmbed} embed The embed to check.
- */
-function embedExceedsMax(embed) {
-    const { title, description, fields, footer, author } = embed
-    let length = 0
+// /**
+//  * Checks if the whole embed's structure exceeds the maximum string length (6,000).
+//  * @param {MessageEmbed} embed The embed to check.
+//  */
+// function embedExceedsMax(embed) {
+//     const { title, description, fields, footer, author } = embed
+//     let length = 0
 
-    if (title) {
-        length += title.length
-        if (length > 6000) {
-            return { exceeded: true, trigger: 'title', index: null }
-        }
-    }
+//     if (title) {
+//         length += title.length
+//         if (length > 6000) {
+//             return { exceeded: true, trigger: 'title', index: null }
+//         }
+//     }
 
-    if (description) {
-        length += description.length
-        if (length > 6000) {
-            return { exceeded: true, trigger: 'description', index: null }
-        }
-    }
+//     if (description) {
+//         length += description.length
+//         if (length > 6000) {
+//             return { exceeded: true, trigger: 'description', index: null }
+//         }
+//     }
 
-    if (footer?.text) {
-        length += footer.text.length
-        if (length > 6000) {
-            return { exceeded: true, trigger: 'footer.text', index: null }
-        }
-    }
+//     if (footer?.text) {
+//         length += footer.text.length
+//         if (length > 6000) {
+//             return { exceeded: true, trigger: 'footer.text', index: null }
+//         }
+//     }
 
-    if (author?.name) {
-        length += author.name.length
-        if (length > 6000) {
-            return { exceeded: true, trigger: 'author.name', index: null }
-        }
-    }
+//     if (author?.name) {
+//         length += author.name.length
+//         if (length > 6000) {
+//             return { exceeded: true, trigger: 'author.name', index: null }
+//         }
+//     }
 
-    for (let i = 0; i < fields.length; i++) {
-        const field = fields[i]
-        length += field.name.length
-        length += field.value.length
-        if (length > 6000) {
-            return { exceeded: true, trigger: 'fields', index: i }
-        }
-    }
+//     for (let i = 0; i < fields.length; i++) {
+//         const field = fields[i]
+//         length += field.name.length
+//         length += field.value.length
+//         if (length > 6000) {
+//             return { exceeded: true, trigger: 'fields', index: i }
+//         }
+//     }
 
-    return { exceeded: false, trigger: null, index: null }
-}
-
-/**
- * Gives any date the following format: `30/12/2020, 23:59`
- * @param {Date|number} date The date in `Date` format or a number.
- * @deprecated
- */
-function formatDate(date) {
-    const timeFormat = new Intl.DateTimeFormat('en-GB', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        timeZone: 'UTC',
-        // timeZoneName: 'short'
-    })
-
-    if (!date && date !== 0) return
-
-    const isValidDate = typeof date === 'number' ? null : !!date.getTime()
-    const isValidNumber = date / 1 < 8.64e+15
-    if (!isValidDate && !isValidNumber) return
-
-    return timeFormat.format(date)
-}
-
-/**
- * Get's the full difference between the specified date and now in this format:
- * `[years, months, days, hours, minutes, seconds]`
- * @param {Date|number} date The date in `Date` format or a number.
- * @deprecated
- */
-function getDateDiff(date) {
-    const milliseconds = Math.abs(Date.now() - date)
-
-    // [years, months, days, hours, minutes, seconds]
-    const difference = new Date(milliseconds).toISOString().replace(/T|:/g, '-')
-        .substring(0, 19).split('-').map(v => Number(v))
-    let [years, months, days, hours, minutes, seconds] = difference
-
-    years -= 1970 // makes sure the year starts on 0
-
-    return [years + 'y', --months + 'mo', --days + 'd', hours + 'h', minutes + 'm', seconds + 's']
-        .filter(value => !value.startsWith('0'))
-}
-
-/**
- * Get's the difference in days between the specified date and now.
- * @param {string|Date} date The date in `Date` format or a string.
- * @returns {number}
- */
-function getDayDiff(date) {
-    const string = typeof (date) === 'string' ? date : new Date(date).toISOString().split('T')[0]
-    const arr = string.split(/\/|,|-/, 3)
-    const newDate = new Date(arr)
-    const difference = new Date() - newDate.getTime()
-    const daysDiff = Math.trunc(difference / 86_400_000)
-    return daysDiff
-}
+//     return { exceeded: false, trigger: null, index: null }
+// }
 
 /**
  * Compares if two arrays have the same values. *It does not check for nested values*.
@@ -665,29 +532,6 @@ function compareArrays(oldArr = [], newArr = []) {
 }
 
 /**
- * Loops over every element contained on both arrays and checks wether they have common elements.
- * @param {array} first The first array.
- * @param {array} second The second array.
- * @returns {boolean}
- */
-function findCommonElement(first, second) {
-    for (let i = 0; i < first?.length; i++) {
-        for (let j = 0; j < second?.length; j++) {
-            if (first[i] === second[j]) return true
-        }
-    }
-    return false
-}
-
-/**
- * Removes all duplicated items in an array
- * @param {any[]} arr The array to filter
- */
-function removeDuplicated(arr) {
-    return [...new Set(arr)]
-}
-
-/**
  * Compares if two objects are equal and returns the differences.
  * @param {object} first The first object.
  * @param {object} second The second object.
@@ -721,186 +565,6 @@ function validURL(str) {
         '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
 
     return pattern.test(str)
-}
-
-/**
- * Bans an user.
- * @param {CommandoGuild} guild The guild where the user is being banned.
- * @param {User} bot The bot user.
- * @param {User} user The user to ban.
- * @param {string} reason The reason of the ban.
- * @deprecated
- */
-async function ban(guild, bot, user, reason = 'No reason given.') {
-    const { members, id: guildId, name: guildName } = guild
-
-    const member = members.cache.get(user.id)
-
-    if (reason.length > 512 || !member?.bannable || isMod(member)) return
-
-    if (member && !user.bot) {
-        await user.send(stripIndent`
-            You have been **banned** from **${guildName}**
-            **Reason:** ${reason}
-            **Moderator:** ${bot.tag} - Auto-moderation system
-        `).catch(() => null)
-    }
-
-    await members.ban(user, { days: 7, reason: reason }).catch(() => null)
-
-    const doc = {
-        _id: docId(),
-        type: 'ban',
-        guild: guildId,
-        user: user.id,
-        mod: bot.id,
-        reason: reason
-    }
-
-    await new moderations(doc).save()
-}
-
-/**
- * Temporally bans a user.
- * @param {CommandoGuild} guild The guild where the user is being banned.
- * @param {User} bot The bot user.
- * @param {User} user The user to ban.
- * @param {number} time How long the ban should last.
- * @param {string} reason The reason of the ban.
- * @deprecated
- */
-async function tempban(guild, bot, user, time, reason = 'No reason given.') {
-    const { members, channels, name: guildName, id: guildId } = guild
-
-    const member = members.cache.get(user.id)
-
-    if (reason.length > 512 || !member?.bannable || isMod(member)) return
-
-    const duration = myMs(time, { long: true })
-
-    if (member && !user.bot) {
-        const invite = await channels.cache.filter(({ type }) =>
-            !['category', 'store'].includes(type)
-        ).first().createInvite({ maxAge: 0, maxUses: 1 })
-        await user.send(stripIndent`
-            You have been **banned** from **${guildName}** for **${duration}**
-            **Reason:** ${reason}
-            **Moderator:** ${bot.tag} - Auto-moderation system
-            
-            Feel free to join back when your ban expires: ${invite.toString()}
-        `).catch(() => null)
-    }
-
-    await members.ban(user, { days: 7, reason: reason }).catch(() => null)
-
-    const doc1 = {
-        _id: docId(),
-        type: 'temp-ban',
-        guild: guildId,
-        user: user.id,
-        mod: bot.id,
-        reason: reason,
-        duration: duration
-    }
-
-    const doc2 = {
-        type: 'temp-ban',
-        guild: guildId,
-        user: user.id,
-        duration: Date.now() + time
-    }
-
-    await new moderations(doc1).save()
-    await new active(doc2).save()
-}
-
-/**
- * Kicks a member.
- * @param {CommandoGuild} guild The guild where the user is being kicked.
- * @param {User} bot The bot user.
- * @param {GuildMember} member The member to kick.
- * @param {string} reason The reason of the kick.
- * @deprecated
- */
-async function kick(guild, bot, member, reason = 'No reason given.') {
-    const { channels, name: guildName, id: guildId } = guild
-
-    if (reason.length > 512 || !member.kickable || isMod(member)) return
-
-    if (!member.user.bot) {
-        const invite = await channels.cache.filter(ch =>
-            !['category', 'store'].includes(ch.type)
-        ).first().createInvite({ maxAge: inviteMaxAge, maxUses: 1 })
-        await member.send(stripIndent`
-            You have been **kicked** from **${guildName}**
-            **Reason:** ${reason}
-            **Moderator:** ${bot} - Auto-moderation system
-            
-            Feel free to join back: ${invite.toString()}
-            *This invite will expire in 1 week.*
-        `).catch(() => null)
-    }
-
-    await member.kick(reason).catch(() => null)
-
-    const doc = {
-        _id: docId(),
-        type: 'kick',
-        guild: guildId,
-        user: member.id,
-        mod: bot.id,
-        reason: reason
-    }
-
-    await new moderations(doc).save()
-}
-
-/**
- * Mutes a member.
- * @param {CommandoGuild} guild The guild where the user is being muted.
- * @param {User} bot The bot user.
- * @param {GuildMember} member The member to mute.
- * @param {Role} role The 'Muted' role.
- * @param {number} time The duration of the mute.
- * @param {string} reason The reason of the mute.
- * @deprecated
- */
-async function mute(guild, bot, member, role, time, reason = 'No reason given.') {
-    const { name: guildName, id: guildId } = guild
-
-    if (reason.length > 512 || !member.manageable || isMod(member) || member.roles.cache.has(role.id)) return
-
-    const duration = myMs(time, { long: true })
-
-    if (!member.user.bot) {
-        await member.send(stripIndent`
-            You have been **muted** on **${guildName}** for **${duration}**
-            **Reason:** ${reason}
-            **Moderator:** ${bot.tag} - Auto-moderation system
-        `).catch(() => null)
-    }
-
-    await member.roles.add(role).catch(() => null)
-
-    const doc1 = {
-        _id: docId(),
-        type: 'mute',
-        guild: guildId,
-        user: member.id,
-        mod: bot.id,
-        reason: reason,
-        duration: duration
-    }
-
-    const doc2 = {
-        type: 'mute',
-        guild: guildId,
-        user: member.id,
-        duration: Date.now() + time
-    }
-
-    await new moderations(doc1).save()
-    await new active(doc2).save()
 }
 
 /**
@@ -1211,7 +875,8 @@ async function generateEmbed({ message, interaction }, array, data) {
                     break
                 }
 
-                const propName = capitalize(key.replace('createdAt', 'date'))
+                const propName = capitalize(key.replace('createdAt', 'date')).replace('id', '')
+                if (propName.endsWith('tag')) continue
 
                 const userStr = key === 'userId' ? `<@${item.userId}> ${item.userTag}` : null
                 const modStr = key === 'modId' ? `<@${item.modId}> ${item.modTag}` : null
@@ -1225,7 +890,7 @@ async function generateEmbed({ message, interaction }, array, data) {
 
                 const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key]
 
-                value.push(`**>** **${propName}:** ${docData}`)
+                value.push(`**${propName}:** ${docData}`)
             }
 
             embed.addField(
@@ -1315,7 +980,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
             }
             return true
         },
-        time: myMs('30s'),
+        time: 30_000,
         componentType: 'BUTTON'
     }).catch(() => null)
 
@@ -1336,134 +1001,34 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     return true
 }
 
-/**
- * Creates an embed containing the information about the command.
- * @param {Command} cmd The command to get information from.
- * @param {CommandoGuild} guild The guild where the command is used.
- */
-function commandInfo(cmd, guild) {
-    const { prefix: _prefix, user, owners } = cmd.client
-    const {
-        name, description, details, examples, aliases, group, guarded, throttling, ownerOnly, guildOnly,
-        dmOnly, deprecated, replacing, slash
-    } = cmd
-
-    const prefix = guild?.prefix || _prefix
-
-    const usage = cmd.format?.split('\n').map(format => {
-        if (format.startsWith('<') || format.startsWith('[')) {
-            return `**>** \`${prefix + name} ${format}\``
-        }
-
-        const [cmd, desc] = format.split(' - ')
-        const str = `**>** \`${prefix + cmd}\``
-
-        if (desc) return str + ' - ' + desc
-        return str
-    }).join('\n') || `**>** \`${prefix + name}\``
-
-    const clientPermissions = cmd.clientPermissions?.map(perm => permissions[perm]).join(', ')
-    const userPermissions = cmd.userPermissions?.map(perm => permissions[perm]).join(', ')
-
-    const embed = new MessageEmbed()
-        .setColor('#4c9f4c')
-        .setAuthor(
-            `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
-            user.displayAvatarURL({ dynamic: true })
-        )
-        .setDescription(stripIndent`
-            ${deprecated ? oneLine`
-                **This command has been marked as deprecated, which means it will be removed in future updates.
-                Please start using the \`${replacing}\` command from now on.**
-            ` : ''}
-            ${description}
-            ${details ? `\n>>> ${details}` : ''}
-        `)
-        .addField('Usage', usage)
-        .setFooter(
-            `Version: ${version} • Developer: ${owners[0].tag}`,
-            user.displayAvatarURL({ dynamic: true })
-        )
-
-    if (examples) embed.addField('Examples', examples.map(ex => `**>** \`${prefix + ex}\``).join('\n'))
-
-    const information = {
-        Category: group.name,
-        Aliases: aliases.join(', ') || null,
-        Slash: slash ? 'Yes' : 'No',
-        Cooldown: throttling ?
-            `${pluralize('usage', throttling.usages)} per ${myMs(throttling.duration * 1000, { long: true })}` :
-            null,
-        Guarded: guarded ? 'Yes' : 'No',
-        Status: !guarded ? (cmd.isEnabledIn(guild) ? 'Enabled' : 'Disabled') : null,
-        'Server only': guildOnly ? 'Yes' : null,
-        'DMs only': dmOnly ? 'Yes' : null,
-        'Bot perms': clientPermissions || null,
-        'User perms': userPermissions || (ownerOnly ? 'Bot\'s owner only' : null)
-    }
-
-    const info = []
-    for (const prop in information) {
-        if (!information[prop]) continue
-        info.push(`**>** **${prop}:** ${information[prop]}`)
-    }
-
-    const first = info.splice(0, Math.round(info.length / 2 + 0.1))
-
-    embed.addFields(
-        { name: 'Information', value: first.join('\n'), inline: true },
-        { name: '\u200B', value: info.join('\n'), inline: true }
-    )
-
-    return embed
-}
-
 module.exports = {
     abcOrder,
     addDashes,
     arrayEquals,
-    ban,
     basicCollector,
     basicEmbed,
-    capitalize,
     code,
     confirmButtons,
-    commandInfo,
     compareArrays,
     customEmoji,
     difference,
     docId,
-    embedExceedsMax,
-    fetchPartial,
-    findCommonElement,
-    formatBytes,
-    formatDate,
+    // embedExceedsMax,
     generateEmbed,
     getArgument,
-    getDateDiff,
-    getDayDiff,
     getKeyPerms,
-    getLogsChannel,
     inviteButton,
     isMod,
     isModuleEnabled,
     isValidRole,
-    kick,
     memberException,
-    mute,
     pagedEmbed,
     pluralize,
-    probability,
-    remDiscFormat,
-    removeDashes,
-    removeDuplicated,
-    removeUnderscores,
     replyAll,
     noReplyInDMs,
     sleep,
     sliceDots,
-    sliceFileName,
-    tempban,
+    timestamp,
     userException,
     validURL
 }

@@ -1,9 +1,8 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, generateEmbed, getArgument } = require('../../utils')
+const { basicEmbed, generateEmbed, getArgument } = require('../../utils/functions')
 const { ErrorSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
 

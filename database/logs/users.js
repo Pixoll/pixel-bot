@@ -2,8 +2,24 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, userFlags, compareArrays, customEmoji, sliceFileName } = require('../../utils')
+const { isModuleEnabled, compareArrays, customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
+
+const userFlags = {
+    HOUSE_BRAVERY: '<:bravery:894110822786281532>',
+    HOUSE_BRILLIANCE: '<:brilliance:894110822626885663> ',
+    HOUSE_BALANCE: '<:balance:894110823553855518>',
+    HYPESQUAD_EVENTS: '<:hypesquad:894113047763898369>',
+    DISCORD_EMPLOYEE: '<:discord_staff:894115772832546856>',
+    PARTNERED_SERVER_OWNER: '<:partner:894116243785785344>',
+    BUGHUNTER_LEVEL_1: '<:bug_hunter:894117053714292746>',
+    BUGHUNTER_LEVEL_2: '<:bug_buster:894117053856878592>',
+    EARLY_SUPPORTER: '<:early_supporter:894117997264896080>',
+    EARLY_VERIFIED_BOT_DEVELOPER: '<:verified_developer:894117997378142238>',
+    DISCORD_CERTIFIED_MODERATOR: '<:certified_moderator:894118624447586304>',
+    VERIFIED_BOT: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
+    TEAM_USER: '',
+}
 
 /**
  * Returns a clickable link to the image. `None` if the link is invald
@@ -22,8 +38,6 @@ const imgOptions = { dynamic: true, size: 2048 }
  */
 module.exports = (client) => {
     client.on('userUpdate', async (oldUser, newUser) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#userUpdate".`)
-
         const { username: name1, discriminator: discrim1, avatar: avatar1, flags: flags1 } = oldUser
         const { username: name2, discriminator: discrim2, avatar: avatar2, flags: flags2, id, tag } = newUser
 

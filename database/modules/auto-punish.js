@@ -1,7 +1,7 @@
 const { User } = require('discord.js')
 const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
-const { myMs } = require('../../utils')
-const { isMod, mute, kick, tempban, ban, moduleStatus } = require('../../utils')
+const myMs = require('../../utils/my-ms')
+const { isMod, mute, kick, tempban, ban, moduleStatus } = require('../../utils/functions')
 const { moderations, modules } = require('../../schemas')
 
 /**

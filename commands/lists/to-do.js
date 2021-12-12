@@ -1,8 +1,7 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils')
+const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 const { TodoSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
@@ -156,7 +155,7 @@ module.exports = class TodoCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            fieldName: `Added item \`${todoData.list.length + 1}\` to your to-do list:`,
+            fieldName: `Added item \`${(todoData?.list.length ?? 0) + 1}\` to your to-do list:`,
             fieldValue: item
         }))
     }

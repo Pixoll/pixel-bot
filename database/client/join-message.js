@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags')
 const { MessageEmbed, TextBasedChannels } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { embedColor, customEmoji, sliceFileName } = require('../../utils')
+const { customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,8 +11,9 @@ const { embedColor, customEmoji, sliceFileName } = require('../../utils')
  */
 module.exports = async (client) => {
     client.on('guildCreate', async guild => {
-        client.emit('debug', `Running "${sliceFileName(__filename)}".`)
+        client.emit('debug', 'Running "client/join-message".')
 
+        const { user, owners, prefix, options, users } = client
         const { channels, id, ownerId } = guild
 
         /** @type {TextBasedChannels} */
@@ -25,15 +26,14 @@ module.exports = async (client) => {
                 return hasPerms
             }).first()
         if (!channel) {
-            const owner = await client.users.fetch(ownerId).catch(() => null)
+            const owner = await users.fetch(ownerId).catch(() => null)
             channel = await owner?.createDM().catch(() => null)
         }
 
         const topgg = 'https://top.gg/bot/802267523058761759'
-        const { user, owners, prefix, options } = client
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setTitle(`Thanks for adding ${user.username}!`)
             .setDescription('Here\'s some useful information about the bot.')
             .addField(`${customEmoji('info')} Using commands`, stripIndent`

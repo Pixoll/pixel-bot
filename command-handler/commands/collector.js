@@ -13,7 +13,6 @@ class ArgumentCollector {
 	constructor(client, args, promptLimit = Infinity) {
 		if (!client) throw new TypeError('Collector client must be specified.')
 		if (!args || !Array.isArray(args)) throw new TypeError('Collector args must be an Array.')
-		if (promptLimit === null) promptLimit = Infinity
 
 		/**
 		 * Client this collector is for
@@ -48,23 +47,28 @@ class ArgumentCollector {
 	/**
 	 * Obtains values for the arguments, prompting if necessary.
 	 * @param {CommandoMessage} msg Message that the collector is being triggered by
-	 * @param {Array<*>} [provided=[]] Values that are already available
+	 * @param {*[]} [provided=[]] Values that are already available
 	 * @param {number} [promptLimit=this.promptLimit] Maximum number of times to prompt for a single argument
 	 * @return {Promise<ArgumentCollectorResult>}
 	 */
 	async obtain(msg, provided = [], promptLimit = this.promptLimit) {
-		this.client.dispatcher._awaiting.add(msg.author.id + msg.channel.id)
+		const { author, channelId } = msg
+		const { dispatcher } = this.client
+		const { args } = this
+		const id = author.id + channelId
+
+		dispatcher._awaiting.add(id)
 		const values = {}
 		const results = []
 
 		try {
-			for (let i = 0; i < this.args.length; i++) {
-				const arg = this.args[i]
+			for (let i = 0; i < args.length; i++) {
+				const arg = args[i]
 				const result = await arg.obtain(msg, arg.infinite ? provided.slice(i) : provided[i], promptLimit)
 				results.push(result)
 
 				if (result.cancelled) {
-					this.client.dispatcher._awaiting.delete(msg.author.id + msg.channel.id)
+					dispatcher._awaiting.delete(id)
 					return {
 						values: null,
 						cancelled: result.cancelled,
@@ -76,16 +80,16 @@ class ArgumentCollector {
 				values[arg.key] = result.value
 			}
 		} catch (err) {
-			this.client.dispatcher._awaiting.delete(msg.author.id + msg.channel.id)
+			dispatcher._awaiting.delete(id)
 			throw err
 		}
 
-		this.client.dispatcher._awaiting.delete(msg.author.id + msg.channel.id)
+		dispatcher._awaiting.delete(id)
 		return {
 			values,
 			cancelled: null,
-			prompts: [].concat(...results.map(res => res.prompts)),
-			answers: [].concat(...results.map(res => res.answers))
+			prompts: results.map(res => res.prompts),
+			answers: results.map(res => res.answers)
 		}
 	}
 }

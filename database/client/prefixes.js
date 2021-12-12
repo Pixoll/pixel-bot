@@ -8,12 +8,12 @@ const { CommandoClient } = require('../../command-handler/typings')
  */
 module.exports = async (client) => {
     const { database } = client
-    const guilds = client.guilds.cache
+    const guilds = client.guilds.cache.toJSON()
 
     const global = await database.prefixes.fetch()
     if (global) client.prefix = global.prefix
 
-    for (const [, guild] of guilds) {
+    for (const guild of guilds) {
         const data = await guild.database.prefixes.fetch()
         if (data) guild.prefix = data.prefix
     }

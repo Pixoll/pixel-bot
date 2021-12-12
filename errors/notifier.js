@@ -2,9 +2,14 @@
 const { CommandoClient } = require('../command-handler/typings')
 const { CommandInstances, Command } = require('../command-handler/typings')
 const { MessageEmbed, TextChannel, Util, CommandInteractionOption } = require('discord.js')
-const { customEmoji, docId, code, replyAll } = require('../utils')
+const { customEmoji, docId, code, replyAll } = require('../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
+
+const fileTree = __dirname.split(/[\\/]+/g)
+fileTree.pop()
+const root = fileTree.pop()
+const excludeRegex = /node_modules|\(internal|\(<anonymous>\)/
 
 /**
  * A manager for all errors of the process and client
@@ -60,17 +65,16 @@ module.exports = (client) => {
 
             const lentgh = error.name.length + error.message.length + 3
             const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
-            const root = __dirname.split(/[\\/]/g).pop()
 
-            const files = stack.filter(str =>
-                !str.includes('node_modules') &&
-                !str.includes('(internal') &&
-                !str.includes('(<anonymous>)') &&
-                str.includes(root)
-            ).map(str =>
-                '>' + str.replace('at ', '')
+            const files = stack.filter(str => {
+                const match = excludeRegex.test(str)
+                if (match) return false
+                return str.includes(root)
+            }).map((str, i) =>
+                '> ' + str.replace('at ', '')
                     .replace(__dirname, root)
                     .replace(/([\\]+)/g, '/')
+                    .trim()
             ).join('\n')
 
             const { guild, channel } = (message || interaction) ?? {}

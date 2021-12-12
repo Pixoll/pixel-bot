@@ -2,7 +2,8 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { User } = require('discord.js')
-const { basicEmbed, userDetails, reasonDetails, confirmButtons, replyAll } = require('../../utils')
+const { basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -12,7 +13,10 @@ module.exports = class UnbanCommand extends Command {
             name: 'unban',
             group: 'mod',
             description: 'Unban a user.',
-            details: `${userDetails}\n${reasonDetails()}`,
+            details: stripIndent`
+                \`user\` has to be a user's username, id or mention.
+                If \`reason\` is not specified, it will default as "No reason given".
+            `,
             format: 'unban [user] <reason>',
             examples: [
                 'unban @Pixoll',

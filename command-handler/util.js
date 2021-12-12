@@ -1,15 +1,3 @@
-// This returns Object.prototype in order to return a valid object
-// without creating a new one each time this is called just to discard it the moment after.
-const isConstructorProxyHandler = {
-	construct() {
-		return Object.prototype
-	}
-}
-
-function escapeRegex(str) {
-	return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
-}
-
 /**
  * @param {*[]} items
  * @param {string} label
@@ -20,31 +8,6 @@ function disambiguation(items, label, property = 'name') {
 	return `**Multiple ${label} found, please be more specific:** ${itemList}`
 }
 
-function isConstructor(func, _class) {
-	try {
-		// eslint-disable-next-line no-new
-		new new Proxy(func, isConstructorProxyHandler)()
-		if (!_class) return true
-		return func.prototype instanceof _class
-	} catch (err) {
-		return false
-	}
-}
-
-function paginate(items, page = 1, pageLength = 10) {
-	const maxPage = Math.ceil(items.length / pageLength)
-	if (page < 1) page = 1
-	if (page > maxPage) page = maxPage
-	const startIndex = (page - 1) * pageLength
-	return {
-		items: items.length > pageLength ? items.slice(startIndex, startIndex + pageLength) : items,
-		page,
-		maxPage,
-		pageLength
-	}
-}
-
-/** @type {Object<string,string>} */
 const permissions = {
 	CREATE_INSTANT_INVITE: 'Create instant invite',
 	KICK_MEMBERS: 'Kick members',
@@ -81,60 +44,15 @@ const permissions = {
 	REQUEST_TO_SPEAK: 'Request to speak',
 	MANAGE_THREADS: 'Manage threads',
 	USE_PUBLIC_THREADS: 'Use public threads',
-	USE_PRIVATE_THREADS: 'Use private threads',
 	CREATE_PUBLIC_THREADS: 'Create public threads',
+	USE_PRIVATE_THREADS: 'Use private threads',
 	CREATE_PRIVATE_THREADS: 'Create private threads',
 	USE_EXTERNAL_STICKERS: 'Use external stickers',
-	START_EMBEDDED_ACTIVITIES: 'Start activities',
 	SEND_MESSAGES_IN_THREADS: 'Send messages in threads',
-}
-
-// eslint-disable-next-line no-unused-vars
-const { StringResolvable } = require('./typings')
-
-/**
- * Resolves a StringResolvable to a string.
- * @param {StringResolvable} data The string resolvable to resolve
- * @returns {string}
- */
-function resolveString(data) {
-	if (typeof data === 'string') return data
-	if (Array.isArray(data)) return data.join('\n')
-	return String(data)
-}
-
-const slashOptionTypes = {
-    subcommand: 1,
-    'subcommand-group': 2,
-    string: 3,
-    integer: 4,
-    boolean: 5,
-    user: 6,
-    channel: 7,
-    role: 8,
-    mentionable: 9,
-    number: 10
-}
-
-const slashOptionChannelTypes = {
-	'guild-text': 0,
-	'guild-voice': 2,
-    'guild-category': 4,
-    'guild-news': 5,
-    'guild-store': 6,
-	'guild-news-thread': 10,
-    'guild-public-thread': 11,
-    'guild-private-thread': 12,
-    'guild-stage-voice': 13
+	START_EMBEDDED_ACTIVITIES: 'Start activities',
 }
 
 module.exports = {
-	escapeRegex,
 	disambiguation,
-	paginate,
-	permissions,
-	isConstructor,
-	resolveString,
-	slashOptionChannelTypes,
-	slashOptionTypes
+	permissions
 }

@@ -2,7 +2,8 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton, GuildMember, MessageEmbed } = require('discord.js')
-const { noReplyInDMs, memberDetails, embedColor, replyAll } = require('../../utils')
+const { replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +14,10 @@ module.exports = class MemberAvatarCommand extends Command {
             aliases: ['memberavatar', 'mavatar', 'mav'],
             group: 'misc',
             description: 'Displays a member\'s server avatar, or yours if you don\'t specify any.',
-            details: memberDetails() + '\nIf no server avatar was found, it will display the user\'s avatar instead.',
+            details: stripIndent`
+                \`member\` can be either a member's name, mention or id.
+                If no server avatar was found, it will display the user\'s avatar instead.
+            `,
             format: 'mavatar <member>',
             examples: ['mavatar Pixoll'],
             guildOnly: true,
@@ -46,7 +50,7 @@ module.exports = class MemberAvatarCommand extends Command {
         const avatar = member.displayAvatarURL({ dynamic: true, size: 2048 })
 
         const embed = new MessageEmbed()
-            .setColor(embedColor)
+            .setColor('#4c9f4c')
             .setAuthor(`${user.tag} • AKA. ${displayName}`, user.displayAvatarURL({ dynamic: true }))
             .setImage(avatar)
             .setTimestamp()

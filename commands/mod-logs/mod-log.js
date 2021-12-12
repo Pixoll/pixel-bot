@@ -3,8 +3,9 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, User } = require('discord.js')
-const { capitalize, basicEmbed, docId, confirmButtons, timestamp, replyAll } = require('../../utils')
+const { basicEmbed, docId, confirmButtons, timestamp, replyAll } = require('../../utils/functions')
 const { ModerationSchema } = require('../../schemas/types')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

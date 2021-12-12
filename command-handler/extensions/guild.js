@@ -2,7 +2,6 @@
 const { Guild, User, MessageEmbed } = require('discord.js')
 const Command = require('../commands/base')
 const GuildDatabaseManager = require('../database/GuildDatabaseManager')
-const GuildSettingsHelper = require('../providers/helper')
 const { CommandoClient, CommandResolvable, CommandGroupResolvable } = require('../typings')
 /* eslint-enable no-unused-vars */
 
@@ -17,9 +16,8 @@ class CommandoGuild extends Guild {
 	 */
 	constructor(client, data) {
 		super(client, { id: data.id })
-		for (const prop in data) {
-			this[prop] = data[prop]
-		}
+        Object.assign(this, data)
+
 		client.emit('debug', `Created new ${this.constructor.name} with id ${this.id}`)
 
 		this._commando = true
@@ -28,7 +26,7 @@ class CommandoGuild extends Guild {
 		 * The database manager for the guild
 		 * @type {GuildDatabaseManager}
 		 */
-		this.database = new GuildDatabaseManager(client, this)
+		this.database = new GuildDatabaseManager(this)
 
 		/**
 		 * The client the guild is for
@@ -38,10 +36,10 @@ class CommandoGuild extends Guild {
 		this.client
 
 		/**
-		 * Shortcut to use setting provider methods for this guild
-		 * @type {GuildSettingsHelper}
+		 * The queued logs for this guild
+		 * @type {MessageEmbed[]}
 		 */
-		this.settings = new GuildSettingsHelper(this.client, this)
+		this.queuedLogs = []
 
 		/**
 		 * Internal command prefix for the guild, controlled by the {@link CommandoGuild#prefix}
@@ -51,12 +49,6 @@ class CommandoGuild extends Guild {
 		 * @private
 		 */
 		this._prefix = null
-
-		/**
-		 * The queued logs for this guild
-		 * @type {MessageEmbed[]}
-		 */
-		this.queuedLogs = []
 	}
 
 	/**
@@ -81,8 +73,10 @@ class CommandoGuild extends Guild {
 	 * @param {boolean} enabled Whether the command should be enabled
 	 */
 	setCommandEnabled(command, enabled) {
-		command = this.client.registry.resolveCommand(command)
-		if (command.guarded) throw new Error('The command is guarded.')
+		const { client } = this
+		command = client.registry.resolveCommand(command)
+		const { name, guarded } = command
+		if (guarded) throw new Error('The command is guarded.')
 		if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
 		enabled = !!enabled
 		if (!this._commandsEnabled) {
@@ -93,8 +87,8 @@ class CommandoGuild extends Guild {
 			 */
 			this._commandsEnabled = {}
 		}
-		this._commandsEnabled[command.name] = enabled
-		this.client.emit('commandStatusChange', this, command, enabled)
+		this._commandsEnabled[name] = enabled
+		client.emit('commandStatusChange', this, command, enabled)
 	}
 
 	/**
@@ -103,12 +97,14 @@ class CommandoGuild extends Guild {
 	 * @return {boolean}
 	 */
 	isCommandEnabled(command) {
-		command = this.client.registry.resolveCommand(command)
-		if (command.guarded) return true
-		if (!this._commandsEnabled || typeof this._commandsEnabled[command.name] === 'undefined') {
-			return command._globalEnabled
+		const { registry } = this.client
+		command = registry.resolveCommand(command)
+		const { name, guarded, _globalEnabled } = command
+		if (guarded) return true
+		if (!this._commandsEnabled || typeof this._commandsEnabled[name] === 'undefined') {
+			return _globalEnabled
 		}
-		return this._commandsEnabled[command.name]
+		return this._commandsEnabled[name]
 	}
 
 	/**
@@ -117,8 +113,10 @@ class CommandoGuild extends Guild {
 	 * @param {boolean} enabled Whether the group should be enabled
 	 */
 	setGroupEnabled(group, enabled) {
-		group = this.client.registry.resolveGroup(group)
-		if (group.guarded) throw new Error('The group is guarded.')
+		const { client } = this
+		group = client.registry.resolveGroup(group)
+		const { id, guarded } = group
+		if (guarded) throw new Error('The group is guarded.')
 		if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
 		enabled = !!enabled
 		if (!this._groupsEnabled) {
@@ -129,8 +127,8 @@ class CommandoGuild extends Guild {
 			 */
 			this._groupsEnabled = {}
 		}
-		this._groupsEnabled[group.id] = enabled
-		this.client.emit('groupStatusChange', this, group, enabled)
+		this._groupsEnabled[id] = enabled
+		client.emit('groupStatusChange', this, group, enabled)
 	}
 
 	/**
@@ -139,10 +137,14 @@ class CommandoGuild extends Guild {
 	 * @return {boolean}
 	 */
 	isGroupEnabled(group) {
-		group = this.client.registry.resolveGroup(group)
-		if (group.guarded) return true
-		if (!this._groupsEnabled || typeof this._groupsEnabled[group.id] === 'undefined') return group._globalEnabled
-		return this._groupsEnabled[group.id]
+		const { registry } = this.client
+		group = registry.resolveGroup(group)
+		const { id, guarded, _globalEnabled } = group
+		if (guarded) return true
+		if (!this._groupsEnabled || typeof this._groupsEnabled[id] === 'undefined') {
+			return _globalEnabled
+		}
+		return this._groupsEnabled[id]
 	}
 
 	/**

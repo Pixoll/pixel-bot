@@ -1,16 +1,41 @@
 /* eslint-disable no-unused-vars */
 const path = require('path')
-const { PermissionResolvable, Message, GuildResolvable, User, MessageEmbed } = require('discord.js')
+const { PermissionResolvable, Message, User, MessageEmbed } = require('discord.js')
 const { APIApplicationCommand } = require('discord-api-types/payloads/v9')
-const { stripIndent, oneLine } = require('common-tags')
+const { stripIndent } = require('common-tags')
 const ArgumentCollector = require('./collector')
-const { permissions, slashOptionTypes, slashOptionChannelTypes } = require('../util')
+const { permissions } = require('../util')
 const {
-	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, CommandoMessage, ArgumentCollectorResult,
-	CommandBlockData, Throttle, CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo
+	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, ArgumentCollectorResult, CommandBlockData, Throttle,
+	CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo, CommandoGuild
 } = require('../typings')
-const { replyAll, isMod } = require('../../utils')
+const { replyAll, isMod } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
+
+const slashOptionTypes = {
+    subcommand: 1,
+    'subcommand-group': 2,
+    string: 3,
+    integer: 4,
+    boolean: 5,
+    user: 6,
+    channel: 7,
+    role: 8,
+    mentionable: 9,
+    number: 10
+}
+
+const slashOptionChannelTypes = {
+	'guild-text': 0,
+	'guild-voice': 2,
+    'guild-category': 4,
+    'guild-news': 5,
+    'guild-store': 6,
+	'guild-news-thread': 10,
+    'guild-public-thread': 11,
+    'guild-private-thread': 12,
+    'guild-stage-voice': 13
+}
 
 /** A command that can be run in a client */
 class Command {
@@ -38,7 +63,7 @@ class Command {
 		 * Aliases for this command
 		 * @type {string[]}
 		 */
-		this.aliases = info.aliases || []
+		this.aliases = info.aliases ?? []
 		if (info.autoAliases) {
 			if (this.name.includes('-')) this.aliases.push(this.name.replace(/-/g, ''))
 			for (const alias of this.aliases) {
@@ -63,7 +88,7 @@ class Command {
 		 * @type {string}
 		 * @default this.name
 		 */
-		this.memberName = info.memberName || this.name
+		this.memberName = info.memberName ?? this.name
 
 		/**
 		 * Short description of the command
@@ -73,21 +98,21 @@ class Command {
 
 		/**
 		 * Usage format string of the command
-		 * @type {string}
+		 * @type {?string}
 		 */
-		this.format = info.format || null
+		this.format = info.format ?? null
 
 		/**
 		 * Long description of the command
 		 * @type {?string}
 		 */
-		this.details = info.details || null
+		this.details = info.details ?? null
 
 		/**
 		 * Example usage strings
 		 * @type {?string[]}
 		 */
-		this.examples = info.examples || null
+		this.examples = info.examples ?? null
 
 		/**
 		 * Whether the command can only be run in direct messages
@@ -121,13 +146,13 @@ class Command {
 		 * Permissions required by the client to use the command.
 		 * @type {?PermissionResolvable[]}
 		 */
-		this.clientPermissions = info.clientPermissions || null
+		this.clientPermissions = info.clientPermissions ?? null
 
 		/**
 		 * Permissions required by the user to use the command.
 		 * @type {?PermissionResolvable[]}
 		 */
-		this.userPermissions = info.userPermissions || null
+		this.userPermissions = info.userPermissions ?? null
 
 		/**
 		 * Whether this command's user permissions are based on "moderator" permissions
@@ -148,25 +173,25 @@ class Command {
 		 * @type {boolean}
 		 * @default true
 		 */
-		this.defaultHandling = 'defaultHandling' in info ? info.defaultHandling : true
+		this.defaultHandling = info.defaultHandling ?? true
 
 		/**
 		 * Options for throttling command usages
 		 * @type {?ThrottlingOptions}
 		 */
-		this.throttling = info.throttling || null
+		this.throttling = info.throttling ?? null
 
 		/**
 		 * The argument collector for the command
 		 * @type {?ArgumentCollector}
 		 */
-		this.argsCollector = info.args && info.args.length ?
+		this.argsCollector = info.args?.length ?
 			new ArgumentCollector(client, info.args, info.argsPromptLimit) :
 			null
-		if (this.argsCollector && typeof info.format === 'undefined') {
+		if (this.argsCollector && !info.format) {
 			this.format = this.argsCollector.args.reduce((prev, arg) => {
-				const wrapL = arg.default !== null ? '[' : '<'
-				const wrapR = arg.default !== null ? ']' : '>'
+				const wrapL = arg.required ? '[' : '<'
+				const wrapR = arg.required ? ']' : '>'
 				return `${prev}${prev ? ' ' : ''}${wrapL}${arg.label}${arg.infinite ? '...' : ''}${wrapR}`
 			}, '')
 		}
@@ -176,27 +201,27 @@ class Command {
 		 * @type {string}
 		 * @default 'single'
 		 */
-		this.argsType = info.argsType || 'single'
+		this.argsType = info.argsType ?? 'single'
 
 		/**
 		 * Maximum number of arguments that will be split
 		 * @type {number}
 		 * @default 0
 		 */
-		this.argsCount = info.argsCount || 0
+		this.argsCount = info.argsCount ?? 0
 
 		/**
 		 * Whether single quotes are allowed to encapsulate an argument
 		 * @type {boolean}
 		 * @default true
 		 */
-		this.argsSingleQuotes = 'argsSingleQuotes' in info ? info.argsSingleQuotes : true
+		this.argsSingleQuotes = info.argsSingleQuotes ?? true
 
 		/**
 		 * Regular expression triggers
-		 * @type {RegExp[]}
+		 * @type {?RegExp[]}
 		 */
-		this.patterns = info.patterns || null
+		this.patterns = info.patterns ?? null
 
 		/**
 		 * Whether the command is protected from being disabled
@@ -242,7 +267,7 @@ class Command {
 
 		/**
 		 * Current throttle objects for the command, mapped by user id
-		 * @type {Map<string, Object>}
+		 * @type {Map<string, Throttle>}
 		 * @private
 		 */
 		this._throttles = new Map()
@@ -252,17 +277,18 @@ class Command {
 		 * @type {SlashCommandInfo}
 		 * @default false
 		 */
-		this.slash = info.slash
+		this.slash = info.slash ?? false
 
 		/**
 		 * The slash command data to send to the API
-		 * @type {APIApplicationCommand}
+		 * @type {?APIApplicationCommand}
 		 * @private
 		 */
 		this._slashToAPI = this.slash ? this.constructor.parseSlash(this.slash) : null
 
 		/**
 		 * Whether this command will be registered in the test guild only or not
+		 * @type {boolean}
 		 * @default false
 		 */
 		this.test = !!info.test
@@ -275,26 +301,27 @@ class Command {
 	 * @return Whether the user has permission, or an error message to respond with if they don't
 	 */
 	hasPermission({ message, interaction }, ownerOverride = true) {
+		const { guildOwnerOnly, ownerOnly, userPermissions, modPermissions, client } = this
 		const { channel, guild, member } = message || interaction
 		const author = message?.author || interaction.user
 
-		if (!this.guildOwnerOnly && !this.ownerOnly && !this.userPermissions && !this.modPermissions) return true
-		if (ownerOverride && this.client.isOwner(author)) return true
+		if (!guildOwnerOnly && !ownerOnly && !userPermissions && !modPermissions) return true
+		if (ownerOverride && client.isOwner(author)) return true
 
-		if (this.ownerOnly && (ownerOverride || !this.client.isOwner(author))) {
+		if (ownerOnly && !client.isOwner(author)) {
 			return 'ownerOnly'
 		}
 
-		if (this.guildOwnerOnly && guild?.ownerId !== author.id) {
+		if (guildOwnerOnly && guild?.ownerId !== author.id) {
 			return 'guildOwnerOnly'
 		}
 
 		if (channel.type !== 'DM') {
-			if (this.modPermissions && !isMod(member)) {
+			if (modPermissions && !isMod(member)) {
 				return 'modPermissions'
 			}
-			if (this.userPermissions) {
-				const missing = channel.permissionsFor(author).missing(this.userPermissions, false)
+			if (userPermissions) {
+				const missing = channel.permissionsFor(author).missing(userPermissions, false)
 				if (missing.length > 0) return missing
 			}
 		}
@@ -312,7 +339,7 @@ class Command {
 	 * (see [RegExp#exec](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec)).
 	 * @param {boolean} fromPattern Whether or not the command is being run from a pattern match
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector (if applicable)
-	 * @return {Promise<?Message|?Array<Message>>}
+	 * @return {Promise<?Message|?Message[]>}
 	 * @abstract
 	 */
 	async run(instances, args, fromPattern, result) {
@@ -331,45 +358,48 @@ class Command {
 	 * @returns {Promise<?Message>}
 	 */
 	onBlock({ message, interaction }, reason, data) {
+		const { name } = this
+		const { missing, remaining } = data
+
 		switch (reason) {
 			case 'dmOnly':
 				return replyAll({ message, interaction }, embed(
-					`The \`${this.name}\` command can only be used in direct messages.`
+					`The \`${name}\` command can only be used in direct messages.`
 				))
 			case 'guildOnly':
 				return replyAll({ message, interaction }, embed(
-					`The \`${this.name}\` command can only be used in a server channel.`
+					`The \`${name}\` command can only be used in a server channel.`
 				))
 			case 'guildOwnerOnly':
 				return replyAll({ message, interaction }, embed(
-					`The \`${this.name}\` command can only be used by the server's owner.`
+					`The \`${name}\` command can only be used by the server's owner.`
 				))
 			case 'nsfw':
 				return replyAll({ message, interaction }, embed(
-					`The \`${this.name}\` command can only be used in a NSFW channel.`
+					`The \`${name}\` command can only be used in a NSFW channel.`
 				))
 			case 'ownerOnly':
 				return replyAll({ message, interaction }, embed(
-					`The \`${this.name}\` command can only be used by the bot's owner.`
+					`The \`${name}\` command can only be used by the bot's owner.`
 				))
 			case 'userPermissions':
 				return replyAll({ message, interaction }, embed(
 					'You are missing the following permissions:',
-					data.missing.map(perm => `\`${permissions[perm]}\``).join(', ')
+					missing.map(perm => `\`${permissions[perm]}\``).join(', ')
 				))
 			case 'modPermissions':
 				return replyAll({ message, interaction }, embed(
-					`The \`${this.name}\` command can only be used by "moderators".`,
+					`The \`${name}\` command can only be used by "moderators".`,
 					'For more information visit the `page 3` of the `help` command.'
 				))
 			case 'clientPermissions':
 				return replyAll({ message, interaction }, embed(
 					'The bot is missing the following permissions:',
-					data.missing.map(perm => `\`${permissions[perm]}\``).join(', ')
+					missing.map(perm => `\`${permissions[perm]}\``).join(', ')
 				))
 			case 'throttling':
 				return replyAll({ message, interaction }, embed(
-					`Please wait **${data.remaining.toFixed(1)} seconds** before using the \`${this.name}\` command again.`
+					`Please wait **${remaining.toFixed(1)} seconds** before using the \`${name}\` command again.`
 				))
 		}
 	}
@@ -382,9 +412,9 @@ class Command {
 	 * @param {boolean} fromPattern Whether the args are pattern matches (see {@link Command#run})
 	 * @param {?ArgumentCollectorResult} result Result from obtaining the arguments from the collector
 	 * (if applicable see {@link Command#run})
-	 * @returns {Promise<?Message|?Array<Message>>}
+	 * @returns {Promise<?Message|?Message[]>}
 	 */
-	onError(err, { message }, args, fromPattern, result) {
+	onError(err, { message, interaction }, args, fromPattern, result) {
 		return
 		/* eslint-disable no-unreachable */
 		const owner = message.client.owners[0]
@@ -429,33 +459,35 @@ class Command {
 
 	/**
 	 * Enables or disables the command in a guild
-	 * @param {?GuildResolvable} guild Guild to enable/disable the command in
+	 * @param {?CommandoGuild} guild Guild to enable/disable the command in
 	 * @param {boolean} enabled Whether the command should be enabled or disabled
 	 */
 	setEnabledIn(guild, enabled) {
+		const { client, guarded } = this
 		if (typeof guild === 'undefined') throw new TypeError('Guild must not be undefined.')
 		if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
-		if (this.guarded) throw new Error('The command is guarded.')
+		if (guarded) throw new Error('The command is guarded.')
 		if (!guild) {
 			this._globalEnabled = enabled
-			this.client.emit('commandStatusChange', null, this, enabled)
+			client.emit('commandStatusChange', null, this, enabled)
 			return
 		}
-		guild = this.client.guilds.resolve(guild)
+		guild = client.guilds.resolve(guild)
 		guild.setCommandEnabled(this, enabled)
 	}
 
 	/**
 	 * Checks if the command is enabled in a guild
-	 * @param {?GuildResolvable} guild Guild to check in
+	 * @param {?CommandoGuild} guild Guild to check in
 	 * @param {boolean} [bypassGroup] Whether to bypass checking the group's status
 	 * @return {boolean}
 	 */
 	isEnabledIn(guild, bypassGroup) {
+		const { client, group } = this
 		if (this.guarded) return true
-		if (!guild) return this.group._globalEnabled && this._globalEnabled
-		guild = this.client.guilds.resolve(guild)
-		return (bypassGroup || guild.isGroupEnabled(this.group)) && guild.isCommandEnabled(this)
+		if (!guild) return group._globalEnabled && this._globalEnabled
+		guild = client.guilds.resolve(guild)
+		return (bypassGroup || guild.isGroupEnabled(group)) && guild.isCommandEnabled(this)
 	}
 
 	/**
@@ -465,9 +497,10 @@ class Command {
 	 */
 	isUsable({ message, interaction }) {
 		if (!message && !interaction) return this._globalEnabled
-		if (this.guildOnly && (message || interaction) && !(message || interaction).guild) return false
+		const { guild } = message || interaction
+		if (this.guildOnly && !guild) return false
 		const hasPermission = this.hasPermission({ message, interaction })
-		return this.isEnabledIn((message || interaction).guild) && hasPermission === true
+		return this.isEnabledIn(guild) && hasPermission === true
 	}
 
 	/**
@@ -481,9 +514,7 @@ class Command {
 		return this.constructor.usage(`${this.name}${argString ? ` ${argString}` : ''}`, prefix, user)
 	}
 
-	/**
-	 * Reloads the command
-	 */
+	/** Reloads the command */
 	reload() {
 		let cmdPath, cached, newCmd
 		try {
@@ -511,9 +542,7 @@ class Command {
 		this.client.registry.reregisterCommand(newCmd, this)
 	}
 
-	/**
-	 * Unloads the command
-	 */
+	/** Unloads the command */
 	unload() {
 		const cmdPath = this.client.registry.resolveCommandPath(this.groupId, this.memberName)
 		if (!require.cache[cmdPath]) throw new Error('Command cannot be unloaded.')
@@ -540,7 +569,7 @@ class Command {
 		}
 
 		let mentionPart
-		if (user) mentionPart = `\`@${user.username.replace(/ /g, '\xa0')}#${user.discriminator}\xa0${nbcmd}\``
+		if (user) mentionPart = `\`@${user.tag.replace(/ /g, '\xa0')}\xa0${nbcmd}\``
 
 		return `${prefixPart || ''}${prefix && user ? ' or ' : ''}${mentionPart || ''}`
 	}
@@ -626,7 +655,7 @@ class Command {
 		if (!!info.deprecated && info.replacing !== info.replacing.toLowerCase()) {
 			throw new TypeError('Command replacing must be lowercase.')
 		}
-		if ('slash' in info && (typeof info.slash !== 'object' && typeof info.slash !== 'boolean')) {
+		if (info.slash && (typeof info.slash !== 'object' && typeof info.slash !== 'boolean')) {
 			throw new TypeError('Command slash must be object or boolean.')
 		}
 		if (info.slash === true) {
@@ -640,7 +669,7 @@ class Command {
 			if (Object.keys(info.slash).length === 0) throw new TypeError('Command slash must not be an empty object.')
 			for (const prop in info) {
 				if (['slash', 'test'].includes(prop)) continue
-				if (info.slash[prop] !== undefined && info.slash[prop] !== null) continue
+				if (typeof info.slash[prop] !== 'undefined' && info.slash[prop] !== null) continue
 				info.slash[prop] = info[prop]
 			}
 			if ('name' in info.slash && typeof info.slash.name === 'string') {

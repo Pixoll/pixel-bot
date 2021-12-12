@@ -16,7 +16,9 @@ module.exports = async (client) => {
             const db = guild.database.polls
 
             const pollsData = await db.fetchMany({ endsAt: { $lte: Date.now() } })
-            for (const [, poll] of pollsData) {
+            for (const poll of pollsData.toJSON()) {
+                client.emit('debug', 'Running event "modules/polls#endPoll".')
+
                 /** @type {TextChannel} */
                 const channel = channels.get(poll.channel)
                 if (!channel) continue
@@ -63,7 +65,7 @@ module.exports = async (client) => {
                 await message.reply({ embeds: [pollEmbed] })
             }
 
-            for (const [, poll] of pollsData) {
+            for (const poll of pollsData.toJSON()) {
                 await db.delete(poll)
             }
         }

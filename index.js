@@ -4,7 +4,8 @@ require('./command-handler/extensions')
 const CommandoClient = require('./command-handler/client')
 const database = require('./database')
 const path = require('path')
-const { errors, rateLimit } = require('./errors')
+const notifier = require('./errors/notifier')
+const rateLimits = require('./errors/rateLimits')
 require('dotenv').config()
 
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
@@ -34,10 +35,8 @@ const client = new CommandoClient({
 })
 
 const { registry } = client
-const debugExclude = new RegExp(
-    'Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection completed|' +
-    'while executing a request'
-)
+const debugExclude =
+    /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection completed|while executing a request/
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
@@ -49,13 +48,13 @@ client.emit('debug', 'Created client')
 
 registry.registerDefaultTypes()
     .registerGroups([
-        { id: 'info', name: 'ℹ️ Information', guarded: true },
+        { id: 'info', name: '\u2139 Information', guarded: true },
         // { id: 'fun', name: 'Fun commands' },
         { id: 'lists', name: '📋 Listing' },
         { id: 'managing', name: '💼 Managing', guarded: true },
         // { id: 'minecraft', name: '<:minecraft:897178717925834773> Minecraft' },
         { id: 'misc', name: '🎲 Miscellaneous' },
-        { id: 'mod', name: '🛡️ Moderation' },
+        { id: 'mod', name: ':shield: Moderation' },
         { id: 'mod-logs', name: '🗃 Moderation logs' },
         { id: 'owner', name: '<a:owner_crown:806558872440930425> Owner only', guarded: true },
         { id: 'utility', name: '🛠 Utility', guarded: true },
@@ -67,14 +66,12 @@ client.emit('debug', `Loaded ${registry.commands.size} commands`)
 
 client.on('ready', async () => {
     await database(client, 'auto-punish', 'chat-filter', 'scam-detector')
-    errors(client)
-    rateLimit(client)
+    notifier(client)
+    rateLimits(client)
 
-    client.user.setPresence({
-        activities: [{
-            name: `for ${client.prefix}help`,
-            type: 'WATCHING'
-        }]
+    client.user.setActivity({
+        name: `for ${client.prefix}help`,
+        type: 'WATCHING'
     })
 
     await client.owners[0].send('**Debug message:** Bot is fully online!')

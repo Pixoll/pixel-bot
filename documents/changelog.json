@@ -71,6 +71,18 @@
         "timestamp": 1638821340000
     },
     {
+        "version": "2.1.1",
+        "changes": [
+            "Fixed embed dysplaying of `mod-logs` and `infractions` commands.",
+            "Fixed `warn` command: It wouldn't save the moderator in the database (missing data).",
+            "Added on and off emojis to the `modules` command.",
+            "Back-end improvements for better performance.",
+            "Fixed `to-do` command: Threw error when using the `add` sub-command for the first time.",
+            "Fixed `times` command: Threw casual error when using the prefixed version of it."
+        ],
+        "timestamp": 1639285560000
+    },
+    {
         "version": "2.2.0",
         "changes": [
             "Added `legal` command.",

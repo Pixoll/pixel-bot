@@ -1,10 +1,9 @@
-/* eslint-disable indent */
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, MessageAttachment, MessageOptions, Util } = require('discord.js')
-const { status: statusJava, statusBedrock, JavaStatusResponse, BedrockStatusResponse } = require('minecraft-server-util')
-const { basicEmbed, getArgument, remDiscFormat, replyAll } = require('../../utils')
+const { status: statusJava, statusBedrock } = require('minecraft-server-util')
+const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
@@ -279,16 +278,22 @@ module.exports = class McStatusCommand extends Command {
      */
     async getJavaStatus(ip, port) {
         const reqStart = Date.now()
-        /** @type {JavaStatusResponse} */
-        const status = await statusJava(ip, port).catch(() => null)
-        const ping = Date.now() - reqStart
-
-        if (!status) {
+        let status
+        try {
+            status = await statusJava(ip, port)
+        } catch {
             return basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the server you were looking for.'
+                color: 'RED',
+                emoji: 'cross',
+                fieldName: 'The server you were looking for is either offline or it doesn\'t exist',
+                fieldValue: stripIndent`
+                    **IP:** \`${ip}\`
+                    **Port:** \`${port}\`
+                `,
             })
         }
 
+        const ping = Date.now() - reqStart
         const { motd, version, favicon, players } = status
 
         // Server favicon
@@ -328,16 +333,22 @@ module.exports = class McStatusCommand extends Command {
      */
     async getBedrockStatus(ip, port) {
         const reqStart = Date.now()
-        /** @type {BedrockStatusResponse} */
-        const status = await statusBedrock(ip, port).catch(() => null)
-        const ping = Date.now() - reqStart
-
-        if (!status) {
+        let status
+        try {
+            status = await statusBedrock(ip, port)
+        } catch {
             return basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the server you were looking for.'
+                color: 'RED',
+                emoji: 'cross',
+                fieldName: 'The server you were looking for is either offline or it doesn\'t exist',
+                fieldValue: stripIndent`
+                    **IP:** \`${ip}\`
+                    **Port:** \`${port}\`
+                `
             })
         }
 
+        const ping = Date.now() - reqStart
         const { motd, players, version } = status
 
         const serverInfo = new MessageEmbed()

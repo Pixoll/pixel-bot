@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
-const { CommandoGuild, CommandoClient } = require('../typings')
+const { CommandoGuild } = require('../typings')
 const DatabaseManager = require('./DatabaseManager')
 const schemas = require('../../schemas')
 /* eslint-enable no-unused-vars */
@@ -8,17 +8,9 @@ const schemas = require('../../schemas')
 /** All guilds' database manager (MongoDB) */
 class GuildDatabaseManager {
     /**
-     * @param {CommandoClient} client The client this database is for
      * @param {CommandoGuild} guild The guild this database is for
      */
-    constructor(client, guild) {
-        /**
-         * Client for this database
-         * @type {CommandoClient}
-         * @readonly
-         */
-        this.client = client
-
+    constructor(guild) {
         /**
          * Guild for this database
          * @type {CommandoGuild}
@@ -27,31 +19,31 @@ class GuildDatabaseManager {
         this.guild = guild
 
         /** @type {DatabaseManager} */
-        this.active = new DatabaseManager(client, guild, schemas.active)
+        this.active = new DatabaseManager(schemas.active, guild)
         /** @type {DatabaseManager} */
-        this.afk = new DatabaseManager(client, guild, schemas.afk)
+        this.afk = new DatabaseManager(schemas.afk, guild)
         /** @type {DatabaseManager} */
-        this.disabled = new DatabaseManager(client, guild, schemas.disabled)
+        this.disabled = new DatabaseManager(schemas.disabled, guild)
         /** @type {DatabaseManager} */
-        this.mcIps = new DatabaseManager(client, guild, schemas.mcIp)
+        this.mcIps = new DatabaseManager(schemas.mcIp, guild)
         /** @type {DatabaseManager} */
-        this.moderations = new DatabaseManager(client, guild, schemas.moderations)
+        this.moderations = new DatabaseManager(schemas.moderations, guild)
         /** @type {DatabaseManager} */
-        this.modules = new DatabaseManager(client, guild, schemas.modules)
+        this.modules = new DatabaseManager(schemas.modules, guild)
         /** @type {DatabaseManager} */
-        this.prefixes = new DatabaseManager(client, guild, schemas.prefixes)
+        this.prefixes = new DatabaseManager(schemas.prefixes, guild)
         /** @type {DatabaseManager} */
-        this.polls = new DatabaseManager(client, guild, schemas.polls)
+        this.polls = new DatabaseManager(schemas.polls, guild)
         /** @type {DatabaseManager} */
-        this.reactionRoles = new DatabaseManager(client, guild, schemas.reactionRoles)
+        this.reactionRoles = new DatabaseManager(schemas.reactionRoles, guild)
         /** @type {DatabaseManager} */
-        this.rules = new DatabaseManager(client, guild, schemas.rules)
+        this.rules = new DatabaseManager(schemas.rules, guild)
         /** @type {DatabaseManager} */
-        this.setup = new DatabaseManager(client, guild, schemas.setup)
+        this.setup = new DatabaseManager(schemas.setup, guild)
         /** @type {DatabaseManager} */
-        this.stickyRoles = new DatabaseManager(client, guild, schemas.stickyRoles)
+        this.stickyRoles = new DatabaseManager(schemas.stickyRoles, guild)
         /** @type {DatabaseManager} */
-        this.welcome = new DatabaseManager(client, guild, schemas.welcome)
+        this.welcome = new DatabaseManager(schemas.welcome, guild)
     }
 
     /**
@@ -64,7 +56,6 @@ class GuildDatabaseManager {
             if (!this[name]) continue
             this[name].cache = schema
         }
-        this.client.emit('debug', `Caching process has finished for guild ${this.guild.id}`)
         return this
     }
 }

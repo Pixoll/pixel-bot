@@ -19,17 +19,17 @@ class ClientDatabaseManager {
         this.client = client
 
         /** @type {DatabaseManager} */
-        this.disabled = new DatabaseManager(client, null, schemas.disabled)
+        this.disabled = new DatabaseManager(schemas.disabled)
         /** @type {DatabaseManager} */
-        this.errors = new DatabaseManager(client, null, schemas.errors)
+        this.errors = new DatabaseManager(schemas.errors)
         /** @type {DatabaseManager} */
-        this.faq = new DatabaseManager(client, null, schemas.faq)
+        this.faq = new DatabaseManager(schemas.faq)
         /** @type {DatabaseManager} */
-        this.prefixes = new DatabaseManager(client, null, schemas.prefixes)
+        this.prefixes = new DatabaseManager(schemas.prefixes)
         /** @type {DatabaseManager} */
-        this.reminders = new DatabaseManager(client, null, schemas.reminders)
+        this.reminders = new DatabaseManager(schemas.reminders)
         /** @type {DatabaseManager} */
-        this.todo = new DatabaseManager(client, null, schemas.todo)
+        this.todo = new DatabaseManager(schemas.todo)
     }
 
     /**
@@ -42,7 +42,6 @@ class ClientDatabaseManager {
             if (!this[name]) continue
             this[name].cache = schema
         }
-        this.client.emit('debug', 'Caching process has finished for the client')
         return this
     }
 }

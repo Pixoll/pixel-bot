@@ -1,13 +1,21 @@
 /* eslint-disable no-unused-vars */
-const { escapeRegex } = require('./util')
 const isPromise = require('is-promise')
 const CommandoRegistry = require('./registry')
-const { Message, MessageEmbed, MessageButton, MessageActionRow } = require('discord.js')
+const { Message, MessageEmbed, MessageButton, MessageActionRow, CommandInteractionOption } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient, CommandoInteraction } = require('./typings')
 const { oneLine, stripIndent } = require('common-tags')
-const { probability, embedColor } = require('../utils')
 const FriendlyError = require('./errors/friendly')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
+
+/**
+ * Calculates the probability of something
+ * @param {number} n The probability (in decimals or percentage) to calculate
+ */
+function probability(n) {
+    if (n > 1) n /= 100
+    return !!n && Math.random() <= n
+}
 
 /** Handles parsing messages and running commands from them */
 class CommandDispatcher {
@@ -76,9 +84,10 @@ class CommandDispatcher {
 	 */
 	/* eslint-enable no-tabs */
 	addInhibitor(inhibitor) {
+		const { inhibitors } = this
 		if (typeof inhibitor !== 'function') throw new TypeError('The inhibitor must be a function.')
-		if (this.inhibitors.has(inhibitor)) return false
-		this.inhibitors.add(inhibitor)
+		if (inhibitors.has(inhibitor)) return false
+		inhibitors.add(inhibitor)
 		return true
 	}
 
@@ -102,11 +111,14 @@ class CommandDispatcher {
 	async handleMessage(message, oldMessage) {
 		if (!this.shouldHandleMessage(message, oldMessage)) return
 
+		const { client, _results } = this
+		const { nonCommandEditable } = client.options
+
 		// Parse the message, and get the old result if it exists
 		let cmdMsg, oldCmdMsg
 		if (oldMessage) {
-			oldCmdMsg = this._results.get(oldMessage.id)
-			if (!oldCmdMsg && !this.client.options.nonCommandEditable) return
+			oldCmdMsg = _results.get(oldMessage.id)
+			if (!oldCmdMsg && !nonCommandEditable) return
 			cmdMsg = this.parseMessage(message)
 			if (cmdMsg && oldCmdMsg) {
 				cmdMsg.responses = oldCmdMsg.responses
@@ -131,8 +143,8 @@ class CommandDispatcher {
 								)
 							)
 						} else {
-							this.client.emit('unknownCommand', cmdMsg)
-							responses = undefined
+							client.emit('unknownCommand', cmdMsg)
+							responses = null
 						}
 					} else if (!oldMessage || typeof oldCmdMsg !== 'undefined') {
 						responses = await cmdMsg.run()
@@ -140,8 +152,8 @@ class CommandDispatcher {
 						if (Array.isArray(responses)) responses = await Promise.all(responses)
 					}
 				} else {
-					this.client.emit('unknownCommand', cmdMsg)
-					responses = undefined
+					client.emit('unknownCommand', cmdMsg)
+					responses = null
 				}
 			} else {
 				responses = await inhibited.response
@@ -150,11 +162,11 @@ class CommandDispatcher {
 			cmdMsg.finalize(responses)
 		} else if (oldCmdMsg) {
 			oldCmdMsg.finalize(null)
-			if (!this.client.options.nonCommandEditable) this._results.delete(message.id)
+			if (!nonCommandEditable) _results.delete(message.id)
 		}
 
 		if (cmdMsg && oldMessage) {
-			this.client.emit('cMessageUpdate', oldMessage, cmdMsg)
+			client.emit('cMessageUpdate', oldMessage, cmdMsg)
 		}
 
 		this.cacheCommandoMessage(message, oldMessage, cmdMsg, responses)
@@ -171,7 +183,7 @@ class CommandDispatcher {
 
 		// Get the matching command
 		/** @type {CommandoInteraction} */
-		const { commandName, channelId, channel, guild, user, guildId, client } = interaction
+		const { commandName, channelId, channel, guild, user, guildId, client, options, deferred, replied } = interaction
 		const command = this.registry.resolveCommand(commandName)
 		if (!command) return
 		const { groupId, memberName } = command
@@ -194,9 +206,6 @@ class CommandDispatcher {
 			await guild.members.fetch(client.user.id)
 		}
 
-		// Defers the reply
-		await interaction.deferReply({ ephemeral: !!command.slash.ephemeral }).catch(() => null)
-
 		// Make sure the command is usable in this context
 		if (command.dmOnly && guild) {
 			client.emit('commandBlock', { interaction }, 'dmOnly')
@@ -216,9 +225,8 @@ class CommandDispatcher {
 		}
 
 		// Ensure the user has permission to use the command
-		const isOwner = client.isOwner(user)
 		const hasPermission = command.hasPermission({ interaction })
-		if (!isOwner && hasPermission !== true) {
+		if (hasPermission !== true) {
 			if (typeof hasPermission === 'string') {
 				client.emit('commandBlock', { interaction }, hasPermission)
 				return await command.onBlock({ interaction }, hasPermission)
@@ -238,53 +246,24 @@ class CommandDispatcher {
 			}
 		}
 
+		// Parses the options into an arguments object
+		const args = {}
+		for (const option of options.data) parseSlashArgs(args, option)
+
 		// Run the command
 		try {
-			// Parses the options into an arguments object
-			const options = {}
-			for (const option of interaction.options.data) {
-				/** @param {option} opt */
-				function concat(opt) {
-					if (opt.name && [undefined, null].includes(opt.value)) {
-						options.subCommand = opt.name
-					} else {
-						const name = removeDashes(opt.name)
-						switch (opt.type) {
-							case 'BOOLEAN':
-							case 'INTEGER':
-							case 'NUMBER':
-							case 'STRING':
-							case 'SUB_COMMAND':
-								options[name] = opt.value ?? null
-								break
-							case 'CHANNEL':
-								options[name] = opt.channel ?? null
-								break
-							case 'MENTIONABLE':
-								options[name] = opt.member ?? opt.user ?? opt.channel ?? opt.role ?? null
-								break
-							case 'ROLE':
-								options[name] = opt.role ?? null
-								break
-							case 'USER':
-								options[name] = opt.member ?? opt.user ?? null
-								break
-						}
-					}
-					opt.options?.forEach(concat)
-				}
-				concat(option)
-			}
+			const location = guildId ? `${guildId}:${channelId}` : `DM:${user.id}`
+			client.emit('debug', `Running slash command "${groupId}:${memberName}" at "${location}".`)
+			await interaction.deferReply({ ephemeral: !!command.slash.ephemeral }).catch(() => null)
+			const promise = command.run({ interaction }, args)
 
-			client.emit('debug', `Running slash command "${groupId}:${memberName}" at "${guildId}-${channelId}".`)
-			const promise = command.run({ interaction }, options, false, {})
-			client.emit('commandRun', command, promise, { interaction }, options, false, {})
+			client.emit('commandRun', command, promise, { interaction }, args)
 			await promise
 
 			if (probability(2)) {
 				const { user, botInvite } = client
 				const embed = new MessageEmbed()
-					.setColor(embedColor)
+					.setColor('#4c9f4c')
 					.addField(`Enjoying ${user.username}?`, oneLine`
 						The please consider voting for it! It helps the bot to become more noticed
 						between other bots. And perhaps consider adding it to any of your own servers
@@ -308,13 +287,13 @@ class CommandDispatcher {
 		} catch (err) {
 			client.emit('commandError', command, err, { interaction })
 			if (err instanceof FriendlyError) {
-				if (interaction.deferred || interaction.replied) {
+				if (deferred || replied) {
 					return await interaction.editReply({ content: err.message, components: [], embeds: [] })
 				} else {
 					return await interaction.reply(err.message)
 				}
 			} else {
-				return await command.onError(err, { interaction })
+				return await command.onError(err, { interaction }, args)
 			}
 		}
 	}
@@ -327,17 +306,20 @@ class CommandDispatcher {
 	 * @private
 	 */
 	shouldHandleMessage(message, oldMessage) {
-		// Ignore partial messages
-		if (message.partial) return false
+		const { partial, author, channelId, content } = message
+		const { client, _awaiting } = this
 
-		if (message.author.bot) return false
-		else if (message.author.id === this.client.user.id) return false
+		// Ignore partial messages
+		if (partial) return false
+
+		if (author.bot) return false
+		else if (author.id === client.user.id) return false
 
 		// Ignore messages from users that the bot is already waiting for input from
-		if (this._awaiting.has(message.author.id + message.channel.id)) return false
+		if (_awaiting.has(author.id + channelId)) return false
 
 		// Make sure the edit actually changed the message content
-		if (oldMessage && message.content === oldMessage.content) return false
+		if (oldMessage && content === oldMessage.content) return false
 
 		return true
 	}
@@ -349,10 +331,11 @@ class CommandDispatcher {
 	 * @private
 	 */
 	inhibit(cmdMsg) {
-		for (const inhibitor of this.inhibitors) {
+		const { inhibitors, client } = this
+		for (const inhibitor of inhibitors) {
 			let inhibit = inhibitor(cmdMsg)
 			if (inhibit) {
-				if (typeof inhibit !== 'object') inhibit = { reason: inhibit, response: undefined }
+				if (typeof inhibit !== 'object') inhibit = { reason: inhibit, response: null }
 
 				const valid = typeof inhibit.reason === 'string' && (
 					typeof inhibit.response === 'undefined' ||
@@ -365,7 +348,7 @@ class CommandDispatcher {
 					)
 				}
 
-				this.client.emit('commandBlock', { message: cmdMsg }, inhibit.reason, inhibit)
+				client.emit('commandBlock', { message: cmdMsg }, inhibit.reason, inhibit)
 				return inhibit
 			}
 		}
@@ -381,17 +364,21 @@ class CommandDispatcher {
 	 * @private
 	 */
 	cacheCommandoMessage(message, oldMessage, cmdMsg, responses) {
-		if (this.client.options.commandEditableDuration <= 0) return
-		if (!cmdMsg && !this.client.options.nonCommandEditable) return
+		const { client, _results } = this
+		const { commandEditableDuration, nonCommandEditable } = client.options
+		const { id } = message
+
+		if (commandEditableDuration <= 0) return
+		if (!cmdMsg && !nonCommandEditable) return
 		if (responses !== null) {
-			this._results.set(message.id, cmdMsg)
+			_results.set(id, cmdMsg)
 			if (!oldMessage) {
 				setTimeout(() => {
-					this._results.delete(message.id)
-				}, this.client.options.commandEditableDuration * 1000)
+					_results.delete(id)
+				}, commandEditableDuration * 1000)
 			}
 		} else {
-			this._results.delete(message.id)
+			_results.delete(id)
 		}
 	}
 
@@ -402,20 +389,23 @@ class CommandDispatcher {
 	 * @private
 	 */
 	parseMessage(message) {
+		const { client, _commandPatterns, registry } = this
+		const { content, guild } = message
+
 		// Find the command to run by patterns
-		for (const command of this.registry.commands.values()) {
+		for (const command of registry.commands.values()) {
 			if (!command.patterns) continue
 			for (const pattern of command.patterns) {
-				const matches = pattern.exec(message.content)
+				const matches = pattern.exec(content)
 				if (matches) return message.initCommand(command, null, matches)
 			}
 		}
 
 		// Find the command to run with default command handling
-		const prefix = message.guild?.prefix || this.client.prefix
-		if (!this._commandPatterns.get(prefix)) this.buildCommandPattern(prefix)
-		let cmdMsg = this.matchDefault(message, this._commandPatterns.get(prefix), 2)
-		if (!cmdMsg && !message.guild) cmdMsg = this.matchDefault(message, /^([^\s]+)/i, 1, true)
+		const prefix = guild?.prefix || client.prefix
+		if (!_commandPatterns.get(prefix)) this.buildCommandPattern(prefix)
+		let cmdMsg = this.matchDefault(message, _commandPatterns.get(prefix), 2)
+		if (!cmdMsg && !guild) cmdMsg = this.matchDefault(message, /^([^\s]+)/i, 1, true)
 		return cmdMsg
 	}
 
@@ -429,13 +419,16 @@ class CommandDispatcher {
 	 * @private
 	 */
 	matchDefault(message, pattern, commandNameIndex = 1, prefixless = false) {
-		const matches = pattern.exec(message.content)
+		const { content } = message
+		const { registry } = this
+
+		const matches = pattern.exec(content)
 		if (!matches) return null
-		const commands = this.registry.findCommands(matches[commandNameIndex], true)
+		const commands = registry.findCommands(matches[commandNameIndex], true)
 		if (commands.length !== 1 || !commands[0].defaultHandling) {
-			return message.initCommand(this.registry.unknownCommand, prefixless ? message.content : matches[1])
+			return message.initCommand(registry.unknownCommand, prefixless ? content : matches[1])
 		}
-		const argString = message.content.substring(matches[1].length + (matches[2] ? matches[2].length : 0))
+		const argString = content.substring(matches[1].length + (matches[2] ? matches[2].length : 0))
 		return message.initCommand(commands[0], argString)
 	}
 
@@ -446,17 +439,20 @@ class CommandDispatcher {
 	 * @private
 	 */
 	buildCommandPattern(prefix) {
+		const { client, _commandPatterns } = this
+		const { id } = client.user
+
 		let pattern
 		if (prefix) {
 			const escapedPrefix = escapeRegex(prefix)
 			pattern = new RegExp(
-				`^(<@!?${this.client.user.id}>\\s+(?:${escapedPrefix}\\s*)?|${escapedPrefix}\\s*)([^\\s]+)`, 'i'
+				`^(<@!?${id}>\\s+(?:${escapedPrefix}\\s*)?|${escapedPrefix}\\s*)([^\\s]+)`, 'i'
 			)
 		} else {
-			pattern = new RegExp(`(^<@!?${this.client.user.id}>\\s+)([^\\s]+)`, 'i')
+			pattern = new RegExp(`(^<@!?${id}>\\s+)([^\\s]+)`, 'i')
 		}
-		this._commandPatterns.set(prefix, pattern)
-		this.client.emit('debug', `Built command pattern for prefix "${prefix}": ${pattern}`)
+		_commandPatterns.set(prefix, pattern)
+		client.emit('debug', `Built command pattern for prefix "${prefix}": ${pattern}`)
 		return pattern
 	}
 }
@@ -471,20 +467,44 @@ function removeDashes(str) {
 	if (!str) return
 	const arr = str.split('-')
 	const first = arr.shift()
-	const rest = arr.map(s => capitalize(s)).join('')
+	const rest = arr.map(capitalize).join('')
 	return first + rest
 }
 
-/**
- * Capitalizes every word of a string.
- * @param {string} str The string to capitalize.
- */
-function capitalize(str) {
-	if (!str) return ''
+function escapeRegex(str) {
+	return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+}
 
-	const splitStr = str.toLowerCase().split(/ +/)
-	for (let i = 0; i < splitStr.length; i++) {
-		splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
+/**
+ * @param {object} obj
+ * @param {CommandInteractionOption} opt
+ */
+function parseSlashArgs(obj, { name, value, type, channel, member, user, role, options }) {
+	if (name && [undefined, null].includes(value)) {
+		obj.subCommand = name
+	} else {
+		name = removeDashes(name)
+		switch (type) {
+			case 'BOOLEAN':
+			case 'INTEGER':
+			case 'NUMBER':
+			case 'STRING':
+			case 'SUB_COMMAND':
+				obj[name] = value ?? null
+				break
+			case 'CHANNEL':
+				obj[name] = channel ?? null
+				break
+			case 'MENTIONABLE':
+				obj[name] = member ?? user ?? channel ?? role ?? null
+				break
+			case 'ROLE':
+				obj[name] = role ?? null
+				break
+			case 'USER':
+				obj[name] = member ?? user ?? null
+				break
+		}
 	}
-	return splitStr.join(' ')
+	options?.forEach(opt => parseSlashArgs(obj, opt))
 }

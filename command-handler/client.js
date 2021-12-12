@@ -1,10 +1,7 @@
-/* eslint-disable no-unused-expressions */
 /* eslint-disable no-unused-vars */
 const { Client, User, UserResolvable, Collection, Permissions } = require('discord.js')
 const CommandoRegistry = require('./registry')
 const CommandDispatcher = require('./dispatcher')
-const GuildSettingsHelper = require('./providers/helper')
-const SettingProvider = require('./providers/base')
 const { CommandoClientOptions, GuildDatabaseManager, CommandoGuildManager } = require('./typings')
 const CommandoMessage = require('./extensions/message')
 // const CommandoGuild = require('./extensions/guild')
@@ -20,32 +17,35 @@ class CommandoClient extends Client {
 	 * @param {CommandoClientOptions} [options] Options for the client
 	 */
 	constructor(options = {}) {
-		if (typeof options.prefix === 'undefined') options.prefix = '!'
-		if (options.prefix === null) options.prefix = ''
-		if (typeof options.commandEditableDuration === 'undefined') options.commandEditableDuration = 30
-		if (typeof options.nonCommandEditable === 'undefined') options.nonCommandEditable = true
+		const { prefix, commandEditableDuration, nonCommandEditable, inviteOptions, owner } = options
+
+		if (typeof prefix === 'undefined') options.prefix = '!'
+		if (prefix === null) options.prefix = ''
+		if (typeof commandEditableDuration === 'undefined') options.commandEditableDuration = 30
+		if (typeof nonCommandEditable === 'undefined') options.nonCommandEditable = true
 		super(options)
 
 		/**
 		 * Options for the client
 		 * @type {CommandoClientOptions}
 		 */
+		// eslint-disable-next-line no-unused-expressions
 		this.options
 
-		if (typeof options.inviteOptions === 'object') {
-			const invitePerms = options.inviteOptions.permissions
-			options.inviteOptions.permissions = Permissions.resolve(invitePerms)
+		if (typeof inviteOptions === 'object') {
+			const invitePerms = inviteOptions.permissions
+			inviteOptions.permissions = Permissions.resolve(invitePerms)
 		}
 
 		/**
 		 * Invite for the bot
 		 * @type {?string}
 		 */
-		this.botInvite = typeof options.inviteOptions === 'string' ? options.inviteOptions : null
+		this.botInvite = typeof inviteOptions === 'string' ? inviteOptions : null
 		if (!this.botInvite) {
 			this.once('ready', () => {
-				if (this.options.inviteOptions) {
-					this.botInvite = this.generateInvite(this.options.inviteOptions)
+				if (inviteOptions) {
+					this.botInvite = this.generateInvite(inviteOptions)
 				}
 			})
 		}
@@ -53,6 +53,7 @@ class CommandoClient extends Client {
 		/**
 		 * @type {CommandoGuildManager}
 		 */
+		// eslint-disable-next-line no-unused-expressions
 		this.guilds
 
 		/**
@@ -78,18 +79,6 @@ class CommandoClient extends Client {
 		 * @type {Collection<string, GuildDatabaseManager>}
 		 */
 		this.databases = new Collection()
-
-		/**
-		 * The client's setting provider
-		 * @type {?SettingProvider}
-		 */
-		this.provider = null
-
-		/**
-		 * Shortcut to use setting provider methods for the global settings
-		 * @type {GuildSettingsHelper}
-		 */
-		this.settings = new GuildSettingsHelper(this, null)
 
 		/**
 		 * Internal global command prefix, controlled by the {@link CommandoClient#prefix} getter/setter
@@ -123,16 +112,16 @@ class CommandoClient extends Client {
 		// Fetch the owner(s)
 		if (options.owner) {
 			this.once('ready', () => {
-				if (Array.isArray(options.owner) || options.owner instanceof Set) {
-					for (const owner of options.owner) {
-						this.users.fetch(owner).catch(err => {
-							this.emit('warn', `Unable to fetch owner ${owner}.`)
+				if (Array.isArray(owner) || owner instanceof Set) {
+					for (const user of owner) {
+						this.users.fetch(user).catch(err => {
+							this.emit('warn', `Unable to fetch owner ${user}.`)
 							this.emit('error', err)
 						})
 					}
 				} else {
-					this.users.fetch(options.owner).catch(err => {
-						this.emit('warn', `Unable to fetch owner ${options.owner}.`)
+					this.users.fetch(owner).catch(err => {
+						this.emit('warn', `Unable to fetch owner ${owner}.`)
 						this.emit('error', err)
 					})
 				}
@@ -147,27 +136,32 @@ class CommandoClient extends Client {
 	 * @emits {@link CommandoClient#commandPrefixChange}
 	 */
 	get prefix() {
-		if (typeof this._prefix === 'undefined' || this._prefix === null) return this.options.prefix
-		return this._prefix
+		const { _prefix, options } = this
+		if (typeof _prefix === 'undefined' || _prefix === null) return options.prefix
+		return _prefix
 	}
 
 	set prefix(prefix) {
 		this._prefix = prefix
-		this.emit('commandPrefixChange', null, this._prefix)
+		this.emit('commandPrefixChange', null, prefix)
 	}
 
 	/**
 	 * Owners of the bot, set by the {@link CommandoClientOptions#owner} option.
 	 * <info>If you simply need to check if a user is an owner of the bot, please instead use
 	 * {@link CommandoClient#isOwner}.</info>
-	 * @type {?Array<User>}
+	 * @type {?User[]}
 	 * @readonly
 	 */
 	get owners() {
-		if (!this.options.owner) return null
-		if (typeof this.options.owner === 'string') return [this.users.cache.get(this.options.owner)]
+		const { options, users } = this
+		const { cache } = users
+		const { owner } = options
+
+		if (!owner) return null
+		if (typeof owner === 'string') return [cache.get(owner)]
 		const owners = []
-		for (const owner of this.options.owner) owners.push(this.users.cache.get(owner))
+		for (const user of owner) owners.push(cache.get(user))
 		return owners
 	}
 
@@ -177,47 +171,23 @@ class CommandoClient extends Client {
 	 * @return {boolean}
 	 */
 	isOwner(user) {
-		if (!this.options.owner) return false
-		user = this.users.resolve(user)
+		const { users, options } = this
+		const { owner } = options
+
+		if (!owner) return false
+		user = users.resolve(user)
 		if (!user) throw new RangeError('Unable to resolve user.')
-		if (typeof this.options.owner === 'string') return user.id === this.options.owner
-		if (Array.isArray(this.options.owner)) return this.options.owner.includes(user.id)
-		if (this.options.owner instanceof Set) return this.options.owner.has(user.id)
+		const { id } = user
+
+		if (typeof owner === 'string') return id === owner
+		if (Array.isArray(owner)) return owner.includes(id)
+		if (owner instanceof Set) return owner.has(id)
 		throw new RangeError('The client\'s "owner" option is an unknown value.')
-	}
-
-	/**
-	 * Sets the setting provider to use, and initialises it once the client is ready
-	 * @param {SettingProvider|Promise<SettingProvider>} provider Provider to use
-	 * @return {Promise<void>}
-	 */
-	async setProvider(provider) {
-		const newProvider = await provider
-		this.provider = newProvider
-
-		if (this.readyTimestamp) {
-			this.emit('debug', `Provider set to ${newProvider.constructor.name} - initialising...`)
-			await newProvider.init(this)
-			this.emit('debug', 'Provider finished initialisation.')
-			return undefined
-		}
-
-		this.emit('debug', `Provider set to ${newProvider.constructor.name} - will initialise once ready.`)
-		await new Promise(resolve => {
-			this.once('ready', () => {
-				this.emit('debug', 'Initialising provider...')
-				resolve(newProvider.init(this))
-			})
-		})
-		this.emit('providerReady', provider)
-		this.emit('debug', 'Provider finished initialisation.')
-		return undefined
 	}
 
 	/** Logs out, terminates the connection to Discord, and destroys the client. */
 	async destroy() {
-		await super.destroy()
-		if (this.provider) await this.provider.destroy()
+		super.destroy()
 	}
 }
 

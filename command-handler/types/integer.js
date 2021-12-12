@@ -15,7 +15,7 @@ class IntegerArgumentType extends ArgumentType {
 	 */
 	validate(val, msg, arg) {
 		const int = parseInt(val)
-		if (Number.isNaN(int)) return false
+		if (isNaN(int)) return false
 
 		if (arg.oneOf && !arg.oneOf.includes(int)) {
 			return `Please enter one of the following options: ${arg.oneOf.map(opt => `\`${opt}\``).join(', ')}`

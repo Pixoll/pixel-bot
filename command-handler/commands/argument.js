@@ -53,35 +53,34 @@ class Argument {
 		 * If type is `string`, this is the maximum length of the string.
 		 * @type {?number}
 		 */
-		this.max = typeof info.max !== 'undefined' ? info.max : null
+		this.max = info.max ?? null
 
 		/**
 		 * If type is `integer` or `float`, this is the minimum value of the number.
 		 * If type is `string`, this is the minimum length of the string.
 		 * @type {?number}
 		 */
-		this.min = typeof info.min !== 'undefined' ? info.min : null
+		this.min = info.min ?? null
 
 		/**
 		 * The default value for the argument
 		 * @type {?ArgumentDefault}
 		 */
-		this.default = typeof info.default !== 'undefined' ? info.default : null
+		this.default = info.default ?? null
 
 		/**
 		 * Whether the argument is required or not
 		 * @type {boolean}
 		 * @default true
 		 */
-		this.required = typeof info.required === 'boolean' ? info.required :
-			(this.default === undefined || this.default === null)
+		this.required = info.required ?? typeof this.default === 'undefined'
 
 		/**
 		 * Whether the argument's validation is skipped or not
 		 * @type {boolean}
 		 * @default false
 		 */
-		this.skipValidation = typeof info.skipValidation === 'boolean' ? info.skipValidation : false
+		this.skipValidation = !!info.skipValidation
 
 		/**
 		 * Values the user can choose from
@@ -89,9 +88,7 @@ class Argument {
 		 * If type is `channel`, `member`, `role`, or `user`, this will be the Ids.
 		 * @type {?string[]}
 		 */
-		this.oneOf = typeof info.oneOf !== 'undefined' ?
-			info.oneOf.map(el => el.toLowerCase ? el.toLowerCase() : el) :
-			null
+		this.oneOf = info.oneOf?.map(el => el.toLowerCase ? el.toLowerCase() : el) ?? null
 
 		/**
 		 * Whether the argument accepts an infinite number of values
@@ -105,28 +102,28 @@ class Argument {
 		 * @type {?Function}
 		 * @see {@link ArgumentType#validate}
 		 */
-		this.validator = info.validate || null
+		this.validator = info.validate ?? null
 
 		/**
 		 * Parser function for parsing a value for the argument
 		 * @type {?Function}
 		 * @see {@link ArgumentType#parse}
 		 */
-		this.parser = info.parse || null
+		this.parser = info.parse ?? null
 
 		/**
 		 * Function to check whether a raw value is considered empty
 		 * @type {?Function}
 		 * @see {@link ArgumentType#isEmpty}
 		 */
-		this.emptyChecker = info.isEmpty || null
+		this.emptyChecker = info.isEmpty ?? null
 
 		/**
 		 * How long to wait for input (in seconds)
 		 * @type {number}
 		 * @default 30
 		 */
-		this.wait = typeof info.wait !== 'undefined' ? info.wait : 30
+		this.wait = info.wait ?? 30
 	}
 
 	/**
@@ -137,6 +134,8 @@ class Argument {
 	 * @return {Promise<ArgumentResult>}
 	 */
 	async obtain(msg, val, promptLimit = Infinity) {
+		const { channel, author } = msg
+
 		let empty = this.isEmpty(val, msg)
 		if (empty && !this.required) {
 			return {
@@ -148,7 +147,7 @@ class Argument {
 		}
 		if (this.infinite) return this.obtainInfinite(msg, val, promptLimit)
 
-		const wait = this.wait > 0 && this.wait !== Infinity ? this.wait * 1000 : undefined
+		const wait = this.wait > 0 && this.wait !== Infinity ? this.wait * 1000 : null
 		const prompts = []
 		const answers = []
 		let valid = !empty ? await this.validate(val, msg) : false
@@ -181,8 +180,8 @@ class Argument {
 			prompts.push(await msg.replyEmbed(prompt))
 
 			// Get the user's response
-			const responses = await msg.channel.awaitMessages({
-				filter: msg2 => msg2.author.id === msg.author.id,
+			const responses = await channel.awaitMessages({
+				filter: msg2 => msg2.author.id === author.id,
 				max: 1,
 				time: wait
 			})
@@ -210,8 +209,9 @@ class Argument {
 				}
 			}
 
-			empty = this.isEmpty(val, msg, responses.first())
-			valid = await this.validate(val, msg, responses.first())
+			const first = responses.first()
+			empty = this.isEmpty(val, msg, first)
+			valid = await this.validate(val, msg, first)
 		}
 
 		return {
@@ -231,7 +231,7 @@ class Argument {
 	 * @private
 	 */
 	async obtainInfinite(msg, vals, promptLimit = Infinity) {
-		const wait = this.wait > 0 && this.wait !== Infinity ? this.wait * 1000 : undefined
+		const wait = this.wait > 0 && this.wait !== Infinity ? this.wait * 1000 : null
 		const results = []
 		const prompts = []
 		const answers = []
@@ -429,7 +429,7 @@ class Argument {
 		if (!info.type && (!info.validate || !info.parse)) {
 			throw new Error('Argument must have both validate and parse since it doesn\'t have a type.')
 		}
-		if (typeof info.wait !== 'undefined' && (typeof info.wait !== 'number' || Number.isNaN(info.wait))) {
+		if (typeof info.wait !== 'undefined' && (typeof info.wait !== 'number' || isNaN(info.wait))) {
 			throw new TypeError('Argument wait must be a number.')
 		}
 	}

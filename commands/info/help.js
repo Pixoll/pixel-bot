@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { MessageEmbed } = require('discord.js')
-const { commandInfo, pagedEmbed, getArgument, replyAll } = require('../../utils')
+const { pagedEmbed, getArgument, replyAll, pluralize } = require('../../utils/functions')
 const { version } = require('../../package.json')
 const { stripIndent, oneLine } = require('common-tags')
 const { CommandInstances } = require('../../command-handler/typings')
+const { permissions } = require('../../command-handler/util')
+const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -16,7 +18,6 @@ module.exports = class HelpCommand extends Command {
             group: 'info',
             description: 'Displays all the commands you have access to, or information about a single command.',
             details: '`command` can be either a command\'s name or alias.',
-            format: 'help <command>',
             examples: ['help ban'],
             guarded: true,
             args: [{
@@ -238,4 +239,86 @@ module.exports = class HelpCommand extends Command {
 
         await replyAll({ message, interaction }, commandInfo(command, guild))
     }
+}
+
+/**
+ * Creates an embed containing the information about the command.
+ * @param {Command} cmd The command to get information from.
+ * @param {CommandoGuild} guild The guild where the command is used.
+ */
+function commandInfo(cmd, guild) {
+    const { prefix: _prefix, user, owners } = cmd.client
+    const {
+        name, description, details, examples, aliases, group, guarded, throttling, ownerOnly, guildOnly,
+        dmOnly, deprecated, replacing, slash
+    } = cmd
+
+    const prefix = guild?.prefix || _prefix
+
+    const usage = cmd.format?.split('\n').map(format => {
+        if (/^[[<]/.test(format)) {
+            return `**>** \`${prefix + name} ${format}\``
+        }
+
+        const [cmd, desc] = format.split(' - ')
+        const str = `**>** \`${prefix + cmd}\``
+
+        if (desc) return str + ' - ' + desc
+        return str
+    }).join('\n') || `**>** \`${prefix + name}\``
+
+    const clientPermissions = cmd.clientPermissions?.map(perm => permissions[perm]).join(', ')
+    const userPermissions = cmd.userPermissions?.map(perm => permissions[perm]).join(', ')
+
+    const embed = new MessageEmbed()
+        .setColor('#4c9f4c')
+        .setAuthor(
+            `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
+            user.displayAvatarURL({ dynamic: true })
+        )
+        .setDescription(stripIndent`
+            ${deprecated ? oneLine`
+                **This command has been marked as deprecated, which means it will be removed in future updates.
+                Please start using the \`${replacing}\` command from now on.**
+            ` : ''}
+            ${description}
+            ${details ? `\n>>> ${details}` : ''}
+        `)
+        .addField('Usage', usage)
+        .setFooter(
+            `Version: ${version} • Developer: ${owners[0].tag}`,
+            user.displayAvatarURL({ dynamic: true })
+        )
+
+    if (examples) embed.addField('Examples', examples.map(ex => `**>** \`${prefix + ex}\``).join('\n'))
+
+    const information = {
+        Category: group.name,
+        Aliases: aliases.join(', ') || null,
+        Slash: slash ? 'Yes' : 'No',
+        Cooldown: throttling ?
+            `${pluralize('usage', throttling.usages)} per ${myMs(throttling.duration * 1000, { long: true })}` :
+            null,
+        Guarded: guarded ? 'Yes' : 'No',
+        Status: !guarded ? (cmd.isEnabledIn(guild) ? 'Enabled' : 'Disabled') : null,
+        'Server only': guildOnly ? 'Yes' : null,
+        'DMs only': dmOnly ? 'Yes' : null,
+        'Bot perms': clientPermissions || null,
+        'User perms': userPermissions || (ownerOnly ? 'Bot\'s owner only' : null)
+    }
+
+    const info = []
+    for (const prop in information) {
+        if (!information[prop]) continue
+        info.push(`**>** **${prop}:** ${information[prop]}`)
+    }
+
+    const first = info.splice(0, Math.round(info.length / 2 + 0.1))
+
+    embed.addFields(
+        { name: 'Information', value: first.join('\n'), inline: true },
+        { name: '\u200B', value: info.join('\n'), inline: true }
+    )
+
+    return embed
 }

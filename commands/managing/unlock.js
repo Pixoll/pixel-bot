@@ -2,7 +2,8 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { TextChannel } = require('discord.js')
-const { basicEmbed, channelDetails, reasonDetails, replyAll } = require('../../utils')
+const { basicEmbed, replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -12,7 +13,10 @@ module.exports = class UnlockCommand extends Command {
             name: 'unlock',
             group: 'managing',
             description: 'Unlock a channel, granting the `Send Messages` permission from @everyone.',
-            details: `${channelDetails()}\n${reasonDetails('Thanks for waiting')}`,
+            details: stripIndent`
+                \`channel\` can be either a channel's name, mention or id.
+                If \`reason\` is not specified, it will default as "Thanks for waiting".
+            `,
             format: 'lock [channel] <reason>',
             examples: ['unlock #chat Thanks for waiting'],
             clientPermissions: ['MANAGE_CHANNELS'],

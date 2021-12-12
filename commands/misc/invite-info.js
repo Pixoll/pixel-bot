@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, Invite } = require('discord.js')
-const { timestamp, basicEmbed, replyAll } = require('../../utils')
+const { timestamp, basicEmbed, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 

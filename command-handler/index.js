@@ -1,29 +1,19 @@
 module.exports = {
+	Argument: require('./commands/argument'),
+	ArgumentCollector: require('./commands/collector'),
+	ArgumentType: require('./types/base'),
 	Client: require('./client'),
-	CommandoClient: require('./client'),
-	CommandoRegistry: require('./registry'),
+	ClientDatabaseManager: require('./database/ClientDatabaseManager'),
+	Command: require('./commands/base'),
 	CommandDispatcher: require('./dispatcher'),
+	CommandFormatError: require('./errors/command-format'),
+	CommandGroup: require('./commands/group'),
+	CommandoClient: require('./client'),
 	CommandoGuild: require('./extensions/guild'),
 	CommandoMessage: require('./extensions/message'),
-	Command: require('./commands/base'),
-	CommandGroup: require('./commands/group'),
-	ArgumentCollector: require('./commands/collector'),
-	Argument: require('./commands/argument'),
-	ArgumentType: require('./types/base'),
-	FriendlyError: require('./errors/friendly'),
-	CommandFormatError: require('./errors/command-format'),
+	CommandoRegistry: require('./registry'),
 	DatabaseManager: require('./database/DatabaseManager'),
-	ClientDatabaseManager: require('./database/ClientDatabaseManager'),
+	FriendlyError: require('./errors/friendly'),
 	GuildDatabaseManager: require('./database/GuildDatabaseManager'),
-
-	...require('./util'),
 	version: '0.13.0',
-
-	SettingProvider: require('./providers/base'),
-	get SQLiteProvider() {
-		return require('./providers/sqlite')
-	},
-	get SyncSQLiteProvider() {
-		return require('./providers/sqlite-sync')
-	}
 }

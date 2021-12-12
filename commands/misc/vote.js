@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageActionRow, MessageButton } = require('discord.js')
-const { noReplyInDMs, replyAll } = require('../../utils')
+const { noReplyInDMs, replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

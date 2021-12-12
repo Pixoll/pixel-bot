@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { myMs } = require('../../utils')
+const myMs = require('../../utils/my-ms')
 const { Argument } = require('../typings')
 const ArgumentType = require('./base')
 /* eslint-enable no-unused-vars */
@@ -88,7 +88,7 @@ class DateArgumentType extends ArgumentType {
             }
             return parsed + formatter - offset
         }) || [defDate.getUTCHours(), defDate.getUTCMinutes()]
-        const arr = [...dateNums, ...timeNums].filter(n => n !== undefined)
+        const arr = [...dateNums, ...timeNums].filter(n => typeof n !== 'undefined')
         const date = new Date(...arr)
         return date
     }

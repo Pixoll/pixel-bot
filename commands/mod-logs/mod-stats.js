@@ -3,9 +3,23 @@ const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, User, Collection } = require('discord.js')
 const { stripIndent } = require('common-tags')
-const { getDayDiff, code, replyAll } = require('../../utils')
+const { code, replyAll } = require('../../utils/functions')
 const { ModerationSchema } = require('../../schemas/types')
 /* eslint-enable no-unused-vars */
+
+/**
+ * Get's the difference in days between the specified date and now.
+ * @param {string|Date} date The date in `Date` format or a string.
+ * @returns {number}
+ */
+function getDayDiff(date) {
+    const string = typeof (date) === 'string' ? date : new Date(date).toISOString().split('T')[0]
+    const arr = string.split(/\/|,|-/, 3)
+    const newDate = new Date(arr)
+    const difference = new Date() - newDate.getTime()
+    const daysDiff = Math.trunc(difference / 86_400_000)
+    return daysDiff
+}
 
 /** A command that can be run in a client */
 module.exports = class ModStatsCommand extends Command {

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
-const { basicEmbed, sleep, timestamp } = require('../../utils')
+const { basicEmbed, sleep, timestamp } = require('../../utils/functions')
 const { CommandoClient } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
@@ -38,7 +38,7 @@ module.exports = (client) => {
         if (!guild || author.bot || everyone) return
 
         const db = guild.database.afk
-        for (const [, user] of users) {
+        for (const user of users.toJSON()) {
             const data = await db.fetch({ user: user.id })
             if (!data) return
 

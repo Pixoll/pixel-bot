@@ -5,10 +5,11 @@ const Command = require('./commands/base')
 const CommandGroup = require('./commands/group')
 const CommandoMessage = require('./extensions/message')
 const ArgumentType = require('./types/base')
-const { isConstructor } = require('./util')
 const {
-	CommandoClient, CommandInstances, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable
+	CommandoClient, CommandInstances, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable, RequireAllOptions
 } = require('./typings')
+const requireAll = require('require-all')
+const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
 
 /** Handles registration and searching of commands and groups */
@@ -58,26 +59,35 @@ class CommandoRegistry {
 	 * @private
 	 */
 	async registerSlashCommands() {
-		const testCommands = this.commands.filter(cmd => cmd.test && cmd.slash).map(cmd => cmd._slashToAPI)
+		const { commands, client } = this
+		const { application, options, guilds } = client
+
+		const testCommands = commands.filter(cmd => cmd.test && cmd.slash).map(cmd => cmd._slashToAPI)
 		if (testCommands.length !== 0) {
-			if (typeof this.client.options.testGuild !== 'string') throw new TypeError('Client testGuild must be a string.')
-			const guild = this.client.guilds.resolve(this.client.options.testGuild)
+			if (typeof options.testGuild !== 'string') throw new TypeError('Client testGuild must be a string.')
+
+			const guild = guilds.resolve(options.testGuild)
 			if (!guild) throw new TypeError('Client testGuild must be a valid Guild id.')
+
 			const current = await guild.commands.fetch()
 			const toAdd = testCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
 			for (const command of toAdd) {
-				await guild.commands.create(command)
+				await guild.commands.set(command)
 			}
-			this.client.emit('debug', `Loaded ${testCommands.length} guild slash commands`)
+
+			client.emit('debug', `Loaded ${testCommands.length} guild slash commands`)
 		}
-		const slashCommands = this.commands.filter(cmd => !cmd.test && cmd.slash).map(cmd => cmd._slashToAPI)
+
+		const slashCommands = commands.filter(cmd => !cmd.test && cmd.slash).map(cmd => cmd._slashToAPI)
 		if (slashCommands.length === 0) return
-		const current = await this.client.application.commands.fetch()
+
+		const current = await application.commands.fetch()
 		const toAdd = slashCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
 		for (const command of toAdd) {
-			await this.client.application.commands.create(command)
+			await application.commands.create(command)
 		}
-		this.client.emit('debug', `Loaded ${slashCommands.length} public slash commands`)
+
+		client.emit('debug', `Loaded ${slashCommands.length} public slash commands`)
 	}
 
 	/**
@@ -89,22 +99,24 @@ class CommandoRegistry {
 	 * @see {@link CommandoRegistry#registerGroups}
 	 */
 	registerGroup(group, name, guarded) {
+		const { client, groups } = this
+
 		if (typeof group === 'string') {
-			group = new CommandGroup(this.client, group, name, guarded)
+			group = new CommandGroup(client, group, name, guarded)
 		} else if (isConstructor(group, CommandGroup)) {
-			group = new group(this.client)
+			group = new group(client)
 		} else if (typeof group === 'object' && !(group instanceof CommandGroup)) {
-			group = new CommandGroup(this.client, group.id, group.name, group.guarded)
+			group = new CommandGroup(client, group.id, group.name, group.guarded)
 		}
 
-		const existing = this.groups.get(group.id)
+		const existing = groups.get(group.id)
 		if (existing) {
 			existing.name = group.name
-			this.client.emit('debug', `Group ${group.id} is already registered renamed it to "${group.name}".`)
+			client.emit('debug', `Group ${group.id} is already registered renamed it to "${group.name}".`)
 		} else {
-			this.groups.set(group.id, group)
-			this.client.emit('groupRegister', group, this)
-			this.client.emit('debug', `Registered group ${group.id}.`)
+			groups.set(group.id, group)
+			client.emit('groupRegister', group, this)
+			client.emit('debug', `Registered group ${group.id}.`)
 		}
 
 		return this
@@ -113,7 +125,7 @@ class CommandoRegistry {
 	/* eslint-disable no-tabs */
 	/**
 	 * Registers multiple groups
-	 * @param {CommandGroup[]|Function[]|Object[]|Array<string[]>} groups An array of CommandGroup instances,
+	 * @param {CommandGroup[]|Function[]|Object[]|string[][]} groups An array of CommandGroup instances,
 	 * constructors, plain objects (with id, name, and guarded properties),
 	 * or arrays of {@link CommandoRegistry#registerGroup} parameters
 	 * @return {CommandoRegistry}
@@ -145,34 +157,38 @@ class CommandoRegistry {
 	 * @see {@link CommandoRegistry#registerCommands}
 	 */
 	registerCommand(command) {
-		if (isConstructor(command, Command)) command = new command(this.client)
-		else if (isConstructor(command.default, Command)) command = new command.default(this.client)
+		const { client, commands, groups, unknownCommand } = this
+
+		if (isConstructor(command, Command)) command = new command(client)
+		else if (isConstructor(command.default, Command)) command = new command.default(client)
 		if (!(command instanceof Command)) throw new Error(`Invalid command object to register: ${command}`)
 
+		const { name, aliases, groupId, memberName, unknown } = command
+
 		// Make sure there aren't any conflicts
-		if (this.commands.some(cmd => cmd.name === command.name || cmd.aliases.includes(command.name))) {
-			throw new Error(`A command with the name/alias "${command.name}" is already registered.`)
+		if (commands.some(cmd => cmd.name === name || cmd.aliases.includes(name))) {
+			throw new Error(`A command with the name/alias "${name}" is already registered.`)
 		}
-		for (const alias of command.aliases) {
-			if (this.commands.some(cmd => cmd.name === alias || cmd.aliases.includes(alias))) {
+		for (const alias of aliases) {
+			if (commands.some(cmd => cmd.name === alias || cmd.aliases.includes(alias))) {
 				throw new Error(`A command with the name/alias "${alias}" is already registered.`)
 			}
 		}
-		const group = this.groups.find(grp => grp.id === command.groupId)
-		if (!group) throw new Error(`Group "${command.groupId}" is not registered.`)
-		if (group.commands.some(cmd => cmd.memberName === command.memberName)) {
-			throw new Error(`A command with the member name "${command.memberName}" is already registered in ${group.id}`)
+		const group = groups.find(grp => grp.id === groupId)
+		if (!group) throw new Error(`Group "${groupId}" is not registered.`)
+		if (group.commands.some(cmd => cmd.memberName === memberName)) {
+			throw new Error(`A command with the member name "${memberName}" is already registered in ${group.id}`)
 		}
-		if (command.unknown && this.unknownCommand) throw new Error('An unknown command is already registered.')
+		if (unknown && unknownCommand) throw new Error('An unknown command is already registered.')
 
 		// Add the command
 		command.group = group
-		group.commands.set(command.name, command)
-		this.commands.set(command.name, command)
-		if (command.unknown) this.unknownCommand = command
+		group.commands.set(name, command)
+		commands.set(name, command)
+		if (unknown) this.unknownCommand = command
 
-		this.client.emit('commandRegister', command, this)
-		this.client.emit('debug', `Registered command ${group.id}:${command.memberName}.`)
+		client.emit('commandRegister', command, this)
+		client.emit('debug', `Registered command ${group.id}:${memberName}.`)
 
 		return this
 	}
@@ -206,7 +222,7 @@ class CommandoRegistry {
 	 * registry.registerCommandsIn(path.join(__dirname, 'commands'))
 	 */
 	registerCommandsIn(options) {
-		const obj = require('require-all')(options)
+		const obj = requireAll(options)
 		const commands = []
 		for (const group of Object.values(obj)) {
 			for (let command of Object.values(group)) {
@@ -226,19 +242,21 @@ class CommandoRegistry {
 	 * @see {@link CommandoRegistry#registerTypes}
 	 */
 	registerType(type) {
-		if (isConstructor(type, ArgumentType)) type = new type(this.client)
-		else if (isConstructor(type.default, ArgumentType)) type = new type.default(this.client)
+		const { client, types } = this
+
+		if (isConstructor(type, ArgumentType)) type = new type(client)
+		else if (isConstructor(type.default, ArgumentType)) type = new type.default(client)
 
 		if (!(type instanceof ArgumentType)) throw new Error(`Invalid type object to register: ${type}`)
 
 		// Make sure there aren't any conflicts
-		if (this.types.has(type.id)) throw new Error(`An argument type with the id "${type.id}" is already registered.`)
+		if (types.has(type.id)) throw new Error(`An argument type with the id "${type.id}" is already registered.`)
 
 		// Add the type
-		this.types.set(type.id, type)
+		types.set(type.id, type)
 
-		this.client.emit('typeRegister', type, this)
-		this.client.emit('debug', `Registered argument type ${type.id}.`)
+		client.emit('typeRegister', type, this)
+		client.emit('debug', `Registered argument type ${type.id}.`)
 
 		return this
 	}
@@ -272,7 +290,7 @@ class CommandoRegistry {
 	 * @return {CommandoRegistry}
 	 */
 	registerTypesIn(options) {
-		const obj = require('require-all')(options)
+		const obj = requireAll(options)
 		const types = []
 		for (const type of Object.values(obj)) types.push(type)
 		return this.registerTypes(types, true)
@@ -284,33 +302,15 @@ class CommandoRegistry {
 	 * @return {CommandoRegistry}
 	 */
 	registerDefaultTypes(types = {}) {
-		types = {
-			string: true,
-			integer: true,
-			float: true,
-			boolean: true,
-			duration: true,
-			date: true,
-			time: true,
-			user: true,
-			member: true,
-			role: true,
-			channel: true,
-			textChannel: true,
-			threadChannel: true,
-			voiceChannel: true,
-			stageChannel: true,
-			categoryChannel: true,
-			message: true,
-			invite: true,
-			customEmoji: true,
-			defaultEmoji: true,
-			command: true,
-			group: true,
-			...types
-		}
+		const defaultTypes = Object.keys(requireAll(path.join(__dirname, '/types')))
+			.filter(k => k !== 'base' && k !== 'union')
+			.reduce((obj, k) => {
+				obj[removeDashes(k)] = true
+				return obj
+			}, {})
+		Object.assign(defaultTypes, types)
 
-		for (let type in types) {
+		for (let type in defaultTypes) {
 			if (type !== type.toLowerCase()) {
 				type = type.replace(/[A-Z]/g, '-$&').toLowerCase()
 			}
@@ -327,24 +327,29 @@ class CommandoRegistry {
 	 * @param {Command} oldCommand Old command
 	 */
 	reregisterCommand(command, oldCommand) {
-		if (isConstructor(command, Command)) command = new command(this.client)
-		else if (isConstructor(command.default, Command)) command = new command.default(this.client)
+		const { client, commands, unknownCommand } = this
 
-		if (command.name !== oldCommand.name) throw new Error('Command name cannot change.')
-		if (command.groupId !== oldCommand.groupId) throw new Error('Command group cannot change.')
-		if (command.memberName !== oldCommand.memberName) throw new Error('Command memberName cannot change.')
-		if (command.unknown && this.unknownCommand !== oldCommand) {
+		if (isConstructor(command, Command)) command = new command(client)
+		else if (isConstructor(command.default, Command)) command = new command.default(client)
+		if (!(command instanceof Command)) throw new Error(`Invalid command object to register: ${command}`)
+
+		const { name, groupId, memberName, unknown } = command
+
+		if (name !== oldCommand.name) throw new Error('Command name cannot change.')
+		if (groupId !== oldCommand.groupId) throw new Error('Command group cannot change.')
+		if (memberName !== oldCommand.memberName) throw new Error('Command memberName cannot change.')
+		if (unknown && this.unknownCommand !== oldCommand) {
 			throw new Error('An unknown command is already registered.')
 		}
 
-		command.group = this.resolveGroup(command.groupId)
-		command.group.commands.set(command.name, command)
-		this.commands.set(command.name, command)
-		if (this.unknownCommand === oldCommand) this.unknownCommand = null
-		if (command.unknown) this.unknownCommand = command
+		command.group = this.resolveGroup(groupId)
+		command.group.commands.set(name, command)
+		commands.set(name, command)
+		if (unknownCommand === oldCommand) this.unknownCommand = null
+		if (unknown) this.unknownCommand = command
 
-		this.client.emit('commandReregister', command, oldCommand)
-		this.client.emit('debug', `Reregistered command ${command.groupId}:${command.memberName}.`)
+		client.emit('commandReregister', command, oldCommand)
+		client.emit('debug', `Reregistered command ${groupId}:${memberName}.`)
 	}
 
 	/**
@@ -352,12 +357,15 @@ class CommandoRegistry {
 	 * @param {Command} command Command to unregister
 	 */
 	unregisterCommand(command) {
-		this.commands.delete(command.name)
-		command.group.commands.delete(command.name)
-		if (this.unknownCommand === command) this.unknownCommand = null
+		const { commands, unknownCommand, client } = this
+		const { name, groupId, memberName } = command
 
-		this.client.emit('commandUnregister', command)
-		this.client.emit('debug', `Unregistered command ${command.groupId}:${command.memberName}.`)
+		commands.delete(name)
+		command.group.commands.delete(name)
+		if (unknownCommand === command) this.unknownCommand = null
+
+		client.emit('commandUnregister', command)
+		client.emit('debug', `Unregistered command ${groupId}:${memberName}.`)
 	}
 
 	/**
@@ -367,13 +375,14 @@ class CommandoRegistry {
 	 * @return {CommandGroup[]} All groups that are found
 	 */
 	findGroups(searchString = null, exact = false) {
-		if (!searchString) return this.groups
+		const { groups } = this
+		if (!searchString) return groups
 
 		// Find all matches
 		const lcSearch = searchString.toLowerCase()
-		const matchedGroups = Array.from(this.groups.filter(
+		const matchedGroups = groups.filter(
 			exact ? groupFilterExact(lcSearch) : groupFilterInexact(lcSearch)
-		).values())
+		).toJSON()
 		if (exact) return matchedGroups
 
 		// See if there's an exact match
@@ -405,17 +414,18 @@ class CommandoRegistry {
 	 * @return {Command[]} All commands that are found
 	 */
 	findCommands(searchString = null, exact = false, { message, interaction } = {}) {
+		const { commands } = this
 		if (!searchString) {
 			return (message || interaction) ?
-				Array.from(this.commands.filter(cmd => cmd.isUsable({ message, interaction })).values()) :
-				Array.from(this.commands)
+				commands.filter(cmd => cmd.isUsable({ message, interaction })).toJSON() :
+				commands.toJSON()
 		}
 
 		// Find all matches
 		const lcSearch = searchString.toLowerCase()
-		const matchedCommands = Array.from(this.commands.filter(
+		const matchedCommands = commands.filter(
 			exact ? commandFilterExact(lcSearch) : commandFilterInexact(lcSearch)
-		).values())
+		).toJSON()
 		if (exact) return matchedCommands
 
 		// See if there's an exact match
@@ -483,3 +493,27 @@ function commandFilterInexact(search) {
 }
 
 module.exports = CommandoRegistry
+
+function isConstructor(func, _class) {
+	try {
+		// eslint-disable-next-line no-new
+		new new Proxy(func, {
+			construct: () => Object.prototype
+		})()
+		if (!_class) return true
+		return func.prototype instanceof _class
+	} catch (err) {
+		return false
+	}
+}
+
+/**
+ * Removes dashes from the string and capitalizes the remaining strings
+ * @param {string} str The string to parse
+ */
+function removeDashes(str) {
+    const arr = str.split('-')
+    const first = arr.shift()
+    const rest = arr.map(capitalize).join('')
+    return first + rest
+}

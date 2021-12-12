@@ -1,7 +1,18 @@
 /* eslint-disable no-unused-vars */
-const { CommandoClient } = require('../../command-handler/typings')
-const { getLogsChannel, sliceFileName, difference } = require('../../utils')
+const { TextChannel } = require('discord.js')
+const { CommandoClient, CommandoGuild } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
+
+/**
+ * Gets the audit-logs channel
+ * @param {CommandoGuild} guild The guild to look into
+ * @returns {Promise<?TextChannel>}
+ */
+async function getLogsChannel(guild) {
+    const data = await guild.database.setup.fetch()
+    const channel = guild.channels.resolve(data?.logsChannel)
+    return channel
+}
 
 /**
  * Re-sends audit-logs when deleted.
@@ -9,11 +20,11 @@ const { getLogsChannel, sliceFileName, difference } = require('../../utils')
  */
 module.exports = (client) => {
     client.on('messageDelete', async message => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDelete".`)
-
         if (message.partial) return
         const { guild, author, embeds, channelId } = message
         if (!guild || client.user.id !== author.id || embeds.length === 0) return
+
+        client.emit('debug', 'Running event "logs/_re-send#messageDelete".')
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
@@ -22,13 +33,13 @@ module.exports = (client) => {
     })
 
     client.on('messageDeleteBulk', async messages => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageDeleteBulk".`)
-
         const notPartial = messages.filter(m => !m.partial)
         if (notPartial.size === 0) return
 
         const { guild, author, channelId } = notPartial.first()
         if (!guild || client.user.id !== author.id) return
+
+        client.emit('debug', 'Running event "logs/_re-send#messageDeleteBulk".')
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return
@@ -41,13 +52,13 @@ module.exports = (client) => {
     })
 
     client.on('messageUpdate', async (oldMessage, newMessage) => {
-        client.emit('debug', `Running event "${sliceFileName(__filename)}#messageUpdate".`)
-
         if (oldMessage.partial || newMessage.partial) return
         const { guild, author, embeds, channelId, channel } = oldMessage
         if (
             !guild || client.user.id !== author.id || embeds.length === 0 || embeds.length === newMessage.embeds.length
         ) return
+
+        client.emit('debug', 'Running event "logs/_re-send#messageUpdate".')
 
         const logsChannel = await getLogsChannel(guild)
         if (!logsChannel || logsChannel.id !== channelId) return

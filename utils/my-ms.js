@@ -19,18 +19,18 @@ const mth = y / 12
  * @returns {string|number}
  */
 function myMs(val, options = {}) {
-    if (val === undefined || val === null) return
+    if (typeof val === 'undefined' || val === null) return
     if (!['number', 'string'].includes(typeof val)) throw new TypeError('Expected a number or string.')
 
     const isNumber = !!Number(val) || Number(val) === 0
 
     if (options.number) {
         if (isNumber) return Math.abs(Number(val))
-        return _parse(val)
+        return parseMs(val)
     }
 
     if (typeof val === 'string' && !isNumber) {
-        const ms = _parse(val)
+        const ms = parseMs(val)
         return ms
     }
 
@@ -76,117 +76,14 @@ function myMs(val, options = {}) {
     return and(arr.join(commas))
 }
 
-/**
- * Parses the specified time into a Discord template
- * @param {number|Date} time The time to parse (in milliseconds)
- * @param {'t'|'T'|'d'|'D'|'f'|'F'|'R'} [format] The format of the timestamp
- * - `t`: Short time ➜ `16:20`
- * - `T`: Long time ➜ `16:20:30`
- * - `d`: Short date ➜ `20/04/2021`
- * - `D`: Long date ➜ `20 April 2021`
- * - `f`: Short date/time ➜ `20 April 2021 16:20`
- * - `F`: Long date/time ➜ `Tuesday, 20 April 2021 16:20`
- * - `R`: Relative time ➜ `2 months ago`
- */
-function timestamp(time, format = 'f') {
-    if (!time) return
-    if (time instanceof Date) time = time.getTime()
-
-    const trunc = Math.trunc(time / 1000)
-    const rem = trunc % 60
-    const roundUp = rem >= 20
-    const epoch = trunc - rem + (roundUp ? 60 : 0)
-
-    return `<t:${epoch}:${format}>`
-}
-
-/** Converts ms and strings into future dates */
-class Duration {
-    /**
-     * Create a new Duration instance
-     * @param {number|string} val The ms or string to parse
-     */
-    constructor(val) {
-        const isNumber = !!Number(val) || Number(val) === 0
-
-        /**
-         * The offset
-         * @type {number}
-         */
-        this.offset = isNumber ? val : myMs(val)
-
-        /** Get the date from now */
-        this.fromNow = new Date(Date.now() + this.offset)
-
-        /** Formats the date */
-        this.format = this._formatDate(this.fromNow)
-    }
-
-    /**
-     * Gives any date the following format: `30/12/2020, 23:59`
-     * @param {Date|number} date The date in `Date` format or a number.
-     * @private
-     */
-    _formatDate(date) {
-        return new Intl.DateTimeFormat('en-GB', {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            timeZone: 'UTC',
-            // timeZoneName: 'short'
-        }).format(date)
-    }
-}
-
-/**
- * Shows the user friendly duration of time between a period and now
- * @param {(Date|number|string)} earlier The time to compare
- * @param {boolean} [showIn] Whether the output should be prefixed
- */
-function toNow(earlier, showIn) {
-    if (!(earlier instanceof Date)) earlier = new Date(earlier)
-    const returnString = showIn ? 'in ' : ''
-    let duration = Math.abs((Date.now() - earlier) / 1000)
-
-    // Compare the duration in seconds
-    if (duration < 45) return `${returnString}a few seconds`
-    else if (duration < 90) return `${returnString}a minute`
-
-    // Compare the duration in minutes
-    duration /= 60
-    if (duration < 45) return `${returnString + Math.round(duration)} minutes`
-    else if (duration < 90) return `${returnString}an hour`
-
-    // Compare the duration in hours
-    duration /= 60
-    if (duration < 22) return `${returnString + Math.round(duration)} hours`
-    else if (duration < 36) return `${returnString}a day`
-
-    // Compare the duration in days
-    duration /= 24
-    if (duration < 26) return `${returnString + Math.round(duration)} days`
-    else if (duration < 46) return `${returnString}a month`
-    else if (duration < 320) return `${returnString + Math.round(duration / 30)} months`
-    else if (duration < 548) return `${returnString}a year`
-
-    return `${returnString + Math.round(duration / 365)} years`
-}
-
-module.exports = {
-    Duration,
-    myMs,
-    toNow,
-    timestamp
-}
+module.exports = myMs
 
 /**
  * Parses the string into milliseconds
  * @param {string} str The string to parse
  * @private
  */
-function _parse(str) {
+function parseMs(str) {
     if (typeof str !== 'string') throw new TypeError('Expected a string.')
 
     const regex = new RegExp(

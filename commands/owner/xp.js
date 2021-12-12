@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { myMs, code, abcOrder } = require('../../utils')
+const { code, abcOrder } = require('../../utils/functions')
+const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

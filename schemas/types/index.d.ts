@@ -14,6 +14,7 @@
 type Snowflake = string
 
 interface BaseSchema { // extends Document
+    readonly _id: string
     readonly createdAt?: Date
     readonly updatedAt?: Date
 }

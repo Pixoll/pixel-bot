@@ -1,4 +1,3 @@
-const GuildSettingsHelper = require('../providers/helper')
 const Structures = require('discord.js-structures')
 
 Structures.extend('Guild', Guild => {
@@ -16,7 +15,7 @@ Structures.extend('Guild', Guild => {
              * The database manager for the guild
              * @type {GuildDatabaseManager}
              */
-            this.database = new GuildDatabaseManager(client, this)
+            this.database = new GuildDatabaseManager(this)
 
             /**
              * The client the guild is for
@@ -26,10 +25,10 @@ Structures.extend('Guild', Guild => {
             this.client
 
             /**
-             * Shortcut to use setting provider methods for this guild
-             * @type {GuildSettingsHelper}
+             * The queued logs for this guild
+             * @type {MessageEmbed[]}
              */
-            this.settings = new GuildSettingsHelper(this.client, this)
+            this.queuedLogs = []
 
             /**
              * Internal command prefix for the guild, controlled by the {@link CommandoGuild#prefix}
@@ -39,12 +38,6 @@ Structures.extend('Guild', Guild => {
              * @private
              */
             this._prefix = null
-
-            /**
-             * The queued logs for this server
-             * @type {MessageEmbed[]}
-             */
-            this.queuedLogs = []
         }
 
         /**
@@ -69,8 +62,10 @@ Structures.extend('Guild', Guild => {
          * @param {boolean} enabled Whether the command should be enabled
          */
         setCommandEnabled(command, enabled) {
-            command = this.client.registry.resolveCommand(command)
-            if (command.guarded) throw new Error('The command is guarded.')
+            const { client } = this
+            command = client.registry.resolveCommand(command)
+            const { name, guarded } = command
+            if (guarded) throw new Error('The command is guarded.')
             if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
             enabled = !!enabled
             if (!this._commandsEnabled) {
@@ -81,8 +76,8 @@ Structures.extend('Guild', Guild => {
                  */
                 this._commandsEnabled = {}
             }
-            this._commandsEnabled[command.name] = enabled
-            this.client.emit('commandStatusChange', this, command, enabled)
+            this._commandsEnabled[name] = enabled
+            client.emit('commandStatusChange', this, command, enabled)
         }
 
         /**
@@ -91,12 +86,14 @@ Structures.extend('Guild', Guild => {
          * @return {boolean}
          */
         isCommandEnabled(command) {
-            command = this.client.registry.resolveCommand(command)
-            if (command.guarded) return true
-            if (!this._commandsEnabled || typeof this._commandsEnabled[command.name] === 'undefined') {
-                return command._globalEnabled
+            const { registry } = this.client
+            command = registry.resolveCommand(command)
+            const { name, guarded, _globalEnabled } = command
+            if (guarded) return true
+            if (!this._commandsEnabled || typeof this._commandsEnabled[name] === 'undefined') {
+                return _globalEnabled
             }
-            return this._commandsEnabled[command.name]
+            return this._commandsEnabled[name]
         }
 
         /**
@@ -105,8 +102,10 @@ Structures.extend('Guild', Guild => {
          * @param {boolean} enabled Whether the group should be enabled
          */
         setGroupEnabled(group, enabled) {
-            group = this.client.registry.resolveGroup(group)
-            if (group.guarded) throw new Error('The group is guarded.')
+            const { client } = this
+            group = client.registry.resolveGroup(group)
+            const { id, guarded } = group
+            if (guarded) throw new Error('The group is guarded.')
             if (typeof enabled === 'undefined') throw new TypeError('Enabled must not be undefined.')
             enabled = !!enabled
             if (!this._groupsEnabled) {
@@ -117,8 +116,8 @@ Structures.extend('Guild', Guild => {
                  */
                 this._groupsEnabled = {}
             }
-            this._groupsEnabled[group.id] = enabled
-            this.client.emit('groupStatusChange', this, group, enabled)
+            this._groupsEnabled[id] = enabled
+            client.emit('groupStatusChange', this, group, enabled)
         }
 
         /**
@@ -127,10 +126,14 @@ Structures.extend('Guild', Guild => {
          * @return {boolean}
          */
         isGroupEnabled(group) {
-            group = this.client.registry.resolveGroup(group)
-            if (group.guarded) return true
-            if (!this._groupsEnabled || typeof this._groupsEnabled[group.id] === 'undefined') return group._globalEnabled
-            return this._groupsEnabled[group.id]
+            const { registry } = this.client
+            group = registry.resolveGroup(group)
+            const { id, guarded, _globalEnabled } = group
+            if (guarded) return true
+            if (!this._groupsEnabled || typeof this._groupsEnabled[id] === 'undefined') {
+                return _globalEnabled
+            }
+            return this._groupsEnabled[id]
         }
 
         /**
