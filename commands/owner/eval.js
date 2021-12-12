@@ -11,8 +11,6 @@ function escapeRegex(str) {
     return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
 }
 
-const nlPattern = /!!NL!!/g
-
 /** A command that can be run in a client */
 module.exports = class EvalCommand extends Command {
     constructor(client) {
@@ -71,7 +69,7 @@ module.exports = class EvalCommand extends Command {
 
     makeResultMessages(result, hrDiff, input = null) {
         const inspected = util.inspect(result, { depth: 0 })
-            .replace(nlPattern, '\n')
+            .replace(/!!NL!!/g, '\n')
             .replace(this.sensitivePattern, '--snip--')
             .replace(escapeRegex(`/${this.client.token}/gi`), '--snip--')
         const split = inspected.split('\n')

@@ -4,19 +4,16 @@ const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
-const channelTypes = {
-    GUILD_TEXT: 'Text',
-    DM: 'Direct messages',
-    GUILD_VOICE: 'Voice',
-    GROUP_DM: 'Group direct messages',
-    GUILD_CATEGORY: 'Category',
-    GUILD_NEWS: 'News',
-    GUILD_STORE: 'Store',
-    UNKNOWN: 'Unknown',
-    GUILD_NEWS_THREAD: 'News thread',
-    GUILD_PUBLIC_THREAD: 'Public thread',
-    GUILD_PRIVATE_THREAD: 'Private thread',
-    GUILD_STAGE_VOICE: 'Stage',
+/**
+ * Parses a channel type
+ * @param {string} type The type to parse
+ * @returns {string}
+ */
+function vcType(type) {
+    switch (type) {
+        case 'GUILD_VOICE': return 'voice'
+        case 'GUILD_STAGE_VOICE': return 'stage'
+    }
 }
 
 /**
@@ -44,23 +41,16 @@ module.exports = (client) => {
 
         if (!channel1 && channel2) {
             embed.setColor('GREEN')
-                .setDescription(
-                    `${user.toString()} joined ${channelTypes[channel2.type].toLowerCase()} channel ${channel2.toString()}`
-                )
+                .setDescription(`${user.toString()} joined ${vcType(channel2.type)} channel ${channel2.toString()}`)
         }
 
         if (!channel2 && channel1) {
             embed.setColor('ORANGE')
-                .setDescription(
-                    `${user.toString()} left ${channelTypes[channel1.type].toLowerCase()} channel ${channel1.toString()}`
-                )
+                .setDescription(`${user.toString()} left ${vcType(channel1.type)} channel ${channel1.toString()}`)
         }
 
         if (channel1 && channel2 && channel1.id !== channel2.id) {
-            embed.addField(
-                `Switched ${channelTypes[channel1.type].toLowerCase()} channels`,
-                `${channel1.toString()} ➜ ${channel2.toString()}`
-            )
+            embed.addField(`Switched ${vcType(channel1.type)} channels`, `${channel1.toString()} ➜ ${channel2.toString()}`)
         }
 
         if (typeof mute1 === 'boolean' && typeof mute2 === 'boolean' && mute1 !== mute2) {

@@ -8,37 +8,48 @@ const { capitalize } = require('lodash')
 const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
-const channelTypes = {
-    GUILD_TEXT: 'Text',
-    DM: 'Direct messages',
-    GUILD_VOICE: 'Voice',
-    GROUP_DM: 'Group direct messages',
-    GUILD_CATEGORY: 'Category',
-    GUILD_NEWS: 'News',
-    GUILD_STORE: 'Store',
-    UNKNOWN: 'Unknown',
-    GUILD_NEWS_THREAD: 'News thread',
-    GUILD_PUBLIC_THREAD: 'Public thread',
-    GUILD_PRIVATE_THREAD: 'Private thread',
-    GUILD_STAGE_VOICE: 'Stage',
+/**
+ * Parses a channel type
+ * @param {string} type The type to parse
+ * @returns {string}
+ */
+function channelType(type) {
+    switch (type) {
+        case 'GUILD_TEXT': return 'Text'
+        case 'GUILD_VOICE': return 'Voice'
+        case 'GUILD_CATEGORY': return 'Category'
+        case 'GUILD_NEWS': return 'News'
+        case 'GUILD_STORE': return 'Store'
+        case 'GUILD_NEWS_THREAD': return 'News thread'
+        case 'GUILD_PUBLIC_THREAD': return 'Public thread'
+        case 'GUILD_PRIVATE_THREAD': return 'Private thread'
+        case 'GUILD_STAGE_VOICE': return 'Stage'
+    }
 }
 
-const rtcRegions = new Map([
-    [null, 'Automatic'],
-    ['brazil', 'Brazil'],
-    ['europe', 'Europe'],
-    ['hongkong', 'Hong Kong'],
-    ['india', 'India'],
-    ['japan', 'Japan'],
-    ['russia', 'Russia'],
-    ['singapore', 'Singapore'],
-    ['southafrica', 'South Africa'],
-    ['sydney', 'Sydney'],
-    ['us-central', 'US Central'],
-    ['us-east', 'US East'],
-    ['us-south', 'US South'],
-    ['us-west', 'US West']
-])
+/**
+ * Parses a channel region
+ * @param {string} region The region to parse
+ * @returns {string}
+ */
+function rtcRegion(region) {
+    switch (region) {
+        case 'brazil': return 'Brazil'
+        case 'europe': return 'Europe'
+        case 'hongkong': return 'Hong Kong'
+        case 'india': return 'India'
+        case 'japan': return 'Japan'
+        case 'russia': return 'Russia'
+        case 'singapore': return 'Singapore'
+        case 'southafrica': return 'South Africa'
+        case 'sydney': return 'Sydney'
+        case 'us-central': return 'US Central'
+        case 'us-east': return 'US East'
+        case 'us-south': return 'US South'
+        case 'us-west': return 'US West'
+        default: return 'Automatic'
+    }
+}
 
 /**
  * Formats the {@link PermissionOverwrites} into an array of string
@@ -69,7 +80,7 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
-            .setAuthor(`Created ${channelTypes[type].toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor(`Created ${channelType(type).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(`${channel.toString()} ${category}`)
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
@@ -113,7 +124,7 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor(`Deleted ${channelTypes[type].toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor(`Deleted ${channelType(type).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(`\`#${name}\` ${category}`)
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
@@ -155,7 +166,7 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor(`Updated ${channelTypes[type1].toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor(`Updated ${channelType(type1).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(oldChannel.toString())
             .setFooter(`Channel id: ${id}`)
             .setTimestamp()
@@ -223,7 +234,7 @@ module.exports = (client) => {
             const { nsfw: nsfw1, topic: topic1, defaultAutoArchiveDuration: autoArchive1 } = oldChannel
             const { nsfw: nsfw2, topic: topic2, defaultAutoArchiveDuration: autoArchive2 } = newChannel
 
-            if (type1 !== type2) embed.addField('Type', `${channelTypes[type1]} ➜ ${channelTypes[type2]}`)
+            if (type1 !== type2) embed.addField('Type', `${channelType(type1)} ➜ ${channelType(type2)}`)
             if (nsfw1 !== nsfw2) embed.addField('NSFW', nsfw1 ? 'Yes ➜ No' : 'No ➜ Yes')
             if (topic1 !== topic2) {
                 const slice1 = sliceDots(topic1, 500) || 'None'
@@ -266,7 +277,7 @@ module.exports = (client) => {
                 embed.addField('Bitrate', bitrate1 / 1000 + 'kbps ➜ ' + bitrate2 / 1000 + 'kbps')
             }
             if (region1 !== region2) {
-                embed.addField('Region override', `${rtcRegions.get(region1)} ➜ ${rtcRegions.get(region2)}`)
+                embed.addField('Region override', `${rtcRegion(region1)} ➜ ${rtcRegion(region2)}`)
             }
             if (limit1 !== limit2) {
                 const limitStr1 = limit1 ? `${limit1} users` : 'No limit'

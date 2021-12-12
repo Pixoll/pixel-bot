@@ -4,8 +4,6 @@ const { CommandoClient, CommandoGuild } = require('../../command-handler/typings
 const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = require('../../schemas')
 /* eslint-enable no-unused-vars */
 
-const today = new Date().getUTCDate()
-
 /**
  * Clean-up function for the database.
  * @param {CommandoClient} client The client instance.
@@ -56,7 +54,7 @@ module.exports = async (client, forceCleanup = false) => {
     })
 
     // Monthly clean-up
-    if (forceCleanup || today === 1) {
+    if (forceCleanup || new Date().getUTCDate() === 1) {
         client.emit('debug', 'Cleaning up database...')
 
         const guilds = client.guilds.cache.map(d => d.id)

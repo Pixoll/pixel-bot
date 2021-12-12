@@ -6,19 +6,19 @@ const { isModuleEnabled, timestamp } = require('../../utils/functions')
 const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
-const channelTypes = {
-    GUILD_TEXT: 'Text',
-    DM: 'Direct messages',
-    GUILD_VOICE: 'Voice',
-    GROUP_DM: 'Group direct messages',
-    GUILD_CATEGORY: 'Category',
-    GUILD_NEWS: 'News',
-    GUILD_STORE: 'Store',
-    UNKNOWN: 'Unknown',
-    GUILD_NEWS_THREAD: 'News thread',
-    GUILD_PUBLIC_THREAD: 'Public thread',
-    GUILD_PRIVATE_THREAD: 'Private thread',
-    GUILD_STAGE_VOICE: 'Stage',
+/**
+ * Parses a channel type
+ * @param {string} type The type to parse
+ * @returns {string}
+ */
+function channelType(type) {
+    switch (type) {
+        case 'GUILD_TEXT': return 'text'
+        case 'GUILD_NEWS': return 'news'
+        case 'GUILD_NEWS_THREAD': return 'news thread'
+        case 'GUILD_PUBLIC_THREAD': return 'public thread'
+        case 'GUILD_PRIVATE_THREAD': return 'private thread'
+    }
 }
 
 /**
@@ -36,8 +36,7 @@ module.exports = (client) => {
         client.emit('debug', 'Running event "logs/threads#threadCreate".')
 
         const { guildMember } = await thread.fetchOwner()
-        const chanType = channelTypes[type].toLowerCase()
-        const parentType = channelTypes[parent.type].toLowerCase()
+        const chanType = channelType(type)
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
@@ -45,7 +44,7 @@ module.exports = (client) => {
             .setDescription(stripIndent`
                 ${oneLine`
                     ${guildMember.toString()} created ${chanType} ${thread.toString()}
-                    under ${parentType} channel ${parent.toString()}
+                    under ${channelType(parent.type)} channel ${parent.toString()}
                 `}
                 **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * 60_000), 'R')}**
             `)
@@ -63,14 +62,11 @@ module.exports = (client) => {
 
         client.emit('debug', 'Running event "logs/threads#threadDelete".')
 
-        const chanType = channelTypes[type].toLowerCase()
-        const parentType = channelTypes[parent.type].toLowerCase()
-
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor(`Deleted ${chanType} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor(`Deleted ${channelType(type)} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(stripIndent`
-                \`#${name}\` under ${parentType} channel ${parent.toString()}
+                \`#${name}\` under ${channelType(parent.type)} channel ${parent.toString()}
                 **Member count:** ${members.cache.size}
             `)
             .setFooter(`Thread id: ${id} • Channel id: ${parent.id}`)
@@ -98,7 +94,7 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor(`Updated ${channelTypes[type].toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor(`Updated ${channelType(type)} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(newThread.toString())
             .setFooter(`Thread id: ${id} • Channel id: ${parentId}`)
             .setTimestamp()

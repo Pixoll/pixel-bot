@@ -7,16 +7,6 @@ const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
-const optionsLook = [
-    { type: 'string', name: 'ip', description: 'The IP of the server to look for.', required: true },
-    { type: 'integer', name: 'port', description: 'The port of the server to look for.', /* minValue: 1, maxValue: 65535 */ }
-]
-
-const optionsSave = [
-    { type: 'string', name: 'ip', description: 'The IP of the server to save.', required: true },
-    { type: 'integer', name: 'port', description: 'The port of the server to save.', /* minValue: 1, maxValue: 65535 */ }
-]
-
 /** A command that can be run in a client */
 module.exports = class McStatusCommand extends Command {
     constructor(client) {
@@ -72,25 +62,81 @@ module.exports = class McStatusCommand extends Command {
                         type: 'subcommand',
                         name: 'java',
                         description: 'Status of a Java server.',
-                        options: optionsLook
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'ip',
+                                description: 'The IP of the server to look for.',
+                                required: true
+                            },
+                            {
+                                type: 'integer',
+                                name: 'port',
+                                description: 'The port of the server to look for.',
+                                // minValue: 1,
+                                // maxValue: 65535
+                            }
+                        ]
                     },
                     {
                         type: 'subcommand',
                         name: 'bedrock',
                         description: 'Status of a Bedrock server.',
-                        options: optionsLook
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'ip',
+                                description: 'The IP of the server to look for.',
+                                required: true
+                            },
+                            {
+                                type: 'integer',
+                                name: 'port',
+                                description: 'The port of the server to look for.',
+                                // minValue: 1,
+                                // maxValue: 65535
+                            }
+                        ]
                     },
                     {
                         type: 'subcommand',
                         name: 'save-java',
                         description: 'Saves a Java server.',
-                        options: optionsSave
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'ip',
+                                description: 'The IP of the server to save.',
+                                required: true
+                            },
+                            {
+                                type: 'integer',
+                                name: 'port',
+                                description: 'The port of the server to save.',
+                                // minValue: 1,
+                                // maxValue: 65535
+                            }
+                        ]
                     },
                     {
                         type: 'subcommand',
                         name: 'save-bedrock',
                         description: 'Saves a Bedrock server.',
-                        options: optionsSave
+                        options: [
+                            {
+                                type: 'string',
+                                name: 'ip',
+                                description: 'The IP of the server to save.',
+                                required: true
+                            },
+                            {
+                                type: 'integer',
+                                name: 'port',
+                                description: 'The port of the server to save.',
+                                // minValue: 1,
+                                // maxValue: 65535
+                            }
+                        ]
                     }
                 ]
             }

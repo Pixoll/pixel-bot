@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { Collection, MessageEmbed } = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { abcOrder, pagedEmbed, basicEmbed, replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
-const timeZones = new Collection([
+const timeZones = new Map([
     ['Pacific/Apia', 'Samoa'],
     ['Pacific/Honolulu', 'Hawaii'],
     ['Pacific/Tahiti', 'Tahiti'],
@@ -48,7 +48,7 @@ const timeZones = new Collection([
     ['Pacific/Fiji', 'Fiji']
 ])
 
-const cities = timeZones.map(t => t).sort()
+const cities = [...timeZones.values()].sort()
 
 /** A command that can be run in a client */
 module.exports = class TimesCommand extends Command {

@@ -7,35 +7,11 @@ const ArgumentCollector = require('./collector')
 const { permissions } = require('../util')
 const {
 	ThrottlingOptions, CommandInfo, CommandoClient, CommandGroup, ArgumentCollectorResult, CommandBlockData, Throttle,
-	CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo, CommandoGuild
+	CommandBlockReason, SlashCommandInfo, CommandInstances, SlashCommandOptionInfo, CommandoGuild, SlashCommandChannelType,
+	SlashCommandOptionType
 } = require('../typings')
 const { replyAll, isMod } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
-
-const slashOptionTypes = {
-    subcommand: 1,
-    'subcommand-group': 2,
-    string: 3,
-    integer: 4,
-    boolean: 5,
-    user: 6,
-    channel: 7,
-    role: 8,
-    mentionable: 9,
-    number: 10
-}
-
-const slashOptionChannelTypes = {
-	'guild-text': 0,
-	'guild-voice': 2,
-    'guild-category': 4,
-    'guild-news': 5,
-    'guild-store': 6,
-	'guild-news-thread': 10,
-    'guild-public-thread': 11,
-    'guild-private-thread': 12,
-    'guild-stage-voice': 13
-}
 
 /** A command that can be run in a client */
 class Command {
@@ -720,7 +696,7 @@ class Command {
 			data.type = 1
 		}
 		(Array.isArray(data) ? data : data.options)?.forEach(option => {
-			if (typeof option.type === 'string') option.type = slashOptionTypes[option.type]
+			if (typeof option.type === 'string') option.type = parseOptionType(option.type)
 			for (const prop in option) {
 				if (prop.toLowerCase() === prop) continue
 				const toApply = prop.replace(/[A-Z]/g, '_$&').toLowerCase()
@@ -728,9 +704,7 @@ class Command {
 				delete option[prop]
 				if (toApply === 'channel_types') {
 					for (let i = 0; i < option[toApply].length; i++) {
-						const elem = option[toApply][i]
-						const chan = slashOptionChannelTypes[elem]
-						option[toApply][i] = chan
+						option[toApply][i] = parseChannelType(option[toApply][i])
 					}
 				}
 			}
@@ -755,4 +729,45 @@ function embed(text, value) {
 	else embed.setDescription(text)
 
 	return embed
+}
+
+/**
+ * Parses the type of the slash command option type into a valid value for the API.
+ * @param {SlashCommandOptionType} type The type to parse.
+ * @returns {?number}
+ */
+function parseOptionType(type) {
+	switch (type) {
+		case 'subcommand': return 1
+		case 'subcommand-group': return 2
+		case 'string': return 3
+		case 'integer': return 4
+		case 'boolean': return 5
+		case 'user': return 6
+		case 'channel': return 7
+		case 'role': return 8
+		case 'mentionable': return 9
+		case 'number': return 10
+		default: throw new TypeError('Unable to parse SlashCommandOptionType.')
+	}
+}
+
+/**
+ * Parses the type of the slash command channel type into a valid value for the API.
+ * @param {SlashCommandChannelType} type The type to parse.
+ * @returns {?number}
+ */
+function parseChannelType(type) {
+	switch (type) {
+		case 'guild-text': return 0
+		case 'guild-voice': return 2
+		case 'guild-category': return 4
+		case 'guild-news': return 5
+		case 'guild-store': return 6
+		case 'guild-news-thread': return 10
+		case 'guild-public-thread': return 11
+		case 'guild-private-thread': return 12
+		case 'guild-stage-voice': return 13
+		default: throw new TypeError('Unable to parse SlashCommandChannelType.')
+	}
 }

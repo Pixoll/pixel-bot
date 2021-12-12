@@ -6,12 +6,6 @@ const { isModuleEnabled, basicEmbed, isMod, validURL, docId } = require('../../u
 const { moderations, active, setup, modules } = require('../../schemas')
 /* eslint-enable no-unused-vars */
 
-const badWordRegex = new RegExp(
-    'bastard|blowjob|boner|boob|buttplug|cock|coon|cum|cunt|dick|dildo|fag|faggot|nigga|nigger|paki|porn|pussy|scum|sex|' +
-    'slut|wank|whore',
-    'm'
-)
-
 /** @param {number} number @param {number} total */
 function percentage(number, total) {
     const chance = (number * 100) / total
@@ -37,6 +31,12 @@ module.exports = (client) => {
         if (mentions.everyone && !permissions?.MENTION_EVERYONE) {
             reasons.push('Tired to ping everyone.')
         }
+
+        const badWordRegex = new RegExp(
+            'bastard|blowjob|boner|boob|buttplug|cock|coon|cum|cunt|dick|dildo|fag|faggot|nigga|nigger|paki|porn|pussy|' +
+            'slut|wank|whores|cum|sex',
+            'm'
+        )
 
         if (badWordRegex.test(content)) {
             reasons.push('Use of at least 1 blacklisted word.')

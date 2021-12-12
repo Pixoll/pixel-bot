@@ -188,9 +188,9 @@ module.exports = class PollCommand extends Command {
                 if (cancelled) return
                 duration = value
             }
-            this.now = Date.now()
-            if (typeof duration === 'number') duration += this.now
+            if (typeof duration === 'number') duration += Date.now()
             if (duration instanceof Date) duration = duration.getTime()
+            this.now = Date.now()
 
             const pollMsg = await basicCollector({ message }, {
                 fieldName: 'What will the message of the poll be?'

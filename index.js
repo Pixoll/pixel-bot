@@ -34,19 +34,16 @@ const client = new CommandoClient({
 
 })
 
-const { registry } = client
-const debugExclude =
-    /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection completed|while executing a request/
-
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
-    const shouldExclude = !!msg.match(debugExclude)?.map(m => m)[0]
-    if (shouldExclude) return
+    const exclude =/Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request/.test(msg)
+    if (exclude) return
     console.log('debug >', msg)
 })
 client.emit('debug', 'Created client')
 
-registry.registerDefaultTypes()
+client.registry
+    .registerDefaultTypes()
     .registerGroups([
         { id: 'info', name: '\u2139 Information', guarded: true },
         // { id: 'fun', name: 'Fun commands' },
@@ -59,10 +56,10 @@ registry.registerDefaultTypes()
         { id: 'owner', name: '<a:owner_crown:806558872440930425> Owner only', guarded: true },
         { id: 'utility', name: '🛠 Utility', guarded: true },
     ])
-client.emit('debug', `Loaded ${registry.groups.size} groups`)
+client.emit('debug', `Loaded ${client.registry.groups.size} groups`)
 
-registry.registerCommandsIn(path.join(__dirname, '/commands'))
-client.emit('debug', `Loaded ${registry.commands.size} commands`)
+client.registry.registerCommandsIn(path.join(__dirname, '/commands'))
+client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
 
 client.on('ready', async () => {
     await database(client, 'auto-punish', 'chat-filter', 'scam-detector')

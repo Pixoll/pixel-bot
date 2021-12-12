@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { MessageEmbed, User } = require('discord.js')
+const {
+    MessageEmbed, User, GuildFeatures, VerificationLevel, ExplicitContentFilterLevel, SystemChannelFlagsString
+} = require('discord.js')
 const { capitalize } = require('lodash')
 const { CommandoClient } = require('../../command-handler/typings')
 const { arrayEquals, isModuleEnabled } = require('../../utils/functions')
@@ -19,85 +21,113 @@ function removeUnderscores(perm, codeLike) {
     return string
 }
 
-const guildFeatures = {
-    ANIMATED_ICON: 'Animated icon',
-    BANNER: 'Banner',
-    COMMERCE: 'Commerce',
-    COMMUNITY: 'Community',
-    DISCOVERABLE: 'Discoverable',
-    FEATURABLE: 'Featurable',
-    INVITE_SPLASH: 'Invite splash',
-    MEMBER_VERIFICATION_GATE_ENABLED: 'Membership screening',
-    NEWS: 'News',
-    PARTNERED: 'Partened',
-    PREVIEW_ENABLED: 'Preview',
-    VANITY_URL: 'Vanity URL',
-    VERIFIED: 'Verified',
-    VIP_REGIONS: 'VIP Regions',
-    WELCOME_SCREEN_ENABLED: 'Welcome screen',
-    TICKETED_EVENTS_ENABLED: 'Ticketed events',
-    MONETIZATION_ENABLED: 'Monetization',
-    MORE_STICKERS: 'More stickers',
-    THREE_DAY_THREAD_ARCHIVE: 'Thread 3 day archive',
-    SEVEN_DAY_THREAD_ARCHIVE: 'Thread 1 week archive',
-    PRIVATE_THREADS: 'Private threads',
+/**
+ * Parses a guild feature.
+ * @param {GuildFeatures} feat The feature to parse.
+ * @returns {string}
+ */
+function guildFeature(feat) {
+    switch (feat) {
+        case 'ANIMATED_ICON': return 'Animated icon'
+        case 'BANNER': return 'Banner'
+        case 'COMMERCE': return 'Commerce'
+        case 'COMMUNITY': return 'Community'
+        case 'DISCOVERABLE': return 'Discoverable'
+        case 'FEATURABLE': return 'Featurable'
+        case 'INVITE_SPLASH': return 'Invite splash'
+        case 'MEMBER_VERIFICATION_GATE_ENABLED': return 'Membership screening'
+        case 'NEWS': return 'News'
+        case 'PARTNERED': return 'Partened'
+        case 'PREVIEW_ENABLED': return 'Preview'
+        case 'VANITY_URL': return 'Vanity URL'
+        case 'VERIFIED': return 'Verified'
+        case 'VIP_REGIONS': return 'VIP Regions'
+        case 'WELCOME_SCREEN_ENABLED': return 'Welcome screen'
+        case 'TICKETED_EVENTS_ENABLED': return 'Ticketed events'
+        case 'MONETIZATION_ENABLED': return 'Monetization'
+        case 'MORE_STICKERS': return 'More stickers'
+        case 'THREE_DAY_THREAD_ARCHIVE': return 'Thread 3 day archive'
+        case 'SEVEN_DAY_THREAD_ARCHIVE': return 'Thread 1 week archive'
+        case 'PRIVATE_THREADS': return 'Private threads'
+    }
 }
 
-const verificationLevels = {
-    NONE: 'None',
-    LOW: 'Low',
-    MEDIUM: 'Medium',
-    HIGH: 'High',
-    VERY_HIGH: 'Highest',
+/**
+ * Parses a verification level.
+ * @param {VerificationLevel} lvl The level to parse.
+ * @returns {string}
+ */
+function verLvl(lvl) {
+    switch (lvl) {
+        case 'NONE': return 'None'
+        case 'LOW': return 'Low'
+        case 'MEDIUM': return 'Medium'
+        case 'HIGH': return 'High'
+        case 'VERY_HIGH': return 'Highest'
+    }
 }
 
-const R18ContentFilter = {
-    DISABLED: 'Don\'t scan any media content',
-    MEMBERS_WITHOUT_ROLES: 'Scan media content from members without a role',
-    ALL_MEMBERS: 'Scan media content from all members',
+/**
+ * Parses an R-18 content filter level.
+ * @param {ExplicitContentFilterLevel} lvl The level to parse.
+ * @returns {string}
+ */
+function r18filter(lvl) {
+    switch (lvl) {
+        case 'DISABLED': return 'Don\'t scan any media content'
+        case 'MEMBERS_WITHOUT_ROLES': return 'Scan media content from members without a role'
+        case 'ALL_MEMBERS': return 'Scan media content from all members'
+    }
 }
 
-const locales = new Map([
-    ['en-US', 'English (United States)'],
-    ['en-GB', 'English (Great Britain)'],
-    ['zh-CN', 'Chinese (China)'],
-    ['zh-TW', 'Chinese (Taiwan)'],
-    ['cs', 'Czech'],
-    ['da', 'Danish'],
-    ['nl', 'Dutch'],
-    ['fr', 'French'],
-    ['de', 'German'],
-    ['el', 'Greek'],
-    ['hu', 'Hungarian'],
-    ['it', 'Italian'],
-    ['ja', 'Japanese'],
-    ['ko', 'Korean'],
-    ['no', 'Norwegian'],
-    ['pl', 'Polish'],
-    ['pt-BR', 'Portuguese (Brazil)'],
-    ['ru', 'Russian'],
-    ['es-ES', 'Spanish (Spain)'],
-    ['sv-SE', 'Swedish'],
-    ['tr', 'Turkish'],
-    ['bg', 'Bulgarian'],
-    ['uk', 'Ukrainian'],
-    ['fi', 'Finnish'],
-    ['hr', 'Croatian'],
-    ['ro', 'Romanian'],
-    ['lt', 'Lithuanian'],
-])
-
-const nsfwLevels = {
-    DEFAULT: 'Default',
-    EXPLICIT: 'Explicit',
-    SAFE: 'Safe',
-    AGE_RESTRICTED: 'Age restricted',
+/**
+ * Parses a system channel flag.
+ * @param {SystemChannelFlagsString} flag The flag to parse.
+ * @returns {string}
+ */
+function sysChanFlag(flag) {
+    switch (flag) {
+        case 'SUPPRESS_JOIN_NOTIFICATIONS': return 'Join messages'
+        case 'SUPPRESS_PREMIUM_SUBSCRIPTIONS': return 'Server boosts messages'
+        case 'SUPPRESS_GUILD_REMINDER_NOTIFICATIONS': return 'Server setup tips'
+    }
 }
 
-const sysChannelFlags = {
-    SUPPRESS_JOIN_NOTIFICATIONS: 'Join messages',
-    SUPPRESS_PREMIUM_SUBSCRIPTIONS: 'Server boosts messages',
-    SUPPRESS_GUILD_REMINDER_NOTIFICATIONS: 'Server setup tips',
+/**
+ * Parses a language id.
+ * @param {string} lang The language to parse.
+ * @returns {string}
+ */
+function locale(lang) {
+    switch (lang) {
+        case 'en-US': return 'English (United States)'
+        case 'en-GB': return 'English (Great Britain)'
+        case 'zh-CN': return 'Chinese (China)'
+        case 'zh-TW': return 'Chinese (Taiwan)'
+        case 'cs': return 'Czech'
+        case 'da': return 'Danish'
+        case 'nl': return 'Dutch'
+        case 'fr': return 'French'
+        case 'de': return 'German'
+        case 'el': return 'Greek'
+        case 'hu': return 'Hungarian'
+        case 'it': return 'Italian'
+        case 'ja': return 'Japanese'
+        case 'ko': return 'Korean'
+        case 'no': return 'Norwegian'
+        case 'pl': return 'Polish'
+        case 'pt-BR': return 'Portuguese (Brazil)'
+        case 'ru': return 'Russian'
+        case 'es-ES': return 'Spanish (Spain)'
+        case 'sv-SE': return 'Swedish'
+        case 'tr': return 'Turkish'
+        case 'bg': return 'Bulgarian'
+        case 'uk': return 'Ukrainian'
+        case 'fi': return 'Finnish'
+        case 'hr': return 'Croatian'
+        case 'ro': return 'Romanian'
+        case 'lt': return 'Lithuanian'
+    }
 }
 
 /**
@@ -196,8 +226,8 @@ module.exports = (client) => {
 
         if (!arrayEquals(sysChanFlags1.toArray(), sysChanFlags2.toArray())) {
             const [disabledFlags, enabledFlags] = compareArrays(
-                sysChanFlags1.toArray().map(feat => sysChannelFlags[feat.toString()]),
-                sysChanFlags2.toArray().map(feat => sysChannelFlags[feat.toString()])
+                sysChanFlags1.toArray().map(feat => sysChanFlag(feat)),
+                sysChanFlags2.toArray().map(feat => sysChanFlag(feat))
             )
 
             const enabled = enabledFlags.join(', ') ? stripIndent`
@@ -260,8 +290,8 @@ module.exports = (client) => {
 
         if (!arrayEquals(features1, features2)) {
             const [addedFeat, removedFeat] = compareArrays(
-                features1.map(feat => guildFeatures[feat.toString()]),
-                features2.map(feat => guildFeatures[feat.toString()])
+                features1.map(feat => guildFeature(feat)),
+                features2.map(feat => guildFeature(feat))
             )
 
             const added = addedFeat.join(', ') ? stripIndent`
@@ -290,15 +320,15 @@ module.exports = (client) => {
         }
 
         if (nsfw1 !== nsfw2) {
-            embed.addField('NSFW level', `${nsfwLevels[nsfw1]} ➜ ${nsfwLevels[nsfw2]}`)
+            embed.addField('NSFW level', `${removeUnderscores(nsfw1)} ➜ ${removeUnderscores(nsfw2)}`)
         }
 
         if (verLVL1 !== verLVL2) {
-            embed.addField('Verification level', `${verificationLevels[verLVL1]} ➜ ${verificationLevels[verLVL2]}`)
+            embed.addField('Verification level', `${verLvl(verLVL1)} ➜ ${verLvl(verLVL2)}`)
         }
 
         if (expFilter1 !== expFilter2) {
-            embed.addField('Explicit content filter', `${R18ContentFilter[expFilter1]} ➜ ${R18ContentFilter[expFilter2]}`)
+            embed.addField('Explicit content filter', `${r18filter(expFilter1)} ➜ ${r18filter(expFilter2)}`)
         }
 
         if (mfa1 !== mfa2) {
@@ -337,7 +367,7 @@ module.exports = (client) => {
             )
         }
 
-        if (lang1 !== lang2) embed.addField('Primary language', `${locales.get(lang1)} ➜ ${locales.get(lang2)}`)
+        if (lang1 !== lang2) embed.addField('Primary language', `${locale(lang1)} ➜ ${locale(lang2)}`)
 
         if (embed.fields.length !== 0 || embed.description) {
             newGuild.queuedLogs.push(embed)

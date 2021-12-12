@@ -1,24 +1,30 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, UserFlagsString } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { isModuleEnabled, compareArrays, customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
-const userFlags = {
-    HOUSE_BRAVERY: '<:bravery:894110822786281532>',
-    HOUSE_BRILLIANCE: '<:brilliance:894110822626885663> ',
-    HOUSE_BALANCE: '<:balance:894110823553855518>',
-    HYPESQUAD_EVENTS: '<:hypesquad:894113047763898369>',
-    DISCORD_EMPLOYEE: '<:discord_staff:894115772832546856>',
-    PARTNERED_SERVER_OWNER: '<:partner:894116243785785344>',
-    BUGHUNTER_LEVEL_1: '<:bug_hunter:894117053714292746>',
-    BUGHUNTER_LEVEL_2: '<:bug_buster:894117053856878592>',
-    EARLY_SUPPORTER: '<:early_supporter:894117997264896080>',
-    EARLY_VERIFIED_BOT_DEVELOPER: '<:verified_developer:894117997378142238>',
-    DISCORD_CERTIFIED_MODERATOR: '<:certified_moderator:894118624447586304>',
-    VERIFIED_BOT: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
-    TEAM_USER: '',
+/**
+ * Parses a user flag into an emoji.
+ * @param {UserFlagsString} flag The flag to parse.
+ * @returns {string}
+ */
+function parseUserFlag(flag) {
+    switch (flag) {
+        case 'BUGHUNTER_LEVEL_1': return '<:bug_hunter:894117053714292746>'
+        case 'BUGHUNTER_LEVEL_2': return '<:bug_buster:894117053856878592>'
+        case 'DISCORD_EMPLOYEE': return '<:discord_staff:894115772832546856>'
+        case 'EARLY_SUPPORTER': return '<:early_supporter:894117997264896080>'
+        case 'EARLY_VERIFIED_BOT_DEVELOPER': return '<:verified_developer:894117997378142238>'
+        case 'HOUSE_BALANCE': return '<:balance:894110823553855518>'
+        case 'HOUSE_BRAVERY': return '<:bravery:894110822786281532>'
+        case 'HOUSE_BRILLIANCE': return '<:brilliance:894110822626885663>'
+        case 'HYPESQUAD_EVENTS': return '<:hypesquad:894113047763898369>'
+        case 'PARTNERED_SERVER_OWNER': return '<:partner:894116243785785344>'
+        case 'TEAM_USER': return ''
+        case 'VERIFIED_BOT': return '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>'
+    }
 }
 
 /**
@@ -29,8 +35,6 @@ function imageLink(link) {
     if (link) return `[Click here](${link})`
     return 'None'
 }
-
-const imgOptions = { dynamic: true, size: 2048 }
 
 /**
  * Handles all of the member logs.
@@ -54,14 +58,14 @@ module.exports = (client) => {
 
         if (avatar1 !== avatar2) {
             embed.addField('Avatar', stripIndent`
-                **Before:** ${imageLink(oldUser.displayAvatarURL(imgOptions))}
-                **After:** ${imageLink(newUser.displayAvatarURL(imgOptions))}
-            `).setThumbnail(newUser.displayAvatarURL(imgOptions))
+                **Before:** ${imageLink(oldUser.displayAvatarURL({ dynamic: true, size: 2048 }))}
+                **After:** ${imageLink(newUser.displayAvatarURL({ dynamic: true, size: 2048 }))}
+            `).setThumbnail(newUser.displayAvatarURL({ dynamic: true, size: 2048 }))
         }
 
         if (flags1 !== flags2) {
-            const array1 = flags1?.toArray().map(flag => userFlags[flag]) || []
-            const array2 = flags2?.toArray().map(flag => userFlags[flag]) || []
+            const array1 = flags1?.toArray().map(flag => parseUserFlag(flag)) || []
+            const array2 = flags2?.toArray().map(flag => parseUserFlag(flag)) || []
             const [added, removed] = compareArrays(array1, array2)
 
             if (added.length !== 0) embed.addField(`${customEmoji('check')} Added badges`, added.join(', '))

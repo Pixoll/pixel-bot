@@ -1,26 +1,32 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed, User, GuildMember, UserFlags } = require('discord.js')
+const { MessageEmbed, User, GuildMember, UserFlags, UserFlagsString } = require('discord.js')
 const { getKeyPerms, timestamp, customEmoji, replyAll } = require('../../utils/functions')
 const myMs = require('../../utils/my-ms')
 const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
 
-const userFlags = {
-    HOUSE_BRAVERY: '<:bravery:894110822786281532>',
-    HOUSE_BRILLIANCE: '<:brilliance:894110822626885663> ',
-    HOUSE_BALANCE: '<:balance:894110823553855518>',
-    HYPESQUAD_EVENTS: '<:hypesquad:894113047763898369>',
-    DISCORD_EMPLOYEE: '<:discord_staff:894115772832546856>',
-    PARTNERED_SERVER_OWNER: '<:partner:894116243785785344>',
-    BUGHUNTER_LEVEL_1: '<:bug_hunter:894117053714292746>',
-    BUGHUNTER_LEVEL_2: '<:bug_buster:894117053856878592>',
-    EARLY_SUPPORTER: '<:early_supporter:894117997264896080>',
-    EARLY_VERIFIED_BOT_DEVELOPER: '<:verified_developer:894117997378142238>',
-    DISCORD_CERTIFIED_MODERATOR: '<:certified_moderator:894118624447586304>',
-    VERIFIED_BOT: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
-    TEAM_USER: '',
+/**
+ * Parses a user flag into an emoji.
+ * @param {UserFlagsString} flag The flag to parse.
+ * @returns {string}
+ */
+function parseUserFlag(flag) {
+    switch (flag) {
+        case 'BUGHUNTER_LEVEL_1': return '<:bug_hunter:894117053714292746>'
+        case 'BUGHUNTER_LEVEL_2': return '<:bug_buster:894117053856878592>'
+        case 'DISCORD_EMPLOYEE': return '<:discord_staff:894115772832546856>'
+        case 'EARLY_SUPPORTER': return '<:early_supporter:894117997264896080>'
+        case 'EARLY_VERIFIED_BOT_DEVELOPER': return '<:verified_developer:894117997378142238>'
+        case 'HOUSE_BALANCE': return '<:balance:894110823553855518>'
+        case 'HOUSE_BRAVERY': return '<:bravery:894110822786281532>'
+        case 'HOUSE_BRILLIANCE': return '<:brilliance:894110822626885663>'
+        case 'HYPESQUAD_EVENTS': return '<:hypesquad:894113047763898369>'
+        case 'PARTNERED_SERVER_OWNER': return '<:partner:894116243785785344>'
+        case 'TEAM_USER': return ''
+        case 'VERIFIED_BOT': return '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>'
+    }
 }
 
 /** A command that can be run in a client */
@@ -71,7 +77,7 @@ module.exports = class WhoIsCommand extends Command {
 
         const description = [user.toString()]
         if (flags) {
-            for (const flag of flags) description.push(userFlags[flag])
+            for (const flag of flags) description.push(parseUserFlag(flag))
         }
         if (member?.premiumSince) description.push(customEmoji('boost'))
         if (!flags?.toArray().includes('VERIFIED_BOT') && user.bot) {

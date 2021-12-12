@@ -7,9 +7,7 @@ const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
 const fileTree = __dirname.split(/[\\/]+/g)
-fileTree.pop()
-const root = fileTree.pop()
-const excludeRegex = /node_modules|\(internal|\(<anonymous>\)/
+const root = fileTree[fileTree.length - 2]
 
 /**
  * A manager for all errors of the process and client
@@ -67,7 +65,7 @@ module.exports = (client) => {
             const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
 
             const files = stack.filter(str => {
-                const match = excludeRegex.test(str)
+                const match = /node_modules|\(internal|\(<anonymous>\)/.test(str)
                 if (match) return false
                 return str.includes(root)
             }).map((str, i) =>

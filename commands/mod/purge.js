@@ -6,15 +6,6 @@ const { validURL, basicEmbed, getArgument, sleep, replyAll } = require('../../ut
 const { stripIndent, oneLine } = require('common-tags')
 /* eslint-enable no-unused-vars */
 
-// /** @type {number} */
-const days14 = require('../../utils/my-ms')('14d')
-const integerOption = [{
-    type: 'integer',
-    name: 'amount',
-    description: 'The amount of messages to delete.',
-    required: true
-}]
-
 /**
  * Bulk deletes the provided messages
  * @param {CommandInstances} instances The instances the command is being run for
@@ -53,12 +44,12 @@ async function bulkDelete({ message, interaction }, messages) {
  * @param {ChannelLogsQueryOptions} options The filtering options for the fetch
  */
 async function fetchMessages({ message, interaction }, options) {
+    const { channel } = message || interaction
     /** @type {Collection<string, Message>} */
-    const fetch = await (message || interaction).channel.messages.fetch(options).catch(() => null)
-    const msgs = fetch?.filter(m => {
-        const isPinned = m.pinned
-        const isOver14 = (Date.now() - m.createdTimestamp) >= days14
-
+    const fetch = await channel.messages.fetch(options).catch(() => null)
+    const msgs = fetch?.filter(({ pinned, createdTimestamp }) => {
+        const isPinned = pinned
+        const isOver14 = (Date.now() - createdTimestamp) >= 1_209_600_000
         return !isPinned && !isOver14
     })
 
@@ -137,37 +128,67 @@ module.exports = class PurgeCommand extends Command {
                         type: 'subcommand',
                         name: 'all',
                         description: 'Delete all messages.',
-                        options: integerOption
+                        options: [{
+                            type: 'integer',
+                            name: 'amount',
+                            description: 'The amount of messages to delete.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'links',
                         description: 'Delete messages with links/urls.',
-                        options: integerOption
+                        options: [{
+                            type: 'integer',
+                            name: 'amount',
+                            description: 'The amount of messages to delete.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'files',
                         description: 'Delete messages with files.',
-                        options: integerOption
+                        options: [{
+                            type: 'integer',
+                            name: 'amount',
+                            description: 'The amount of messages to delete.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'embeds',
                         description: 'Delete messages with embeds.',
-                        options: integerOption
+                        options: [{
+                            type: 'integer',
+                            name: 'amount',
+                            description: 'The amount of messages to delete.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'users',
                         description: 'Delete messages sent by users.',
-                        options: integerOption
+                        options: [{
+                            type: 'integer',
+                            name: 'amount',
+                            description: 'The amount of messages to delete.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'bots',
                         description: 'Delete messages sent by bots.',
-                        options: integerOption
+                        options: [{
+                            type: 'integer',
+                            name: 'amount',
+                            description: 'The amount of messages to delete.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
@@ -180,7 +201,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The user who sent the messages.',
                                 required: true
                             },
-                            ...integerOption
+                            {
+                                type: 'integer',
+                                name: 'amount',
+                                description: 'The amount of messages to delete.',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -194,7 +220,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The id of the message.',
                                 required: true
                             },
-                            ...integerOption
+                            {
+                                type: 'integer',
+                                name: 'amount',
+                                description: 'The amount of messages to delete.',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -208,7 +239,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The id of the message.',
                                 required: true
                             },
-                            ...integerOption
+                            {
+                                type: 'integer',
+                                name: 'amount',
+                                description: 'The amount of messages to delete.',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -222,7 +258,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The text to match.',
                                 required: true
                             },
-                            ...integerOption
+                            {
+                                type: 'integer',
+                                name: 'amount',
+                                description: 'The amount of messages to delete.',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -236,7 +277,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The text to match.',
                                 required: true
                             },
-                            ...integerOption
+                            {
+                                type: 'integer',
+                                name: 'amount',
+                                description: 'The amount of messages to delete.',
+                                required: true
+                            }
                         ]
                     },
                     {
@@ -250,7 +296,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The text to match.',
                                 required: true
                             },
-                            ...integerOption
+                            {
+                                type: 'integer',
+                                name: 'amount',
+                                description: 'The amount of messages to delete.',
+                                required: true
+                            }
                         ]
                     }
                 ]

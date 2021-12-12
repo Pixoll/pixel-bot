@@ -14,8 +14,6 @@ function imageLink(link) {
     return 'None'
 }
 
-const imgOptions = { dynamic: true, size: 2048 }
-
 /**
  * Handles all of the member logs.
  * @param {CommandoClient} client
@@ -106,9 +104,9 @@ module.exports = (client) => {
 
         if (avatar1 !== avatar2) {
             embed.addField('Server avatar', stripIndent`
-                **Before:** ${imageLink(oldMember.displayAvatarURL(imgOptions))}
-                **After:** ${imageLink(newMember.displayAvatarURL(imgOptions))}
-            `).setThumbnail(newMember.displayAvatarURL(imgOptions))
+                **Before:** ${imageLink(oldMember.displayAvatarURL({ dynamic: true, size: 2048 }))}
+                **After:** ${imageLink(newMember.displayAvatarURL({ dynamic: true, size: 2048 }))}
+            `).setThumbnail(newMember.displayAvatarURL({ dynamic: true, size: 2048 }))
         }
 
         if (role) {

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, PremiumTier } = require('discord.js')
 const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
@@ -20,12 +20,18 @@ function sliceEmojis(arr) {
     return normal
 }
 
-const maxEmojisPerTier = new Map([
-    ['NONE', 50],
-    ['TIER_1', 100],
-    ['TIER_2', 150],
-    ['TIER_3', 250],
-])
+/**
+ * Parses the emoji tier into the maximum emojis.
+ * @param {PremiumTier} tier The tier to parse.
+ */
+function parseEmojiTier(tier) {
+    switch (tier) {
+        case 'NONE': return 50
+        case 'TIER_1': return 100
+        case 'TIER_2': return 150
+        case 'TIER_3': return 250
+    }
+}
 
 /** A command that can be run in a client */
 module.exports = class EmojisCommand extends Command {
@@ -47,7 +53,7 @@ module.exports = class EmojisCommand extends Command {
     async run({ message, interaction }) {
         const { guild } = message || interaction
         const _emojis = await guild.emojis.fetch()
-        const maxEmojis = maxEmojisPerTier.get(guild.premiumTier)
+        const maxEmojis = parseEmojiTier(guild.premiumTier)
 
         const emojis = _emojis.map(emoji => ({
             animated: emoji.animated,
@@ -69,7 +75,7 @@ module.exports = class EmojisCommand extends Command {
             normal.shift().join(' ') || 'No emojis found.'
         )
         while (normal.length !== 0) {
-            embed.addField('ㅤ', normal.shift().join(' '))
+            embed.addField('\u2800', normal.shift().join(' '))
         }
 
         embed.addField(
@@ -77,7 +83,7 @@ module.exports = class EmojisCommand extends Command {
             animated.shift().join(' ') || 'No emojis found.'
         )
         while (animated.length !== 0) {
-            embed.addField('ㅤ', animated.shift().join(' '))
+            embed.addField('\u2800', animated.shift().join(' '))
         }
 
         await replyAll({ message, interaction }, embed)

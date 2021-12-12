@@ -6,9 +6,6 @@ const { stripIndent } = require('common-tags')
 const { replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
-const ownerCrown = '<a:owner_crown:806558872440930425>'
-const boost = '<a:boost:806364586231595028>'
-
 /**
  * Formats the guild's boost tier level
  * @param {PremiumTier} tier The boost tier of the server
@@ -55,14 +52,14 @@ module.exports = class ServerInfoCommand extends Command {
             .setAuthor(name, server.iconURL({ dynamic: true }))
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
             .addField('Information', stripIndent`
-                **Owner:** ${owner.user.tag} ${ownerCrown}
+                **Owner:** ${owner.user.tag} '<a:owner_crown:806558872440930425>'
                 **Channel categories:** ${categories.toLocaleString()}
                 **Text channels:** ${text.toLocaleString()}
                 **Voice channels:** ${voice.toLocaleString()}
             `, true)
             .addField('\u200B', stripIndent`
                 **Server boost lvl:** ${formatLvl(premiumTier)}
-                **Server boosts:** ${premiumSubscriptionCount.toLocaleString()} ${boost}
+                **Server boosts:** ${premiumSubscriptionCount.toLocaleString()} '<a:boost:806364586231595028>'
                 **Members:** ${memberCount.toLocaleString()}
                 **Roles:** ${_roles.size.toLocaleString()}
             `, true)

@@ -4,8 +4,6 @@ const { CommandInstances } = require('../../command-handler/typings')
 const { timestamp, basicEmbed, replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
-const letters = ['t', 'T', 'd', 'D', 'f', 'F', 'R']
-
 /** A command that can be run in a client */
 module.exports = class TimestampCommand extends Command {
     constructor(client) {
@@ -60,7 +58,7 @@ module.exports = class TimestampCommand extends Command {
         if (date instanceof Date) date = date.getTime()
 
         const timestamps = []
-        for (const letter of letters) {
+        for (const letter of ['t', 'T', 'd', 'D', 'f', 'F', 'R']) {
             const string = timestamp(date, letter)
             timestamps.push(`\`${string}\` ${string}`)
         }

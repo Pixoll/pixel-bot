@@ -4,23 +4,17 @@ const { Argument } = require('../typings')
 const ArgumentType = require('./base')
 /* eslint-enable no-unused-vars */
 
-const dateMatcher = '([1-3]?\\d[\\/\\-\\.,][01]?\\d(?:[\\/\\-\\.,]\\d{2})?(?:\\d{2})?)'
-const timeMatcher = '([0-2]?\\d(?::[0-5]?\\d)?)'
-const formatMatcher = '([aApP]\\.?[mM]\\.?)'
-const offsetMatcher = '([+-]\\d\\d?)'
-const regex = new RegExp(`^${dateMatcher}?(?: +)?${timeMatcher}?${formatMatcher}?(?: +)?${offsetMatcher}?$`)
-
-const timeParser = new Map([
-    ['am', 0],
-    ['a.m.', 0],
-    ['pm', 12],
-    ['p.m.', 12]
-])
-const tzOffset = new Date().getTimezoneOffset() / 60
-
 class DateArgumentType extends ArgumentType {
     constructor(client) {
         super(client, 'date')
+        this.regex = new RegExp(
+            '^([1-3]?\\d[\\/\\-\\.,][01]?\\d(?:[\\/\\-\\.,]\\d{2})?(?:\\d{2})?)?' + // date
+            '(?:\\s+)?' + // space
+            '([0-2]?\\d(?::[0-5]?\\d)?)?' + // time/hour
+            '([aApP]\\.?[mM]\\.?)?' + // am pm
+            '(?:\\s+)?' + // space
+            '([+-]\\d\\d?)?$' // time zone offset
+        )
     }
 
     /**
@@ -29,7 +23,7 @@ class DateArgumentType extends ArgumentType {
      * @return Whether the value is valid
      */
     validate(val, _, arg) {
-        const date = this._parseDate(val.match(regex)?.slice(1, 5), val)
+        const date = this._parseDate(val.match(this.regex)?.slice(1, 5), val)
         if (!date) {
             return 'Please enter a valid date format. Use the `help` command for more information.'
         }
@@ -51,7 +45,7 @@ class DateArgumentType extends ArgumentType {
      * @return Usable value
      */
     parse(val) {
-        return this._parseDate(val.match(regex)?.slice(1, 5), val)
+        return this._parseDate(val.match(this.regex)?.slice(1, 5), val)
     }
 
     /**
@@ -81,8 +75,12 @@ class DateArgumentType extends ArgumentType {
             const parsed = parseInt(s)
             if (i !== 0) return parsed
 
+            const tzOffset = new Date().getTimezoneOffset() / 60
             const offset = tzOffset + parseInt(matches[3] ?? 0)
-            const formatter = timeParser.get(matches[2]?.toLowerCase()) ?? 0
+
+            const ampm = matches[2]?.toLowerCase().replace(/\./g, '')
+            const formatter = ampm ? (ampm === 'am' ? 0 : 12) : 0
+
             if (formatter === 12 && parsed === 12) {
                 return parsed - offset
             }

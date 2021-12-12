@@ -19,40 +19,7 @@ function defaultDoc(guildId, key, value) {
         guild: guildId
     }
     doc[key] = value
-
     return doc
-}
-
-const logsOption = {
-    type: 'channel',
-    channelTypes: ['guild-text'],
-    name: 'audit-logs-channel',
-    description: 'The channel where to send the audit logs.',
-    required: true
-}
-const mutedOption = {
-    type: 'role',
-    name: 'muted-role',
-    description: 'The role that will be given to muted members.',
-    required: true
-}
-const memberOption = {
-    type: 'role',
-    name: 'member-role',
-    description: 'The role that will be given to a member upon joining.',
-    required: true
-}
-const botOption = {
-    type: 'role',
-    name: 'bot-role',
-    description: 'The role that will be given to a bot upon joining.',
-    required: true
-}
-const lockdownOption = {
-    type: 'string',
-    name: 'lockdown-channels',
-    description: 'The channels for the lockdown command, separated by spaces (max. 30 at once).',
-    required: true
 }
 
 /** A command that can be run in a client */
@@ -109,7 +76,33 @@ module.exports = class SetupCommand extends Command {
                         type: 'subcommand',
                         name: 'full',
                         description: 'Setup the bot completely to its core.',
-                        options: [logsOption, mutedOption, memberOption, botOption, lockdownOption]
+                        options: [{
+                            type: 'channel',
+                            channelTypes: ['guild-text'],
+                            name: 'audit-logs-channel',
+                            description: 'The channel where to send the audit logs.',
+                            required: true
+                        }, {
+                            type: 'role',
+                            name: 'muted-role',
+                            description: 'The role that will be given to muted members.',
+                            required: true
+                        }, {
+                            type: 'role',
+                            name: 'member-role',
+                            description: 'The role that will be given to a member upon joining.',
+                            required: true
+                        }, {
+                            type: 'role',
+                            name: 'bot-role',
+                            description: 'The role that will be given to a bot upon joining.',
+                            required: true
+                        }, {
+                            type: 'string',
+                            name: 'lockdown-channels',
+                            description: 'The channels for the lockdown command, separated by spaces (max. 30 at once).',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
@@ -120,31 +113,57 @@ module.exports = class SetupCommand extends Command {
                         type: 'subcommand',
                         name: 'audit-logs',
                         description: 'Setup the audit logs channel.',
-                        options: [logsOption]
+                        options: [{
+                            type: 'channel',
+                            channelTypes: ['guild-text'],
+                            name: 'channel',
+                            description: 'The channel where to send the audit logs.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'muted-role',
                         description: 'Setup the role for muted members.',
-                        options: [mutedOption]
+                        options: [{
+                            type: 'role',
+                            name: 'role',
+                            description: 'The role that will be given to muted members.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'member-role',
                         description: 'Setup the role given to a member upon joining.',
-                        options: [memberOption]
+                        options: [{
+                            type: 'role',
+                            name: 'role',
+                            description: 'The role that will be given to a member upon joining.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'bot-role',
                         description: 'Setup the role given to a bot upon joining.',
-                        options: [botOption]
+                        options: [{
+                            type: 'role',
+                            name: 'role',
+                            description: 'The role that will be given to a bot upon joining.',
+                            required: true
+                        }]
                     },
                     {
                         type: 'subcommand',
                         name: 'lockdown-channels',
                         description: 'Setup all the lockdown channels used in the "lockdown" command.',
-                        options: [lockdownOption]
+                        options: [{
+                            type: 'string',
+                            name: 'channels',
+                            description: 'The channels for the lockdown command, separated by spaces (max. 30 at once).',
+                            required: true
+                        }]
                     }
                 ]
             }
@@ -163,7 +182,7 @@ module.exports = class SetupCommand extends Command {
      * @param {TextChannel|Role|string} args.value The value to set for that sub-command
      */
     async run({ message, interaction }, {
-        subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels
+        subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels, channel, role, channels
     }) {
         subCommand = subCommand.toLowerCase()
         const { guild } = message || interaction
@@ -180,15 +199,15 @@ module.exports = class SetupCommand extends Command {
             case 'reload':
                 return await this._reload({ message, interaction }, data)
             case 'audit-logs':
-                return await this.auditLogs({ message, interaction }, value ?? auditLogsChannel)
+                return await this.auditLogs({ message, interaction }, value ?? channel)
             case 'muted-role':
-                return await this.mutedRole({ message, interaction }, value ?? mutedRole)
+                return await this.mutedRole({ message, interaction }, value ?? role)
             case 'member-role':
-                return await this.memberRole({ message, interaction }, value ?? memberRole)
+                return await this.memberRole({ message, interaction }, value ?? role)
             case 'bot-role':
-                return await this.botRole({ message, interaction }, value ?? botRole)
+                return await this.botRole({ message, interaction }, value ?? role)
             case 'lockdown-channels':
-                return await this.lockdownChannels({ message, interaction }, data, value ?? lockdownChannels)
+                return await this.lockdownChannels({ message, interaction }, data, value ?? channels)
         }
     }
 
