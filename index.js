@@ -36,7 +36,8 @@ const client = new CommandoClient({
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
-    const exclude =/Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request/.test(msg)
+    const exclude =
+        /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request/.test(msg)
     if (exclude) return
     console.log('debug >', msg)
 })
