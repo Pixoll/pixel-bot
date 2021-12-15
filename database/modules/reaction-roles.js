@@ -62,11 +62,11 @@ module.exports = async (client) => {
 
     client.on('messageReactionAdd', async (reaction, user) => {
         if (reaction.partial) {
-            reaction = reaction.fetch().catch(() => null)
+            reaction = await reaction.fetch().catch(() => null)
             if (!reaction) return
         }
         if (user.partial) {
-            user = user.fetch().catch(() => null)
+            user = await user.fetch().catch(() => null)
             if (!user) return
         }
 
@@ -100,11 +100,11 @@ module.exports = async (client) => {
 
     client.on('messageReactionRemove', async (reaction, user) => {
         if (reaction.partial) {
-            reaction = reaction.fetch().catch(() => null)
+            reaction = await reaction.fetch().catch(() => null)
             if (!reaction) return
         }
         if (user.partial) {
-            user = user.fetch().catch(() => null)
+            user = await user.fetch().catch(() => null)
             if (!user) return
         }
 

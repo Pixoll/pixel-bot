@@ -12,7 +12,7 @@ const { isModuleEnabled, timestamp } = require('../../utils/functions')
 module.exports = (client) => {
     client.on('guildMemberRemove', async member => {
         if (member.partial) {
-            member = member.fetch().catch(() => null)
+            member = await member.fetch().catch(() => null)
             if (!member) return
         }
 
