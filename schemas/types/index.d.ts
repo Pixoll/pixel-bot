@@ -78,8 +78,9 @@ export interface ModuleSchema extends BaseSchema {
     guild: Snowflake
     // autoMod: boolean
     // chatFilter: boolean
-    welcome: boolean
+    // scamDetector: boolean
     stickyRoles: boolean
+    welcome: boolean
     auditLogs: {
         boosts: boolean
         channels: boolean
@@ -99,7 +100,7 @@ export interface ModuleSchema extends BaseSchema {
     }
 }
 
-export type Module = 'auto-mod' | 'chat-filter' | 'sticky-roles' | 'welcome' | 'audit-logs'
+export type Module = 'auto-mod' | 'audit-logs' | 'chat-filter' | 'sticky-roles' | 'welcome' // 'scam-detector' 
 export type AuditLog = 'boosts' | 'channels' | 'commands' | 'emojis' | 'invites' | 'members' | 'messages' |
     'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'users' | 'voice'
 

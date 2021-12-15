@@ -567,7 +567,7 @@ class CommandoMessage extends Message {
 		// If text remains, push it to the array as-is (except for wrapping quotes, which are removed)
 		if (match && re.lastIndex < argStringModified.length) {
 			const re2 = allowSingleQuote ? /^("|')([^]*)\1$/g : /^(")([^]*)"$/g
-			result.push(argStringModified.substr(re.lastIndex).replace(re2, '$2'))
+			result.push(argStringModified.substring(re.lastIndex, argStringModified.length).replace(re2, '$2'))
 		}
 		return result
 	}

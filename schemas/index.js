@@ -54,6 +54,7 @@ module.exports = {
         guild: String,
         // autoMod: Boolean,
         // chatFilter: Boolean,
+        // scamDetector: Boolean,
         stickyRoles: Boolean,
         welcome: Boolean,
         auditLogs: {

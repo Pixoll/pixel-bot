@@ -11,7 +11,7 @@ const { isModuleEnabled, basicEmbed, docId } = require('../../utils/functions')
 module.exports = (client) => {
     client.on('messageCreate', /** @param {CommandoMessage} message */ async message => {
         const { guild, author, content, guildId, embeds, member } = message
-        if (!guild || !member.bannable) return
+        if (!guild || !member?.bannable) return
 
         const isEnabled = await isModuleEnabled(guild, 'scam-detector')
         if (!isEnabled) return

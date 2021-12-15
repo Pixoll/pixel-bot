@@ -53,7 +53,7 @@ module.exports = (client) => {
      * @param {Command} [command] the command
      * @param {string} [id] the error id to use
      */
-    async function errorHandler(error, type, { message, interaction }, command, id) {
+    async function errorHandler(error, type, { message, interaction } = {}, command, id) {
         /** @type {TextChannel} */
         const errorsChannel = await client.channels.fetch('906740370304540702')
 
@@ -62,13 +62,13 @@ module.exports = (client) => {
             console.error(error)
 
             const lentgh = error.name.length + error.message.length + 3
-            const stack = error.stack?.substr(lentgh).replace(/ +/g, ' ').split('\n')
+            const stack = error.stack?.substring(lentgh, error.stack?.length).replace(/ +/g, ' ').split('\n')
 
             const files = stack.filter(str => {
                 const match = /node_modules|\(internal|\(<anonymous>\)/.test(str)
                 if (match) return false
                 return str.includes(root)
-            }).map((str, i) =>
+            }).map((str) =>
                 '> ' + str.replace('at ', '')
                     .replace(__dirname, root)
                     .replace(/([\\]+)/g, '/')
@@ -76,7 +76,7 @@ module.exports = (client) => {
             ).join('\n')
 
             const { guild, channel } = (message || interaction) ?? {}
-            const author = (message?.author || interaction.user) ?? null
+            const author = (message?.author || interaction?.user) ?? null
             const url = message?.url ?? null
 
             let where = ''
@@ -115,7 +115,7 @@ module.exports = (client) => {
                     }
                     for (const option of interaction.options.data) concat(option)
                 }
-                embed.addField('Command input', code(Util.escapeMarkdown(input).substr(0, 1016), 'js'))
+                embed.addField('Command input', code(Util.escapeMarkdown(input).substring(0, 1016), 'js'))
             }
 
             const msg = (error.name + whatCommand + ': ' + error.message).split('Require stack:').shift()
