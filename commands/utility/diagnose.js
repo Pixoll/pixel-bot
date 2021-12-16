@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel } = require('discord.js')
-const { Command, permissions, CommandGroup } = require('../../command-handler')
+const { Command, CommandGroup } = require('../../command-handler')
+const { permissions } = require('../../command-handler/util')
 const { CommandInstances } = require('../../command-handler/typings')
 const { getArgument, replyAll, basicEmbed } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
