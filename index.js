@@ -63,7 +63,7 @@ client.registry.registerCommandsIn(path.join(__dirname, '/commands'))
 client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
 
 client.on('ready', async () => {
-    await database(client, 'auto-punish', 'chat-filter', 'scam-detector')
+    await database(client, 'chat-filter', 'scam-detector')
     notifier(client)
     rateLimits(client)
 

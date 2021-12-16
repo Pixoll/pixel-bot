@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageEmbed } = require('discord.js')
 const { basicEmbed, sleep, timestamp } = require('../../utils/functions')
-const { CommandoClient } = require('../../command-handler/typings')
+const { CommandoClient, CommandoMessage } = require('../../command-handler/typings')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,9 +11,7 @@ const { CommandoClient } = require('../../command-handler/typings')
 module.exports = (client) => {
     client.on('cMessageCreate', async message => {
         const { guild, author, isCommand, command } = message
-
-        if (!guild || author.bot) return
-        if (isCommand && command?.name === 'afk') return
+        if (!guild || author.bot || (isCommand && command?.name === 'afk')) return
 
         const db = guild.database.afk
         const status = await db.fetch({ user: author.id })
@@ -21,11 +19,9 @@ module.exports = (client) => {
 
         await db.delete(status)
 
-        const toDelete = await message.reply({
-            embeds: [basicEmbed({
-                color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`
-            })]
-        })
+        const toDelete = await message.replyEmbed(basicEmbed({
+            color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`
+        }))
 
         await sleep(10)
         await toDelete?.delete().catch(() => null)
@@ -34,24 +30,35 @@ module.exports = (client) => {
     client.on('cMessageCreate', async message => {
         const { guild, author, mentions } = message
         const { everyone, users } = mentions
-
         if (!guild || author.bot || everyone) return
 
         const db = guild.database.afk
+        const embeds = []
         for (const user of users.toJSON()) {
             const data = await db.fetch({ user: user.id })
-            if (!data) return
+            if (!data) continue
 
             const embed = new MessageEmbed()
                 .setColor('GOLD')
                 .setAuthor(`${user.username} is AFK`, user.displayAvatarURL({ dynamic: true }))
                 .setDescription(`${data.status}\n${timestamp(data.updatedAt, 'R')}`)
                 .setTimestamp(data.updatedAt)
+            embeds.push(embed)
+        }
 
-            const toDelete = await message.replyEmbed(embed)
+        if (embeds.length === 0) return
 
-            await sleep(15)
-            await toDelete?.delete().catch(() => null)
+        const toDelete = []
+        while (embeds.length > 0) {
+            const sliced = embeds.splice(0, 10)
+            /** @type {CommandoMessage} */
+            const msg = await message.replyEmbed({ embeds: sliced }).catch(() => null)
+            toDelete.push(msg)
+        }
+
+        await sleep(15)
+        for (const msg of toDelete) {
+            await msg?.delete().catch(() => null)
         }
     })
 }

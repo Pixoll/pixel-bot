@@ -76,7 +76,6 @@ export interface McIpSchema extends BaseSchema {
 
 export interface ModuleSchema extends BaseSchema {
     guild: Snowflake
-    // autoMod: boolean
     // chatFilter: boolean
     // scamDetector: boolean
     stickyRoles: boolean

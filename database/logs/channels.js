@@ -3,7 +3,7 @@ const { stripIndent, oneLine } = require('common-tags')
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites, Util } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { compareArrays, sliceDots, customEmoji, isModuleEnabled } = require('../../utils/functions')
-const { permissions } = require('../../command-handler')
+const { permissions } = require('../../command-handler/util')
 const { capitalize } = require('lodash')
 const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */

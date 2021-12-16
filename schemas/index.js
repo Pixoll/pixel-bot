@@ -52,7 +52,6 @@ module.exports = {
     }, { timestamps: true })),
     modules: model('modules', Schema({
         guild: String,
-        // autoMod: Boolean,
         // chatFilter: Boolean,
         // scamDetector: Boolean,
         stickyRoles: Boolean,

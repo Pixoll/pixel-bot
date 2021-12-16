@@ -562,11 +562,13 @@ class Command {
 		if (typeof info.name !== 'string') throw new TypeError('Command name must be a string.')
 		if (info.name !== info.name.toLowerCase()) throw new Error('Command name must be lowercase.')
 		if (info.name.replace(/ +/g, '') !== info.name) throw new Error('Command name must not include spaces.')
-		if (info.aliases && (!Array.isArray(info.aliases) || info.aliases.some(ali => typeof ali !== 'string'))) {
-			throw new TypeError('Command aliases must be an Array of strings.')
-		}
-		if (info.aliases && info.aliases.some(ali => ali !== ali.toLowerCase())) {
-			throw new RangeError('Command aliases must be lowercase.')
+		if ('aliases' in info) {
+			if (!Array.isArray(info.aliases) || info.aliases.some(ali => typeof ali !== 'string')) {
+				throw new TypeError('Command aliases must be an Array of strings.')
+			}
+			if (info.aliases.some(ali => ali !== ali.toLowerCase())) {
+				throw new RangeError('Command aliases must be lowercase.')
+			}
 		}
 		if (typeof info.group !== 'string') throw new TypeError('Command group must be a string.')
 		if (info.group !== info.group.toLowerCase()) throw new RangeError('Command group must be lowercase.')
@@ -579,10 +581,10 @@ class Command {
 		if (typeof info.description !== 'string') throw new TypeError('Command description must be a string.')
 		if ('format' in info && typeof info.format !== 'string') throw new TypeError('Command format must be a string.')
 		if ('details' in info && typeof info.details !== 'string') throw new TypeError('Command details must be a string.')
-		if (info.examples && (!Array.isArray(info.examples) || info.examples.some(ex => typeof ex !== 'string'))) {
+		if ('examples' in info && (!Array.isArray(info.examples) || info.examples.some(ex => typeof ex !== 'string'))) {
 			throw new TypeError('Command examples must be an Array of strings.')
 		}
-		if (info.clientPermissions) {
+		if ('clientPermissions' in info) {
 			if (!Array.isArray(info.clientPermissions)) {
 				throw new TypeError('Command clientPermissions must be an Array of permission key strings.')
 			}
@@ -590,7 +592,7 @@ class Command {
 				if (!permissions[perm]) throw new RangeError(`Invalid command clientPermission: ${perm}`)
 			}
 		}
-		if (info.userPermissions) {
+		if ('userPermissions' in info) {
 			if (!Array.isArray(info.userPermissions)) {
 				throw new TypeError('Command userPermissions must be an Array of permission key strings.')
 			}
@@ -598,7 +600,7 @@ class Command {
 				if (!permissions[perm]) throw new RangeError(`Invalid command userPermission: ${perm}`)
 			}
 		}
-		if (info.throttling) {
+		if ('throttling' in info) {
 			if (typeof info.throttling !== 'object') throw new TypeError('Command throttling must be an Object.')
 			if (typeof info.throttling.usages !== 'number' || isNaN(info.throttling.usages)) {
 				throw new TypeError('Command throttling usages must be a number.')
@@ -609,20 +611,20 @@ class Command {
 			}
 			if (info.throttling.duration < 1) throw new RangeError('Command throttling duration must be at least 1.')
 		}
-		if (info.args && !Array.isArray(info.args)) throw new TypeError('Command args must be an Array.')
+		if ('args' in info && !Array.isArray(info.args)) throw new TypeError('Command args must be an Array.')
 		if ('argsPromptLimit' in info && typeof info.argsPromptLimit !== 'number') {
 			throw new TypeError('Command argsPromptLimit must be a number.')
 		}
 		if ('argsPromptLimit' in info && info.argsPromptLimit < 0) {
 			throw new RangeError('Command argsPromptLimit must be at least 0.')
 		}
-		if (info.argsType && !['single', 'multiple'].includes(info.argsType)) {
+		if ('argsType' in info && !['single', 'multiple'].includes(info.argsType)) {
 			throw new RangeError('Command argsType must be one of "single" or "multiple".')
 		}
 		if (info.argsType === 'multiple' && info.argsCount && info.argsCount < 2) {
 			throw new RangeError('Command argsCount must be at least 2.')
 		}
-		if (info.patterns && (!Array.isArray(info.patterns) || info.patterns.some(pat => !(pat instanceof RegExp)))) {
+		if ('patterns' in info && (!Array.isArray(info.patterns) || info.patterns.some(pat => !(pat instanceof RegExp)))) {
 			throw new TypeError('Command patterns must be an Array of regular expressions.')
 		}
 		if (!!info.deprecated && typeof info.replacing !== 'string') {
@@ -631,15 +633,12 @@ class Command {
 		if (!!info.deprecated && info.replacing !== info.replacing.toLowerCase()) {
 			throw new TypeError('Command replacing must be lowercase.')
 		}
-		if (info.slash && (typeof info.slash !== 'object' && typeof info.slash !== 'boolean')) {
+		if ('slash' in info && (typeof info.slash !== 'object' && typeof info.slash !== 'boolean')) {
 			throw new TypeError('Command slash must be object or boolean.')
 		}
 		if (info.slash === true) {
-			info.slash = {}
-			for (const prop in info) {
-				if (prop === 'slash') continue
-				info.slash[prop] = info[prop]
-			}
+			delete info.slash
+			info.slash = Object.assign({}, info)
 		}
 		if (typeof info.slash === 'object') {
 			if (Object.keys(info.slash).length === 0) throw new TypeError('Command slash must not be an empty object.')
@@ -691,7 +690,8 @@ class Command {
 	 * @private
 	 */
 	static parseSlash(info) {
-		const data = Array.isArray(info) ? info : { ...info }
+		/** @type {SlashCommandInfo|SlashCommandOptionInfo[]} */
+		const data = Array.isArray(info) ? info : JSON.parse(JSON.stringify(info))
 		if (!Array.isArray(data) && data.name) {
 			data.type = 1
 		}

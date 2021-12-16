@@ -11,7 +11,7 @@ function sliceEmojis(arr) {
     const normal = []
     for (const emoji of arr) {
         if (dummy.join(' ').length + emoji.length + 1 > 1024) {
-            normal.push([...dummy])
+            normal.push(dummy)
             dummy.splice(0, dummy.length)
         }
         dummy.push(emoji)

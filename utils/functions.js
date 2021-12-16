@@ -285,16 +285,12 @@ function userException(user, author, { client, name }) {
     const options = { color: 'RED', emoji: 'cross' }
 
     if (user.id === client.user.id) {
-        return {
-            ...options,
-            description: `You can't make me ${name} myself.`
-        }
+        options.description = `You can't make me ${name} myself.`
+        return options
     }
     if (user.id === author.id) {
-        return {
-            ...options,
-            description: `You can't ${name} yourself.`
-        }
+        options.description = `You can't ${name} yourself.`
+        return options
     }
 
     return null
@@ -313,11 +309,9 @@ function memberException(member, moderator, { client, name }) {
     /** @type {BasicEmbedOptions} */
     const options = { color: 'RED', emoji: 'cross' }
     if (!member.bannable) {
-        return {
-            ...options,
-            fieldName: `Unable to ${name} ${member.user.tag}`,
-            fieldValue: 'Please check the role hierarchy or server ownership.'
-        }
+        options.fieldName = `Unable to ${name} ${member.user.tag}`
+        options.fieldValue = 'Please check the role hierarchy or server ownership.'
+        return options
     }
 
     if (client.isOwner(moderator)) return null
@@ -326,18 +320,14 @@ function memberException(member, moderator, { client, name }) {
     const highestMod = moderator.roles.highest
     const bannable = highestMod.comparePositionTo(highestTarget) > 0
     if (!bannable || client.isOwner(member)) {
-        return {
-            ...options,
-            fieldName: `You can't ${name} ${member.user.tag}`,
-            fieldValue: 'Please check the role hierarchy or server ownership.'
-        }
+        options.fieldName = `You can't ${name} ${member.user.tag}`
+        options.fieldValue = 'Please check the role hierarchy or server ownership.'
+        return options
     }
 
     if (isMod(member)) {
-        return {
-            ...options,
-            description: `That user is a mod/admin, you can't ${name} them.`
-        }
+        options.description = `That user is a mod/admin, you can't ${name} them.`
+        return options
     }
 
     return null

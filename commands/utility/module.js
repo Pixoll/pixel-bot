@@ -32,7 +32,6 @@ function patchData(data) {
     const _patch = b => b === true
 
     const patch = {
-        // autoMod: _patch(data?.autoMod),
         // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
         stickyRoles: _patch(data?.stickyRoles),

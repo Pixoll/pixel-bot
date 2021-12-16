@@ -11,10 +11,10 @@ module.exports = (client) => {
         const { guild, user, roles, id } = member
         if (id === client.user.id) return
 
-        client.emit('debug', 'Running event "modules/default-roles".')
-
         const data = await guild.database.setup.fetch()
         if (!data) return
+
+        client.emit('debug', 'Running event "modules/default-roles".')
 
         if (data.memberRole && !user.bot) await roles.add(data.memberRole).catch(() => null)
         if (data.botRole && user.bot) await roles.add(data.botRole).catch(() => null)

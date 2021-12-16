@@ -15,7 +15,6 @@ function patchData(data) {
     const _patch = b => b === true ? `Enabled ${customEmoji('online')}` : `Disabled ${customEmoji('dnd')}`
 
     const patch = {
-        // autoMod: _patch(data?.autoMod),
         // chatFilter: _patch(data?.chatFilter),
         welcome: _patch(data?.welcome),
         stickyRoles: _patch(data?.stickyRoles),
@@ -64,13 +63,12 @@ module.exports = class ModulesCommand extends Command {
 
         const data = await guild.database.modules.fetch()
         const patch = patchData(data)
-        const { auditLogs, /* autoMod, chatFilter, */ welcome, stickyRoles } = patch
+        const { auditLogs, /* chatFilter, */ welcome, stickyRoles } = patch
         const {
             boosts, channels, commands, emojis, invites, members, messages, moderation,
             modules, roles, server, stickers, threads, users, voice
         } = auditLogs
 
-        // **Automatic moderation:** ${autoMod}
         // **Chat filter:** ${chatFilter}
 
         const embed = new MessageEmbed()
