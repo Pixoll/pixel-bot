@@ -21,7 +21,7 @@ class ArgumentType {
 		this.client = client
 
 		/**
-		 * Id of this argument type (this is what you specify in {@link ArgumentInfo#type})
+		 * ID of this argument type (this is what you specify in {@link ArgumentInfo#type})
 		 * @type {string}
 		 */
 		this.id = id

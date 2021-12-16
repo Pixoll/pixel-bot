@@ -99,7 +99,7 @@ module.exports = class ErrorsCommand extends Command {
             number: 3,
             authorName: 'Errors and bugs list',
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
-            title: ' •  Id:',
+            title: ' •  ID:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['type', '_id'],
             useDocId: true,

@@ -2,7 +2,7 @@
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
 const { MessageEmbed, TextChannel, Message } = require('discord.js')
-const { getArgument, basicCollector, validURL, replyAll, basicEmbed } = require('../../utils/functions')
+const { getArgument, basicCollector, validURL, replyAll, basicEmbed, timestamp } = require('../../utils/functions')
 const myMs = require('../../utils/my-ms')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
@@ -215,7 +215,10 @@ module.exports = class PollCommand extends Command {
             }
         }
 
-        const sent = await channel.send(msg)
+        const sent = await channel.send(stripIndent`
+            ${msg}\n
+            This poll ends at ${timestamp(duration, 'f', true)} (${timestamp(duration, 'R', true)}.)
+        `)
         for (const emoji of emojis) await sent.react(emoji)
 
         await this.db.add({
@@ -223,8 +226,7 @@ module.exports = class PollCommand extends Command {
             channel: channel.id,
             message: sent.id,
             emojis,
-            duration: myMs(duration - this.now, { long: true }),
-            endsAt: duration
+            duration: duration
         })
 
         await replyAll({ message, interaction }, basicEmbed({

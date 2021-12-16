@@ -15,7 +15,7 @@ module.exports = async (client) => {
         for (const guild of guilds) {
             const db = guild.database.polls
 
-            const pollsData = await db.fetchMany({ endsAt: { $lte: Date.now() } })
+            const pollsData = await db.fetchMany({ duration: { $lte: Date.now() } })
             for (const poll of pollsData.toJSON()) {
                 client.emit('debug', 'Running event "modules/polls#endPoll".')
 

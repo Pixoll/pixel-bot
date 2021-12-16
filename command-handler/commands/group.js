@@ -24,7 +24,7 @@ class CommandGroup {
 		this.client = client
 
 		/**
-		 * Id of this group
+		 * ID of this group
 		 * @type {string}
 		 */
 		this.id = id

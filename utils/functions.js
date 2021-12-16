@@ -158,7 +158,7 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
 /**
  * Parses the specified time into a Discord template
  * @param {number|Date} time The time to parse (in milliseconds)
- * @param {'t'|'T'|'d'|'D'|'f'|'F'|'R'} [format] The format of the timestamp
+ * @param {'t'|'T'|'d'|'D'|'f'|'F'|'R'} [format='f'] The format of the timestamp
  * - `t`: Short time ➜ `16:20`
  * - `T`: Long time ➜ `16:20:30`
  * - `d`: Short date ➜ `20/04/2021`
@@ -166,12 +166,15 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
  * - `f`: Short date/time ➜ `20 April 2021 16:20`
  * - `F`: Long date/time ➜ `Tuesday, 20 April 2021 16:20`
  * - `R`: Relative time ➜ `2 months ago`
+ * @param {?boolean} [exact=false] Whether the timestamp should be exact and not rounded
  */
-function timestamp(time, format = 'f') {
+function timestamp(time, format = 'f', exact = false) {
     if (!time) return
     if (time instanceof Date) time = time.getTime()
 
     const trunc = Math.trunc(time / 1000)
+    if (exact) return `<t:${trunc}:${format}>`
+
     const rem = trunc % 60
     const roundUp = rem >= 20
     const epoch = trunc - rem + (roundUp ? 60 : 0)
@@ -941,7 +944,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
             stripIndent`
                 ${!targetStr ? '' : target instanceof User ? stripIndent`
                     **User:** ${target.toString()} ${target.tag}
-                    **Id:** ${target.id}
+                    **ID:** ${target.id}
                 ` : `**Target:** ${targetStr}`}
                 **Action:** ${action}
                 ${data.reason ? `**Reason:** ${data.reason}` : ''}

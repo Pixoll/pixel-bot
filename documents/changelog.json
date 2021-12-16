@@ -83,6 +83,16 @@
         "timestamp": 1639285560000
     },
     {
+        "version": "2.1.2",
+        "changes": [
+            "Added support for Group DM invites in both `invite-info` command and `audit-logs/invites` sub-module.",
+            "Changed \"Id\" to \"ID\" in some commands, to be grammatically correct.",
+            "Modified polls database structure. This will most likely break all current active polls, meaning they wont be able to end by their own.",
+            "Now the end date and duration of a poll will be displayed automatically at the end of the message."
+        ],
+        "timestamp": 1639612800000
+    },
+    {
         "version": "2.2.0",
         "changes": [
             "Added `legal` command.",

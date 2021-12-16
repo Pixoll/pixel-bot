@@ -455,7 +455,7 @@ class CommandoRegistry {
 
 	/**
 	 * Resolves a command file path from a command's group id and memberName
-	 * @param {string} group Id of the command's group
+	 * @param {string} group ID of the command's group
 	 * @param {string} memberName Member name of the command
 	 * @return {string} Fully-resolved path to the corresponding command file
 	 */
@@ -512,8 +512,8 @@ function isConstructor(func, _class) {
  * @param {string} str The string to parse
  */
 function removeDashes(str) {
-    const arr = str.split('-')
-    const first = arr.shift()
-    const rest = arr.map(capitalize).join('')
-    return first + rest
+	const arr = str.split('-')
+	const first = arr.shift()
+	const rest = arr.map(capitalize).join('')
+	return first + rest
 }

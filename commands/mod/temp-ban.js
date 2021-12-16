@@ -99,7 +99,8 @@ module.exports = class TempBanCommand extends Command {
             }
         }
 
-        if (typeof duration === 'number') duration = duration + Date.now()
+        const now = Date.now()
+        if (typeof duration === 'number') duration = duration + now
         if (duration instanceof Date) duration = duration.getTime()
 
         const { guild, guildId, member: mod } = message || interaction
@@ -160,7 +161,7 @@ module.exports = class TempBanCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(Date.now() - duration, { long: true })
+            duration: myMs(duration - now, { long: true })
         })
         await active.add({
             _id: documentId,

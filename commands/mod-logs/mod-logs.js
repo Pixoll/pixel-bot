@@ -80,7 +80,7 @@ module.exports = class ModLogsCommand extends Command {
                 ${pluralize('mod log', modLogs.size)}
             `,
             authorIconURL: avatarURL,
-            title: ' •  Id:',
+            title: ' •  ID:',
             keyTitle: { prefix: 'type' },
             keysExclude: ['updatedAt', 'guild', user ? ('modId', 'modTag') : null],
             useDocId: true,

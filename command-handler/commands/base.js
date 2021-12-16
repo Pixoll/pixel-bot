@@ -48,7 +48,7 @@ class Command {
 		}
 
 		/**
-		 * Id of the group the command belongs to
+		 * ID of the group the command belongs to
 		 * @type {string}
 		 */
 		this.groupId = info.group
@@ -411,7 +411,7 @@ class Command {
 
 	/**
 	 * Creates/obtains the throttle object for a user, if necessary (owners are excluded)
-	 * @param {string} userId Id of the user to throttle for
+	 * @param {string} userId ID of the user to throttle for
 	 * @return {?Throttle}
 	 * @private
 	 */

@@ -54,18 +54,31 @@ module.exports = class InviteInfoCommand extends Command {
 
         const { guild, channel, url, inviter, presenceCount, memberCount, maxUses, expiresAt, temporary } = invite
 
+        const author = channel.type !== 'GROUP_DM' ?
+            [guild.name, guild.iconURL({ dynamic: true })] :
+            [channel.name, channel.iconURL()]
+
+        const info = guild ? stripIndent`
+            **Channel:** ${channel.toString()} ${channel.name}
+            **Online members:** ${presenceCount}/${memberCount}
+        ` : stripIndent`
+            **Members:** ${memberCount}
+        `
+
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(guild.name, guild.iconURL({ dynamic: true }), url)
+            .setAuthor(...author, url)
             .setDescription(stripIndent`
-                **Inviter:** ${inviter || 'Inviter is unavailable.'}
-                **Channel:** ${channel.toString()}
-                **Online members:** ${presenceCount.toLocaleString()}/${memberCount.toLocaleString()}
+                **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
+                ${info}
                 **Max uses:** ${maxUses || 'No limit'}
                 **Expires:** ${expiresAt ? timestamp(expiresAt) : 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
-            .setFooter(`Server id: ${guild.id}`)
+            .setFooter(guild ?
+                `Server id: ${guild.id}` :
+                `Group DM id: ${channel.id}`
+            )
 
         await replyAll({ message, interaction }, embed)
     }

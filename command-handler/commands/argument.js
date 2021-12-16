@@ -437,7 +437,7 @@ class Argument {
 	/**
 	 * Gets the argument type to use from an id
 	 * @param {CommandoClient} client Client to use the registry of
-	 * @param {string|string[]} id Id of the type to use
+	 * @param {string|string[]} id ID of the type to use
 	 * @returns {?ArgumentType}
 	 * @private
 	 */

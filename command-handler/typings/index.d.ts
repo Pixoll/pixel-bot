@@ -155,7 +155,7 @@ export abstract class ArgumentType {
 
 	/** Client that this argument type is for */
 	public readonly client: CommandoClient
-	/** Id of this argument type (this is what you specify in {@link ArgumentInfo#type}) */
+	/** ID of this argument type (this is what you specify in {@link ArgumentInfo#type}) */
 	public id: string
 
 	/**
@@ -1399,7 +1399,7 @@ export interface CommandoClientOptions extends ClientOptions {
 	 * @default true
 	 */
 	nonCommandEditable?: boolean
-	/** Id of the bot owner's Discord user, or multiple ids */
+	/** ID of the bot owner's Discord user, or multiple ids */
 	owner?: string | string[] | Set<string>
 	/** Invite URL to the bot's support server */
 	serverInvite?: string
@@ -1732,10 +1732,10 @@ export type SlashCommandChannelType = 'guild-text' | 'guild-voice' | 'guild-cate
 export type StringResolvable = string | string[] | object
 
 export interface RequireAllOptions {
-    dirname: string
-    filter?: ((name: string, path: string) => string | false) | RegExp
-    excludeDirs?: RegExp
-    map?: ((name: string, path: string) => string)
-    resolve?: ((module: any) => any)
-    recursive?: boolean
+	dirname: string
+	filter?: ((name: string, path: string) => string | false) | RegExp
+	excludeDirs?: RegExp
+	map?: ((name: string, path: string) => string)
+	resolve?: ((module: any) => any)
+	recursive?: boolean
 }

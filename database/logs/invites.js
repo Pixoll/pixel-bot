@@ -63,22 +63,27 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/invites#cMessageCreate".')
-
-        /** @type {Collection<string,Invite>} */
+        /** @type {Collection<string, Invite>} */
         const invites = await guild.invites.fetch().catch(() => null)
         const matches = [...content.matchAll(/discord\.\w+\/(?:invite\/)?([^ ]+)/g)].map(m => m[1])
 
         for (const code of matches) {
             /** @type {Invite} */
             const invite = await client.fetchInvite(code).catch(() => null)
-            if (!invite) continue
-            if (invites?.get(invite.code)) continue
+            if (!invite || invites?.get(invite.code)) continue
 
             const {
-                channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild
+                channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild, inviter
             } = invite
-            if (!invGuild) continue
+
+            const info = invGuild ? stripIndent`
+                **Server:** ${invGuild.name}
+                **Channel:** ${invChannel.toString()} ${invChannel.name}
+                **Online members:** ${presenceCount}/${memberCount}
+            ` : stripIndent`
+                **Group DM:** ${invChannel.name}
+                **Members:** ${memberCount}
+            `
 
             const embed = new MessageEmbed()
                 .setColor('BLUE')
@@ -88,14 +93,16 @@ module.exports = (client) => {
                     **Invite:** ${invite.toString()}
                 `)
                 .addField('Invite information', stripIndent`
-                    **Server:** ${invGuild.name}
-                    **Channel:** ${invChannel.toString()} ${invChannel.name}
-                    **Online members:** ${presenceCount}/${memberCount}
+                    **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
+                    ${info}
                     **Max uses:** ${maxUses || 'No limit'}
                     **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                     **Temporary membership:** ${temporary ? 'Yes' : 'No'}
                 `)
-                .setFooter(`Server id: ${invGuild.id}`)
+                .setFooter(invGuild ?
+                    `Server id: ${invGuild.id}` :
+                    `Group DM id: ${invChannel.id}`
+                )
                 .setTimestamp()
 
             guild.queuedLogs.push(embed)

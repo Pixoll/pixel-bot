@@ -99,7 +99,8 @@ module.exports = class MuteCommand extends Command {
             }
         }
 
-        if (typeof duration === 'number') duration = duration + Date.now()
+        const now = Date.now()
+        if (typeof duration === 'number') duration = duration + now
         if (duration instanceof Date) duration = duration.getTime()
 
         const { guild, guildId, member: mod } = message || interaction
@@ -168,7 +169,7 @@ module.exports = class MuteCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(duration - Date.now(), { long: true })
+            duration: myMs(duration - now, { long: true })
         })
         await active.add({
             _id: documentId,

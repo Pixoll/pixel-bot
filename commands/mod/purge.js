@@ -9,7 +9,7 @@ const { stripIndent, oneLine } = require('common-tags')
 /**
  * Bulk deletes the provided messages
  * @param {CommandInstances} instances The instances the command is being run for
- * @param {Collection<string,Message>} messages The messages to delete
+ * @param {Collection<string, Message>} messages The messages to delete
  */
 async function bulkDelete({ message, interaction }, messages) {
     if (messages.length === 0) {
@@ -22,7 +22,7 @@ async function bulkDelete({ message, interaction }, messages) {
     const ref = message || await interaction.fetchReply()
     messages = messages.filter(msg => msg.id !== ref.id)
 
-    /** @type {Collection<string,Message>} */
+    /** @type {Collection<string, Message>} */
     const bulk = await channel.bulkDelete(messages)
 
     const embed = basicEmbed({

@@ -115,8 +115,7 @@ export interface PollSchema extends BaseSchema {
     channel: Snowflake
     message: Snowflake
     emojis: (string | Snowflake)[]
-    duration: string
-    endsAt: number
+    duration: number
 }
 
 export interface ReactionRoleSchema extends BaseSchema {

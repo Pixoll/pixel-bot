@@ -85,8 +85,7 @@ module.exports = {
         channel: String,
         message: String,
         emojis: Array,
-        duration: String,
-        endsAt: Number
+        duration: Number
     })),
     reactionRoles: model('reaction-roles', Schema({
         guild: String,
