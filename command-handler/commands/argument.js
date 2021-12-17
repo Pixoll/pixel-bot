@@ -1,12 +1,15 @@
 /* eslint-disable no-unused-vars */
 const { Util: { escapeMarkdown }, MessageEmbed } = require('discord.js')
 const { oneLine, stripIndent } = require('common-tags')
-const isPromise = require('is-promise')
 const ArgumentUnionType = require('../types/union')
 const {
 	ArgumentInfo, ArgumentDefault, ArgumentType, CommandoClient, ArgumentResult, CommandoMessage
 } = require('../typings')
 /* eslint-enable no-unused-vars */
+
+function isPromise(obj) {
+	return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function'
+}
 
 /** A fancy argument */
 class Argument {

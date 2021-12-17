@@ -93,6 +93,13 @@
         "timestamp": 1639612800000
     },
     {
+        "version": "2.1.3",
+        "changes": [
+            "Bug fixes update."
+        ],
+        "timestamp": 1639704360000
+    },
+    {
         "version": "2.2.0",
         "changes": [
             "Added `legal` command.",

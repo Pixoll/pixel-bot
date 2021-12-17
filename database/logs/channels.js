@@ -161,8 +161,12 @@ module.exports = (client) => {
 
         client.emit('debug', 'Running event "logs/channels#channelUpdate".')
 
-        const { name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, id } = oldChannel
-        const { name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2 } = newChannel
+        const {
+            name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, permissionsLocked: locked1, id
+        } = oldChannel
+        const {
+            name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2, permissionsLocked: locked2
+        } = newChannel
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
@@ -172,7 +176,10 @@ module.exports = (client) => {
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)
+
         if (parent1 !== parent2) embed.addField('Category', `${parent1?.name || 'None'} ➜ ${parent2?.name || 'None'}`)
+
+        if (locked1 !== locked2) embed.addField('Synched permissions', locked1 ? 'Yes ➜ No' : 'No ➜ Yes')
 
         const cache1 = permissions1.cache
         const cache2 = permissions2.cache
@@ -208,23 +215,21 @@ module.exports = (client) => {
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)
 
-            const [denied, removed1] = compareArrays(deny1, deny2)
-            const [allowed, removed2] = compareArrays(allow1, allow2)
+            const [removed1, denied] = compareArrays(deny1, deny2)
+            const [removed2, allowed] = compareArrays(allow1, allow2)
 
-            const [neutral1] = compareArrays(denied, removed2)
-            const [neutral2] = compareArrays(allowed, removed1)
+            const [, neutral1] = compareArrays(denied, removed2)
+            const [, neutral2] = compareArrays(allowed, removed1)
             const neutral = [...neutral1, ...neutral2]
 
-            embed.addField('Updated permissions', `**${capitalize(perms1.type)}:** ${mention} ${name}\n`)
-            let field = embed.fields.find(f => f.name === 'Updated permissions').value
+            embed.addField('Updated permissions', `**${capitalize(perms1.type)}:** ${mention} ${name}`)
+            const field = embed.fields.find(f => f.name === 'Updated permissions')
 
-            function addValue(value) {
-                embed.fields.find(f => f.name === 'Updated permissions').value = field + value
-                field = embed.fields.find(f => f.name === 'Updated permissions').value
-            }
+            // eslint-disable-next-line no-return-assign
+            const addValue = value => field.value += ('\n' + value)
 
-            if (denied.length !== 0) addValue(`${customEmoji('cross')} **Denied:** ${denied.join(', ')}\n`)
-            if (allowed.length !== 0) addValue(`${customEmoji('check')} **Allowed:** ${allowed.join(', ')}\n`)
+            if (denied.length !== 0) addValue(`${customEmoji('cross')} **Denied:** ${denied.join(', ')}`)
+            if (allowed.length !== 0) addValue(`${customEmoji('check')} **Allowed:** ${allowed.join(', ')}`)
             if (neutral.length !== 0) addValue(`${customEmoji('neutral')} **Neutral:** ${neutral.join(', ')}`)
 
             checked = true
@@ -242,7 +247,7 @@ module.exports = (client) => {
 
                 embed.addField('Topic', stripIndent`
                     **Before**\n${slice1}
-                    ——————————————
+
                     **After**\n${slice2}
                 `)
             }

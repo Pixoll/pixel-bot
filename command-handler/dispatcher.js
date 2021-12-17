@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-const isPromise = require('is-promise')
 const CommandoRegistry = require('./registry')
 const { Message, MessageEmbed, MessageButton, MessageActionRow, CommandInteractionOption } = require('discord.js')
 const { CommandoMessage, Inhibition, Inhibitor, CommandoClient, CommandoInteraction } = require('./typings')
@@ -8,13 +7,17 @@ const FriendlyError = require('./errors/friendly')
 const { capitalize } = require('lodash')
 /* eslint-enable no-unused-vars */
 
+function isPromise(obj) {
+	return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function'
+}
+
 /**
  * Calculates the probability of something
  * @param {number} n The probability (in decimals or percentage) to calculate
  */
 function probability(n) {
-    if (n > 1) n /= 100
-    return !!n && Math.random() <= n
+	if (n > 1) n /= 100
+	return !!n && Math.random() <= n
 }
 
 /** Handles parsing messages and running commands from them */
