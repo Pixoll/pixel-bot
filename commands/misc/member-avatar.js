@@ -15,7 +15,7 @@ module.exports = class MemberAvatarCommand extends Command {
             group: 'misc',
             description: 'Displays a member\'s server avatar, or yours if you don\'t specify any.',
             details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
+                \`member\` can be either a member's name, mention or ID.
                 If no server avatar was found, it will display the user\'s avatar instead.
             `,
             format: 'mavatar <member>',

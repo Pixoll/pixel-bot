@@ -110,7 +110,7 @@ Structures.extend('Guild', Guild => {
             enabled = !!enabled
             if (!this._groupsEnabled) {
                 /**
-                 * Internal map object of group statuses, mapped by group id
+                 * Internal map object of group statuses, mapped by group ID
                  * @type {Object}
                  * @private
                  */

@@ -14,7 +14,7 @@ module.exports = class LockCommand extends Command {
             group: 'managing',
             description: 'Locks a channel, revoking the `Send Messages` permission from @everyone.',
             details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
+                \`channel\` can be either a channel's name, mention or ID.
                 If \`reason\` is not specified, it will default as "We\'ll be back shortly".
             `,
             format: 'lock [channel] <reason>',

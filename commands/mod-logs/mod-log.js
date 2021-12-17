@@ -17,12 +17,12 @@ module.exports = class ModLogCommand extends Command {
             group: 'mod-logs',
             description: 'Display or delete a single moderation log.',
             details: oneLine`
-                \`modlog id\` has to be a valid mod log id.
+                \`modlog ID\` has to be a valid mod log ID.
                 To see all the mod logs in this server use the \`modlogs\` command.
             `,
             format: stripIndent`
-                modlog view [modlog id] - Display a mod log's information.
-                modlog delete [modlog id] - Delete a mod log (admins only).
+                modlog view [modlog ID] - Display a mod log's information.
+                modlog delete [modlog ID] - Delete a mod log (admins only).
             `,
             examples: [`modlog ${docId()}`],
             modPermissions: true,
@@ -37,8 +37,8 @@ module.exports = class ModLogCommand extends Command {
                 },
                 {
                     key: 'modlogId',
-                    label: 'mod log id',
-                    prompt: 'What is the id of the mod log you want to view?',
+                    label: 'modlog ID',
+                    prompt: 'What is the ID of the mod log you want to view?',
                     type: 'string',
                     max: 12
                 }
@@ -52,7 +52,7 @@ module.exports = class ModLogCommand extends Command {
                         options: [{
                             type: 'string',
                             name: 'modlog-id',
-                            description: 'The id of the mod log to display.',
+                            description: 'The ID of the mod log to display.',
                             required: true
                         }]
                     },
@@ -63,7 +63,7 @@ module.exports = class ModLogCommand extends Command {
                         options: [{
                             type: 'string',
                             name: 'modlog-id',
-                            description: 'The id of the mod log to delete.',
+                            description: 'The ID of the mod log to delete.',
                             required: true
                         }]
                     }
@@ -77,7 +77,7 @@ module.exports = class ModLogCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'view'|'delete'} args.subCommand The sub-command to use
-     * @param {string} args.modlogId The mod log id
+     * @param {string} args.modlogId The mod log ID
      */
     async run({ message, interaction }, { subCommand, modlogId }) {
         subCommand = subCommand.toLowerCase()
@@ -87,7 +87,7 @@ module.exports = class ModLogCommand extends Command {
         const modLog = await this.db.fetch(modlogId)
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
+                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
             }))
         }
 
@@ -151,7 +151,7 @@ module.exports = class ModLogCommand extends Command {
         await this.db.delete(modlog)
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Deleted mod log with id \`${modlog._id}\``
+            color: 'GREEN', emoji: 'check', description: `Deleted mod log with ID \`${modlog._id}\``
         }))
     }
 }

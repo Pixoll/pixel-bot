@@ -16,7 +16,7 @@ module.exports = class BanCommand extends Command {
             group: 'mod',
             description: 'Ban a user permanently.',
             details: stripIndent`
-                \`user\` has to be a user's username, id or mention.
+                \`user\` has to be a user's username, ID or mention.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
             format: 'ban [user] <reason>',

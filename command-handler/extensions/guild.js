@@ -16,9 +16,9 @@ class CommandoGuild extends Guild {
 	 */
 	constructor(client, data) {
 		super(client, { id: data.id })
-        Object.assign(this, data)
+		Object.assign(this, data)
 
-		client.emit('debug', `Created new ${this.constructor.name} with id ${this.id}`)
+		client.emit('debug', `Created new ${this.constructor.name} with ID ${this.id}`)
 
 		this._commando = true
 
@@ -121,7 +121,7 @@ class CommandoGuild extends Guild {
 		enabled = !!enabled
 		if (!this._groupsEnabled) {
 			/**
-			 * Internal map object of group statuses, mapped by group id
+			 * Internal map object of group statuses, mapped by group ID
 			 * @type {Object}
 			 * @private
 			 */

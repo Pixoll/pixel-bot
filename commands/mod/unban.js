@@ -14,7 +14,7 @@ module.exports = class UnbanCommand extends Command {
             group: 'mod',
             description: 'Unban a user.',
             details: stripIndent`
-                \`user\` has to be a user's username, id or mention.
+                \`user\` has to be a user's username, ID or mention.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
             format: 'unban [user] <reason>',

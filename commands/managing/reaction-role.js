@@ -18,12 +18,12 @@ module.exports = class ReactionRoleCommand extends Command {
             group: 'managing',
             description: 'Create or remove reaction roles.',
             details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
-                \`msg id\` has to be a message's id that's in the **same channel** that you specified.
+                \`channel\` can be either a channel's name, mention or ID.
+                \`msg ID\` has to be a message's ID that's in the **same channel** that you specified.
             `,
             format: stripIndent`
-                reactrole create [channel] [msg id] - Create reaction roles.
-                reactrole remove [channel] [msg id] - Remove reaction roles.
+                reactrole create [channel] [msg ID] - Create reaction roles.
+                reactrole remove [channel] [msg ID] - Remove reaction roles.
             `,
             examples: [
                 'reactrole create #reaction-roles 826935004936142918',
@@ -49,7 +49,7 @@ module.exports = class ReactionRoleCommand extends Command {
                 },
                 {
                     key: 'msgId',
-                    label: 'message id',
+                    label: 'message ID',
                     prompt: 'On what message do you want to create or remove the reaction roles?',
                     type: 'string'
                 }

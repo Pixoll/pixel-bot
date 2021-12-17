@@ -54,14 +54,14 @@ class CommandDispatcher {
 		this._commandPatterns = new Map()
 
 		/**
-		 * Old command message results, mapped by original message id
+		 * Old command message results, mapped by original message ID
 		 * @type {Map<string, CommandoMessage>}
 		 * @private
 		 */
 		this._results = new Map()
 
 		/**
-		 * Tuples in string form of user id and channel id that are currently awaiting messages from a user in a channel
+		 * Tuples in string form of user ID and channel ID that are currently awaiting messages from a user in a channel
 		 * @type {Set<string>}
 		 * @private
 		 */

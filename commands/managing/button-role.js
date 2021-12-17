@@ -15,7 +15,7 @@ module.exports = class ButtonRoleCommand extends Command {
             group: 'managing',
             description: 'Create or remove button roles.',
             details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
+                \`channel\` can be either a channel's name, mention or ID.
                 \`roles\` to be all the roles' names, mentions or ids, separated by commas (max. 10 at once).
             `,
             format: 'buttonrole [channel] [roles]',

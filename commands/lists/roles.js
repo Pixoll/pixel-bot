@@ -12,7 +12,7 @@ module.exports = class RolesCommand extends Command {
             name: 'roles',
             group: 'lists',
             description: 'Displays a list of roles in the server, or the roles of a specific member.',
-            details: '`member` can be either a member\'s name, mention or id.',
+            details: '`member` can be either a member\'s name, mention or ID.',
             format: 'roles <member>',
             examples: ['roles Pixoll'],
             guildOnly: true,

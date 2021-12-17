@@ -65,8 +65,8 @@ module.exports = class PurgeCommand extends Command {
             description: 'Delete a number of messages from a channel (limit of 100).',
             details: stripIndent`
                 \`number\` has be a number from 1 to 100.
-                \`user\` has to be a user's username, id or mention.
-                \`msg id\` has to be a message's id that's in the **same channel** as where you use this command.
+                \`user\` has to be a user's username, ID or mention.
+                \`msg ID\` has to be a message's ID that's in the **same channel** as where you use this command.
             `,
             format: stripIndent`
                 purge [number] <all> - Delete all messages.
@@ -76,8 +76,8 @@ module.exports = class PurgeCommand extends Command {
                 purge [number] users - Delete messages sent by users.
                 purge [number] bots - Delete messages sent by bots.
                 purge [number] user [user] - Delete messages sent by \`user\`.
-                purge [number] before [msg id] - Delete messages sent before \`msg id\`.
-                purge [number] after [msg id] - Delete messages sent after \`msg id\`.
+                purge [number] before [msg ID] - Delete messages sent before \`msg ID\`.
+                purge [number] after [msg ID] - Delete messages sent after \`msg ID\`.
                 purge [number] match [text] - Delete messages matching \`text\`.
                 purge [number] starts-with [text] - Delete messages starting with \`text\`.
                 purge [number] ends-with [text] - Delete messages ending with \`text\`.
@@ -116,7 +116,7 @@ module.exports = class PurgeCommand extends Command {
                     key: 'filter',
                     prompt: oneLine`
                         What filter would like to use? This can be an \`user\`, a
-                        \`msg id\` or just \`text\` depending on the sub-command used.
+                        \`msg ID\` or just \`text\` depending on the sub-command used.
                     `,
                     type: ['user', 'message', 'string'],
                     required: false
@@ -217,7 +217,7 @@ module.exports = class PurgeCommand extends Command {
                             {
                                 type: 'string',
                                 name: 'message-id',
-                                description: 'The id of the message.',
+                                description: 'The ID of the message.',
                                 required: true
                             },
                             {
@@ -236,7 +236,7 @@ module.exports = class PurgeCommand extends Command {
                             {
                                 type: 'string',
                                 name: 'message-id',
-                                description: 'The id of the message.',
+                                description: 'The ID of the message.',
                                 required: true
                             },
                             {
@@ -336,7 +336,7 @@ module.exports = class PurgeCommand extends Command {
                     filter = await interaction.channel.messages.fetch(messageId).catch(() => null)
                     if (!filter) {
                         return await replyAll({ interaction }, basicEmbed({
-                            color: 'RED', emoji: 'cross', description: 'The message id is invalid.'
+                            color: 'RED', emoji: 'cross', description: 'The message ID is invalid.'
                         }))
                     }
                     break

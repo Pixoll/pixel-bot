@@ -26,7 +26,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor(user.tag, newMember.displayAvatarURL({ dynamic: true }))
             .setDescription(`${user.toString()} ${action} boosting ${emoji}`)
-            .setFooter(`User id: ${id}`)
+            .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
         if (action === 'stopped') embed.addField('Boosted for', timestamp(boostTime1, 'R'))

@@ -13,7 +13,7 @@ module.exports = class warnCommand extends Command {
             name: 'warn',
             group: 'mod',
             description: 'Warn a member.',
-            details: '`member` can be a member\'s username, id or mention. `reason` can be anything you want.',
+            details: '`member` can be a member\'s username, ID or mention. `reason` can be anything you want.',
             format: 'warn [member] [reason]',
             examples: ['warn Pixoll Stop posting NSFW'],
             modPermissions: true,

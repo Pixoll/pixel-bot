@@ -149,7 +149,7 @@ export class ArgumentCollector {
 export abstract class ArgumentType {
 	/**
 	 * @param client The client the argument type is for
-	 * @param id The argument type id (this is what you specify in {@link ArgumentInfo#type})
+	 * @param id The argument type ID (this is what you specify in {@link ArgumentInfo#type})
 	 */
 	public constructor(client: CommandoClient, id: string)
 
@@ -240,14 +240,14 @@ export abstract class Command {
 
 	/** Whether the command is enabled globally */
 	private _globalEnabled: boolean
-	/** Current throttle objects for the command, mapped by user id */
+	/** Current throttle objects for the command, mapped by user ID */
 	private _throttles: Map<string, object>
 	/** The slash command data to send to the API */
 	private _slashToAPI: APIApplicationCommand
 
 	/**
 	 * Creates/obtains the throttle object for a user, if necessary (owners are excluded)
-	 * @param userId id of the user to throttle for
+	 * @param userId ID of the user to throttle for
 	 */
 	private throttle(userId: string): Throttle | null
 
@@ -301,7 +301,7 @@ export abstract class Command {
 	public format: string
 	/** The group the command belongs to, assigned upon registration */
 	public group: CommandGroup
-	/** id of the group the command belongs to */
+	/** ID of the group the command belongs to */
 	public groupId: string
 	/**
 	 * Whether the command is protected from being disabled
@@ -470,11 +470,11 @@ export class CommandDispatcher {
 	 */
 	public constructor(client: CommandoClient, registry: CommandoRegistry)
 
-	/** Tuples in string form of user id and channel id that are currently awaiting messages from a user in a channel */
+	/** Tuples in string form of user ID and channel ID that are currently awaiting messages from a user in a channel */
 	private _awaiting: Set<string>
 	/** Map of {@link RegExp}s that match command messages, mapped by string prefix */
 	private _commandPatterns: Map<string, RegExp>
-	/** Old command message results, mapped by original message id */
+	/** Old command message results, mapped by original message ID */
 	private _results: Map<string, CommandoMessage>
 
 	/**
@@ -575,7 +575,7 @@ export class CommandFormatError extends FriendlyError {
 export class CommandGroup {
 	/**
 	 * @param client The client the group is for
-	 * @param id The id for the group
+	 * @param id The ID for the group
 	 * @param name The name of the group
 	 * @param guarded Whether the group should be protected from disabling
 	 */
@@ -589,7 +589,7 @@ export class CommandGroup {
 	public commands: Collection<string, Command>
 	/** Whether or not this group is protected from being disabled */
 	public guarded: boolean
-	/** id of this group */
+	/** ID of this group */
 	public id: string
 	/** Name of this group */
 	public name: string
@@ -661,7 +661,7 @@ export class CommandoGuild extends Guild {
 	private _prefix: string
 	/** Map object of internal command statuses, mapped by command name */
 	private _commandsEnabled: object
-	/** Internal map object of group statuses, mapped by group id */
+	/** Internal map object of group statuses, mapped by group ID */
 	private _groupsEnabled: object
 
 	/** The client of this guild */
@@ -734,9 +734,9 @@ export class CommandoMessage extends Message {
 	public isCommand: boolean
 	/** Pattern matches (if from a pattern trigger) */
 	public patternMatches: string[] | null
-	/** Index of the current response that will be edited, mapped by channel id */
+	/** Index of the current response that will be edited, mapped by channel ID */
 	public responsePositions: { [key: string]: number } | null
-	/** Response messages sent, mapped by channel id (set by the dispatcher after running the command) */
+	/** Response messages sent, mapped by channel ID (set by the dispatcher after running the command) */
 	public responses: { [key: string]: CommandoMessage[] } | null
 	/** The guild the message was sent in (if in a guild channel) */
 	public readonly guild: CommandoGuild
@@ -745,7 +745,7 @@ export class CommandoMessage extends Message {
 	private deleteRemainingResponses(): void
 	/**
 	 * Edits the current response
-	 * @param id The id of the channel the response is in ("DM" for direct messages)
+	 * @param id The ID of the channel the response is in ("DM" for direct messages)
 	 * @param options Options for the response
 	 */
 	private editCurrentResponse(id: string, options: MessageEditOptions | Exclude<MessageAttachment>):
@@ -880,9 +880,9 @@ export class CommandoRegistry {
 	public commands: Collection<string, Command>
 	/** Fully resolved path to the bot's commands directory */
 	public commandsPath: string
-	/** Registered command groups, mapped by their id */
+	/** Registered command groups, mapped by their ID */
 	public groups: Collection<string, CommandGroup>
-	/** Registered argument types, mapped by their id */
+	/** Registered argument types, mapped by their ID */
 	public types: Collection<string, ArgumentType>
 	/** Command to run when an unknown command is used */
 	public unknownCommand?: Command
@@ -933,9 +933,9 @@ export class CommandoRegistry {
 	public registerDefaultTypes(types?: DefaultTypesOptions): CommandoRegistry
 	/**
 	 * Registers a single group
-	 * @param group A CommandGroup instance, a constructor, or the group id
-	 * @param name Name for the group (if the first argument is the group id)
-	 * @param guarded Whether the group should be guarded (if the first argument is the group id)
+	 * @param group A CommandGroup instance, a constructor, or the group ID
+	 * @param name Name for the group (if the first argument is the group ID)
+	 * @param guarded Whether the group should be guarded (if the first argument is the group ID)
 	 *  @see {@link CommandoRegistry#registerGroups}
 	 */
 	public registerGroup(
@@ -946,7 +946,7 @@ export class CommandoRegistry {
 	/**
 	 * Registers multiple groups
 	 * @param groups An array of CommandGroup instances, constructors, plain objects
-	 * (with id, name, and guarded properties), or arrays of {@link CommandoRegistry#registerGroup} parameters
+	 * (with ID, name, and guarded properties), or arrays of {@link CommandoRegistry#registerGroup} parameters
 	 * @example
 	 * registry.registerGroups([
 	 * 	['fun', 'Fun'],
@@ -994,8 +994,8 @@ export class CommandoRegistry {
 	 */
 	public resolveCommand(command: CommandResolvable): Command
 	/**
-	 * Resolves a command file path from a command's group id and memberName
-	 * @param group id of the command's group
+	 * Resolves a command file path from a command's group ID and memberName
+	 * @param group ID of the command's group
 	 * @param memberName Member name of the command
 	 * @returns Fully-resolved path to the corresponding command file
 	 */
@@ -1036,20 +1036,20 @@ export class DatabaseManager<T> {
 	public add(doc: T): Promise<T>
 	/**
 	 * Delete a single document from the database
-	 * @param doc The document to delete or its id
+	 * @param doc The document to delete or its ID
 	 * @returns The deleted document
 	 */
 	public delete(doc: T | string): Promise<T>
 	/**
 	 * Update a single document of the database
-	 * @param toUpdate The document to update or its id
+	 * @param toUpdate The document to update or its ID
 	 * @param options The options for this update
 	 * @returns The updated document
 	 */
 	public update(toUpdate: T | string, options: UpdateWithAggregationPipeline | UpdateQuery<T>): Promise<T>
 	/**
 	 * Fetch a single document
-	 * @param filter The id or fetching filter for the document
+	 * @param filter The ID or fetching filter for the document
 	 * @returns The fetched document
 	 */
 	public fetch(filter?: string | FilterQuery<T>): Promise<?T>
@@ -1146,7 +1146,7 @@ export interface ArgumentInfo {
 	/** Predefined error message to output for the argument when it isn't valid */
 	error?: string
 	/**
-	 * Type of the argument (must be the id of one of the registered argument
+	 * Type of the argument (must be the ID of one of the registered argument
 	 * types or multiple ids in order of priority separated by `|` for a union type -
 	 * see {@link CommandoRegistry#registerDefaultTypes} for the built-in types) */
 	type?: ArgumentTypes | ArgumentTypes[]
@@ -1216,7 +1216,7 @@ export type ArgumentTypes = 'string' | 'integer' | 'float' | 'boolean' | 'durati
 /**
  * A CommandGroupResolvable can be:
  * - A {@link CommandGroup}
- * - A group id
+ * - A group ID
  */
 export type CommandGroupResolvable = CommandGroup | string
 
@@ -1231,7 +1231,7 @@ export interface CommandInfo {
 	 * @default false
 	 */
 	autoAliases?: boolean
-	/** The id of the group the command belongs to (must be lowercase) */
+	/** The ID of the group the command belongs to (must be lowercase) */
 	group: string
 	/**
 	 * The member name of the command in the group (must be lowercase)
@@ -1405,7 +1405,7 @@ export interface CommandoClientOptions extends ClientOptions {
 	serverInvite?: string
 	/** Invite options for the bot */
 	inviteOptions?: InviteGenerationOptions | string
-	/** The test guild id or the slash commands */
+	/** The test guild ID or the slash commands */
 	testGuild?: string
 }
 

@@ -51,7 +51,7 @@ module.exports = (client) => {
                 **Mentionable:** ${mentionable ? 'Yes' : 'No'}
                 **Mod perms:** ${getKeyPerms(role)}
             `)
-            .setFooter(`Role id: ${id}`)
+            .setFooter(`Role ID: ${id}`)
             .setTimestamp()
 
         if (url) embed.setThumbnail(url)
@@ -91,7 +91,7 @@ module.exports = (client) => {
                 **Mentionable:** ${mentionable ? 'Yes' : 'No'}
                 **Mod perms:** ${getKeyPerms(role)}
             `)
-            .setFooter(`Role id: ${id}`)
+            .setFooter(`Role ID: ${id}`)
             .setTimestamp()
 
         if (url) embed.setThumbnail(url)
@@ -133,7 +133,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor('Updated role', guild.iconURL({ dynamic: true }))
             .setDescription(oldRole.toString())
-            .setFooter(`Role id: ${id}`)
+            .setFooter(`Role ID: ${id}`)
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)

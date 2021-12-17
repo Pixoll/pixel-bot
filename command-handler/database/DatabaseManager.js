@@ -54,11 +54,11 @@ class DatabaseManager {
 
     /**
      * Delete a single document from the database
-     * @param {object|string} doc The document to delete or its id
+     * @param {object|string} doc The document to delete or its ID
      */
     async delete(doc) {
         if (typeof doc !== 'string' && typeof doc !== 'object') {
-            throw new TypeError('doc must me either an object or a document id.')
+            throw new TypeError('doc must me either an object or a document ID.')
         }
         if (typeof doc === 'object' && !doc._id) {
             throw new RangeError('doc must have the _id property.')
@@ -73,13 +73,13 @@ class DatabaseManager {
 
     /**
      * Update a single document of the database
-     * @param {object|string} toUpdate The document to update or its id
+     * @param {object|string} toUpdate The document to update or its ID
      * @param {object} options The options for this update
      * @returns The updated document
      */
     async update(toUpdate, options) {
         if (typeof toUpdate !== 'string' && typeof toUpdate !== 'object') {
-            throw new TypeError('toUpdate must me either an object or a document id.')
+            throw new TypeError('toUpdate must me either an object or a document ID.')
         }
         if (typeof toUpdate === 'object' && !toUpdate._id) {
             throw new RangeError('toUpdate must have the _id property.')
@@ -101,7 +101,7 @@ class DatabaseManager {
 
     /**
      * Fetch a single document
-     * @param {string|object} [filter={}] The id or fetching filter for this document
+     * @param {string|object} [filter={}] The ID or fetching filter for this document
      * @returns {Promise<?object>} The fetched document
      */
     async fetch(filter = {}) {

@@ -31,8 +31,8 @@ module.exports = class GuildCommand extends Command {
                 },
                 {
                     key: 'guildId',
-                    label: 'guild id or name',
-                    prompt: 'What is the id or name of the guild?',
+                    label: 'guild ID or name',
+                    prompt: 'What is the ID or name of the guild?',
                     type: 'string'
                 },
                 {
@@ -50,7 +50,7 @@ module.exports = class GuildCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'info'|'invite'|'remove'} args.subCommand The sub-command
-     * @param {string} args.guildId The guild's id or name
+     * @param {string} args.guildId The guild's ID or name
      * @param {string} args.reason Why the bot is leaving such guild
      */
     async run({ message }, { subCommand, guildId, reason }) {

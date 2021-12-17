@@ -17,8 +17,8 @@ module.exports = class TempRoleCommand extends Command {
             group: 'mod',
             description: 'Assign a role that persists for a limited time.',
             details: stripIndent`
-                \`role\` can be either a role's name, mention or id.
-                \`member\` can be either a member's name, mention or id.
+                \`role\` can be either a role's name, mention or ID.
+                \`member\` can be either a member's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

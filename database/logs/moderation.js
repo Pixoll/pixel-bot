@@ -40,7 +40,7 @@ module.exports = (client) => {
                 ${executor.toString()} kicked ${user.toString()} ${user.tag}
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User id: ${id} • Mod id: ${executor.id}`)
+            .setFooter(`User ID: ${id} • Mod ID: ${executor.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -79,7 +79,7 @@ module.exports = (client) => {
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
             .setImage('https://media.giphy.com/media/fe4dDMD2cAU5RfEaCU/giphy.gif')
-            .setFooter(`User id: ${user.id}`)
+            .setFooter(`User ID: ${user.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -118,7 +118,7 @@ module.exports = (client) => {
                 ${moderator ? moderator + 'unbanned' : 'Unbanned'} ${user.toString()} ${user.tag}
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User id: ${user.id}`)
+            .setFooter(`User ID: ${user.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -139,7 +139,7 @@ module.exports = (client) => {
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User id: ${user.id} • Mod id: ${mod.id}`)
+            .setFooter(`User ID: ${user.id} • Mod ID: ${mod.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -151,7 +151,7 @@ module.exports = (client) => {
 
         client.emit('debug', 'Running event "logs/moderation#guildMemberUnmute".')
 
-        const modFooter = mod ? ` • Mod id: ${mod.id}` : ''
+        const modFooter = mod ? ` • Mod ID: ${mod.id}` : ''
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
@@ -161,7 +161,7 @@ module.exports = (client) => {
                 ${mod.toString()} unmuted ${user.toString()} ${user.tag}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User id: ${user.id}` + modFooter)
+            .setFooter(`User ID: ${user.id}` + modFooter)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -181,7 +181,7 @@ module.exports = (client) => {
                 ${mod.toString()} warned ${user.toString()} ${user.tag}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User id: ${user.id} • Mod id: ${mod.id}`)
+            .setFooter(`User ID: ${user.id} • Mod ID: ${mod.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

@@ -6,12 +6,12 @@ const { CommandoClient, CommandoMessage, Argument, ArgumentInfo } = require('../
 class ArgumentType {
 	/**
 	 * @param {CommandoClient} client The client the argument type is for
-	 * @param {string} id The argument type id (this is what you specify in {@link ArgumentInfo#type})
+	 * @param {string} id The argument type ID (this is what you specify in {@link ArgumentInfo#type})
 	 */
 	constructor(client, id) {
 		if (!client) throw new Error('A client must be specified.')
-		if (typeof id !== 'string') throw new Error('Argument type id must be a string.')
-		if (id !== id.toLowerCase()) throw new Error('Argument type id must be lowercase.')
+		if (typeof id !== 'string') throw new Error('Argument type ID must be a string.')
+		if (id !== id.toLowerCase()) throw new Error('Argument type ID must be lowercase.')
 
 		/**
 		 * Client that this argument type is for

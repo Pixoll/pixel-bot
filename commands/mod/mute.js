@@ -17,7 +17,7 @@ module.exports = class MuteCommand extends Command {
             group: 'mod',
             description: 'Mute a member so they cannot type or speak.',
             details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
+                \`member\` can be either a member's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

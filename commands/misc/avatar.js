@@ -13,7 +13,7 @@ module.exports = class AvatarCommand extends Command {
             aliases: ['av'],
             group: 'misc',
             description: 'Displays a user\'s avatar, or yours if you don\'t specify any.',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: '`user` has to be a user\'s username, ID or mention.',
             format: 'avatar <user>',
             examples: ['avatar Pixoll'],
             args: [{

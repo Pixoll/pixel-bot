@@ -14,7 +14,7 @@ module.exports = class UnlockCommand extends Command {
             group: 'managing',
             description: 'Unlock a channel, granting the `Send Messages` permission from @everyone.',
             details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
+                \`channel\` can be either a channel's name, mention or ID.
                 If \`reason\` is not specified, it will default as "Thanks for waiting".
             `,
             format: 'lock [channel] <reason>',

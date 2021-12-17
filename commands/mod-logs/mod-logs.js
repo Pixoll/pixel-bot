@@ -14,7 +14,7 @@ module.exports = class ModLogsCommand extends Command {
             aliases: ['modlogs'],
             group: 'mod-logs',
             description: 'Displays all moderator logs of the server of a specific moderator, or all if none is specified',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: '`user` has to be a user\'s username, ID or mention.',
             format: 'modlogs <user>',
             examples: ['modlogs Pixoll'],
             modPermissions: true,

@@ -31,7 +31,7 @@ module.exports = class ModStatsCommand extends Command {
             description: 'Displays your moderation statistics or for a moderator or admin.',
             details: stripIndent`
                 If \`user\` is not specified, I will show your own moderation statistics.
-                \`user\` can be a user's username, id or mention.
+                \`user\` can be a user's username, ID or mention.
             `,
             format: 'modstats <user>',
             examples: ['modstats Pixoll'],
@@ -84,7 +84,7 @@ module.exports = class ModStatsCommand extends Command {
             .setColor('#4c9f4c')
             .setAuthor(`${user.username}'s moderation statistics`, user.displayAvatarURL({ dynamic: true }))
             .setDescription(table)
-            .setFooter(`User id: ${user.id}`)
+            .setFooter(`User ID: ${user.id}`)
             .setTimestamp()
 
         await replyAll({ message, interaction }, embed)

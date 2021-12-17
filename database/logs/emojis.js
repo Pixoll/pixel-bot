@@ -28,7 +28,7 @@ module.exports = (client) => {
                 `**Added emoji:** ${name}`
             )
             .setThumbnail(url)
-            .setFooter(`Emoji id: ${id}`)
+            .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -47,7 +47,7 @@ module.exports = (client) => {
             .setAuthor('Deleted emoji', guild.iconURL({ dynamic: true }))
             .setDescription(`**Name:** ${name}`)
             .setThumbnail(url)
-            .setFooter(`Emoji id: ${id}`)
+            .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -66,7 +66,7 @@ module.exports = (client) => {
             .setAuthor('Updated emoji', guild.iconURL({ dynamic: true }))
             .addField('Name', `${oldEmoji.name} ➜ ${newEmoji.name}`)
             .setThumbnail(url)
-            .setFooter(`Emoji id: ${id}`)
+            .setFooter(`Emoji ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

@@ -63,7 +63,7 @@ module.exports = class ServerInfoCommand extends Command {
                 **Members:** ${memberCount.toLocaleString()}
                 **Roles:** ${_roles.size.toLocaleString()}
             `, true)
-            .setFooter(`Server id: ${id} • Created at`)
+            .setFooter(`Server ID: ${id} • Created at`)
             .setTimestamp(createdTimestamp)
 
         if (guild instanceof Guild) return serverInfo

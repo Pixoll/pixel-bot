@@ -17,7 +17,7 @@ module.exports = class SoftBanCommand extends Command {
             group: 'mod',
             description: 'Soft-ban a user (Ban to delete their messages and then immediately unban).',
             details: stripIndent`
-                \`user\` has to be a user's username, id or mention.
+                \`user\` has to be a user's username, ID or mention.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
             format: 'softban [user] <reason>',

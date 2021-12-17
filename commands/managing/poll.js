@@ -17,13 +17,13 @@ module.exports = class PollCommand extends Command {
             group: 'managing',
             description: 'Create or end a poll.',
             details: stripIndent`
-                \`channel\` can be either a channel's name, mention or id.
+                \`channel\` can be either a channel's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
-                \`msg id\` has to be a message's id that's in the **same channel** that you specified.
+                \`msg ID\` has to be a message's ID that's in the **same channel** that you specified.
             `,
             format: stripIndent`
                 poll create [channel] [duration] - Create a poll in that channel.
-                poll end <channel> <msg id> - End the oldest poll in that channel.
+                poll end <channel> <msg ID> - End the oldest poll in that channel.
             `,
             examples: [
                 'poll create polls 12h',
@@ -49,7 +49,7 @@ module.exports = class PollCommand extends Command {
                 {
                     key: 'durationOrMsg',
                     label: 'duration or message',
-                    prompt: 'How long should the poll last? Or what\'s the message id of the poll you want to end?',
+                    prompt: 'How long should the poll last? Or what\'s the message ID of the poll you want to end?',
                     type: ['date', 'duration', 'string'],
                     required: false
                 }
@@ -238,7 +238,7 @@ module.exports = class PollCommand extends Command {
      * The `end` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {TextChannel} channel The text channel of the poll to end
-     * @param {Message} msg The message id of the poll to end
+     * @param {Message} msg The message ID of the poll to end
      * @param {string} pollURL The URL of the poll to end
      */
     async end({ message, interaction }, channel, msg, pollURL) {

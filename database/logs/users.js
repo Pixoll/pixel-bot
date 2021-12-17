@@ -49,7 +49,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor('Updated user', newUser.displayAvatarURL({ dynamic: true }))
             .setDescription(`${newUser.toString()} ${tag}`)
-            .setFooter(`User id: ${id}`)
+            .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Username', `${name1} ➜ ${name2}`)
@@ -80,7 +80,7 @@ module.exports = (client) => {
             if (!member) continue
 
             const status = await isModuleEnabled(guild, 'audit-logs', 'users')
-            if (!status) return
+            if (!status) continue
 
             guild.queuedLogs.push(embed)
         }

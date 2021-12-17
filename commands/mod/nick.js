@@ -15,7 +15,7 @@ module.exports = class NickCommand extends Command {
             group: 'mod',
             description: 'Change the nickname of a member or remove it.',
             details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
+                \`member\` can be either a member's name, mention or ID.
                 \`nick\` will be the member's new nickname.
                 Setting \`nick\` as \`remove\` will remove the member's current nickname.
             `,

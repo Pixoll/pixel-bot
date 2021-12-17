@@ -12,7 +12,7 @@ module.exports = class MembersCommand extends Command {
             name: 'members',
             group: 'lists',
             description: 'Displays a list of members in a role.',
-            details: '`role` can be either a role\'s name, mention or id.',
+            details: '`role` can be either a role\'s name, mention or ID.',
             format: 'members [role]',
             examples: ['members Staff'],
             guildOnly: true,

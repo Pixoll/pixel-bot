@@ -30,13 +30,13 @@ class CommandoRegistry {
 		this.commands = new Collection()
 
 		/**
-		 * Registered command groups, mapped by their id
+		 * Registered command groups, mapped by their ID
 		 * @type {Collection<string, CommandGroup>}
 		 */
 		this.groups = new Collection()
 
 		/**
-		 * Registered argument types, mapped by their id
+		 * Registered argument types, mapped by their ID
 		 * @type {Collection<string, ArgumentType>}
 		 */
 		this.types = new Collection()
@@ -67,7 +67,7 @@ class CommandoRegistry {
 			if (typeof options.testGuild !== 'string') throw new TypeError('Client testGuild must be a string.')
 
 			const guild = guilds.resolve(options.testGuild)
-			if (!guild) throw new TypeError('Client testGuild must be a valid Guild id.')
+			if (!guild) throw new TypeError('Client testGuild must be a valid Guild ID.')
 
 			const current = await guild.commands.fetch()
 			const toAdd = testCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
@@ -92,9 +92,9 @@ class CommandoRegistry {
 
 	/**
 	 * Registers a single group
-	 * @param {CommandGroup|Function|Object|string} group A CommandGroup instance, a constructor, or the group id
-	 * @param {string} [name] Name for the group (if the first argument is the group id)
-	 * @param {boolean} [guarded] Whether the group should be guarded (if the first argument is the group id)
+	 * @param {CommandGroup|Function|Object|string} group A CommandGroup instance, a constructor, or the group ID
+	 * @param {string} [name] Name for the group (if the first argument is the group ID)
+	 * @param {boolean} [guarded] Whether the group should be guarded (if the first argument is the group ID)
 	 * @return {CommandoRegistry}
 	 * @see {@link CommandoRegistry#registerGroups}
 	 */
@@ -126,7 +126,7 @@ class CommandoRegistry {
 	/**
 	 * Registers multiple groups
 	 * @param {CommandGroup[]|Function[]|Object[]|string[][]} groups An array of CommandGroup instances,
-	 * constructors, plain objects (with id, name, and guarded properties),
+	 * constructors, plain objects (with ID, name, and guarded properties),
 	 * or arrays of {@link CommandoRegistry#registerGroup} parameters
 	 * @return {CommandoRegistry}
 	 * @example
@@ -250,7 +250,7 @@ class CommandoRegistry {
 		if (!(type instanceof ArgumentType)) throw new Error(`Invalid type object to register: ${type}`)
 
 		// Make sure there aren't any conflicts
-		if (types.has(type.id)) throw new Error(`An argument type with the id "${type.id}" is already registered.`)
+		if (types.has(type.id)) throw new Error(`An argument type with the ID "${type.id}" is already registered.`)
 
 		// Add the type
 		types.set(type.id, type)
@@ -454,7 +454,7 @@ class CommandoRegistry {
 	}
 
 	/**
-	 * Resolves a command file path from a command's group id and memberName
+	 * Resolves a command file path from a command's group ID and memberName
 	 * @param {string} group ID of the command's group
 	 * @param {string} memberName Member name of the command
 	 * @return {string} Fully-resolved path to the corresponding command file

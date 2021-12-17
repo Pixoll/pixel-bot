@@ -29,7 +29,7 @@ module.exports = (client) => {
                 **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
-            .setFooter(`Inviter id: ${inviter.id}`)
+            .setFooter(`Inviter ID: ${inviter.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -50,7 +50,7 @@ module.exports = (client) => {
                 **Link:** ${invite.toString()}
                 **Channel:** ${channel.toString()}
             `)
-            .setFooter(`Channel id: ${channel.id}`)
+            .setFooter(`Channel ID: ${channel.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -100,8 +100,8 @@ module.exports = (client) => {
                     **Temporary membership:** ${temporary ? 'Yes' : 'No'}
                 `)
                 .setFooter(invGuild ?
-                    `Server id: ${invGuild.id}` :
-                    `Group DM id: ${invChannel.id}`
+                    `Server ID: ${invGuild.id}` :
+                    `Group DM ID: ${invChannel.id}`
                 )
                 .setTimestamp()
 

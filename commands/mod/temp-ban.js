@@ -18,7 +18,7 @@ module.exports = class TempBanCommand extends Command {
             group: 'mod',
             description: 'Ban a user for a specified amount of time.',
             details: stripIndent`
-                \`user\` has to be a user's username, id or mention.
+                \`user\` has to be a user's username, ID or mention.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

@@ -13,7 +13,7 @@ module.exports = class BanCheckCommand extends Command {
             aliases: ['bancheck', 'checkban'],
             group: 'mod',
             description: 'Check if a user is banned.',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: '`user` has to be a user\'s username, ID or mention.',
             format: 'bancheck [user]',
             examples: ['bancheck Pixoll'],
             clientPermissions: ['BAN_MEMBERS'],

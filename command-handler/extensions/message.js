@@ -76,13 +76,13 @@ class CommandoMessage extends Message {
 		this.patternMatches = null
 
 		/**
-		 * Response messages sent, mapped by channel id (set by the dispatcher after running the command)
+		 * Response messages sent, mapped by channel ID (set by the dispatcher after running the command)
 		 * @type {?{[key:string]:CommandoMessage[]}}
 		 */
 		this.responses = null
 
 		/**
-		 * Index of the current response that will be edited, mapped by channel id
+		 * Index of the current response that will be edited, mapped by channel ID
 		 * @type {?{[key:string]:number}}
 		 */
 		this.responsePositions = null
@@ -410,7 +410,7 @@ class CommandoMessage extends Message {
 
 	/**
 	 * Edits the current response
-	 * @param {string} id The id of the channel the response is in ("DM" for direct messages)
+	 * @param {string} id The ID of the channel the response is in ("DM" for direct messages)
 	 * @param {ResponseOptions} [options] Options for the response
 	 * @return {Promise<Message>}
 	 * @private

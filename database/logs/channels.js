@@ -82,7 +82,7 @@ module.exports = (client) => {
             .setColor('GREEN')
             .setAuthor(`Created ${channelType(type).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(`${channel.toString()} ${category}`)
-            .setFooter(`Channel id: ${id}`)
+            .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
         const perms = []
@@ -126,7 +126,7 @@ module.exports = (client) => {
             .setColor('ORANGE')
             .setAuthor(`Deleted ${channelType(type).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(`\`#${name}\` ${category}`)
-            .setFooter(`Channel id: ${id}`)
+            .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -145,7 +145,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor('Updated channel pins', channel.guild.iconURL({ dynamic: true }))
             .setDescription(`Pinned or unpinned a message in ${channel.toString()}`)
-            .setFooter(`Channel id: ${id}`)
+            .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -172,7 +172,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor(`Updated ${channelType(type1).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
             .setDescription(oldChannel.toString())
-            .setFooter(`Channel id: ${id}`)
+            .setFooter(`Channel ID: ${id}`)
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)
@@ -194,8 +194,9 @@ module.exports = (client) => {
             if (target) {
                 const mention = target.toString()
                 const name = Util.escapeMarkdown(target.user?.tag || target.name)
+                const emoji = customEmoji(action === 'Added' ? 'check' : 'cross')
 
-                embed.addField(`${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
+                embed.addField(`${emoji} ${action} permissions`, `**${capitalize(diff.type)}:** ${mention} ${name}`)
             }
 
             checked = true
@@ -215,11 +216,11 @@ module.exports = (client) => {
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)
 
-            const [removed1, denied] = compareArrays(deny1, deny2)
-            const [removed2, allowed] = compareArrays(allow1, allow2)
+            const [denied, removed1] = compareArrays(deny1, deny2)
+            const [allowed, removed2] = compareArrays(allow1, allow2)
 
-            const [, neutral1] = compareArrays(denied, removed2)
-            const [, neutral2] = compareArrays(allowed, removed1)
+            const [neutral1] = compareArrays(denied, removed2)
+            const [neutral2] = compareArrays(allowed, removed1)
             const neutral = [...neutral1, ...neutral2]
 
             embed.addField('Updated permissions', `**${capitalize(perms1.type)}:** ${mention} ${name}`)

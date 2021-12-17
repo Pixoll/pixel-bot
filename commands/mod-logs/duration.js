@@ -15,12 +15,12 @@ module.exports = class DurationCommand extends Command {
             description: 'Change the duration of a punishment.',
             details: stripIndent`
                 ${oneLine`
-                    \`modlog id\` has to be a valid mod log id.
+                    \`modlog ID\` has to be a valid mod log ID.
                     To see all the mod logs in this server use the \`modlogs\` command.
                 `}
                 \`new duration\` uses the bot's time formatting, for more information use the \`help\` command.
             `,
-            format: 'duration [modlog id] [new duration]',
+            format: 'duration [modlog ID] [new duration]',
             examples: [
                 `duration ${docId()} 12/30/2022`,
                 `duration ${docId()} 30d`
@@ -30,8 +30,8 @@ module.exports = class DurationCommand extends Command {
             args: [
                 {
                     key: 'modlogId',
-                    label: 'mod log id',
-                    prompt: 'What is the id of the mod log you want to change the duration?',
+                    label: 'modlog ID',
+                    prompt: 'What is the ID of the mod log you want to change the duration?',
                     type: 'string',
                     max: 12
                 },
@@ -46,7 +46,7 @@ module.exports = class DurationCommand extends Command {
                     {
                         type: 'string',
                         name: 'modlog-id',
-                        description: 'The id of the mod log to update.',
+                        description: 'The ID of the mod log to update.',
                         required: true
                     },
                     {
@@ -64,7 +64,7 @@ module.exports = class DurationCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
-     * @param {string} args.modlogId The mod log id
+     * @param {string} args.modlogId The mod log ID
      * @param {number|Date} args.duration The new duration
      */
     async run({ message, interaction }, { modlogId, duration }) {
@@ -84,7 +84,7 @@ module.exports = class DurationCommand extends Command {
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
+                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
             }))
         }
 

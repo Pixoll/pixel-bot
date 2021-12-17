@@ -14,20 +14,20 @@ module.exports = class ReasonCommand extends Command {
             description: 'Change the reason of a moderation log.',
             details: stripIndent`
                 ${oneLine`
-                    \`modlog id\` has to be a valid mod log id.
+                    \`modlog ID\` has to be a valid mod log ID.
                     To see all the mod logs in this server use the \`modlogs\` command.
                 `}
                 \`new reason\` will be the new reason of the moderation log.
             `,
-            format: 'reason [modlog id] [new reason]',
+            format: 'reason [modlog ID] [new reason]',
             examples: [`reason ${docId()} Post NSFW and being racist`],
             userPermissions: ['ADMINISTRATOR'],
             guildOnly: true,
             args: [
                 {
                     key: 'modlogId',
-                    label: 'mod log id',
-                    prompt: 'What is the id of the mod log you want to change the duration?',
+                    label: 'modlog ID',
+                    prompt: 'What is the ID of the mod log you want to change the duration?',
                     type: 'string',
                     max: 12
                 },
@@ -43,7 +43,7 @@ module.exports = class ReasonCommand extends Command {
                     {
                         type: 'string',
                         name: 'modlog-id',
-                        description: 'The id of the mod log to update.',
+                        description: 'The ID of the mod log to update.',
                         required: true
                     },
                     {
@@ -61,7 +61,7 @@ module.exports = class ReasonCommand extends Command {
      * Runs the command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
-     * @param {string} args.modlogId The mod log id
+     * @param {string} args.modlogId The mod log ID
      * @param {string} args.reason The new reason
      */
     async run({ message, interaction }, { modlogId, reason }) {
@@ -77,7 +77,7 @@ module.exports = class ReasonCommand extends Command {
         const modLog = await moderations.fetch(modlogId)
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That id is either invalid or it does not exist.'
+                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
             }))
         }
 

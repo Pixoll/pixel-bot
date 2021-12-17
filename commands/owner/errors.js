@@ -26,7 +26,7 @@ module.exports = class ErrorsCommand extends Command {
                 },
                 {
                     key: 'errorId',
-                    label: 'error id',
+                    label: 'error ID',
                     prompt: 'What specific error do you want to remove?',
                     type: 'string',
                     required: false
@@ -42,7 +42,7 @@ module.exports = class ErrorsCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'view'|'remove'} args.subCommand The sub-command
-     * @param {string} args.errorId The id of the error to remove
+     * @param {string} args.errorId The ID of the error to remove
      */
     async run({ message }, { subCommand, errorId }) {
         subCommand = subCommand.toLowerCase()
@@ -110,7 +110,7 @@ module.exports = class ErrorsCommand extends Command {
     /**
      * The `remove` sub-command
      * @param {CommandoMessage} message The message the command is being run for
-     * @param {string} errorId The id of the error to remove
+     * @param {string} errorId The ID of the error to remove
      */
     async remove(message, errorId) {
         if (message && !errorId) {
@@ -128,7 +128,7 @@ module.exports = class ErrorsCommand extends Command {
         await this.db.delete(doc)
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Error with id \`${doc._id}\` has been successfully removed.`
+            color: 'GREEN', emoji: 'check', description: `Error with ID \`${doc._id}\` has been successfully removed.`
         }))
     }
 }

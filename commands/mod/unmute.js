@@ -14,7 +14,7 @@ module.exports = class UnmuteCommand extends Command {
             group: 'mod',
             description: 'Unmute a member.',
             details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
+                \`member\` can be either a member's name, mention or ID.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
             format: 'unmute [member] <reason>',

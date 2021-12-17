@@ -9,7 +9,7 @@ const { SetupSchema } = require('../../schemas/types')
 
 /**
  * Creates a default mongo document for {@link SetupSchema}
- * @param {string} guildId The id of the guild the command is being run in
+ * @param {string} guildId The ID of the guild the command is being run in
  * @param {'logsChannel'|'memberRole'|'botRole'|'mutedRole'|'lockChannels'} key The key of the value to set
  * @param {*} value The value to set
  */
@@ -30,8 +30,8 @@ module.exports = class SetupCommand extends Command {
             group: 'utility',
             description: 'Setup the bot to its core. Data collected will be deleted if the bot leaves the server.',
             details: stripIndent`
-                \`text-channel\` can be either a text channel's name, mention or id.
-                \`role\` can be either a role's name, mention or id.
+                \`text-channel\` can be either a text channel's name, mention or ID.
+                \`role\` can be either a role's name, mention or ID.
                 \`text-channels\` to be all the text channels' names, mentions or ids, separated by spaces (max. 30 at once).
             `,
             format: stripIndent`

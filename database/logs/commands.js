@@ -14,7 +14,7 @@ module.exports = (client) => {
         const { guild, channel } = message || interaction
         const author = message?.author || interaction.user
         const isModCommand = !!command.userPermissions || command.ownerOnly ||
-            command.guildOwnerOnly || command.name === 'prefix'
+            command.guildOwnerOnly || command.name === 'prefix' || command.modPermissions
 
         if (channel.type === 'DM' || command.hidden || !isModCommand) return
 
@@ -52,7 +52,7 @@ module.exports = (client) => {
                 ${url ? `[Jump to message](${url})` : ''}
             `)
             .addField('Message', code(content))
-            .setFooter(`Author id: ${author.id}`)
+            .setFooter(`Author ID: ${author.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

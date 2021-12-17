@@ -513,12 +513,12 @@ function arrayEquals(first, second) {
 function compareArrays(oldArr = [], newArr = []) {
     const map1 = new Map()
     oldArr.forEach(e => map1.set(e, true))
-    const removed = newArr.filter(e => !map1.has(e))
+    const added = newArr.filter(e => !map1.has(e))
     map1.clear()
 
     const map2 = new Map()
     newArr.forEach(e => map2.set(e, true))
-    const added = oldArr.filter(e => !map2.has(e))
+    const removed = oldArr.filter(e => !map2.has(e))
     map2.clear()
 
     return [added, removed]
@@ -587,7 +587,7 @@ function isValidRole(msg, role) {
 }
 
 /**
- * Creates a random Mongo document id.
+ * Creates a random Mongo document ID.
  * @returns {string}
  */
 function docId() {
@@ -800,7 +800,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
  * @param {string[]} [data.keys=undefined] The properties to display in the embed. If empty I will use every property
  * @param {string[]} [data.keysExclude=[]] The properties to exclude on the embed.
  * If empty I will use `data.keys` or every property
- * @param {boolean} [data.useDocId=false] Whether to use the document's id on each data chunk
+ * @param {boolean} [data.useDocId=false] Whether to use the document's ID on each data chunk
  */
 async function generateEmbed({ message, interaction }, array, data) {
     const {

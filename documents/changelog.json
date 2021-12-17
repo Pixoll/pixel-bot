@@ -95,7 +95,8 @@
     {
         "version": "2.1.3",
         "changes": [
-            "Bug fixes update."
+            "Fixed displaying errors and bugs on audit-logs.",
+            "Changed \"id\" to \"ID\" in some commands and modules/sub-modules, to be grammatically correct."
         ],
         "timestamp": 1639704360000
     },

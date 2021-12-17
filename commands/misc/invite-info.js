@@ -76,8 +76,8 @@ module.exports = class InviteInfoCommand extends Command {
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
             .setFooter(guild ?
-                `Server id: ${guild.id}` :
-                `Group DM id: ${channel.id}`
+                `Server ID: ${guild.id}` :
+                `Group DM ID: ${channel.id}`
             )
 
         await replyAll({ message, interaction }, embed)

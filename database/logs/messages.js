@@ -49,7 +49,7 @@ module.exports = (client) => {
             .setColor('ORANGE')
             .setAuthor('Deleted message', author.displayAvatarURL({ dynamic: true }))
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()}`)
-            .setFooter(`Author id: ${author.id}`)
+            .setFooter(`Author ID: ${author.id}`)
             .setTimestamp()
 
         if (deleted) embed.addField('Message', deleted)
@@ -93,7 +93,7 @@ module.exports = (client) => {
             .setColor('ORANGE')
             .setAuthor('Deleted multiple messages', guild.iconURL({ dynamic: true }))
             .setDescription(`Deleted **${pluralize('message', messages.size)}** in ${channel.toString()}`)
-            .setFooter(`Channel id: ${channel.id}`)
+            .setFooter(`Channel ID: ${channel.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -126,7 +126,7 @@ module.exports = (client) => {
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()} [Jump to message](${url})`)
             .addField('Before', oldContent)
             .addField('After', newContent)
-            .setFooter(`Author id: ${author.id}`)
+            .setFooter(`Author ID: ${author.id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

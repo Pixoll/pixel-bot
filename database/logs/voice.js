@@ -36,7 +36,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
-            .setFooter(`User id: ${id}`)
+            .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
         if (!channel1 && channel2) {

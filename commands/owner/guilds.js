@@ -33,7 +33,7 @@ module.exports = class GuildsCommand extends Command {
             const gOwner = await guild.fetchOwner()
             guildsList.push({
                 name: guild.name,
-                'Guild id': guild.id,
+                'Guild ID': guild.id,
                 owner: `${gOwner.user.toString()} ${gOwner.user.tag}`
             })
         }

@@ -37,7 +37,7 @@ module.exports = class WhoIsCommand extends Command {
             aliases: ['user-info', 'userinfo'],
             group: 'misc',
             description: 'Displays a user\'s information.',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: '`user` has to be a user\'s username, ID or mention.',
             format: 'whois <user>',
             examples: ['whois Pixoll'],
             args: [{
@@ -91,7 +91,7 @@ module.exports = class WhoIsCommand extends Command {
             .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatar)
             .setThumbnail(avatar)
             .setDescription(description.join(' '))
-            .setFooter(`User id: ${user.id}`)
+            .setFooter(`User ID: ${user.id}`)
             .setTimestamp()
 
         if (member) {

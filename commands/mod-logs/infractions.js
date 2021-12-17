@@ -12,7 +12,7 @@ module.exports = class InfractionsCommand extends Command {
             name: 'infractions',
             group: 'mod-logs',
             description: 'Displays a list of infractions of a user.',
-            details: '`user` has to be a user\'s username, id or mention.',
+            details: '`user` has to be a user\'s username, ID or mention.',
             format: 'infractions [user]',
             examples: ['infractions Pixoll'],
             modPermissions: true,

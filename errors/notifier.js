@@ -27,7 +27,7 @@ module.exports = (client) => {
 			`)
             .addField('Please send this information as well', stripIndent`
                 **Type:** ${error.name}
-                **Error id:** ${id}
+                **Error ID:** ${id}
             `)
 
         await replyAll({ message, interaction }, reply)
@@ -51,7 +51,7 @@ module.exports = (client) => {
      * @param {string} type the type of error
      * @param {CommandInstances} [instances] the command instances
      * @param {Command} [command] the command
-     * @param {string} [id] the error id to use
+     * @param {string} [id] the error ID to use
      */
     async function errorHandler(error, type, { message, interaction } = {}, command, id) {
         /** @type {TextChannel} */

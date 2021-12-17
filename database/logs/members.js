@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags')
 const { MessageEmbed } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
-const { isModuleEnabled, timestamp } = require('../../utils/functions')
+const { isModuleEnabled, timestamp, customEmoji } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
@@ -35,7 +35,7 @@ module.exports = (client) => {
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
             .addField('Registered', timestamp(createdAt, 'R'))
-            .setFooter(`User id: ${id}`)
+            .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -73,7 +73,7 @@ module.exports = (client) => {
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
             .addField('Roles', rolesList || 'None')
-            .setFooter(`User id: ${id}`)
+            .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -97,7 +97,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor('Updated member', newMember.displayAvatarURL({ dynamic: true }))
             .setDescription(`${user.toString()} ${user.tag}`)
-            .setFooter(`User id: ${id}`)
+            .setFooter(`User ID: ${id}`)
             .setTimestamp()
 
         if (nick1 !== nick2) embed.addField('Nickname', `${nick1 || 'None'} ➜ ${nick2 || 'None'}`)
@@ -111,7 +111,8 @@ module.exports = (client) => {
 
         if (role) {
             const action = roles2.cache.has(role.id) ? 'Added' : 'Removed'
-            embed.addField(`${action} role`, `${role.toString()}`)
+            const emoji = customEmoji(action === 'Added' ? 'check' : 'cross')
+            embed.addField(`${emoji} ${action} role`, `${role.toString()}`)
         }
 
         if (embed.fields.length !== 0) guild.queuedLogs.push(embed)

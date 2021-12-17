@@ -5,7 +5,7 @@ const {
 } = require('discord.js')
 const { capitalize } = require('lodash')
 const { CommandoClient } = require('../../command-handler/typings')
-const { arrayEquals, isModuleEnabled } = require('../../utils/functions')
+const { arrayEquals, isModuleEnabled, compareArrays, customEmoji } = require('../../utils/functions')
 const myMs = require('../../utils/my-ms')
 /* eslint-enable no-unused-vars */
 
@@ -94,7 +94,7 @@ function sysChanFlag(flag) {
 }
 
 /**
- * Parses a language id.
+ * Parses a language ID.
  * @param {string} lang The language to parse.
  * @returns {string}
  */
@@ -128,17 +128,6 @@ function locale(lang) {
         case 'ro': return 'Romanian'
         case 'lt': return 'Lithuanian'
     }
-}
-
-/**
- * Compares and returns the difference between the set of permissions
- * @param {string[]} Old The old permissions
- * @param {string[]} New The new permissions
- */
-function compareArrays(Old = [], New = []) {
-    const arr1 = New.filter(perm => !Old.includes(perm))
-    const arr2 = Old.filter(perm => !New.includes(perm))
-    return [arr1, arr2]
 }
 
 /**
@@ -225,9 +214,9 @@ module.exports = (client) => {
         }
 
         if (!arrayEquals(sysChanFlags1.toArray(), sysChanFlags2.toArray())) {
-            const [disabledFlags, enabledFlags] = compareArrays(
-                sysChanFlags1.toArray().map(feat => sysChanFlag(feat)),
-                sysChanFlags2.toArray().map(feat => sysChanFlag(feat))
+            const [enabledFlags, disabledFlags] = compareArrays(
+                sysChanFlags2.toArray().map(feat => sysChanFlag(feat)),
+                sysChanFlags1.toArray().map(feat => sysChanFlag(feat))
             )
 
             const enabled = enabledFlags.join(', ') ? stripIndent`
@@ -295,12 +284,12 @@ module.exports = (client) => {
             )
 
             const added = addedFeat.join(', ') ? stripIndent`
-                **Added**
+                ${customEmoji('check')} **Added**
                 ${addedFeat.join(', ') || 'None'}
             ` : ''
 
             const removed = removedFeat.join(', ') ? stripIndent`
-                **Removed**
+                ${customEmoji('cross')} **Removed**
                 ${removedFeat.join(', ') || 'None'}
             ` : ''
 

@@ -7,14 +7,14 @@ const { CommandoClient, Command, CommandoGuild } = require('../typings')
 class CommandGroup {
 	/**
 	 * @param {CommandoClient} client The client the group is for
-	 * @param {string} id The id for the group
+	 * @param {string} id The ID for the group
 	 * @param {string} [name=id] The name of the group
 	 * @param {boolean} [guarded=false] Whether the group should be protected from disabling
 	 */
 	constructor(client, id, name, guarded = false) {
 		if (!client) throw new Error('A client must be specified.')
-		if (typeof id !== 'string') throw new TypeError('Group id must be a string.')
-		if (id !== id.toLowerCase()) throw new Error('Group id must be lowercase.')
+		if (typeof id !== 'string') throw new TypeError('Group ID must be a string.')
+		if (id !== id.toLowerCase()) throw new Error('Group ID must be lowercase.')
 
 		/**
 		 * Client that this group is for

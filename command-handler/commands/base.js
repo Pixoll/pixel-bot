@@ -242,7 +242,7 @@ class Command {
 		this._globalEnabled = true
 
 		/**
-		 * Current throttle objects for the command, mapped by user id
+		 * Current throttle objects for the command, mapped by user ID
 		 * @type {Map<string, Throttle>}
 		 * @private
 		 */

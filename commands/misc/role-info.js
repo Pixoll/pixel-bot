@@ -16,7 +16,7 @@ module.exports = class RoleInfoCommand extends Command {
             description: oneLine`
                 Displays multiple information about a role, such as color, position, members and mod permissions.
             `,
-            details: '`role` can be either a role\'s name, mention or id.',
+            details: '`role` can be either a role\'s name, mention or ID.',
             format: 'roleinfo [role]',
             examples: ['roleinfo Staff'],
             guildOnly: true,
@@ -61,7 +61,7 @@ module.exports = class RoleInfoCommand extends Command {
                 **Position:** ${position}
                 **Members:** ${members.size}
             `)
-            .setFooter(`Role id: ${id} • Created at`)
+            .setFooter(`Role ID: ${id} • Created at`)
             .setTimestamp(createdTimestamp)
 
         if (url) roleInfo.setThumbnail(url)

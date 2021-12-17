@@ -33,7 +33,7 @@ module.exports = (client) => {
                 **Description:** ${description || 'No description.'}
             `)
             .setThumbnail(url)
-            .setFooter(`Sticker id: ${id}`)
+            .setFooter(`Sticker ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -56,7 +56,7 @@ module.exports = (client) => {
                 **Description:** ${description || 'No description.'}
             `)
             .setThumbnail(url)
-            .setFooter(`Sticker id: ${id}`)
+            .setFooter(`Sticker ID: ${id}`)
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -77,7 +77,7 @@ module.exports = (client) => {
             .setColor('BLUE')
             .setAuthor('Updated sticker', guild.iconURL({ dynamic: true }))
             .setThumbnail(url)
-            .setFooter(`Sticker id: ${id}`)
+            .setFooter(`Sticker ID: ${id}`)
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)

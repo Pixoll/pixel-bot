@@ -16,8 +16,8 @@ module.exports = class RoleCommand extends Command {
             group: 'mod',
             description: 'Add or remove roles from a member.',
             details: stripIndent`
-                \`member\` can be either a member's name, mention or id.
-                \`role\` can be either a role's name, mention or id.
+                \`member\` can be either a member's name, mention or ID.
+                \`role\` can be either a role's name, mention or ID.
                 \`roles\` to be all the roles' names, mentions or ids, separated by commas (max. 10 at once).
             `,
             format: stripIndent`
