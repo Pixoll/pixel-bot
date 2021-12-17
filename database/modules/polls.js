@@ -29,10 +29,10 @@ module.exports = async (client) => {
 
                 const reactions = message.reactions.cache.filter(r =>
                     poll.emojis.includes(r.emoji.id || r.emoji.name)
-                )
+                ).toJSON()
 
                 const results = []
-                for (const [, reaction] of reactions) {
+                for (const reaction of reactions) {
                     const votes = reaction.count - 1
                     const emoji = reaction.emoji.toString()
                     results.push({ votes, emoji })

@@ -29,7 +29,7 @@ module.exports = class GuildsCommand extends Command {
         }
 
         const guildsList = []
-        for (const [, guild] of guilds.cache) {
+        for (const guild of guilds.cache.toJSON()) {
             const gOwner = await guild.fetchOwner()
             guildsList.push({
                 name: guild.name,

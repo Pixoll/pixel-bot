@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { Command } = require('../../command-handler')
 const { CommandInstances } = require('../../command-handler/typings')
-const { GuildBan, Collection, GuildAuditLogs } = require('discord.js')
+const { GuildBan, Collection } = require('discord.js')
 const { basicEmbed, generateEmbed, abcOrder, pluralize, replyAll } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
@@ -34,22 +34,11 @@ module.exports = class BansCommand extends Command {
             }))
         }
 
-        /** @type {GuildAuditLogs} */
-        const _banLogs = await guild.fetchAuditLogs({ type: 'MEMBER_BAN_ADD' }).catch(() => null)
-        const banLogs = _banLogs?.entries.toJSON() || []
-
         const bansList = []
-        for (const [, { user, reason }] of bans) {
-            const banLog = banLogs.find(log => log.target.id === user.id)
-            const exec = banLog?.executor
-            const mod = exec ? {
-                mod: { id: exec.id, tag: exec.tag }
-            } : {}
-
+        for (const { user, reason } of bans.toJSON()) {
             bansList.push({
                 tag: user.tag,
                 id: user.id,
-                ...mod,
                 reason: reason?.replace(/%20/g, ' ') || 'No reason given.'
             })
         }

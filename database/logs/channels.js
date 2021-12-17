@@ -69,7 +69,7 @@ function format(perms) {
  */
 module.exports = (client) => {
     client.on('channelCreate', async channel => {
-        const { guild, id, type, parent } = channel
+        const { guild, id, type, parent, permissionOverwrites } = channel
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
@@ -86,7 +86,7 @@ module.exports = (client) => {
             .setTimestamp()
 
         const perms = []
-        for (const [, perm] of channel.permissionOverwrites.cache) {
+        for (const perm of permissionOverwrites.cache.toJSON()) {
             /** @type {GuildMember|Role} */
             const target = await guild[perm.type + 's'].fetch(perm.id).catch(() => null)
             const [deny, allow] = format(perm)
@@ -194,7 +194,7 @@ module.exports = (client) => {
             checked = true
         }
 
-        for (const [, perms1] of cache1) {
+        for (const perms1 of cache1.toJSON()) {
             const perms2 = cache2.get(perms1.id)
             if (perms1.deny.bitfield === perms2?.deny.bitfield && perms1.allow.bitfield === perms2?.allow.bitfield) continue
             if (checked) break
@@ -203,7 +203,7 @@ module.exports = (client) => {
             const target = guild[perms1.type + 's'].cache.get(perms1.id)
 
             const mention = target.toString()
-            const name = Util.escapeMarkdown(target.user?.tag)
+            const name = Util.escapeMarkdown(target.user?.tag || target.name)
 
             const [deny1, allow1] = format(perms1)
             const [deny2, allow2] = format(perms2)

@@ -8,7 +8,7 @@ const { CommandoClient } = require('../../command-handler/typings')
  */
 module.exports = async (client) => {
     const { database, registry } = client
-    const guilds = client.guilds.cache
+    const guilds = client.guilds.cache.toJSON()
 
     const global = await database.disabled.fetch()
     if (global) {
@@ -22,7 +22,7 @@ module.exports = async (client) => {
         }
     }
 
-    for (const [, guild] of guilds) {
+    for (const guild of guilds) {
         const data = await guild.database.disabled.fetch()
         if (data) {
             for (const str of data.commands) {
