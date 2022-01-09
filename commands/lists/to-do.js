@@ -70,7 +70,7 @@ module.exports = class TodoCommand extends Command {
                             name: 'item',
                             description: 'The item to remove from your to-do list.',
                             required: true,
-                            // minValue: 1
+                            minValue: 1
                         }]
                     },
                     {

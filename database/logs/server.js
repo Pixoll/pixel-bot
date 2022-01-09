@@ -90,6 +90,7 @@ function sysChanFlag(flag) {
         case 'SUPPRESS_JOIN_NOTIFICATIONS': return 'Join messages'
         case 'SUPPRESS_PREMIUM_SUBSCRIPTIONS': return 'Server boosts messages'
         case 'SUPPRESS_GUILD_REMINDER_NOTIFICATIONS': return 'Server setup tips'
+        case 'SUPPRESS_JOIN_NOTIFICATION_REPLIES': return 'Sticker reply button for join messages'
     }
 }
 
@@ -157,7 +158,7 @@ module.exports = (client) => {
             mfaLevel: mfa1, widgetChannel: widgetChan1, widgetEnabled: widgetOn1, discoverySplash: discSplash1,
             publicUpdatesChannel: updateChan1, rulesChannel: rulesChan1, preferredLocale: lang1, nsfwLevel: nsfw1,
             partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1,
-            maximumBitrate: maxBitrate1
+            maximumBitrate: maxBitrate1, premiumProgressBarEnabled: boostProgressBar1
         } = oldGuild
         const {
             name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,
@@ -166,14 +167,16 @@ module.exports = (client) => {
             mfaLevel: mfa2, widgetChannel: widgetChan2, widgetEnabled: widgetOn2, discoverySplash: discSplash2,
             publicUpdatesChannel: updateChan2, rulesChannel: rulesChan2, preferredLocale: lang2, nsfwLevel: nsfw2,
             partnered: partner2, premiumTier: boostLvl2, systemChannelFlags: sysChanFlags2, verified: verified2,
-            maximumBitrate: maxBitrate2
+            maximumBitrate: maxBitrate2, premiumProgressBarEnabled: boostProgressBar2
         } = newGuild
 
         const imgOptions = { dynamic: true, size: 1024 }
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated server', newGuild.iconURL(imgOptions))
+            .setAuthor({
+                name: 'Updated server', iconURL: newGuild.iconURL(imgOptions)
+            })
             .setTimestamp()
 
         const imagesEmbed = new MessageEmbed(embed)
@@ -273,6 +276,10 @@ module.exports = (client) => {
             }]).setThumbnail(newGuild.splashURL(imgOptions))
 
             newGuild.queuedLogs.push(imagesEmbed)
+        }
+
+        if (boostProgressBar1 !== boostProgressBar2) {
+            embed.addField('Boost progress bar', boostProgressBar1 ? 'Enabled ➜ Disabled' : 'Disabled ➜ Enabled')
         }
 
         if (url1 !== url2) embed.addField('Vanity URL code', `${url1 || 'None'} ➜ ${url2 || 'None'}`)

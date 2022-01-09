@@ -73,7 +73,7 @@ module.exports = class FaqCommand extends Command {
                             name: 'item',
                             description: 'The item to remove from the FAQ list.',
                             required: true,
-                            // minValue: 1
+                            minValue: 1
                         }]
                     },
                     {

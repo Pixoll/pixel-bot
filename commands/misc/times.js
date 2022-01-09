@@ -188,7 +188,7 @@ module.exports = class TimesCommand extends Command {
         const pages = [timesEmbed(firstPart), timesEmbed(secondPart), timesEmbed(thirdPart)]
 
         const generate = page => ({
-            embed: pages[page].setFooter(`Page ${++page} of 3`)
+            embed: pages[page].setFooter({ text: `Page ${++page} of 3` })
         })
 
         await pagedEmbed({ message, interaction }, { number: 1, total: 3 }, generate)

@@ -103,6 +103,19 @@
     {
         "version": "2.2.0",
         "changes": [
+            "Fixed argument manager: Required arguments were not being requested when not specified.",
+            "Added server Boost progress bar in the `audit-logs/server` module.",
+            "Added support for min. and max. values in some slash commands.",
+            "Added a `time-out` command and added time-outs to the `audit-logs/moderation` module.",
+            "Fixed color of boost related audit-logs: BLUE ➜ #f47fff",
+            "Added `audit-logs/events`.",
+            "Fixed `reload` sub-command of `setup`: Missing data such as deleted roles and channels, weren't being deleted.",
+            "The `purge` command was deleting 1 message less than it should with the `all` sub-command."
+        ]
+    },
+    {
+        "version": "2.3.0",
+        "changes": [
             "Added `legal` command.",
             "Added the bot's **Terms of Service (ToS)** and **Privacy Policy.** Access them with the `legal` command."
         ]

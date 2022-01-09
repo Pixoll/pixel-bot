@@ -1,5 +1,4 @@
 console.log('Starting bot...')
-require('./command-handler/extensions')
 
 const CommandoClient = require('./command-handler/client')
 const database = require('./database')
@@ -21,24 +20,23 @@ const client = new CommandoClient({
             'ADD_REACTIONS', 'ADMINISTRATOR', 'ATTACH_FILES', 'BAN_MEMBERS', 'CHANGE_NICKNAME', 'CREATE_INSTANT_INVITE',
             'EMBED_LINKS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
             'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'SEND_MESSAGES',
-            'SEND_MESSAGES_IN_THREADS', 'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'USE_PRIVATE_THREADS',
-            'USE_PUBLIC_THREADS', 'VIEW_AUDIT_LOG', 'VIEW_CHANNEL'
+            'SEND_MESSAGES_IN_THREADS', 'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'VIEW_AUDIT_LOG', 'VIEW_CHANNEL'
         ]
     },
     intents: [
         'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS', 'GUILDS', 'GUILD_BANS', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_INVITES',
-        'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES'
+        'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES',
+        'GUILD_SCHEDULED_EVENTS'
     ],
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     failIfNotExists: false,
-
 })
 
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ')
     const exclude =
-        /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request/.test(msg)
-    if (exclude) return
+        /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request|Created new/
+    if (exclude.test(msg)) return
     console.log('debug >', msg)
 })
 client.emit('debug', 'Created client')
@@ -62,7 +60,7 @@ client.emit('debug', `Loaded ${client.registry.groups.size} groups`)
 client.registry.registerCommandsIn(path.join(__dirname, '/commands'))
 client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
 
-client.on('ready', async () => {
+client.on('guildsReady', async () => {
     await database(client, 'chat-filter', 'scam-detector')
     notifier(client)
     rateLimits(client)

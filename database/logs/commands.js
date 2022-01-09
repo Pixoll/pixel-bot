@@ -21,7 +21,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/commands#commandRun".')
+        client.emit('debug', 'Running event "logs/commands#run".')
 
         let string
         if (message) string = message.cleanContent
@@ -46,13 +46,15 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor(`Used ${command.name} command`, author.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: `Used ${command.name} command`, iconURL: author.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(oneLine`
                 ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
                 ${url ? `[Jump to message](${url})` : ''}
             `)
             .addField('Message', code(content))
-            .setFooter(`Author ID: ${author.id}`)
+            .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -64,11 +66,13 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/commands#commandPrefixChange".')
+        client.emit('debug', 'Running event "logs/commands#prefixChange".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated command prefix', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated command prefix', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(`**New prefix:** ${prefix}`)
             .setTimestamp()
 
@@ -81,11 +85,13 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'commands')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/commands#commandStatusChange".')
+        client.emit('debug', 'Running event "logs/commands#statusChange".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated command status', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated command status', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(`The \`${command.name}\` command has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
             .setTimestamp()
 

@@ -16,14 +16,16 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/stickers#stickerCreate".')
+        client.emit('debug', 'Running event "logs/stickers#create".')
 
         /** @type {User} */
         const user = await sticker.fetchUser().catch(() => null)
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
-            .setAuthor('Created sticker', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Created sticker', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(user ?
                 `**${user.toString()} added a sticker:** ${name}` :
                 `**Added a sticker:** ${name}`
@@ -33,7 +35,7 @@ module.exports = (client) => {
                 **Description:** ${description || 'No description.'}
             `)
             .setThumbnail(url)
-            .setFooter(`Sticker ID: ${id}`)
+            .setFooter({ text: `Sticker ID: ${id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -45,18 +47,20 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/stickers#stickerDelete".')
+        client.emit('debug', 'Running event "logs/stickers#delete".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Deleted sticker', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Deleted sticker', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Name:** ${name}
                 **Related emoji:** ${tags.map(s => `:${s}:`).join(' ')}
                 **Description:** ${description || 'No description.'}
             `)
             .setThumbnail(url)
-            .setFooter(`Sticker ID: ${id}`)
+            .setFooter({ text: `Sticker ID: ${id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -68,16 +72,18 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'stickers')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/stickers#stickerUpdate".')
+        client.emit('debug', 'Running event "logs/sticker#update".')
 
         const { name: name1, description: description1, tags: tags1 } = oldSticker
         const { name: name2, description: description2, tags: tags2 } = newSticker
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated sticker', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated sticker', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setThumbnail(url)
-            .setFooter(`Sticker ID: ${id}`)
+            .setFooter({ text: `Sticker ID: ${id}` })
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)

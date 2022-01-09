@@ -17,7 +17,7 @@ function percentage(number, total) {
  */
 module.exports = (client) => {
     // Warn - Default chat filter
-    client.on('cMessageCreate', async message => {
+    client.on('commandoMessageCreate', async message => {
         const { guild, author, member, content, mentions, guildId, channel } = message
         const permissions = member?.permissionsIn(channel).serialize() ?? null
         if (!guild || author.bot || !content || permissions?.ADMINISTRATOR) return
@@ -87,7 +87,7 @@ module.exports = (client) => {
     })
 
     // Mute - Spam detector
-    client.on('cMessageCreate', async message => {
+    client.on('commandoMessageCreate', async message => {
         const { guild, guildId, author, member, channel, isCommand } = message
         const permissions = member?.permissionsIn(channel).serialize() ?? null
         if (!guild || author.bot || isCommand || permissions?.ADMINISTRATOR) return
@@ -151,7 +151,7 @@ module.exports = (client) => {
     })
 
     // Warn - Invite detector
-    client.on('cMessageCreate', async message => {
+    client.on('commandoMessageCreate', async message => {
         const { guild, author, isCommand, content, guildId, channel, member } = message
         const permissions = member?.permissionsIn(channel).serialize() ?? null
         if (!guild || author.bot || !content || isCommand || permissions?.ADMINISTRATOR) return
@@ -163,8 +163,9 @@ module.exports = (client) => {
         const invites = await guild.invites.fetch().catch(() => null)
         const matches = [...content.matchAll(/discord\.\w+\/(?:invite\/)?([^ ]+)/g)].map(m => m[1])
 
+        let deleted = false
         for (const code of matches) {
-            if (message?.deleted) return
+            if (deleted) return
 
             /** @type {Invite} */
             const invite = await client.fetchInvite(code).catch(() => null)
@@ -173,7 +174,8 @@ module.exports = (client) => {
             const reason = 'Posted an invite'
             const mod = client.user
 
-            message = await message.delete().catch(() => null)
+            await message.delete().catch(() => null)
+            deleted = true
             await guild.database.moderations.add({
                 _id: docId(),
                 type: 'warn',

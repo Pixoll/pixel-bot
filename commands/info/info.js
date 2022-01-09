@@ -51,7 +51,7 @@ module.exports = class InfoCommand extends Command {
                 [Invite the bot](${topgg}/invite) -
                 [Vote here](${topgg}/vote)
             `, true)
-            .setFooter(`Uptime: ${uptimeStr}`)
+            .setFooter({ text: `Uptime: ${uptimeStr}` })
             .setTimestamp()
 
         await replyAll({ message, interaction }, info)

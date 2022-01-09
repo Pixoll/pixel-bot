@@ -74,15 +74,17 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/channels#channelCreate".')
+        client.emit('debug', 'Running event "logs/channels#create".')
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
-            .setAuthor(`Created ${channelType(type).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Created ${channelType(type).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(`${channel.toString()} ${category}`)
-            .setFooter(`Channel ID: ${id}`)
+            .setFooter({ text: `Channel ID: ${id}` })
             .setTimestamp()
 
         const perms = []
@@ -118,15 +120,17 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/channels#channelDelete".')
+        client.emit('debug', 'Running event "logs/channels#delete".')
 
         const category = parent ? `under the category \`${parent.name}\`` : ''
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor(`Deleted ${channelType(type).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Deleted ${channelType(type).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(`\`#${name}\` ${category}`)
-            .setFooter(`Channel ID: ${id}`)
+            .setFooter({ text: `Channel ID: ${id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -139,13 +143,15 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/channels#channelPinsUpdate".')
+        client.emit('debug', 'Running event "logs/channels#pinsUpdate".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated channel pins', channel.guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated channel pins', iconURL: channel.guild.iconURL({ dynamic: true })
+            })
             .setDescription(`Pinned or unpinned a message in ${channel.toString()}`)
-            .setFooter(`Channel ID: ${id}`)
+            .setFooter({ text: `Channel ID: ${id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -159,7 +165,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'channels')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/channels#channelUpdate".')
+        client.emit('debug', 'Running event "logs/channels#update".')
 
         const {
             name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, permissionsLocked: locked1, id
@@ -170,9 +176,11 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor(`Updated ${channelType(type1).toLowerCase()} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Updated ${channelType(type1).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(oldChannel.toString())
-            .setFooter(`Channel ID: ${id}`)
+            .setFooter({ text: `Channel ID: ${id}` })
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)

@@ -31,8 +31,8 @@ module.exports = class DiscriminatorCommand extends Command {
                     name: 'discriminator',
                     description: 'The discriminator to look for.',
                     required: true,
-                    // minValue: 1,
-                    // maxValue: 9999
+                    minValue: 1,
+                    maxValue: 9999
                 }]
             }
         })

@@ -46,7 +46,9 @@ module.exports = class AvatarCommand extends Command {
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setImage(avatar)
             .setTimestamp()
 

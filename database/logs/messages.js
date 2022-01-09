@@ -41,15 +41,17 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/messages#messageDelete".')
+        client.emit('debug', 'Running event "logs/messages#delete".')
 
         const deleted = sliceDots(content, 1024)
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Deleted message', author.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Deleted message', iconURL: author.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()}`)
-            .setFooter(`Author ID: ${author.id}`)
+            .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp()
 
         if (deleted) embed.addField('Message', deleted)
@@ -87,13 +89,15 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/messages#messageDeleteBulk".')
+        client.emit('debug', 'Running event "logs/messages#deleteBulk".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Deleted multiple messages', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Deleted multiple messages', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(`Deleted **${pluralize('message', messages.size)}** in ${channel.toString()}`)
-            .setFooter(`Channel ID: ${channel.id}`)
+            .setFooter({ text: `Channel ID: ${channel.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -113,7 +117,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'messages')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/messages#messageUpdate".')
+        client.emit('debug', 'Running event "logs/messages#update".')
 
         const oldContent = content1 !== null ?
             sliceDots(content1, 1024) || '`Empty`' :
@@ -122,11 +126,13 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Edited message', author.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Edited message', iconURL: author.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()} [Jump to message](${url})`)
             .addField('Before', oldContent)
             .addField('After', newContent)
-            .setFooter(`Author ID: ${author.id}`)
+            .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

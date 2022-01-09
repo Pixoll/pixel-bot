@@ -51,7 +51,9 @@ module.exports = class MemberAvatarCommand extends Command {
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${user.tag} • AKA. ${displayName}`, user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: `${user.tag} • AKA. ${displayName}`, iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setImage(avatar)
             .setTimestamp()
 

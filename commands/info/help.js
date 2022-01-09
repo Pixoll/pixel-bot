@@ -93,7 +93,9 @@ module.exports = class HelpCommand extends Command {
 
             const base = new MessageEmbed()
                 .setColor('#4c9f4c')
-                .setAuthor(`${user.username}'s help`, user.displayAvatarURL({ dynamic: true }))
+                .setAuthor({
+                    name: `${user.username}'s help`, iconURL: user.displayAvatarURL({ dynamic: true })
+                })
 
             const strikethrough = 'with a strikethrough (~~`like this`~~), mean they\'ve been marked as deprecated'
             const dash = oneLine`
@@ -272,10 +274,10 @@ function commandInfo(cmd, guild) {
 
     const embed = new MessageEmbed()
         .setColor('#4c9f4c')
-        .setAuthor(
-            `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
-            user.displayAvatarURL({ dynamic: true })
-        )
+        .setAuthor({
+            name: `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
+            iconURL: user.displayAvatarURL({ dynamic: true })
+        })
         .setDescription(stripIndent`
             ${deprecated ? oneLine`
                 **This command has been marked as deprecated, which means it will be removed in future updates.

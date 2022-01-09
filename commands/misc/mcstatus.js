@@ -73,8 +73,8 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to look for.',
-                                // minValue: 1,
-                                // maxValue: 65535
+                                minValue: 1,
+                                maxValue: 65535
                             }
                         ]
                     },
@@ -93,8 +93,8 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to look for.',
-                                // minValue: 1,
-                                // maxValue: 65535
+                                minValue: 1,
+                                maxValue: 65535
                             }
                         ]
                     },
@@ -113,8 +113,8 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to save.',
-                                // minValue: 1,
-                                // maxValue: 65535
+                                minValue: 1,
+                                maxValue: 65535
                             }
                         ]
                     },
@@ -133,8 +133,8 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to save.',
-                                // minValue: 1,
-                                // maxValue: 65535
+                                minValue: 1,
+                                maxValue: 65535
                             }
                         ]
                     }
@@ -348,7 +348,9 @@ module.exports = class McStatusCommand extends Command {
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`Server IP: ${ip}`, 'attachment://icon.png')
+            .setAuthor({
+                name: `Server IP: ${ip}`, iconURL: 'attachment://icon.png'
+            })
             .addField('MOTD', Util.escapeMarkdown(motd.clean.trimStart()))
             .setThumbnail('attachment://icon.png')
             .setTimestamp()
@@ -399,7 +401,7 @@ module.exports = class McStatusCommand extends Command {
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`Server IP: ${ip}`)
+            .setAuthor({ name: `Server IP: ${ip}` })
             .addField('MOTD', Util.escapeMarkdown(motd.clean.trimStart()))
             .addField('Information', stripIndent`
                 **Online players:** ${players.online}/${players.max}

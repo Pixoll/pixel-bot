@@ -40,6 +40,7 @@ function patchData(data) {
             channels: _patch(data?.auditLogs?.channels),
             commands: _patch(data?.auditLogs?.commands),
             emojis: _patch(data?.auditLogs?.emojis),
+            events: _patch(data?.auditLogs?.events),
             invites: _patch(data?.auditLogs?.invites),
             members: _patch(data?.auditLogs?.members),
             messages: _patch(data?.auditLogs?.messages),
@@ -201,7 +202,9 @@ module.exports = class ModuleCommand extends Command {
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`Status of ${type}: ${subModule || module}`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Status of ${type}: ${subModule || module}`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Status:** ${isEnabled ? 'Enabled' : 'Disabled'}
                 ${subModule ? `**Parent module:** ${capitalize(module)}` : ''}

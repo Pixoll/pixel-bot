@@ -82,9 +82,11 @@ module.exports = class ModStatsCommand extends Command {
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${user.username}'s moderation statistics`, user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: `${user.username}'s moderation statistics`, iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(table)
-            .setFooter(`User ID: ${user.id}`)
+            .setFooter({ text: `User ID: ${user.id}` })
             .setTimestamp()
 
         await replyAll({ message, interaction }, embed)

@@ -197,15 +197,15 @@ module.exports = class SetupCommand extends Command {
             case 'view':
                 return await this.view({ message, interaction }, data)
             case 'reload':
-                return await this._reload({ message, interaction }, data)
+                return await this.reloadSetup({ message, interaction }, data)
             case 'audit-logs':
-                return await this.auditLogs({ message, interaction }, value ?? channel)
+                return await this.auditLogs({ message, interaction }, data, value ?? channel)
             case 'muted-role':
-                return await this.mutedRole({ message, interaction }, value ?? role)
+                return await this.mutedRole({ message, interaction }, data, value ?? role)
             case 'member-role':
-                return await this.memberRole({ message, interaction }, value ?? role)
+                return await this.memberRole({ message, interaction }, data, value ?? role)
             case 'bot-role':
-                return await this.botRole({ message, interaction }, value ?? role)
+                return await this.botRole({ message, interaction }, data, value ?? role)
             case 'lockdown-channels':
                 return await this.lockdownChannels({ message, interaction }, data, value ?? channels)
         }
@@ -421,9 +421,11 @@ module.exports = class SetupCommand extends Command {
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${guild.name}'s setup data`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `${guild.name}'s setup data`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(toDisplay.join('\n'))
-            .setFooter('Missing or wrong data? Try using the "reload" sub-command!')
+            .setFooter({ text: 'Missing or wrong data? Try using the "reload" sub-command.' })
 
         await replyAll({ message, interaction }, embed)
     }
@@ -433,7 +435,7 @@ module.exports = class SetupCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {SetupSchema} data The setup data
      */
-    async _reload({ message, interaction }, data) {
+    async reloadSetup({ message, interaction }, data) {
         if (!data) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
@@ -448,38 +450,45 @@ module.exports = class SetupCommand extends Command {
         })
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
 
-        const { guild, guildId } = message || interaction
-        const newDoc = { guild: guildId }
+        const { guild } = message || interaction
+        const newDoc = { $set: {}, $unset: {} }
 
         if (data.logsChannel) {
             const logsChannel = await guild.channels.fetch(data.logsChannel).catch(() => null)
-            if (logsChannel) newDoc.logsChannel = logsChannel.id
+            if (!logsChannel) newDoc.$unset.logsChannel = ''
         }
 
         if (data.memberRole) {
             const memberRole = await guild.roles.fetch(data.memberRole).catch(() => null)
-            if (memberRole) newDoc.memberRole = memberRole.id
+            if (!memberRole) newDoc.$unset.memberRole = ''
         }
 
         if (data.botRole) {
             const botRole = await guild.roles.fetch(data.botRole).catch(() => null)
-            if (botRole) newDoc.botRole = botRole.id
+            if (!botRole) newDoc.$unset.botRole = ''
         }
 
         if (data.mutedRole) {
             const mutedRole = await guild.roles.fetch(data.mutedRole).catch(() => null)
-            if (mutedRole) newDoc.mutedRole = mutedRole.id
+            if (!mutedRole) newDoc.$unset.mutedRole = ''
         }
 
         if (data.lockChannels?.length !== 0) {
-            newDoc.lockChannels = []
+            const lockChannels = []
             for (const chanId of data.lockChannels) {
                 const channel = await guild.channels.fetch(chanId).catch(() => null)
-                if (channel) newDoc.lockChannels.push(channel.id)
+                if (channel) lockChannels.push(channel.id)
+            }
+            if (data.lockChannels.length !== lockChannels.length) {
+                newDoc.$set.lockChannels = lockChannels
             }
         }
 
-        await this.db.update(data, newDoc)
+        if (Object.keys(newDoc.$set).length === 0) delete newDoc.$set
+        if (Object.keys(newDoc.$unset).length === 0) delete newDoc.$unset
+        if (Object.keys(newDoc).length !== 0) {
+            await this.db.update(data, newDoc)
+        }
 
         await toDelete?.delete().catch(() => null)
         await replyAll({ message, interaction }, basicEmbed({
@@ -490,9 +499,10 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `audit-logs` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
+     * @param {SetupSchema} data The setup data
      * @param {TextChannel} channel The channel for the audit logs
      */
-    async auditLogs({ message, interaction }, channel) {
+    async auditLogs({ message, interaction }, data, channel) {
         if (message) {
             while (!(channel instanceof TextChannel)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -502,7 +512,8 @@ module.exports = class SetupCommand extends Command {
         }
 
         const { guildId } = message || interaction
-        await this.db.add(defaultDoc(guildId, 'logsChannel', channel.id))
+        if (data) await this.db.update(data, { logsChannel: channel.id })
+        else await this.db.add(defaultDoc(guildId, 'logsChannel', channel.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -517,9 +528,10 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `muted-role` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
+     * @param {SetupSchema} data The setup data
      * @param {Role} role The role for the muted members
      */
-    async mutedRole({ message, interaction }, role) {
+    async mutedRole({ message, interaction }, data, role) {
         if (message) {
             while (!(role instanceof Role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -529,7 +541,8 @@ module.exports = class SetupCommand extends Command {
         }
 
         const { guildId } = message || interaction
-        await this.db.add(defaultDoc(guildId, 'mutedRole', role.id))
+        if (data) await this.db.update(data, { mutedRole: role.id })
+        else await this.db.add(defaultDoc(guildId, 'mutedRole', role.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -544,9 +557,10 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `member-role` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
+     * @param {SetupSchema} data The setup data
      * @param {Role} role The default role for all members
      */
-    async memberRole({ message, interaction }, role) {
+    async memberRole({ message, interaction }, data, role) {
         if (message) {
             while (!(role instanceof Role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -556,7 +570,8 @@ module.exports = class SetupCommand extends Command {
         }
 
         const { guildId } = message || interaction
-        await this.db.add(defaultDoc(guildId, 'memberRole', role.id))
+        if (data) await this.db.update(data, { memberRole: role.id })
+        else await this.db.add(defaultDoc(guildId, 'memberRole', role.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -571,9 +586,10 @@ module.exports = class SetupCommand extends Command {
     /**
      * The `bot-role` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
+     * @param {SetupSchema} data The setup data
      * @param {Role} role The default role for all bots
      */
-    async botRole({ message, interaction }, role) {
+    async botRole({ message, interaction }, data, role) {
         if (message) {
             while (!(role instanceof Role)) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
@@ -584,6 +600,9 @@ module.exports = class SetupCommand extends Command {
 
         const { guildId } = message || interaction
         await this.db.add(defaultDoc(guildId, 'botRole', role.id))
+
+        if (data) await this.db.update(data, { botRole: role.id })
+        else await this.db.add(defaultDoc(guildId, 'botRole', role.id))
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',

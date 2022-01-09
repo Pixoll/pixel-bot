@@ -19,7 +19,7 @@ interface BaseSchema { // extends Document
     readonly updatedAt?: Date
 }
 
-type TimeBasedModeration = 'mute' | 'temp-ban'
+type TimeBasedModeration = 'mute' | 'temp-ban' | 'time-out'
 
 export interface ActiveSchema extends BaseSchema {
     type: TimeBasedModeration | 'temp-role'
@@ -85,6 +85,7 @@ export interface ModuleSchema extends BaseSchema {
         channels: boolean
         commands: boolean
         emojis: boolean
+        events: boolean
         invites: boolean
         members: boolean
         messages: boolean
@@ -99,9 +100,31 @@ export interface ModuleSchema extends BaseSchema {
     }
 }
 
-export type Module = 'auto-mod' | 'audit-logs' | 'chat-filter' | 'sticky-roles' | 'welcome' // 'scam-detector' 
-export type AuditLog = 'boosts' | 'channels' | 'commands' | 'emojis' | 'invites' | 'members' | 'messages' |
-    'moderation' | 'modules' | 'roles' | 'server' | 'stickers' | 'threads' | 'users' | 'voice'
+export type Module =
+    | 'auto-mod'
+    | 'audit-logs'
+    | 'chat-filter'
+    | 'sticky-roles'
+    | 'welcome'
+    // | 'scam-detector'
+
+export type AuditLog =
+    | 'boosts'
+    | 'channels'
+    | 'commands'
+    | 'emojis'
+    | 'events'
+    | 'invites'
+    | 'members'
+    | 'messages'
+    | 'moderation'
+    | 'modules'
+    | 'roles'
+    | 'server'
+    | 'stickers'
+    | 'threads'
+    | 'users'
+    | 'voice'
 
 export interface PrefixSchema extends BaseSchema {
     global: boolean

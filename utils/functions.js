@@ -150,7 +150,7 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
         if (!fieldValue) throw new Error('The argument fieldValue must be specified')
         embed.addField(`${emoji} ${fieldName}`, fieldValue)
     }
-    if (footer) embed.setFooter(footer)
+    if (footer) embed.setFooter({ text: footer })
 
     return embed
 }
@@ -514,12 +514,10 @@ function compareArrays(oldArr = [], newArr = []) {
     const map1 = new Map()
     oldArr.forEach(e => map1.set(e, true))
     const added = newArr.filter(e => !map1.has(e))
-    map1.clear()
 
     const map2 = new Map()
     newArr.forEach(e => map2.set(e, true))
     const removed = oldArr.filter(e => !map2.has(e))
-    map2.clear()
 
     return [added, removed]
 }
@@ -676,7 +674,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
         else msg = await message.reply(msgOptions)
     }
 
-    if (data.total <= data.number && !data.components[0]) return
+    if (!msg || (data.total <= data.number && !data.components[0])) return
 
     let index = 0
     const collector = targetChan.createMessageComponentCollector({
@@ -828,8 +826,12 @@ async function generateEmbed({ message, interaction }, array, data) {
             .setTimestamp()
 
         if (embedTitle) embed.setTitle(embedTitle)
-        if (authorName) embed.setAuthor(authorName, authorIconURL)
-        if (pages > 1) embed.setFooter(`Page ${Math.round(start / number + 1)} of ${pages}`)
+        if (authorName) {
+            embed.setAuthor({
+                name: authorName, iconURL: authorIconURL
+            })
+        }
+        if (pages > 1) embed.setFooter({ text: `Page ${Math.round(start / number + 1)} of ${pages}` })
         if (useDescription) {
             return {
                 embed: embed.setDescription(current.join('\n')),
@@ -924,7 +926,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
 
     const confirmEmbed = new MessageEmbed()
         .setColor('GOLD')
-        .setFooter('The command will automatically be cancelled in 30 seconds.')
+        .setFooter({ text: 'The command will automatically be cancelled in 30 seconds.' })
 
     if (!targetStr && Object.keys(data).length === 0) {
         confirmEmbed.setDescription(`**Are you sure you want to ${action}?**`)

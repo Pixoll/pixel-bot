@@ -115,7 +115,9 @@ module.exports = class ModLogCommand extends Command {
 
         const modlogInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`Mod log ${modlog._id}`, user?.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: `Mod log ${modlog._id}`, iconURL: user?.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Type:** ${capitalize(modlog.type)}
                 **User:** ${`${user.toString()} ${user?.tag}` || 'Unable to fetch user.'}

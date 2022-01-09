@@ -312,7 +312,9 @@ module.exports = class PollCommand extends Command {
 
         const pollEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), pollMsg.url)
+            .setAuthor({
+                name: 'The poll has ended!', iconURL: guild.iconURL({ dynamic: true }), url: pollMsg.url
+            })
             .setDescription(winner || noVotes || draw)
             .setTimestamp()
 

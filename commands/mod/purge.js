@@ -19,9 +19,6 @@ async function bulkDelete({ message, interaction }, messages) {
     }
 
     const { channel } = message || interaction
-    const ref = message || await interaction.fetchReply()
-    messages = messages.filter(msg => msg.id !== ref.id)
-
     /** @type {Collection<string, Message>} */
     const bulk = await channel.bulkDelete(messages)
 
@@ -29,10 +26,8 @@ async function bulkDelete({ message, interaction }, messages) {
         color: 'GREEN', emoji: 'check', description: `Deleted ${bulk.size} messages.`
     })
 
-    const _msg = await message?.fetch().catch(() => null)
     const toDelete = await replyAll({ message, interaction }, embed)
-
-    if (_msg && !_msg.deleted) await _msg?.delete().catch(() => null)
+    if (message) await message.delete().catch(() => null)
 
     await sleep(10)
     await toDelete?.delete().catch(() => null)
@@ -52,8 +47,8 @@ async function fetchMessages({ message, interaction }, options) {
         const isOver14 = (Date.now() - createdTimestamp) >= 1_209_600_000
         return !isPinned && !isOver14
     })
-
-    return msgs
+    const ref = message || await interaction.fetchReply()
+    return msgs.filter(msg => msg.id !== ref.id)
 }
 
 /** A command that can be run in a client */
@@ -132,7 +127,9 @@ module.exports = class PurgeCommand extends Command {
                             type: 'integer',
                             name: 'amount',
                             description: 'The amount of messages to delete.',
-                            required: true
+                            required: true,
+                            minValue: 1,
+                            maxValue: 100
                         }]
                     },
                     {
@@ -143,7 +140,9 @@ module.exports = class PurgeCommand extends Command {
                             type: 'integer',
                             name: 'amount',
                             description: 'The amount of messages to delete.',
-                            required: true
+                            required: true,
+                            minValue: 1,
+                            maxValue: 100
                         }]
                     },
                     {
@@ -154,7 +153,9 @@ module.exports = class PurgeCommand extends Command {
                             type: 'integer',
                             name: 'amount',
                             description: 'The amount of messages to delete.',
-                            required: true
+                            required: true,
+                            minValue: 1,
+                            maxValue: 100
                         }]
                     },
                     {
@@ -165,7 +166,9 @@ module.exports = class PurgeCommand extends Command {
                             type: 'integer',
                             name: 'amount',
                             description: 'The amount of messages to delete.',
-                            required: true
+                            required: true,
+                            minValue: 1,
+                            maxValue: 100
                         }]
                     },
                     {
@@ -176,7 +179,9 @@ module.exports = class PurgeCommand extends Command {
                             type: 'integer',
                             name: 'amount',
                             description: 'The amount of messages to delete.',
-                            required: true
+                            required: true,
+                            minValue: 1,
+                            maxValue: 100
                         }]
                     },
                     {
@@ -187,7 +192,9 @@ module.exports = class PurgeCommand extends Command {
                             type: 'integer',
                             name: 'amount',
                             description: 'The amount of messages to delete.',
-                            required: true
+                            required: true,
+                            minValue: 1,
+                            maxValue: 100
                         }]
                     },
                     {
@@ -205,7 +212,9 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'integer',
                                 name: 'amount',
                                 description: 'The amount of messages to delete.',
-                                required: true
+                                required: true,
+                                minValue: 1,
+                                maxValue: 100
                             }
                         ]
                     },
@@ -224,7 +233,9 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'integer',
                                 name: 'amount',
                                 description: 'The amount of messages to delete.',
-                                required: true
+                                required: true,
+                                minValue: 1,
+                                maxValue: 100
                             }
                         ]
                     },
@@ -243,7 +254,9 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'integer',
                                 name: 'amount',
                                 description: 'The amount of messages to delete.',
-                                required: true
+                                required: true,
+                                minValue: 1,
+                                maxValue: 100
                             }
                         ]
                     },
@@ -262,7 +275,9 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'integer',
                                 name: 'amount',
                                 description: 'The amount of messages to delete.',
-                                required: true
+                                required: true,
+                                minValue: 1,
+                                maxValue: 100
                             }
                         ]
                     },
@@ -281,7 +296,9 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'integer',
                                 name: 'amount',
                                 description: 'The amount of messages to delete.',
-                                required: true
+                                required: true,
+                                minValue: 1,
+                                maxValue: 100
                             }
                         ]
                     },
@@ -300,7 +317,9 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'integer',
                                 name: 'amount',
                                 description: 'The amount of messages to delete.',
-                                required: true
+                                required: true,
+                                minValue: 1,
+                                maxValue: 100
                             }
                         ]
                     }
@@ -346,6 +365,8 @@ module.exports = class PurgeCommand extends Command {
                     filter = text
             }
         }
+
+        if (amount < 100) amount++
 
         switch (subCommand) {
             case 'all':

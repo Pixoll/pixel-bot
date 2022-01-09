@@ -9,7 +9,7 @@ const { CommandoClient, CommandoMessage } = require('../../command-handler/typin
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
-    client.on('cMessageCreate', async message => {
+    client.on('commandoMessageCreate', async message => {
         const { guild, author, isCommand, command } = message
         if (!guild || author.bot || (isCommand && command?.name === 'afk')) return
 
@@ -27,7 +27,7 @@ module.exports = (client) => {
         await toDelete?.delete().catch(() => null)
     })
 
-    client.on('cMessageCreate', async message => {
+    client.on('commandoMessageCreate', async message => {
         const { guild, author, mentions } = message
         const { everyone, users } = mentions
         if (!guild || author.bot || everyone) return
@@ -40,7 +40,9 @@ module.exports = (client) => {
 
             const embed = new MessageEmbed()
                 .setColor('GOLD')
-                .setAuthor(`${user.username} is AFK`, user.displayAvatarURL({ dynamic: true }))
+                .setAuthor({
+                    name: `${user.username} is AFK`, iconURL: user.displayAvatarURL({ dynamic: true })
+                })
                 .setDescription(`${data.status}\n${timestamp(data.updatedAt, 'R')}`)
                 .setTimestamp(data.updatedAt)
             embeds.push(embed)

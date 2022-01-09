@@ -1,11 +1,11 @@
 import {
 	Client, ClientEvents, ClientOptions, Collection, Guild, GuildResolvable, Message, MessageAttachment,
 	MessageEditOptions, MessageEmbed, MessageOptions, PermissionResolvable, PermissionString, User, UserResolvable,
-	InviteGenerationOptions, GuildMember, ClientUser, Snowflake, CachedManager, FetchGuildOptions, FetchGuildsOptions,
+	InviteGenerationOptions, GuildMember, Snowflake, CachedManager, FetchGuildOptions, FetchGuildsOptions,
 	CommandInteraction
 } from 'discord.js'
-import { APIApplicationCommand } from 'discord-api-types/payloads/v9'
-import { FilterQuery, Model, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose'
+import { RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord-api-types/rest/v9'
+import { FilterQuery, Model, UpdateQuery, UpdateAggregationStage } from 'mongoose'
 import {
 	ActiveSchema, AfkSchema, DisabledSchema, ErrorSchema, FaqSchema, McIpSchema, ModerationSchema, ModuleSchema,
 	PollSchema, PrefixSchema, ReactionRoleSchema, ReminderSchema, RuleSchema, SetupSchema, StickyRoleSchema, TodoSchema,
@@ -243,7 +243,7 @@ export abstract class Command {
 	/** Current throttle objects for the command, mapped by user ID */
 	private _throttles: Map<string, object>
 	/** The slash command data to send to the API */
-	private _slashToAPI: APIApplicationCommand
+	private _slashToAPI: RESTPostAPIChatInputApplicationCommandsJSONBody
 
 	/**
 	 * Creates/obtains the throttle object for a user, if necessary (owners are excluded)
@@ -1046,7 +1046,7 @@ export class DatabaseManager<T> {
 	 * @param options The options for this update
 	 * @returns The updated document
 	 */
-	public update(toUpdate: T | string, options: UpdateWithAggregationPipeline | UpdateQuery<T>): Promise<T>
+	public update(toUpdate: T | string, options: UpdateAggregationStage | UpdateQuery<T> | T): Promise<T>
 	/**
 	 * Fetch a single document
 	 * @param filter The ID or fetching filter for the document
@@ -1360,6 +1360,9 @@ export interface CommandoClientEvents extends ClientEvents {
 		command: Command, error: Error, instances: CommandInstances, args: object | string | string[],
 		fromPattern: boolean, result?: ArgumentCollectorResult
 	]
+	commandoGuildCreate: [guild: CommandoGuild]
+	commandoMessageCreate: [message: CommandoMessage]
+	commandoMessageUpdate: [oldMessage: Message, newMessage: CommandoMessage]
 	commandPrefixChange: [guild?: CommandoGuild, prefix?: string]
 	commandRegister: [command: Command, registry: CommandoRegistry]
 	commandReregister: [newCommand: Command, oldCommand: Command]
@@ -1369,14 +1372,13 @@ export interface CommandoClientEvents extends ClientEvents {
 	]
 	commandStatusChange: [guild?: CommandoGuild, command: Command, enabled: boolean]
 	commandUnregister: [command: Command]
-	cMessageCreate: [message: CommandoMessage]
-	cMessageUpdate: [oldMessage: Message, newMessage: CommandoMessage]
-	databaseOn: [client: CommandoClient]
 	groupRegister: [group: CommandGroup, registry: CommandoRegistry]
 	groupStatusChange: [guild?: CommandoGuild, group: CommandGroup, enabled: boolean]
-	guildMemberMute: [guild: CommandoGuild, moderator: User, user: User, reason: string, duration: number]
+	guildMemberMute: [guild: CommandoGuild, moderator: User, user: User, reason: string, expiresAt: number]
+	guildMemberTimeout: [guild: CommandoGuild, moderator: User, user: User, reason: string, expiresAt: number]
 	guildMemberUnmute: [guild: CommandoGuild, moderator?: User, user: User, reason: string]
 	guildMemberWarn: [guild: CommandoGuild, moderator: User, user: User, reason: string]
+	guildsReady: [client: CommandoClient]
 	moduleStatusChange: [guild: CommandoGuild, module: string, enabled: boolean]
 	typeRegister: [type: ArgumentType, registry: CommandoRegistry]
 	unknownCommand: [message: CommandoMessage]
@@ -1709,10 +1711,10 @@ export interface SlashCommandOptionInfo {
 	 * @default false
 	 */
 	required?: boolean
-	// /** The minimum value permitted - only usable if `type` is `integer` or `number` */
-	// minValue?: number
-	// /** The maxmum value permitted - only usable if `type` is `integer` or `number` */
-	// maxValue?: number
+	/** The minimum value permitted - only usable if `type` is `integer` or `number` */
+	minValue?: number
+	/** The maxmum value permitted - only usable if `type` is `integer` or `number` */
+	maxValue?: number
 	/** The choices options for the option - only usable if `type` is `string`, `integer` or `number` */
 	choices?: { name: string, value: string | number }[]
 	/** The type options for the option - only usable if `type` is `channel` */
@@ -1726,8 +1728,8 @@ export interface SlashCommandOptionInfo {
 export type SlashCommandOptionType = 'subcommand' | 'subcommand-group' | 'string' | 'integer' | 'boolean' | 'user' |
 	'channel' | 'role' | 'mentionable' | 'number'
 
-export type SlashCommandChannelType = 'guild-text' | 'guild-voice' | 'guild-category' | 'guild-news' | 'guild-store' |
-	'guild-news-thread' | 'guild-public-thread' | 'guild-private-thread' | 'guild-stage-voice'
+export type SlashCommandChannelType = 'guild-text' | 'guild-voice' | 'guild-category' | 'guild-news' | 'guild-news-thread' |
+	'guild-public-thread' | 'guild-private-thread' | 'guild-stage-voice'
 
 export type StringResolvable = string | string[] | object
 

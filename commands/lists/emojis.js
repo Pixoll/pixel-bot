@@ -62,7 +62,9 @@ module.exports = class EmojisCommand extends Command {
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${guild.name}'s emojis`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `${guild.name}'s emojis`, iconURL: guild.iconURL({ dynamic: true })
+            })
 
         const notAnimated = emojis.filter(e => !e.animated).map(e => e.string)
         const isAnimated = emojis.filter(e => e.animated).map(e => e.string)

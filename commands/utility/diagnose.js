@@ -3,7 +3,7 @@ const { stripIndent } = require('common-tags')
 const { MessageEmbed, GuildChannel } = require('discord.js')
 const { Command, CommandGroup } = require('../../command-handler')
 const { permissions } = require('../../command-handler/util')
-const { CommandInstances } = require('../../command-handler/typings')
+const { CommandInstances, Command: CommandType, CommandoGuild: GroupType } = require('../../command-handler/typings')
 const { getArgument, replyAll, basicEmbed } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
@@ -91,7 +91,7 @@ module.exports = class DiagnoseCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'all'|'command'|'group'} args.subCommand The sub-command to use
-     * @param {Command|CommandGroup} args.cmdOrGroup The command or group to diagnose
+     * @param {CommandType|GroupType} args.cmdOrGroup The command or group to diagnose
      */
     async run({ message, interaction }, { subCommand, cmdOrGroup, command, group }) {
         subCommand = subCommand.toLowerCase()
@@ -138,7 +138,9 @@ module.exports = class DiagnoseCommand extends Command {
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${name}'s disabled commands and groups`, avatar)
+            .setAuthor({
+                name: `${name}'s disabled commands and groups`, iconURL: avatar
+            })
             .addField('Commands', commandsList)
             .addField('Groups', groupsList)
             .setTimestamp()
@@ -149,7 +151,7 @@ module.exports = class DiagnoseCommand extends Command {
     /**
      * The `command` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
-     * @param {Command} command The command to diagnose
+     * @param {CommandType} command The command to diagnose
      */
     async command({ message, interaction }, command) {
         if (message) {
@@ -172,7 +174,9 @@ module.exports = class DiagnoseCommand extends Command {
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${global} of command: ${command.name}`, avatar)
+            .setAuthor({
+                name: `${global} of command: ${command.name}`, iconURL: avatar
+            })
             .addField('Status', isEnabled ? 'Enabled' : 'Disabled', true)
             .addField('Guarded', command.guarded ? 'Yes' : 'No', true)
             .setTimestamp()
@@ -193,7 +197,7 @@ module.exports = class DiagnoseCommand extends Command {
     /**
      * The `group` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
-     * @param {CommandGroup} group The group to diagnose
+     * @param {GroupType} group The group to diagnose
      */
     async _group({ message, interaction }, group) {
         if (message) {
@@ -212,7 +216,9 @@ module.exports = class DiagnoseCommand extends Command {
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${global} of group: ${group.name}`, avatar)
+            .setAuthor({
+                name: `${global} of group: ${group.name}`, iconURL: avatar
+            })
             .addField('Status', isEnabled ? 'Enabled' : 'Disabled', true)
             .addField('Guarded', group.guarded ? 'Yes' : 'No', true)
             .setTimestamp()

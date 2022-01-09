@@ -29,14 +29,16 @@ module.exports = async (client) => {
 
         const info = new MessageEmbed()
             .setColor(color)
-            .setAuthor(message, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: message, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setThumbnail(guild.iconURL({ dynamic: true, size: 2048 }))
             .setDescription(stripIndent`
                 **Name:** ${Util.escapeMarkdown(name)}
                 **Owner:** ${Util.escapeMarkdown(ownedBy)}
                 **Members:** ${memberCount.toLocaleString()}
             `)
-            .setFooter(`Guild ID: ${id} • Owner ID: ${ownerId}`)
+            .setFooter({ text: `Guild ID: ${id} • Owner ID: ${ownerId}` })
             .setTimestamp()
 
         await channel.send({ embeds: [info] })

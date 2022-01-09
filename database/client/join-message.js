@@ -73,7 +73,10 @@ module.exports = async (client) => {
                 [Invite the bot](${topgg}/invite) -
                 [Vote here](${topgg}/vote)
             `)
-            .setFooter(`Created with ❤️ by ${owners[0].tag}`, owners[0].displayAvatarURL({ dynamic: true }))
+            .setFooter({
+                text: `Created with ❤️ by ${owners[0].tag}`,
+                iconURL: owners[0].displayAvatarURL({ dynamic: true })
+            })
 
         await channel?.send({ embeds: [embed] }).catch(() => null)
     })

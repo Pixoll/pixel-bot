@@ -29,7 +29,9 @@ module.exports = class ServerIconCommand extends Command {
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(guild.name, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: guild.name, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setImage(icon)
             .setTimestamp()
 

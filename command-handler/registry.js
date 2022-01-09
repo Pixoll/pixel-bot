@@ -5,6 +5,8 @@ const Command = require('./commands/base')
 const CommandGroup = require('./commands/group')
 const CommandoMessage = require('./extensions/message')
 const ArgumentType = require('./types/base')
+const { APIApplicationCommand, APIApplicationCommandOption } = require('discord-api-types/payloads/v9')
+const { RESTPostAPIChatInputApplicationCommandsJSONBody } = require('discord-api-types/rest/v9')
 const {
 	CommandoClient, CommandInstances, DefaultTypesOptions, CommandGroupResolvable, CommandResolvable, RequireAllOptions
 } = require('./typings')
@@ -70,9 +72,18 @@ class CommandoRegistry {
 			if (!guild) throw new TypeError('Client testGuild must be a valid Guild ID.')
 
 			const current = await guild.commands.fetch()
-			const toAdd = testCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
-			for (const command of toAdd) {
-				await guild.commands.set(command)
+			const [updated, removed] = getUpdatedSlashCommands(current, testCommands)
+			for (const command of updated) {
+				const match = current.find(cmd => cmd.name === command.name)
+				if (match) {
+					await guild.commands.edit(match, command)
+				} else {
+					await guild.commands.create(command)
+				}
+			}
+			for (const command of removed) {
+				const match = current.find(cmd => cmd.name === command.name)
+				if (match) await guild.commands.delete(match)
 			}
 
 			client.emit('debug', `Loaded ${testCommands.length} guild slash commands`)
@@ -82,9 +93,18 @@ class CommandoRegistry {
 		if (slashCommands.length === 0) return
 
 		const current = await application.commands.fetch()
-		const toAdd = slashCommands.filter(slash => !current.map(cmd => cmd.name).includes(slash.name))
-		for (const command of toAdd) {
-			await application.commands.create(command)
+		const [updated, removed] = getUpdatedSlashCommands(current, slashCommands)
+		for (const command of updated) {
+			const match = current.find(cmd => cmd.name === command.name)
+			if (match) {
+				await application.commands.edit(match, command)
+			} else {
+				await application.commands.create(command)
+			}
+		}
+		for (const command of removed) {
+			const match = current.find(cmd => cmd.name === command.name)
+			if (match) await application.commands.delete(match)
 		}
 
 		client.emit('debug', `Loaded ${slashCommands.length} public slash commands`)
@@ -516,4 +536,104 @@ function removeDashes(str) {
 	const first = arr.shift()
 	const rest = arr.map(capitalize).join('')
 	return first + rest
+}
+
+const apiCmdOptionType = {
+	SUB_COMMAND: 1,
+	SUB_COMMAND_GROUP: 2,
+	STRING: 3,
+	INTEGER: 4,
+	BOOLEAN: 5,
+	USER: 6,
+	CHANNEL: 7,
+	ROLE: 8,
+	MENTIONABLE: 9,
+	NUMBER: 10
+}
+
+const apiCmdOptChanType = {
+	GUILD_TEXT: 0,
+	GUILD_VOICE: 2,
+	GUILD_CATEGORY: 4,
+	GUILD_NEWS: 5,
+	GUILD_NEWS_THREAD: 10,
+	GUILD_PUBLIC_THREAD: 11,
+	GUILD_PRIVATE_THREAD: 12,
+	GUILD_STAGE_VOICE: 13
+}
+
+/**
+ * Compares and returns the difference between a set of arrays
+ * @param {APIApplicationCommand[]} oldCommands The old array
+ * @param {RESTPostAPIChatInputApplicationCommandsJSONBody[]} newCommands The new array
+ * @returns {RESTPostAPIChatInputApplicationCommandsJSONBody[][]} `[updated, removed]`
+ */
+function getUpdatedSlashCommands(oldCommands = [], newCommands = []) {
+	oldCommands = JSON.parse(JSON.stringify(oldCommands))
+	newCommands = JSON.parse(JSON.stringify(newCommands))
+
+	oldCommands.forEach(apiCommand => {
+		for (const prop in apiCommand) {
+			if (['name', 'description', 'options'].includes(prop)) continue
+			delete apiCommand[prop]
+		}
+		apiCommand.type = 1
+		parseApiCmdOptions(apiCommand.options)
+		if (apiCommand.options?.length === 0) {
+			delete apiCommand.options
+		}
+	})
+
+	const map1 = new Map()
+	oldCommands.forEach(e => map1.set(JSON.stringify(orderObjProps(e)), true))
+	const updated = newCommands.filter(e => !map1.has(JSON.stringify(orderObjProps(e))))
+
+	const map2 = new Map()
+	newCommands.forEach(e => map2.set(e.name), true)
+	const removed = oldCommands.filter(e => !map2.has(e.name))
+
+	return [updated, removed]
+}
+
+/** @param {APIApplicationCommandOption[]} options */
+function parseApiCmdOptions(options) {
+	options.forEach(option => {
+		if (option.required === false) {
+			delete option.required
+		}
+		for (const oprop in option) {
+			if (typeof option[oprop] === 'undefined') {
+				delete option[oprop]
+				continue
+			}
+			if (oprop.toLowerCase() === oprop) continue
+			const toApply = oprop.replace(/[A-Z]/g, '_$&').toLowerCase()
+			option[toApply] = option[oprop]
+			delete option[oprop]
+			if (toApply === 'channel_types') {
+				for (let i = 0; i < option[toApply].length; i++) {
+					option[toApply][i] = apiCmdOptChanType[option[toApply][i]]
+				}
+			}
+		}
+		option.type = apiCmdOptionType[option.type]
+		if (option.options) parseApiCmdOptions(option.options)
+	})
+}
+
+function orderObjProps(obj) {
+	const ordered = {}
+	for (const key of Object.keys(obj).sort()) {
+		if (Array.isArray(obj[key])) {
+			ordered[key] = []
+			obj[key].forEach(nested => {
+				ordered[key].push(orderObjProps(nested))
+			})
+		} else if (typeof obj[key] === 'object') {
+			ordered[key] = orderObjProps(obj[key])
+		} else {
+			ordered[key] = obj[key]
+		}
+	}
+	return ordered
 }

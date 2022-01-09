@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const path = require('path')
 const { PermissionResolvable, Message, User, MessageEmbed } = require('discord.js')
-const { APIApplicationCommand } = require('discord-api-types/payloads/v9')
+const { RESTPostAPIChatInputApplicationCommandsJSONBody } = require('discord-api-types/rest/v9')
 const { stripIndent } = require('common-tags')
 const ArgumentCollector = require('./collector')
 const { permissions } = require('../util')
@@ -235,18 +235,11 @@ class Command {
 		this.replacing = info.replacing
 
 		/**
-		 * Whether the command is enabled globally
+		 * Whether this command will be registered in the test guild only or not
 		 * @type {boolean}
-		 * @private
+		 * @default false
 		 */
-		this._globalEnabled = true
-
-		/**
-		 * Current throttle objects for the command, mapped by user ID
-		 * @type {Map<string, Throttle>}
-		 * @private
-		 */
-		this._throttles = new Map()
+		this.test = !!info.test
 
 		/**
 		 * The data for the slash command
@@ -256,18 +249,25 @@ class Command {
 		this.slash = info.slash ?? false
 
 		/**
-		 * The slash command data to send to the API
-		 * @type {?APIApplicationCommand}
+		 * Whether the command is enabled globally
+		 * @type {boolean}
 		 * @private
 		 */
-		this._slashToAPI = this.slash ? this.constructor.parseSlash(this.slash) : null
+		this._globalEnabled = true
 
 		/**
-		 * Whether this command will be registered in the test guild only or not
-		 * @type {boolean}
-		 * @default false
+		 * The slash command data to send to the API
+		 * @type {?RESTPostAPIChatInputApplicationCommandsJSONBody}
+		 * @private
 		 */
-		this.test = !!info.test
+		this._slashToAPI = this.slash ? this.constructor.parseSlash(JSON.parse(JSON.stringify(this.slash))) : null
+
+		/**
+		 * Current throttle objects for the command, mapped by user ID
+		 * @type {Map<string, Throttle>}
+		 * @private
+		 */
+		this._throttles = new Map()
 	}
 
 	/**
@@ -331,9 +331,8 @@ class Command {
 	 * - nsfw: none
 	 * - throttling: `throttle` ({@link Object}), `remaining` ({@link number}) time in seconds
 	 * - userPermissions & clientPermissions: `missing` ({@link Array}<{@link string}>) permission names
-	 * @returns {Promise<?Message>}
 	 */
-	onBlock({ message, interaction }, reason, data) {
+	onBlock({ message, interaction }, reason, data = {}) {
 		const { name } = this
 		const { missing, remaining } = data
 
@@ -690,12 +689,14 @@ class Command {
 	 * @private
 	 */
 	static parseSlash(info) {
-		/** @type {SlashCommandInfo|SlashCommandOptionInfo[]} */
-		const data = Array.isArray(info) ? info : JSON.parse(JSON.stringify(info))
-		if (!Array.isArray(data) && data.name) {
-			data.type = 1
+		if (!Array.isArray(info) && info.name) {
+			for (const prop in info) {
+				if (['name', 'description', 'options'].includes(prop)) continue
+				delete info[prop]
+			}
+			info.type = 1
 		}
-		(Array.isArray(data) ? data : data.options)?.forEach(option => {
+		(Array.isArray(info) ? info : info.options)?.forEach(option => {
 			if (typeof option.type === 'string') option.type = parseOptionType(option.type)
 			for (const prop in option) {
 				if (prop.toLowerCase() === prop) continue
@@ -710,7 +711,7 @@ class Command {
 			}
 			if (option.options) this.parseSlash(option.options)
 		})
-		return data
+		return info
 	}
 }
 
@@ -763,7 +764,6 @@ function parseChannelType(type) {
 		case 'guild-voice': return 2
 		case 'guild-category': return 4
 		case 'guild-news': return 5
-		case 'guild-store': return 6
 		case 'guild-news-thread': return 10
 		case 'guild-public-thread': return 11
 		case 'guild-private-thread': return 12

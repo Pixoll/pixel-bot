@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { CommandoClient } = require('../command-handler/typings')
 const { CommandInstances, Command } = require('../command-handler/typings')
-const { MessageEmbed, TextChannel, Util, CommandInteractionOption } = require('discord.js')
+const { MessageEmbed, TextChannel, Util, CommandInteractionOption, SnowflakeUtil } = require('discord.js')
 const { customEmoji, docId, code, replyAll } = require('../utils/functions')
 const { stripIndent } = require('common-tags')
 /* eslint-enable no-unused-vars */
@@ -104,8 +104,10 @@ module.exports = (client) => {
 
             if (command) {
                 let input = ''
-                if (message) input = message.cleanContent
-                else {
+                if (message) {
+                    input = message.cleanContent
+                }
+                if (interaction) {
                     input = `/${command.name}`
                     /** @param {CommandInteractionOption} opt */
                     function concat(opt) {
@@ -115,7 +117,9 @@ module.exports = (client) => {
                     }
                     for (const option of interaction.options.data) concat(option)
                 }
-                embed.addField('Command input', code(Util.escapeMarkdown(input).substring(0, 1016), 'js'))
+                if (input) {
+                    embed.addField('Command input', code(Util.escapeMarkdown(input).substring(0, 1016), 'js'))
+                }
             }
 
             const msg = (error.name + whatCommand + ': ' + error.message).split('Require stack:').shift()

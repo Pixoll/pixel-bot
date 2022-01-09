@@ -23,6 +23,7 @@ function patchData(data) {
             channels: _patch(data?.auditLogs?.channels),
             commands: _patch(data?.auditLogs?.commands),
             emojis: _patch(data?.auditLogs?.emojis),
+            events: _patch(data?.auditLogs?.events),
             invites: _patch(data?.auditLogs?.invites),
             members: _patch(data?.auditLogs?.members),
             messages: _patch(data?.auditLogs?.messages),
@@ -65,15 +66,17 @@ module.exports = class ModulesCommand extends Command {
         const patch = patchData(data)
         const { auditLogs, /* chatFilter, */ welcome, stickyRoles } = patch
         const {
-            boosts, channels, commands, emojis, invites, members, messages, moderation,
-            modules, roles, server, stickers, threads, users, voice
+            boosts, channels, commands, emojis, events, invites, members, messages, moderation, modules, roles, server,
+            stickers, threads, users, voice
         } = auditLogs
 
         // **Chat filter:** ${chatFilter}
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${guild.name}'s modules and sub-modules`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `${guild.name}'s modules and sub-modules`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Sticky roles:** ${stickyRoles}
                 **Welcome messages:** ${welcome}
@@ -82,6 +85,7 @@ module.exports = class ModulesCommand extends Command {
                 \u2800⤷ **Channels:** ${channels}
                 \u2800⤷ **Commands:** ${commands}
                 \u2800⤷ **Emojis:** ${emojis}
+                \u2800⤷ **Events:** ${events}
                 \u2800⤷ **Invites:** ${invites}
                 \u2800⤷ **Members:** ${members}
                 \u2800⤷ **Messages:** ${messages}

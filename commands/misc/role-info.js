@@ -51,7 +51,7 @@ module.exports = class RoleInfoCommand extends Command {
 
         const roleInfo = new MessageEmbed()
             .setColor(color || '#4c9f4c')
-            .setAuthor(`Information for role: ${name}`)
+            .setAuthor({ name: `Information for role: ${name}` })
             .setDescription(stripIndent`
                 **Mention:** \`${role.toString()}\`
                 **Color:** ${color ? `[${color}](${colorURL})` : 'None'}
@@ -61,7 +61,7 @@ module.exports = class RoleInfoCommand extends Command {
                 **Position:** ${position}
                 **Members:** ${members.size}
             `)
-            .setFooter(`Role ID: ${id} • Created at`)
+            .setFooter({ text: `Role ID: ${id} • Created at` })
             .setTimestamp(createdTimestamp)
 
         if (url) roleInfo.setThumbnail(url)

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { MessageEmbed, User, TextBasedChannels, Message, MessageOptions, GuildMember } = require('discord.js')
+const { MessageEmbed, User, TextBasedChannels, Message, GuildMember } = require('discord.js')
 const { CommandoClient } = require('../../command-handler/typings')
 const { noReplyInDMs, basicEmbed } = require('../../utils/functions')
 const myMs = require('../../utils/my-ms')
@@ -40,20 +40,23 @@ module.exports = async (client) => {
 
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')
-                .setAuthor(member?.displayName || user.username, user.displayAvatarURL({ dynamic: true }))
+                .setAuthor({
+                    name: member?.displayName || user.username, iconURL: user.displayAvatarURL({ dynamic: true })
+                })
                 .setDescription(reminder.reminder)
-                .setFooter(`Set about ${time} ago`)
+                .setFooter({ text: `Set about ${time} ago` })
                 .setTimestamp(reminder.createdAt)
 
-            /** @type {MessageOptions} */
-            const options = {}
+            const options = noReplyInDMs(msg)
+            options.embeds = [embed]
             if (msg) {
                 options.reply = { messageReference: msg }
                 if (msg.author.bot) options.content = user.toString()
+            } else if (channel.type !== 'DM') {
+                options.content = user.toString()
             }
-            else if (channel.type !== 'DM') options.content = user.toString()
 
-            await channel.send({ embeds: [embed], ...options, ...noReplyInDMs(msg) }).catch(() => null)
+            await channel.send(options).catch(() => null)
         }
 
         for (const reminder of data.toJSON()) {

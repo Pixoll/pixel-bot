@@ -23,10 +23,12 @@ module.exports = (client) => {
         const emoji = action === 'started' ? customEmoji('boost') : ''
 
         const embed = new MessageEmbed()
-            .setColor('BLUE')
-            .setAuthor(user.tag, newMember.displayAvatarURL({ dynamic: true }))
+            .setColor('#f47fff')
+            .setAuthor({
+                name: user.tag, iconURL: newMember.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(`${user.toString()} ${action} boosting ${emoji}`)
-            .setFooter(`User ID: ${id}`)
+            .setFooter({ text: `User ID: ${id}` })
             .setTimestamp()
 
         if (action === 'stopped') embed.addField('Boosted for', timestamp(boostTime1, 'R'))

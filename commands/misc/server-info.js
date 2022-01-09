@@ -49,7 +49,9 @@ module.exports = class ServerInfoCommand extends Command {
 
         const serverInfo = new MessageEmbed()
             .setColor('RANDOM')
-            .setAuthor(name, server.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: name, iconURL: server.iconURL({ dynamic: true })
+            })
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
             .addField('Information', stripIndent`
                 **Owner:** ${owner.user.tag} '<a:owner_crown:806558872440930425>'
@@ -63,7 +65,7 @@ module.exports = class ServerInfoCommand extends Command {
                 **Members:** ${memberCount.toLocaleString()}
                 **Roles:** ${_roles.size.toLocaleString()}
             `, true)
-            .setFooter(`Server ID: ${id} • Created at`)
+            .setFooter({ text: `Server ID: ${id} • Created at` })
             .setTimestamp(createdTimestamp)
 
         if (guild instanceof Guild) return serverInfo

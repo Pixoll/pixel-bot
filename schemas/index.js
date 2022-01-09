@@ -61,6 +61,7 @@ module.exports = {
             channels: Boolean,
             commands: Boolean,
             emojis: Boolean,
+            events: Boolean,
             invites: Boolean,
             members: Boolean,
             messages: Boolean,

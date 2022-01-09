@@ -33,7 +33,7 @@ module.exports = class ReactionRoleCommand extends Command {
             userPermissions: ['MANAGE_ROLES'],
             guildOnly: true,
             deprecated: true,
-            replacing: 'buttonrole',
+            replacing: 'button-role',
             args: [
                 {
                     key: 'subCommand',

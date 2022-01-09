@@ -34,7 +34,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/roles#roleCreate".')
+        client.emit('debug', 'Running event "logs/roles#create".')
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -42,7 +42,9 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
-            .setAuthor('Created role', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Created role', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Role:** ${role.toString()}
                 **Color:** ${color ? `[${color}](${colorURL})` : 'None'}
@@ -51,7 +53,7 @@ module.exports = (client) => {
                 **Mentionable:** ${mentionable ? 'Yes' : 'No'}
                 **Mod perms:** ${getKeyPerms(role)}
             `)
-            .setFooter(`Role ID: ${id}`)
+            .setFooter({ text: `Role ID: ${id}` })
             .setTimestamp()
 
         if (url) embed.setThumbnail(url)
@@ -74,7 +76,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/roles#roleDelete".')
+        client.emit('debug', 'Running event "logs/roles#delete".')
 
         const color = hexColor === '#000000' ? null : hexColor
         const colorURL = color ? `https://www.color-hex.com/color/${color.replace('#', '')}` : null
@@ -82,7 +84,9 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Deleted role', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Deleted role', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Name:** ${name}
                 **Color:** ${color ? `[${color}](${colorURL})` : 'No color'}
@@ -91,7 +95,7 @@ module.exports = (client) => {
                 **Mentionable:** ${mentionable ? 'Yes' : 'No'}
                 **Mod perms:** ${getKeyPerms(role)}
             `)
-            .setFooter(`Role ID: ${id}`)
+            .setFooter({ text: `Role ID: ${id}` })
             .setTimestamp()
 
         if (url) embed.setThumbnail(url)
@@ -113,7 +117,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'roles')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/roles#roleUpdate".')
+        client.emit('debug', 'Running event "logs/roles#update".')
 
         const {
             name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1,
@@ -131,9 +135,11 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated role', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated role', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(oldRole.toString())
-            .setFooter(`Role ID: ${id}`)
+            .setFooter({ text: `Role ID: ${id}` })
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Name', `${name1} ➜ ${name2}`)

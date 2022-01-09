@@ -5,7 +5,7 @@ const { isModuleEnabled } = require('../../utils/functions')
 /* eslint-enable no-unused-vars */
 
 /**
- * Handles all of the command logs.
+ * Handles all of the modules logs.
  * @param {CommandoClient} client
  */
 module.exports = (client) => {
@@ -19,7 +19,9 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated module status', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated module status', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(`The \`${module}\` module has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
             .setTimestamp()
 

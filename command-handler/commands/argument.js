@@ -76,7 +76,7 @@ class Argument {
 		 * @type {boolean}
 		 * @default true
 		 */
-		this.required = info.required ?? typeof this.default === 'undefined'
+		this.required = 'required' in info ? !!info.required : !('default' in info)
 
 		/**
 		 * Whether the argument's validation is skipped or not
@@ -167,7 +167,9 @@ class Argument {
 
 			const prompt = new MessageEmbed()
 				.setColor(empty && this.prompt ? 'BLUE' : 'RED')
-				.setFooter(wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : '')
+				.setFooter({
+					text: wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : ''
+				})
 				.addField(this.prompt, stripIndent`
 					**Don't type the whole command again!** Only what I ask for.
 					Respond with \`cancel\` to cancel the command.
@@ -271,7 +273,9 @@ class Argument {
 							**Don't type the whole command again!** Only what I ask for.
 							Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry up to this point.
 						`)
-						.setFooter(wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : '')
+						.setFooter({
+							text: wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : ''
+						})
 
 					prompts.push(await msg.replyEmbed(prompt))
 				} else if (results.length === 0) {
@@ -284,9 +288,11 @@ class Argument {
 								Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry.
 							`
 						)
-						.setFooter(wait ?
-							`The command will automatically be cancelled in ${this.wait} seconds, unless you respond.` : ''
-						)
+						.setFooter({
+							text: wait ?
+								`The command will automatically be cancelled in ${this.wait} seconds, unless you respond.` :
+								''
+						})
 
 					prompts.push(await msg.replyEmbed(prompt))
 				}

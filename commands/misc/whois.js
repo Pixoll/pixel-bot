@@ -88,10 +88,12 @@ module.exports = class WhoIsCommand extends Command {
 
         const userInfo = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), avatar)
+            .setAuthor({
+                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true }), url: avatar
+            })
             .setThumbnail(avatar)
             .setDescription(description.join(' '))
-            .setFooter(`User ID: ${user.id}`)
+            .setFooter({ text: `User ID: ${user.id}` })
             .setTimestamp()
 
         if (member) {

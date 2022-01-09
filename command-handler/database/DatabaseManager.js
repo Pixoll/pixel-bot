@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Collection } = require('discord.js')
-const isEqual = require('lodash.isequal')
+const { isEqual } = require('lodash')
 const { Model } = require('mongoose')
 const { CommandoGuild, DataModel } = require('../typings')
 /* eslint-enable no-unused-vars */

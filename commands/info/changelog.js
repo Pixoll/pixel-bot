@@ -7,11 +7,11 @@ const { version } = require('../../package.json')
 
 const changelog = require('../../documents/changelog.json')
     .sort((a, b) => abcOrder(b.version, a.version))
-    .map(val => {
-        if (version < val.version) return null
-        const changes = val.changes.length === 1 ? val.changes[0] :
-            val.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n')
-        const title = `Version ${val.version} - ${timestamp(val.timestamp, 'F')}`
+    .map(log => {
+        if (version < log.version) return null
+        const changes = log.changes.length === 1 ? log.changes[0] :
+            log.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n')
+        const title = `Version ${log.version} - ${timestamp(log.timestamp, 'F') ?? 'No date specified'}`
         return { title, changes }
     })
     .filter(log => log)

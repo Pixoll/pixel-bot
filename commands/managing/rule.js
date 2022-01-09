@@ -120,7 +120,9 @@ module.exports = class RuleCommand extends Command {
 
         const ruleEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${guild.name}'s rules`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `${guild.name}'s rules`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .addField(`Rule ${rule--}`, rulesData.rules[rule])
             .setTimestamp()
 

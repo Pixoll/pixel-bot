@@ -92,7 +92,9 @@ module.exports = class WelcomeCommand extends Command {
         if (!channel) {
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')
-                .setAuthor(`${guild.name}'s welcome message`, guild.iconURL({ dynamic: true }))
+                .setAuthor({
+                    name: `${guild.name}'s welcome message`, iconURL: guild.iconURL({ dynamic: true })
+                })
                 .setDescription(stripIndent`
                     **Channel:** ${data?.channel ? `<#${data?.channel}>` : '`No saved channel found.`'}
                     **Message:** ${data?.message?.replace(/{[\w_]+}/g, '`$&`') || '`No saved message found.`'}

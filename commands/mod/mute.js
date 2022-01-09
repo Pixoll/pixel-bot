@@ -15,7 +15,7 @@ module.exports = class MuteCommand extends Command {
         super(client, {
             name: 'mute',
             group: 'mod',
-            description: 'Mute a member so they cannot type or speak.',
+            description: 'Mute a member so they cannot send messages or speak.',
             details: stripIndent`
                 \`member\` can be either a member's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.

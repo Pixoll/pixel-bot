@@ -22,7 +22,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/moderation#guildMemberRemove".')
+        client.emit('debug', 'Running event "logs/moderation#kick".')
 
         /** @type {GuildAuditLogs} */
         const kickLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -34,13 +34,15 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Kicked user', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Kicked user', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 ${executor.toString()} kicked ${user.toString()} ${user.tag}
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User ID: ${id} • Mod ID: ${executor.id}`)
+            .setFooter({ text: `User ID: ${id} • Mod ID: ${executor.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -58,7 +60,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/moderation#guildBanAdd".')
+        client.emit('debug', 'Running event "logs/moderation#banAdd".')
 
         /** @type {GuildAuditLogs} */
         const banLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -72,14 +74,16 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Banned user', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Banned user', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 ${moderator ? moderator + 'banned' : 'Banned'} ${user.toString()} ${user.tag}
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
             .setImage('https://media.giphy.com/media/fe4dDMD2cAU5RfEaCU/giphy.gif')
-            .setFooter(`User ID: ${user.id}`)
+            .setFooter({ text: `User ID: ${user.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -97,7 +101,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/moderation#guildBanRemove".')
+        client.emit('debug', 'Running event "logs/moderation#banRemove".')
 
         /** @type {GuildAuditLogs} */
         const unbanLogs = await guild.fetchAuditLogs({ limit: 1 }).catch(() => null)
@@ -112,34 +116,61 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Unbanned user', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Unbanned user', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 ${moderator ? moderator + 'unbanned' : 'Unbanned'} ${user.toString()} ${user.tag}
                 **Reason:** ${reason?.replace(/%20/g, ' ') || 'No reason given.'}
             `)
-            .setFooter(`User ID: ${user.id}`)
+            .setFooter({ text: `User ID: ${user.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
     })
 
-    client.on('guildMemberMute', async (guild, mod, user, reason, duration) => {
+    client.on('guildMemberMute', async (guild, mod, user, reason, expiresAt) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/moderation#guildMemberMute".')
+        client.emit('debug', 'Running event "logs/moderation#mute".')
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Muted member', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Muted member', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 ${mod.toString()} muted ${user.toString()} ${user.tag}
-                **Expires:** ${timestamp(duration, 'R')}
+                **Expires:** ${timestamp(expiresAt, 'R')}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User ID: ${user.id} • Mod ID: ${mod.id}`)
+            .setFooter({ text: `User ID: ${user.id} • Mod ID: ${mod.id}` })
+            .setTimestamp()
+
+        guild.queuedLogs.push(embed)
+    })
+
+    client.on('guildMemberTimeout', async (guild, mod, user, reason, expiresAt) => {
+        const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
+        if (!isEnabled) return
+
+        client.emit('debug', 'Running event "logs/moderation#timeout".')
+
+        const embed = new MessageEmbed()
+            .setColor('GOLD')
+            .setAuthor({
+                name: 'Timed-out member', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
+            .setDescription(stripIndent`
+                ${mod.toString()} timed-out ${user.toString()} ${user.tag}
+                **Expires:** ${timestamp(expiresAt, 'R')}
+                **Reason:** ${reason}
+            `)
+            .setFooter({ text: `User ID: ${user.id} • Mod ID: ${mod.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -149,19 +180,21 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/moderation#guildMemberUnmute".')
+        client.emit('debug', 'Running event "logs/moderation#unmute".')
 
         const modFooter = mod ? ` • Mod ID: ${mod.id}` : ''
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Unmuted member', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Unmuted member', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 ${mod.toString()} unmuted ${user.toString()} ${user.tag}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User ID: ${user.id}` + modFooter)
+            .setFooter({ text: `User ID: ${user.id}` + modFooter })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -171,17 +204,19 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'moderation')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/moderation#guildMemberWarn".')
+        client.emit('debug', 'Running event "logs/moderation#warn".')
 
         const embed = new MessageEmbed()
             .setColor('GOLD')
-            .setAuthor('Warned member', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Warned member', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
                 ${mod.toString()} warned ${user.toString()} ${user.tag}
                 **Reason:** ${reason}
             `)
-            .setFooter(`User ID: ${user.id} • Mod ID: ${mod.id}`)
+            .setFooter({ text: `User ID: ${user.id} • Mod ID: ${mod.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)

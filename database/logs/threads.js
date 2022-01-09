@@ -33,14 +33,16 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/threads#threadCreate".')
+        client.emit('debug', 'Running event "logs/threads#create".')
 
         const { guildMember } = await thread.fetchOwner()
         const chanType = channelType(type)
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
-            .setAuthor(`Created ${chanType} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Created ${chanType} channel`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 ${oneLine`
                     ${guildMember.toString()} created ${chanType} ${thread.toString()}
@@ -48,7 +50,7 @@ module.exports = (client) => {
                 `}
                 **Auto-archiving ${timestamp(Date.now() + (autoArchiveDuration * 60_000), 'R')}**
             `)
-            .setFooter(`Thread ID: ${id} • Channel ID: ${parent.id}`)
+            .setFooter({ text: `Thread ID: ${id} • Channel ID: ${parent.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -60,16 +62,18 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/threads#threadDelete".')
+        client.emit('debug', 'Running event "logs/threads#delete".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor(`Deleted ${channelType(type)} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Deleted ${channelType(type)} channel`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 \`#${name}\` under ${channelType(parent.type)} channel ${parent.toString()}
                 **Member count:** ${members.cache.size}
             `)
-            .setFooter(`Thread ID: ${id} • Channel ID: ${parent.id}`)
+            .setFooter({ text: `Thread ID: ${id} • Channel ID: ${parent.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -81,7 +85,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'threads')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/threads#threadUpdate".')
+        client.emit('debug', 'Running event "logs/threads#update".')
 
         const {
             autoArchiveDuration: autoArchive1, archived: archived1, name: name1, locked: locked1,
@@ -94,9 +98,11 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor(`Updated ${channelType(type)} channel`, guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: `Updated ${channelType(type)} channel`, iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(newThread.toString())
-            .setFooter(`Thread ID: ${id} • Channel ID: ${parentId}`)
+            .setFooter({ text: `Thread ID: ${id} • Channel ID: ${parentId}` })
             .setTimestamp()
 
         if (autoArchive1 !== autoArchive2) {

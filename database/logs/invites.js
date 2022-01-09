@@ -16,11 +16,13 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/invites#inviteCreate".')
+        client.emit('debug', 'Running event "logs/invites#create".')
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Created invite', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Created invite', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Link:** ${invite.toString()}
                 **Channel:** ${channel.toString()}
@@ -29,7 +31,7 @@ module.exports = (client) => {
                 **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
-            .setFooter(`Inviter ID: ${inviter.id}`)
+            .setFooter({ text: `Inviter ID: ${inviter.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -41,22 +43,24 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'invites')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/invites#inviteDelete".')
+        client.emit('debug', 'Running event "logs/invites#delete".')
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('Deleted invite', guild.iconURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Deleted invite', iconURL: guild.iconURL({ dynamic: true })
+            })
             .setDescription(stripIndent`
                 **Link:** ${invite.toString()}
                 **Channel:** ${channel.toString()}
             `)
-            .setFooter(`Channel ID: ${channel.id}`)
+            .setFooter({ text: `Channel ID: ${channel.id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
     })
 
-    client.on('cMessageCreate', async message => {
+    client.on('commandoMessageCreate', async message => {
         const { guild, author, isCommand, content, channel, url } = message
         if (!guild || author.bot || isCommand) return
 
@@ -87,7 +91,9 @@ module.exports = (client) => {
 
             const embed = new MessageEmbed()
                 .setColor('BLUE')
-                .setAuthor(`${author.tag} posted an invite`, author.displayAvatarURL({ dynamic: true }))
+                .setAuthor({
+                    name: `${author.tag} posted an invite`, iconURL: author.displayAvatarURL({ dynamic: true })
+                })
                 .setDescription(stripIndent`
                     ${author.toString()} posted an invite in ${channel.toString()} [Jump to message](${url})
                     **Invite:** ${invite.toString()}
@@ -99,10 +105,11 @@ module.exports = (client) => {
                     **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                     **Temporary membership:** ${temporary ? 'Yes' : 'No'}
                 `)
-                .setFooter(invGuild ?
-                    `Server ID: ${invGuild.id}` :
-                    `Group DM ID: ${invChannel.id}`
-                )
+                .setFooter({
+                    text: invGuild ?
+                        `Server ID: ${invGuild.id}` :
+                        `Group DM ID: ${invChannel.id}`
+                })
                 .setTimestamp()
 
             guild.queuedLogs.push(embed)

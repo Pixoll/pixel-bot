@@ -25,17 +25,19 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/members#guildMemberAdd".')
+        client.emit('debug', 'Running event "logs/members#add".')
 
         const { tag, id, createdAt } = user
 
         const embed = new MessageEmbed()
             .setColor('GREEN')
-            .setAuthor('User joined', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'User joined', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
             .addField('Registered', timestamp(createdAt, 'R'))
-            .setFooter(`User ID: ${id}`)
+            .setFooter({ text: `User ID: ${id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -60,7 +62,7 @@ module.exports = (client) => {
         const status = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!status) return
 
-        client.emit('debug', 'Running event "logs/members#guildMemberRemove".')
+        client.emit('debug', 'Running event "logs/members#remove".')
 
         const { tag } = user
 
@@ -69,11 +71,13 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('ORANGE')
-            .setAuthor('User left', user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'User left', iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
             .addField('Roles', rolesList || 'None')
-            .setFooter(`User ID: ${id}`)
+            .setFooter({ text: `User ID: ${id}` })
             .setTimestamp()
 
         guild.queuedLogs.push(embed)
@@ -86,7 +90,7 @@ module.exports = (client) => {
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'members')
         if (!isEnabled) return
 
-        client.emit('debug', 'Running event "logs/members#guildMemberUpdate".')
+        client.emit('debug', 'Running event "logs/members#update".')
 
         const { roles: roles1, nickname: nick1, avatar: avatar1 } = oldMember
         const { roles: roles2, nickname: nick2, avatar: avatar2, user, id } = newMember
@@ -95,9 +99,11 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated member', newMember.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated member', iconURL: newMember.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(`${user.toString()} ${user.tag}`)
-            .setFooter(`User ID: ${id}`)
+            .setFooter({ text: `User ID: ${id}` })
             .setTimestamp()
 
         if (nick1 !== nick2) embed.addField('Nickname', `${nick1 || 'None'} ➜ ${nick2 || 'None'}`)

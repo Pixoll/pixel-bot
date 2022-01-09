@@ -47,9 +47,11 @@ module.exports = (client) => {
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
-            .setAuthor('Updated user', newUser.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: 'Updated user', iconURL: newUser.displayAvatarURL({ dynamic: true })
+            })
             .setDescription(`${newUser.toString()} ${tag}`)
-            .setFooter(`User ID: ${id}`)
+            .setFooter({ text: `User ID: ${id}` })
             .setTimestamp()
 
         if (name1 !== name2) embed.addField('Username', `${name1} ➜ ${name2}`)

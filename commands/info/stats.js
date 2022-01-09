@@ -61,7 +61,9 @@ module.exports = class StatsCommand extends Command {
 
         const stats = new MessageEmbed()
             .setColor('#4c9f4c')
-            .setAuthor(`${user.username}'s stats`, user.displayAvatarURL({ dynamic: true }))
+            .setAuthor({
+                name: `${user.username}'s stats`, iconURL: user.displayAvatarURL({ dynamic: true })
+            })
             .addField('Servers', guilds.size.toLocaleString(), true)
             .addField('Users', users, true)
             .addField('Memory usage', `${usedMemory}/${maxMemory} MB`, true)

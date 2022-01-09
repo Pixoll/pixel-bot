@@ -51,7 +51,9 @@ module.exports = async (client) => {
 
                 const pollEmbed = new MessageEmbed()
                     .setColor('#4c9f4c')
-                    .setAuthor('The poll has ended!', guild.iconURL({ dynamic: true }), message.url)
+                    .setAuthor({
+                        name: 'The poll has ended!', iconURL: guild.iconURL({ dynamic: true }), url: message.url
+                    })
                     .setDescription(winner || noVotes || draw)
                     .setTimestamp()
 

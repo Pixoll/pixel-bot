@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Client, User, UserResolvable, Collection, Permissions } = require('discord.js')
+const { Client, User, UserResolvable, Collection, Permissions, Guild } = require('discord.js')
 const CommandoRegistry = require('./registry')
 const CommandDispatcher = require('./dispatcher')
 const { CommandoClientOptions, GuildDatabaseManager, CommandoGuildManager } = require('./typings')
 const CommandoMessage = require('./extensions/message')
-// const CommandoGuild = require('./extensions/guild')
+const CommandoGuild = require('./extensions/guild')
 const ClientDatabaseManager = require('./database/ClientDatabaseManager')
 /* eslint-enable no-unused-vars */
 
@@ -87,13 +87,17 @@ class CommandoClient extends Client {
 		 */
 		this._prefix = null
 
+		// Parses all the guild instances
+		this.once('ready', this.parseGuilds)
+		this.on('guildCreate', this.parseGuild)
+
 		// Set up message command handling
 		const catchErr = err => {
 			this.emit('error', err)
 		}
 		this.on('messageCreate', async message => {
 			const commando = new CommandoMessage(this, message)
-			this.emit('cMessageCreate', commando)
+			this.emit('commandoMessageCreate', commando)
 			await this.dispatcher.handleMessage(commando).catch(catchErr)
 		})
 		this.on('messageUpdate', async (oldMessage, newMessage) => {
@@ -183,6 +187,41 @@ class CommandoClient extends Client {
 		if (Array.isArray(owner)) return owner.includes(id)
 		if (owner instanceof Set) return owner.has(id)
 		throw new RangeError('The client\'s "owner" option is an unknown value.')
+	}
+
+	/**
+	 * Parses all {@link Guild} instances into {@link CommandoGuild}s.
+	 * @private
+	 */
+	parseGuilds() {
+		this.guilds.cache.forEach(guild => this.parseGuild(guild))
+		this.emit('guildsReady', this)
+	}
+
+	/**
+	 * Parses a {@link Guild} instance into a {@link CommandoGuild}.
+	 * @param {Guild} guild The {@link Guild} to parse
+	 * @private
+	 */
+	parseGuild(guild) {
+		const commandoGuild = new CommandoGuild(this, guild)
+		Object.assign(guild, commandoGuild)
+		guild.setCommandEnabled = commandoGuild.setCommandEnabled
+		guild.isCommandEnabled = commandoGuild.isCommandEnabled
+		guild.setGroupEnabled = commandoGuild.setGroupEnabled
+		guild.isGroupEnabled = commandoGuild.isGroupEnabled
+		guild.commandUsage = commandoGuild.commandUsage
+		Object.defineProperty(guild, 'prefix', {
+			get() {
+				if (this._prefix === null) return this.client.prefix
+				return this._prefix
+			},
+			set(prefix) {
+				this._prefix = prefix
+				this.client.emit('commandPrefixChange', this, this._prefix)
+			}
+		})
+		this.emit('commandoGuildCreate', guild)
 	}
 
 	/** Logs out, terminates the connection to Discord, and destroys the client. */

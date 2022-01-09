@@ -249,6 +249,17 @@ class CommandDispatcher {
 			}
 		}
 
+		if (command.deprecated) {
+			const embed = new MessageEmbed()
+				.setColor('GOLD')
+				.addField(
+					`The \`${command.name}\` command has been marked as deprecated!`,
+					`Please start using the \`${command.replacing}\` command from now on.`
+				)
+
+			await channel.send({ content: user.toString(), embeds: [embed] })
+		}
+
 		// Parses the options into an arguments object
 		const args = {}
 		for (const option of options.data) parseSlashArgs(args, option)

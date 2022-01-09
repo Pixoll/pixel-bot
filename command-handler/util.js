@@ -43,13 +43,17 @@ const permissions = {
 	USE_APPLICATION_COMMANDS: 'Use application commands',
 	REQUEST_TO_SPEAK: 'Request to speak',
 	MANAGE_THREADS: 'Manage threads',
+	/** @deprecated */
 	USE_PUBLIC_THREADS: 'Use public threads',
 	CREATE_PUBLIC_THREADS: 'Create public threads',
+	/** @deprecated */
 	USE_PRIVATE_THREADS: 'Use private threads',
 	CREATE_PRIVATE_THREADS: 'Create private threads',
 	USE_EXTERNAL_STICKERS: 'Use external stickers',
 	SEND_MESSAGES_IN_THREADS: 'Send messages in threads',
 	START_EMBEDDED_ACTIVITIES: 'Start activities',
+	MODERATE_MEMBERS: 'Time out members',
+	MANAGE_EVENTS: 'Manage events'
 }
 
 module.exports = {
