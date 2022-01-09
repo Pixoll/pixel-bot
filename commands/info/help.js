@@ -209,10 +209,10 @@ module.exports = class HelpCommand extends Command {
             ]
 
             const generate = page => ({
-                embed: pages[page].setFooter(
-                    `Page ${page + 1} of ${pages.length} • Version: ${version} • Developer: ${owner.tag}`,
-                    user.displayAvatarURL({ dynamic: true })
-                )
+                embed: pages[page].setFooter({
+                    text: `Page ${page + 1} of ${pages.length} • Version: ${version} • Developer: ${owner.tag}`,
+                    iconURL: user.displayAvatarURL({ dynamic: true })
+                })
             })
 
             return await pagedEmbed({ message, interaction }, {
@@ -287,10 +287,10 @@ function commandInfo(cmd, guild) {
             ${details ? `\n>>> ${details}` : ''}
         `)
         .addField('Usage', usage)
-        .setFooter(
-            `Version: ${version} • Developer: ${owners[0].tag}`,
-            user.displayAvatarURL({ dynamic: true })
-        )
+        .setFooter({
+            text: `Version: ${version} • Developer: ${owners[0].tag}`,
+            iconURL: user.displayAvatarURL({ dynamic: true })
+        })
 
     if (examples) embed.addField('Examples', examples.map(ex => `**>** \`${prefix + ex}\``).join('\n'))
 
