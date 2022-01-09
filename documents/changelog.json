@@ -111,7 +111,8 @@
             "Added `audit-logs/events`.",
             "Fixed `reload` sub-command of `setup`: Missing data such as deleted roles and channels, weren't being deleted.",
             "The `purge` command was deleting 1 message less than it should with the `all` sub-command."
-        ]
+        ],
+        "timestamp": 1641748320000
     },
     {
         "version": "2.3.0",
