@@ -1,10 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { MessageEmbed, GuildChannel } = require('discord.js')
-const { Command, CommandGroup } = require('../../command-handler')
-const { permissions } = require('../../command-handler/util')
-const { CommandInstances, Command: CommandType, CommandoGuild: GroupType } = require('../../command-handler/typings')
-const { getArgument, replyAll, basicEmbed } = require('../../utils/functions')
+const { stripIndent } = require('common-tags');
+const { MessageEmbed, GuildChannel } = require('discord.js');
+const { Command, CommandInstances, CommandGroup, util: { permissions } } = require('pixoll-commando');
+const { getArgument, replyAll, basicEmbed } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -83,7 +81,7 @@ module.exports = class DiagnoseCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -91,26 +89,26 @@ module.exports = class DiagnoseCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {object} args The arguments for the command
      * @param {'all'|'command'|'group'} args.subCommand The sub-command to use
-     * @param {CommandType|GroupType} args.cmdOrGroup The command or group to diagnose
+     * @param {Command|Group} args.cmdOrGroup The command or group to diagnose
      */
     async run({ message, interaction }, { subCommand, cmdOrGroup, command, group }) {
-        subCommand = subCommand.toLowerCase()
+        subCommand = subCommand.toLowerCase();
 
         try {
-            command &&= this.client.registry.resolveCommand(command)
-            group &&= this.client.registry.resolveGroup(group)
+            command &&= this.client.registry.resolveCommand(command);
+            group &&= this.client.registry.resolveGroup(group);
         } catch {
-            command = null
-            group = null
+            command = null;
+            group = null;
         }
 
         switch (subCommand) {
             case 'all':
-                return await this.all({ message, interaction })
+                return await this.all({ message, interaction });
             case 'command':
-                return await this.command({ message, interaction }, cmdOrGroup ?? command)
+                return await this.command({ message, interaction }, cmdOrGroup ?? command);
             case 'group':
-                return await this._group({ message, interaction }, cmdOrGroup ?? group)
+                return await this._group({ message, interaction }, cmdOrGroup ?? group);
         }
     }
 
@@ -119,22 +117,22 @@ module.exports = class DiagnoseCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async all({ message, interaction }) {
-        const { guild, client } = message || interaction
-        const { user, registry } = client
-        const { commands, groups } = registry
+        const { guild, client } = message || interaction;
+        const { user, registry } = client;
+        const { commands, groups } = registry;
 
         const commandsList = commands.filter(cmd => {
-            if (guild) return !cmd.isEnabledIn(guild, true)
-            return !cmd._globalEnabled
-        }).map(c => `\`${c.name}\``).sort().join(', ') || 'There are no disabled commands'
+            if (guild) return !cmd.isEnabledIn(guild, true);
+            return !cmd._globalEnabled;
+        }).map(c => `\`${c.name}\``).sort().join(', ') || 'There are no disabled commands';
 
         const groupsList = groups.filter(grp => {
-            if (guild) return !grp.isEnabledIn(guild)
-            return !grp._globalEnabled
-        }).map(g => `\`${g.name}\``).sort().join(', ') || 'There are no disabled groups'
+            if (guild) return !grp.isEnabledIn(guild);
+            return !grp._globalEnabled;
+        }).map(g => `\`${g.name}\``).sort().join(', ') || 'There are no disabled groups';
 
-        const name = guild?.name || user.username
-        const avatar = guild?.iconURL({ dynamic: true }) || user.displayAvatarURL({ dynamic: true })
+        const name = guild?.name || user.username;
+        const avatar = guild?.iconURL({ dynamic: true }) || user.displayAvatarURL({ dynamic: true });
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -143,34 +141,34 @@ module.exports = class DiagnoseCommand extends Command {
             })
             .addField('Commands', commandsList)
             .addField('Groups', groupsList)
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, diagnose)
+        await replyAll({ message, interaction }, diagnose);
     }
 
     /**
      * The `command` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
-     * @param {CommandType} command The command to diagnose
+     * @param {Command} command The command to diagnose
      */
     async command({ message, interaction }, command) {
         if (message) {
             while (!(command instanceof Command)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                command = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                command = value;
             }
         } else if (!command) {
             return await replyAll({ interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.'
-            }))
+            }));
         }
 
-        const { guild, client } = message || interaction
-        const isEnabled = guild ? command.isEnabledIn(guild, true) : command._globalEnabled
+        const { guild, client } = message || interaction;
+        const isEnabled = guild ? command.isEnabledIn(guild, true) : command._globalEnabled;
 
-        const global = guild ? 'Status' : 'Global status'
-        const avatar = guild?.iconURL({ dynamic: true }) || client.user.displayAvatarURL({ dynamic: true })
+        const global = guild ? 'Status' : 'Global status';
+        const avatar = guild?.iconURL({ dynamic: true }) || client.user.displayAvatarURL({ dynamic: true });
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -179,40 +177,40 @@ module.exports = class DiagnoseCommand extends Command {
             })
             .addField('Status', isEnabled ? 'Enabled' : 'Disabled', true)
             .addField('Guarded', command.guarded ? 'Yes' : 'No', true)
-            .setTimestamp()
+            .setTimestamp();
 
         if (guild) {
             /** @type {GuildChannel} */
-            const channel = (message || interaction).channel
+            const channel = (message || interaction).channel;
 
-            const perms = channel.permissionsFor(guild.me).missing(command.clientPermissions)
-            const missing = perms?.map(str => `\`${permissions[str]}\``).join(', ') || 'None'
+            const perms = channel.permissionsFor(guild.me).missing(command.clientPermissions);
+            const missing = perms?.map(str => `\`${permissions[str]}\``).join(', ') || 'None';
 
-            diagnose.addField('Missing permissions', missing)
+            diagnose.addField('Missing permissions', missing);
         }
 
-        await replyAll({ message, interaction }, diagnose)
+        await replyAll({ message, interaction }, diagnose);
     }
 
     /**
      * The `group` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
-     * @param {GroupType} group The group to diagnose
+     * @param {Group} group The group to diagnose
      */
     async _group({ message, interaction }, group) {
         if (message) {
             while (!(group instanceof CommandGroup)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                group = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                group = value;
             }
         }
 
-        const { guild, client } = message || interaction
-        const isEnabled = guild ? group.isEnabledIn(guild, true) : group._globalEnabled
+        const { guild, client } = message || interaction;
+        const isEnabled = guild ? group.isEnabledIn(guild, true) : group._globalEnabled;
 
-        const global = guild ? 'Status' : 'Global status'
-        const avatar = guild?.iconURL({ dynamic: true }) || client.user.displayAvatarURL({ dynamic: true })
+        const global = guild ? 'Status' : 'Global status';
+        const avatar = guild?.iconURL({ dynamic: true }) || client.user.displayAvatarURL({ dynamic: true });
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -221,8 +219,8 @@ module.exports = class DiagnoseCommand extends Command {
             })
             .addField('Status', isEnabled ? 'Enabled' : 'Disabled', true)
             .addField('Guarded', group.guarded ? 'Yes' : 'No', true)
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, diagnose)
+        await replyAll({ message, interaction }, diagnose);
     }
-}
+};

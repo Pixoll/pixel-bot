@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { oneLine } = require('common-tags')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { isMod, generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { oneLine } = require('common-tags');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { isMod, generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -20,7 +19,7 @@ module.exports = class ModeratorsCommand extends Command {
             slash: {
                 description: 'Displays a list of all moderators of this server with their mod roles.'
             }
-        })
+        });
     }
 
     /**
@@ -28,16 +27,16 @@ module.exports = class ModeratorsCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { guild } = message || interaction
+        const { guild } = message || interaction;
 
-        const members = guild.members.cache
-        const mods = members?.filter(m => isMod(m, true) && !m.user.bot)
+        const members = guild.members.cache;
+        const mods = members?.filter(m => isMod(m, true) && !m.user.bot);
         if (!mods || mods.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no moderators, try running the `admins` command instead.'
-            }))
+            }));
         }
 
         const modsList = mods.sort((a, b) => b.roles.highest.position - a.roles.highest.position)
@@ -45,12 +44,12 @@ module.exports = class ModeratorsCommand extends Command {
                 tag: mbr.user.tag,
                 list: mbr.roles.cache.filter(m => isMod(m, true)).sort((a, b) => b.position - a.position)
                     .map(r => r.name).join(', ') || 'None'
-            }))
+            }));
 
         await generateEmbed({ message, interaction }, modsList, {
             authorName: `There's ${pluralize('moderator', modsList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             keyTitle: { suffix: 'tag' }
-        })
+        });
     }
-}
+};

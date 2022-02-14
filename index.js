@@ -1,11 +1,10 @@
-console.log('Starting bot...')
+console.log('Starting bot...');
 
-const CommandoClient = require('./command-handler/client')
-const database = require('./database')
-const path = require('path')
-const notifier = require('./errors/notifier')
-const rateLimits = require('./errors/rateLimits')
-require('dotenv').config()
+const { CommandoClient } = require('pixoll-commando');
+const path = require('path');
+const notifier = require('./errors/notifier');
+const rateLimits = require('./errors/rateLimits');
+require('dotenv').config();
 
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
 
@@ -30,16 +29,18 @@ const client = new CommandoClient({
     ],
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     failIfNotExists: false,
-})
+    modulesDir: path.join(__dirname, '/modules'),
+    excludeModules: ['chat-filter', 'scam-detector'],
+});
 
 client.on('debug', (...msgs) => {
-    const msg = msgs.join(' ')
+    const msg = msgs.join(' ');
     const exclude =
-        /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request|Created new/
-    if (exclude.test(msg)) return
-    console.log('debug >', msg)
-})
-client.emit('debug', 'Created client')
+        /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request|Created new/;
+    if (exclude.test(msg)) return;
+    console.log('debug >', msg);
+});
+client.emit('debug', 'Created client');
 
 client.registry
     .registerDefaultTypes()
@@ -54,26 +55,25 @@ client.registry
         { id: 'mod-logs', name: '🗃 Moderation logs' },
         { id: 'owner', name: '<a:owner_crown:806558872440930425> Owner only', guarded: true },
         { id: 'utility', name: '🛠 Utility', guarded: true },
-    ])
-client.emit('debug', `Loaded ${client.registry.groups.size} groups`)
+    ]);
+client.emit('debug', `Loaded ${client.registry.groups.size} groups`);
 
-client.registry.registerCommandsIn(path.join(__dirname, '/commands'))
-client.emit('debug', `Loaded ${client.registry.commands.size} commands`)
+client.registry.registerCommandsIn(path.join(__dirname, '/commands'));
+client.emit('debug', `Loaded ${client.registry.commands.size} commands`);
 
 client.on('guildsReady', async () => {
-    await database(client, 'chat-filter', 'scam-detector')
-    notifier(client)
-    rateLimits(client)
+    notifier(client);
+    rateLimits(client);
 
     client.user.setActivity({
         name: `for ${client.prefix}help`,
         type: 'WATCHING'
-    })
+    });
 
-    await client.owners[0].send('**Debug message:** Bot is fully online!')
-    client.emit('debug', `${client.user.tag} is fully online!`)
-})
+    await client.owners[0].send('**Debug message:** Bot is fully online!');
+    client.emit('debug', `${client.user.tag} is fully online!`);
+});
 
 client.login().then(() =>
     client.emit('debug', 'Logged in')
-)
+);

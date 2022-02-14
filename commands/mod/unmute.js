@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { GuildMember } = require('discord.js')
-const { basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { GuildMember } = require('discord.js');
+const { basicEmbed, confirmButtons, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -54,7 +53,7 @@ module.exports = class UnmuteCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -69,52 +68,52 @@ module.exports = class UnmuteCommand extends Command {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
-            reason ??= 'No reason given.'
+            reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { guild } = message || interaction
-        const author = message?.author || interaction.user
-        const { active, setup } = guild.database
-        const { user, roles } = member
+        const { guild } = message || interaction;
+        const author = message?.author || interaction.user;
+        const { active, setup } = guild.database;
+        const { user, roles } = member;
 
-        const data = await setup.fetch()
+        const data = await setup.fetch();
         if (!data || !data.mutedRole) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.'
-            }))
+            }));
         }
 
-        const role = await guild.roles.fetch(data.mutedRole)
+        const role = await guild.roles.fetch(data.mutedRole);
 
         if (!roles.cache.has(role.id)) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is not muted.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'unmute', member.user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'unmute', member.user, { reason });
+        if (!confirmed) return;
 
-        await roles.remove(role)
-        this.client.emit('guildMemberUnmute', guild, author, user, reason)
+        await roles.remove(role);
+        this.client.emit('guildMemberUnmute', guild, author, user, reason);
 
-        const mute = await active.fetch({ type: 'mute', user: { id: user.id } })
-        if (mute) await active.delete(mute)
+        const mute = await active.fetch({ type: 'mute', user: { id: user.id } });
+        if (mute) await active.delete(mute);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been unmuted`,
             fieldValue: `**Reason:** ${reason}`
-        }))
+        }));
     }
-}
+};

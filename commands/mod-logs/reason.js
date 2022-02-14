@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { stripIndent, oneLine } = require('common-tags');
+const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -54,7 +53,7 @@ module.exports = class ReasonCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -68,32 +67,32 @@ module.exports = class ReasonCommand extends Command {
         if (interaction && reason.length > 512) {
             return await replyAll({ interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-            }))
+            }));
         }
 
-        const { guild } = message || interaction
-        const { moderations, active } = guild.database
+        const { guild } = message || interaction;
+        const { moderations, active } = guild.database;
 
-        const modLog = await moderations.fetch(modlogId)
+        const modLog = await moderations.fetch(modlogId);
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
-            }))
+            }));
         }
 
-        const activeLog = await active.fetch(modlogId)
+        const activeLog = await active.fetch(modlogId);
 
-        const confirmed = await confirmButtons({ message, interaction }, 'update mod log reason', modlogId, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'update mod log reason', modlogId, { reason });
+        if (!confirmed) return;
 
-        await moderations.update(modLog, { reason })
-        if (activeLog) await active.update(activeLog, { reason })
+        await moderations.update(modLog, { reason });
+        if (activeLog) await active.update(activeLog, { reason });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated reason for mod log \`${modlogId}\``,
             fieldValue: `**New reason:** ${reason}`
-        }))
+        }));
     }
-}
+};

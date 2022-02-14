@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
-const { TodoSchema } = require('../../schemas/types')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
+const { TodoSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -80,9 +79,9 @@ module.exports = class TodoCommand extends Command {
                     }
                 ]
             }
-        })
+        });
 
-        this.db = this.client.database.todo
+        this.db = this.client.database.todo;
     }
 
     /**
@@ -93,20 +92,20 @@ module.exports = class TodoCommand extends Command {
      * @param {string|number} args.item The item to add/remove
      */
     async run({ message, interaction }, { subCommand, item }) {
-        subCommand = subCommand.toLowerCase()
-        const author = message?.author || interaction.user
+        subCommand = subCommand.toLowerCase();
+        const author = message?.author || interaction.user;
 
-        const TODO = await this.db.fetch({ user: author.id })
+        const TODO = await this.db.fetch({ user: author.id });
 
         switch (subCommand) {
             case 'view':
-                return await this.view({ message, interaction }, TODO)
+                return await this.view({ message, interaction }, TODO);
             case 'add':
-                return await this.add({ message, interaction }, item, TODO)
+                return await this.add({ message, interaction }, item, TODO);
             case 'remove':
-                return await this.remove({ message, interaction }, item, TODO)
+                return await this.remove({ message, interaction }, item, TODO);
             case 'clear':
-                return await this.clear({ message, interaction }, TODO)
+                return await this.clear({ message, interaction }, TODO);
         }
     }
 
@@ -119,10 +118,10 @@ module.exports = class TodoCommand extends Command {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
-            }))
+            }));
         }
 
-        const author = message?.author || interaction.user
+        const author = message?.author || interaction.user;
 
         await generateEmbed({ message, interaction }, todoData.list, {
             number: 5,
@@ -132,7 +131,7 @@ module.exports = class TodoCommand extends Command {
             hasObjects: false,
             toUser: true,
             dmMsg: 'Check your DMs for your to-do list.'
-        })
+        });
     }
 
     /**
@@ -143,21 +142,21 @@ module.exports = class TodoCommand extends Command {
      */
     async add({ message, interaction }, item, todoData) {
         if (message && !item) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            item = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            item = value;
         }
 
-        const author = message?.author || interaction.user
-        if (!todoData) await this.db.add({ user: author.id, list: [item] })
-        else await this.db.update(todoData, { $push: { list: item } })
+        const author = message?.author || interaction.user;
+        if (!todoData) await this.db.add({ user: author.id, list: [item] });
+        else await this.db.update(todoData, { $push: { list: item } });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Added item \`${(todoData?.list.length ?? 0) + 1}\` to your to-do list:`,
             fieldValue: item
-        }))
+        }));
     }
 
     /**
@@ -168,27 +167,27 @@ module.exports = class TodoCommand extends Command {
      */
     async remove({ message, interaction }, item, todoData) {
         if (message && !item) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            item = Math.abs(parseInt(value || 0) || 0)
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            item = Math.abs(parseInt(value || 0) || 0);
         }
 
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
-            }))
+            }));
         }
 
         if (!todoData.list[--item]) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside your to-do list.'
-            }))
+            }));
         }
-        await this.db.update(todoData, { $pull: { list: todoData.list[item++] } })
+        await this.db.update(todoData, { $pull: { list: todoData.list[item++] } });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Removed item \`${item}\` from your to-do list.`
-        }))
+        }));
     }
 
     /**
@@ -200,16 +199,16 @@ module.exports = class TodoCommand extends Command {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'clear your to-do list')
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'clear your to-do list');
+        if (!confirmed) return;
 
-        await this.db.delete(todoData)
+        await this.db.delete(todoData);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Your to-do list has been cleared.'
-        }))
+        }));
     }
-}
+};

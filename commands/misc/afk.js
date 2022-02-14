@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -36,7 +35,7 @@ module.exports = class AfkCommand extends Command {
                     required: true
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -46,40 +45,40 @@ module.exports = class AfkCommand extends Command {
      * @param {string} args.status The status to set or `off`
      */
     async run({ message, interaction }, { status }) {
-        const { guildId, guild } = message || interaction
-        const author = message?.author || interaction.user
-        const db = guild.database.afk
+        const { guildId, guild } = message || interaction;
+        const author = message?.author || interaction.user;
+        const db = guild.database.afk;
 
-        const afkStatus = await db.fetch({ guild: guildId, user: author.id })
+        const afkStatus = await db.fetch({ guild: guildId, user: author.id });
 
         if (afkStatus) {
             if (status.toLowerCase() === 'off') {
-                await afkStatus.deleteOne()
+                await afkStatus.deleteOne();
                 return await replyAll({ message, interaction }, basicEmbed({
                     color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status`
-                }))
+                }));
             }
 
-            await afkStatus.updateOne({ status })
+            await afkStatus.updateOne({ status });
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'GREEN', emoji: 'check', fieldName: 'I updated your AFK status to:', fieldValue: status
-            }))
+            }));
         }
 
         if (status.toLowerCase() === 'off') {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'You can\'t set your status as `off`'
-            }))
+            }));
         }
 
         await db.add({
             guild: guildId,
             user: author.id,
             status
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', fieldName: 'I set your AFK status as:', fieldValue: status
-        }))
+        }));
     }
-}
+};

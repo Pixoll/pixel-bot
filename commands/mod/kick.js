@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { GuildMember, TextChannel } = require('discord.js')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { GuildMember, TextChannel } = require('discord.js');
 const {
     docId, basicEmbed, memberException, userException, inviteButton, confirmButtons, replyAll
-} = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
-const { CommandInstances } = require('../../command-handler/typings')
+} = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -56,7 +55,7 @@ module.exports = class KickCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -71,28 +70,28 @@ module.exports = class KickCommand extends Command {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
-            reason ??= 'No reason given.'
+            reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { guild, guildId, member: mod } = message || interaction
-        const author = message?.author || interaction.user
-        const { user } = member
+        const { guild, guildId, member: mod } = message || interaction;
+        const author = message?.author || interaction.user;
+        const { user } = member;
 
-        const uExcept = userException(user, author, this)
-        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
+        const uExcept = userException(user, author, this);
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept));
 
-        const mExcept = memberException(member, mod, this)
-        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
+        const mExcept = memberException(member, mod, this);
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept));
 
-        const confirmed = await confirmButtons({ message }, 'kick', user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message }, 'kick', user, { reason });
+        if (!confirmed) return;
 
         if (!user.bot) {
             const embed = basicEmbed({
@@ -104,18 +103,18 @@ module.exports = class KickCommand extends Command {
 
                     *The invite will expire in 1 week.*
                 `
-            })
+            });
 
             /** @type {TextChannel} */
-            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
+            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first();
             const button = inviteButton(
                 await channel.createInvite({ maxAge: 604_800, maxUses: 1 })
-            )
+            );
 
-            await user.send({ embeds: [embed], components: [button] }).catch(() => null)
+            await user.send({ embeds: [embed], components: [button] }).catch(() => null);
         }
 
-        await member.kick(reason)
+        await member.kick(reason);
 
         await guild.database.moderations.add({
             _id: docId(),
@@ -126,13 +125,13 @@ module.exports = class KickCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been kicked`,
             fieldValue: `**Reason:** ${reason}`
-        }))
+        }));
     }
-}
+};

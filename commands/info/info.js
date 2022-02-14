@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { version, description } = require('../../package.json')
-const { replyAll } = require('../../utils/functions')
-const myMs = require('../../utils/my-ms')
-const { MessageEmbed, version: djsVersion } = require('discord.js')
-const { stripIndent, oneLine } = require('common-tags')
-const { CommandInstances } = require('../../command-handler/typings')
+const { Command, CommandInstances, version: pixComVersion } = require('pixoll-commando');
+const { version, description } = require('../../package.json');
+const { replyAll } = require('../../utils/functions');
+const myMs = require('../../utils/my-ms');
+const { MessageEmbed, version: djsVersion } = require('discord.js');
+const { stripIndent, oneLine } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -18,7 +17,7 @@ module.exports = class InfoCommand extends Command {
             description: 'Displays some information about the bot.',
             guarded: true,
             slash: true
-        })
+        });
     }
 
     /**
@@ -26,12 +25,12 @@ module.exports = class InfoCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { user, owners, options, uptime } = this.client
-        const guilds = this.client.guilds.cache
+        const { user, owners, options, uptime } = this.client;
+        const guilds = this.client.guilds.cache;
 
-        const uptimeStr = myMs(uptime, { long: true, length: 2, showMs: false })
-        const topgg = 'https://top.gg/bot/802267523058761759'
-        const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString()
+        const uptimeStr = myMs(uptime, { long: true, length: 2, showMs: false });
+        const topgg = 'https://top.gg/bot/802267523058761759';
+        const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString();
 
         const info = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -43,6 +42,7 @@ module.exports = class InfoCommand extends Command {
             .addField('Information', stripIndent`
                 **Version:** ${version}
                 **Library:** [discord.js v${djsVersion}](https://discord.js.org/#/)
+                **Framework:** [pixoll-commando v${pixComVersion}](https://github.com/Pixoll/Commando-v13)
                 **Developer:** ${owners[0].toString()} (${owners[0].tag})
             `, true)
             .addField('Links', oneLine`
@@ -52,8 +52,8 @@ module.exports = class InfoCommand extends Command {
                 [Vote here](${topgg}/vote)
             `, true)
             .setFooter({ text: `Uptime: ${uptimeStr}` })
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, info)
+        await replyAll({ message, interaction }, info);
     }
-}
+};

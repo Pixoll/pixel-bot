@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { GuildMember } = require('discord.js')
-const { stripIndent } = require('common-tags')
-const { docId, isMod, basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances, CommandoMessage } = require('pixoll-commando');
+const { GuildMember } = require('discord.js');
+const { stripIndent } = require('common-tags');
+const { docId, isMod, basicEmbed, confirmButtons, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -12,19 +11,19 @@ const { docId, isMod, basicEmbed, confirmButtons, replyAll } = require('../../ut
  * @param {GuildMember} member The member to validate
  */
 function validMember(msg, member) {
-    if (!member) return false
+    if (!member) return false;
 
-    const { author, guild, client } = msg
-    const { user } = member
-    const authorId = author.id
+    const { author, guild, client } = msg;
+    const { user } = member;
+    const authorId = author.id;
 
     if (user.id !== client.user.id && user.id !== authorId) {
-        if (!member.bannable) return false
-        if (guild.ownerId === authorId) return true
-        if (isMod(member)) return false
-        return true
+        if (!member.bannable) return false;
+        if (guild.ownerId === authorId) return true;
+        if (isMod(member)) return false;
+        return true;
     } else {
-        return true
+        return true;
     }
 }
 
@@ -57,30 +56,30 @@ module.exports = class MultiBanCommand extends Command {
                     prompt: 'What members do you want to ban?',
                     type: 'string',
                     validate: async (val, msg, arg) => {
-                        const type = msg.client.registry.types.get('member')
-                        const array = val.split(/\s*,\s*/).slice(0, 30)
-                        const valid = []
+                        const type = msg.client.registry.types.get('member');
+                        const array = val.split(/\s*,\s*/).slice(0, 30);
+                        const valid = [];
                         for (const str of array) {
-                            const con1 = await type.validate(str, msg, arg)
-                            if (!con1) valid.push(false)
-                            const con2 = validMember(msg, await type.parse(str, msg))
-                            valid.push(con2)
+                            const con1 = await type.validate(str, msg, arg);
+                            if (!con1) valid.push(false);
+                            const con2 = validMember(msg, await type.parse(str, msg));
+                            valid.push(con2);
                         }
-                        return valid.filter(b => b !== true).length !== array.length
+                        return valid.filter(b => b !== true).length !== array.length;
                     },
                     parse: async (val, msg, arg) => {
-                        const type = msg.client.registry.types.get('member')
-                        const array = val.split(/\s*,\s*/).slice(0, 30)
-                        const valid = []
+                        const type = msg.client.registry.types.get('member');
+                        const array = val.split(/\s*,\s*/).slice(0, 30);
+                        const valid = [];
                         for (const str of array) {
-                            const con1 = await type.validate(str, msg, arg)
-                            if (!con1) valid.push(false)
-                            const member = await type.parse(str, msg)
-                            const con2 = validMember(msg, member)
-                            if (!con2) continue
-                            valid.push(member)
+                            const con1 = await type.validate(str, msg, arg);
+                            if (!con1) valid.push(false);
+                            const member = await type.parse(str, msg);
+                            const con2 = validMember(msg, member);
+                            if (!con2) continue;
+                            valid.push(member);
                         }
-                        return valid
+                        return valid;
                     },
                     error: 'None of the members you specified were valid. Please try again.'
                 }
@@ -101,7 +100,7 @@ module.exports = class MultiBanCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -113,36 +112,36 @@ module.exports = class MultiBanCommand extends Command {
      */
     async run({ message, interaction }, { reason, members }) {
         if (interaction) {
-            const arg = this.argsCollector.args[1]
-            const msg = await interaction.fetchReply()
-            const isValid = await arg.validate(members, msg)
+            const arg = this.argsCollector.args[1];
+            const msg = await interaction.fetchReply();
+            const isValid = await arg.validate(members, msg);
             if (isValid !== true) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: arg.error
-                }))
+                }));
             }
-            members = await arg.parse(members, msg)
-            reason ??= 'No reason given.'
+            members = await arg.parse(members, msg);
+            reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { guild, guildId } = message || interaction
-        const author = message?.author || interaction.user
-        const manager = guild.members
+        const { guild, guildId } = message || interaction;
+        const author = message?.author || interaction.user;
+        const manager = guild.members;
 
         const embed = n => basicEmbed({
             color: 'GOLD', emoji: 'loading', description: `Banned ${n}/${members.length} members...`
-        })
-        const toEdit = await message?.replyEmbed(embed(0)) || await interaction.channel.send({ embeds: [embed(0)] })
+        });
+        const toEdit = await message?.replyEmbed(embed(0)) || await interaction.channel.send({ embeds: [embed(0)] });
 
-        const banned = []
+        const banned = [];
         for (const { user } of members) {
-            const confirmed = await confirmButtons({ message, interaction }, 'ban', user, { reason }, false)
-            if (!confirmed) continue
+            const confirmed = await confirmButtons({ message, interaction }, 'ban', user, { reason }, false);
+            if (!confirmed) continue;
 
             if (!user.bot) {
                 await user.send({
@@ -154,10 +153,10 @@ module.exports = class MultiBanCommand extends Command {
                             **Moderator:** ${author.toString()} ${author.tag}
                         `
                     })]
-                }).catch(() => null)
+                }).catch(() => null);
             }
 
-            await manager.ban(user, { days: 7, reason })
+            await manager.ban(user, { days: 7, reason });
 
             await guild.database.moderations.add({
                 _id: docId(),
@@ -168,10 +167,10 @@ module.exports = class MultiBanCommand extends Command {
                 modId: author.id,
                 modTag: author.tag,
                 reason
-            })
+            });
 
-            banned.push(user)
-            await toEdit.edit({ embeds: [embed(banned.length)] }).catch(() => null)
+            banned.push(user);
+            await toEdit.edit({ embeds: [embed(banned.length)] }).catch(() => null);
         }
 
         const options = banned.length !== 0 ? {
@@ -181,9 +180,9 @@ module.exports = class MultiBanCommand extends Command {
             fieldValue: banned.map(u => u.toString()).join(', ')
         } : {
             color: 'RED', emoji: 'cross', description: 'No members were banned.'
-        }
+        };
 
-        await toEdit?.delete().catch(() => null)
-        await replyAll({ message, interaction }, { embeds: [basicEmbed(options)], components: [] })
+        await toEdit?.delete().catch(() => null);
+        await replyAll({ message, interaction }, { embeds: [basicEmbed(options)], components: [] });
     }
-}
+};

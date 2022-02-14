@@ -1,14 +1,13 @@
 /* eslint-disable no-unused-vars */
-const util = require('util')
-const { Util: { splitMessage } } = require('discord.js')
-const { stripIndents } = require('common-tags')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
+const util = require('util');
+const { Util: { splitMessage } } = require('discord.js');
+const { stripIndents } = require('common-tags');
+const { Command, CommandInstances } = require('pixoll-commando');
 /* eslint-enable no-unused-vars */
 
 /** @param {string} str */
 function escapeRegex(str) {
-    return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+    return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
 }
 
 /** A command that can be run in a client */
@@ -28,10 +27,10 @@ module.exports = class EvalCommand extends Command {
                 prompt: 'What code would you like to evaluate?',
                 type: 'string'
             }]
-        })
+        });
 
-        this.lastResult = null
-        this._sensitivePattern = null
+        this.lastResult = null;
+        this._sensitivePattern = null;
     }
 
     /**
@@ -43,27 +42,27 @@ module.exports = class EvalCommand extends Command {
     run({ message }, { script }) {
         // Remove any surrounding code blocks before evaluation
         if (script.startsWith('```') && script.endsWith('```')) {
-            script = script.replace(/(^.*?\s)|(\n.*$)/g, '')
+            script = script.replace(/(^.*?\s)|(\n.*$)/g, '');
         }
 
         // Run the code and measure its execution time
-        let hrDiff
+        let hrDiff;
         try {
-            const hrStart = process.hrtime()
+            const hrStart = process.hrtime();
             // eslint-disable-next-line no-eval
-            this.lastResult = eval(script)
-            hrDiff = process.hrtime(hrStart)
+            this.lastResult = eval(script);
+            hrDiff = process.hrtime(hrStart);
         } catch (err) {
-            return message.reply(`Error while evaluating: \`${err}\``)
+            return message.reply(`Error while evaluating: \`${err}\``);
         }
 
         // Prepare for callback time and respond
-        this.hrStart = process.hrtime()
-        const result = this.makeResultMessages(this.lastResult, hrDiff, script)
+        this.hrStart = process.hrtime();
+        const result = this.makeResultMessages(this.lastResult, hrDiff, script);
         if (Array.isArray(result)) {
-            return result.map(item => message.reply(item))
+            return result.map(item => message.reply(item));
         } else {
-            return message.reply(result)
+            return message.reply(result);
         }
     }
 
@@ -71,39 +70,39 @@ module.exports = class EvalCommand extends Command {
         const inspected = util.inspect(result, { depth: 0 })
             .replace(/!!NL!!/g, '\n')
             .replace(this.sensitivePattern, '--snip--')
-            .replace(escapeRegex(`/${this.client.token}/gi`), '--snip--')
-        const split = inspected.split('\n')
-        const last = inspected.length - 1
-        const prependPart = inspected[0] !== '{' && inspected[0] !== '[' && inspected[0] !== "'" ? split[0] : inspected[0]
+            .replace(escapeRegex(`/${this.client.token}/gi`), '--snip--');
+        const split = inspected.split('\n');
+        const last = inspected.length - 1;
+        const prependPart = inspected[0] !== '{' && inspected[0] !== '[' && inspected[0] !== "'" ? split[0] : inspected[0];
         const appendPart = inspected[last] !== '}' && inspected[last] !== ']' && inspected[last] !== "'" ?
             split[split.length - 1] :
-            inspected[last]
-        const prepend = `\`\`\`js\n${prependPart}\n`
-        const append = `\n${appendPart}\n\`\`\``
+            inspected[last];
+        const prepend = `\`\`\`js\n${prependPart}\n`;
+        const append = `\n${appendPart}\n\`\`\``;
         if (input) {
             return splitMessage(stripIndents`
 				*Executed in ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1_000_000}ms.*
 				\`\`\`js
 				${inspected}
 				\`\`\`
-			`, { maxLength: 1900, prepend, append })
+			`, { maxLength: 1900, prepend, append });
         } else {
             return splitMessage(stripIndents`
 				*Callback executed after ${hrDiff[0] > 0 ? `${hrDiff[0]}s ` : ''}${hrDiff[1] / 1_000_000}ms.*
 				\`\`\`js
 				${inspected}
 				\`\`\`
-			`, { maxLength: 1900, prepend, append })
+			`, { maxLength: 1900, prepend, append });
         }
     }
 
     get sensitivePattern() {
         if (!this._sensitivePattern) {
-            const client = this.client
-            let pattern = ''
-            if (client.token) pattern += escapeRegex(client.token)
-            this._sensitivePattern = new RegExp(pattern, 'gi')
+            const client = this.client;
+            let pattern = '';
+            if (client.token) pattern += escapeRegex(client.token);
+            this._sensitivePattern = new RegExp(pattern, 'gi');
         }
-        return this._sensitivePattern
+        return this._sensitivePattern;
     }
-}
+};

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -35,7 +34,7 @@ module.exports = class DiscriminatorCommand extends Command {
                     maxValue: 9999
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -45,27 +44,27 @@ module.exports = class DiscriminatorCommand extends Command {
      * @param {string} args.discriminator The discriminator to filter displayed members
      */
     async run({ message, interaction }, { discriminator }) {
-        const { guild } = message || interaction
-        const members = guild.members.cache
+        const { guild } = message || interaction;
+        const members = guild.members.cache;
 
         if (interaction) {
-            discriminator = discriminator.toString().padStart(4, '0').slice(-4)
+            discriminator = discriminator.toString().padStart(4, '0').slice(-4);
         }
 
         const match = members.filter(m => m.user.discriminator === discriminator)
             .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
-            .map(m => `${m.toString()} ${m.user.tag}`)
+            .map(m => `${m.toString()} ${m.user.tag}`);
 
         if (!match || match.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find any members.'
-            }))
+            }));
         }
 
         await generateEmbed({ message, interaction }, match, {
             number: 20,
             authorName: `Found ${pluralize('member', match.length)}`,
             useDescription: true
-        })
+        });
     }
-}
+};

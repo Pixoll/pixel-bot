@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed, Role } = require('discord.js')
-const { getKeyPerms, replyAll } = require('../../utils/functions')
-const { stripIndent, oneLine } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageEmbed, Role } = require('discord.js');
+const { getKeyPerms, replyAll } = require('../../utils/functions');
+const { stripIndent, oneLine } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -33,7 +32,7 @@ module.exports = class RoleInfoCommand extends Command {
                     required: true
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -43,11 +42,11 @@ module.exports = class RoleInfoCommand extends Command {
      * @param {Role} args.role The role to get information about
      */
     async run({ message, interaction }, { role }) {
-        const { hexColor, id, name, hoist, position, mentionable, members, createdTimestamp, unicodeEmoji } = role
-        const color = hexColor === '#000000' ? null : hexColor
-        const colorURL = color ? `https://www.colorhexa.com/${color.replace('#', '')}.png` : null
-        const url = role.iconURL({ size: 2048 }) || colorURL
-        const permissions = getKeyPerms(role)
+        const { hexColor, id, name, hoist, position, mentionable, members, createdTimestamp, unicodeEmoji } = role;
+        const color = hexColor === '#000000' ? null : hexColor;
+        const colorURL = color ? `https://www.colorhexa.com/${color.replace('#', '')}.png` : null;
+        const url = role.iconURL({ size: 2048 }) || colorURL;
+        const permissions = getKeyPerms(role);
 
         const roleInfo = new MessageEmbed()
             .setColor(color || '#4c9f4c')
@@ -62,12 +61,12 @@ module.exports = class RoleInfoCommand extends Command {
                 **Members:** ${members.size}
             `)
             .setFooter({ text: `Role ID: ${id} • Created at` })
-            .setTimestamp(createdTimestamp)
+            .setTimestamp(createdTimestamp);
 
-        if (url) roleInfo.setThumbnail(url)
+        if (url) roleInfo.setThumbnail(url);
 
-        if (permissions !== 'None') roleInfo.addField('Mod permissions', permissions)
+        if (permissions !== 'None') roleInfo.addField('Mod permissions', permissions);
 
-        await replyAll({ message, interaction }, roleInfo)
+        await replyAll({ message, interaction }, roleInfo);
     }
-}
+};

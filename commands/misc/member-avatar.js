@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageActionRow, MessageButton, GuildMember, MessageEmbed } = require('discord.js')
-const { replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageActionRow, MessageButton, GuildMember, MessageEmbed } = require('discord.js');
+const { replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -34,7 +33,7 @@ module.exports = class MemberAvatarCommand extends Command {
                     description: 'The member to get the avatar from.'
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -44,10 +43,10 @@ module.exports = class MemberAvatarCommand extends Command {
      * @param {GuildMember} args.member The user to get the avatar from
      */
     async run({ message, interaction }, { member }) {
-        member ??= (message || interaction).member
-        const { user, displayName } = member
+        member ??= (message || interaction).member;
+        const { user, displayName } = member;
 
-        const avatar = member.displayAvatarURL({ dynamic: true, size: 2048 })
+        const avatar = member.displayAvatarURL({ dynamic: true, size: 2048 });
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -55,7 +54,7 @@ module.exports = class MemberAvatarCommand extends Command {
                 name: `${user.tag} • AKA. ${displayName}`, iconURL: user.displayAvatarURL({ dynamic: true })
             })
             .setImage(avatar)
-            .setTimestamp()
+            .setTimestamp();
 
         const row = new MessageActionRow()
             .addComponents(
@@ -63,8 +62,8 @@ module.exports = class MemberAvatarCommand extends Command {
                     .setStyle('LINK')
                     .setLabel('Download')
                     .setURL(avatar)
-            )
+            );
 
-        await replyAll({ message, interaction }, { embeds: [embed], components: [row] })
+        await replyAll({ message, interaction }, { embeds: [embed], components: [row] });
     }
-}
+};

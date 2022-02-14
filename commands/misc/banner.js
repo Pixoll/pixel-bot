@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { User, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
+const { basicEmbed, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -28,7 +27,7 @@ module.exports = class BannerCommand extends Command {
                     description: 'The user to get the banner from.'
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -38,15 +37,15 @@ module.exports = class BannerCommand extends Command {
      * @param {User} args.user The user to get the banner from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) user = user?.user ?? user ?? interaction.user
-        if (message) user ??= message.author
-        user = await user.fetch()
+        if (interaction) user = user?.user ?? user ?? interaction.user;
+        if (message) user ??= message.author;
+        user = await user.fetch();
 
-        const banner = user.bannerURL({ dynamic: true, size: 2048 })
+        const banner = user.bannerURL({ dynamic: true, size: 2048 });
         if (!banner) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no banner on their profile.'
-            }))
+            }));
         }
 
         const embed = new MessageEmbed()
@@ -55,7 +54,7 @@ module.exports = class BannerCommand extends Command {
                 name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
             })
             .setImage(banner)
-            .setTimestamp()
+            .setTimestamp();
 
         const row = new MessageActionRow()
             .addComponents(
@@ -63,8 +62,8 @@ module.exports = class BannerCommand extends Command {
                     .setStyle('LINK')
                     .setLabel('Download')
                     .setURL(banner)
-            )
+            );
 
-        await replyAll({ message, interaction }, { embeds: [embed], components: [row] })
+        await replyAll({ message, interaction }, { embeds: [embed], components: [row] });
     }
-}
+};

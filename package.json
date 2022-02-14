@@ -1,21 +1,25 @@
 {
   "name": "pixel",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
   "dependencies": {
+    "better-ms": "^1.1.7",
     "common-tags": "1.8.2",
-    "discord.js": "13.5.1",
+    "discord.js": "13.6.0",
     "discord.js-structures": "1.0.3",
     "dotenv": "10.0.0",
     "emoji-regex": "10.0.0",
     "lodash": "4.17.21",
     "minecraft-server-util": "5.2.8",
     "mongoose": "6.1.5",
+    "pixoll-commando": "^0.13.6",
     "require-all": "3.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "tsc.cmd",
+    "lint": "eslint . --ext .ts",
+    "lint:layout": "eslint . --ext .ts --fix --fix-type layout"
   },
   "engines": {
     "node": "16.x",
@@ -32,11 +36,12 @@
   },
   "homepage": "https://github.com/Pixoll/pixel-bot/#readme",
   "devDependencies": {
-    "canvas": "2.8.0",
-    "eslint": "7.32.0",
-    "eslint-config-standard": "16.0.3",
-    "eslint-plugin-import": "2.25.4",
-    "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "5.1.1"
+    "@types/common-tags": "^1.8.1",
+    "@types/lodash": "^4.14.178",
+    "@types/require-all": "^3.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
+    "canvas": "^2.8.0",
+    "eslint": "^8.8.0"
   }
 }

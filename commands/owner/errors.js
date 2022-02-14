@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances, CommandoMessage } = require('../../command-handler/typings')
-const { basicEmbed, generateEmbed, getArgument } = require('../../utils/functions')
-const { ErrorSchema } = require('../../schemas/types')
+const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js');
+const { Command, CommandInstances, CommandoMessage } = require('pixoll-commando');
+const { basicEmbed, generateEmbed, getArgument } = require('../../utils/functions');
+const { ErrorSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -32,9 +31,9 @@ module.exports = class ErrorsCommand extends Command {
                     required: false
                 }
             ]
-        })
+        });
 
-        this.db = this.client.database.errors
+        this.db = this.client.database.errors;
     }
 
     /**
@@ -45,19 +44,19 @@ module.exports = class ErrorsCommand extends Command {
      * @param {string} args.errorId The ID of the error to remove
      */
     async run({ message }, { subCommand, errorId }) {
-        subCommand = subCommand.toLowerCase()
-        const errors = await this.db.fetchMany()
+        subCommand = subCommand.toLowerCase();
+        const errors = await this.db.fetchMany();
         if (errors.size === 0) {
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There have been no errors or bugs lately.'
-            }))
+            }));
         }
 
         switch (subCommand) {
             case 'view':
-                return await this.view(message, errors)
+                return await this.view(message, errors);
             case 'remove':
-                return await this.remove(message, errorId)
+                return await this.remove(message, errorId);
         }
     }
 
@@ -68,7 +67,7 @@ module.exports = class ErrorsCommand extends Command {
      */
     async view(message, errors) {
         const errorsList = errors.map(val => {
-            const whatCommand = val.command ? ` at '${val.command}' command` : ''
+            const whatCommand = val.command ? ` at '${val.command}' command` : '';
 
             return {
                 _id: val._id,
@@ -76,8 +75,8 @@ module.exports = class ErrorsCommand extends Command {
                 message: val.name + whatCommand + (val.message ? (': ' + '``' + val.message + '``') : ''),
                 createdAt: val.createdAt,
                 files: val.files
-            }
-        })
+            };
+        });
 
         const filterMenu = new MessageActionRow().addComponents(
             new MessageSelectMenu()
@@ -93,7 +92,7 @@ module.exports = class ErrorsCommand extends Command {
                     { label: 'Uncaught exception monitor', value: 'Uncaught exception monitor' },
                     { label: 'Process warning', value: 'Process warning' },
                 ])
-        )
+        );
 
         await generateEmbed({ message }, errorsList, {
             number: 3,
@@ -104,7 +103,7 @@ module.exports = class ErrorsCommand extends Command {
             keysExclude: ['type', '_id'],
             useDocId: true,
             components: [filterMenu]
-        })
+        });
     }
 
     /**
@@ -114,21 +113,21 @@ module.exports = class ErrorsCommand extends Command {
      */
     async remove(message, errorId) {
         if (message && !errorId) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            errorId = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            errorId = value;
         }
 
-        const doc = await this.db.fetch(errorId)
+        const doc = await this.db.fetch(errorId);
         if (!doc) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'I couldn\'t find the error you were looking for.'
-            }))
+            }));
         }
-        await this.db.delete(doc)
+        await this.db.delete(doc);
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Error with ID \`${doc._id}\` has been successfully removed.`
-        }))
+        }));
     }
-}
+};

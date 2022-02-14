@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { MessageEmbed } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { ModuleSchema } = require('../../schemas/types')
-const { replyAll, customEmoji } = require('../../utils/functions')
+const { stripIndent } = require('common-tags');
+const { MessageEmbed } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { ModuleSchema } = require('../../schemas/types');
+const { replyAll, customEmoji } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -12,7 +11,7 @@ const { replyAll, customEmoji } = require('../../utils/functions')
  * @param {ModuleSchema} data The data to patch
  */
 function patchData(data) {
-    const _patch = b => b === true ? `Enabled ${customEmoji('online')}` : `Disabled ${customEmoji('dnd')}`
+    const _patch = b => b === true ? `Enabled ${customEmoji('online')}` : `Disabled ${customEmoji('dnd')}`;
 
     const patch = {
         // chatFilter: _patch(data?.chatFilter),
@@ -36,9 +35,9 @@ function patchData(data) {
             users: _patch(data?.auditLogs?.users),
             voice: _patch(data?.auditLogs?.voice)
         }
-    }
+    };
 
-    return patch
+    return patch;
 }
 
 /** A command that can be run in a client */
@@ -52,7 +51,7 @@ module.exports = class ModulesCommand extends Command {
             guarded: true,
             guildOnly: true,
             slash: true
-        })
+        });
     }
 
     /**
@@ -60,15 +59,15 @@ module.exports = class ModulesCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { guild } = message || interaction
+        const { guild } = message || interaction;
 
-        const data = await guild.database.modules.fetch()
-        const patch = patchData(data)
-        const { auditLogs, /* chatFilter, */ welcome, stickyRoles } = patch
+        const data = await guild.database.modules.fetch();
+        const patch = patchData(data);
+        const { auditLogs, /* chatFilter, */ welcome, stickyRoles } = patch;
         const {
             boosts, channels, commands, emojis, events, invites, members, messages, moderation, modules, roles, server,
             stickers, threads, users, voice
-        } = auditLogs
+        } = auditLogs;
 
         // **Chat filter:** ${chatFilter}
 
@@ -98,8 +97,8 @@ module.exports = class ModulesCommand extends Command {
                 \u2800⤷ **Users:** ${users}
                 \u2800⤷ **Voice:** ${voice}
             `)
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, embed)
+        await replyAll({ message, interaction }, embed);
     }
-}
+};

@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { oneLine } = require('common-tags')
-const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { oneLine } = require('common-tags');
+const { User, MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -32,7 +31,7 @@ module.exports = class ModLogsCommand extends Command {
                     description: 'The moderator to check their mod logs.'
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -42,19 +41,19 @@ module.exports = class ModLogsCommand extends Command {
      * @param {User} args.user The user to get the mod logs from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) user &&= user.user ?? user
+        if (interaction) user &&= user.user ?? user;
 
-        const { guild } = message || interaction
-        const db = guild.database.moderations
+        const { guild } = message || interaction;
+        const db = guild.database.moderations;
 
-        const modLogs = await db.fetchMany(user ? { modId: user.id } : {})
+        const modLogs = await db.fetchMany(user ? { modId: user.id } : {});
         if (modLogs.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no moderation logs.'
-            }))
+            }));
         }
 
-        const intMsg = await interaction?.fetchReply()
+        const intMsg = await interaction?.fetchReply();
 
         const filterMenu = new MessageActionRow().addComponents(
             new MessageSelectMenu()
@@ -70,9 +69,9 @@ module.exports = class ModLogsCommand extends Command {
                     { label: 'Mutes', value: 'mute', emoji: '🔇' },
                     { label: 'Warns', value: 'warn', emoji: '⚠' },
                 ])
-        )
+        );
 
-        const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
+        const avatarURL = user?.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true });
 
         await generateEmbed({ message, interaction }, modLogs.toJSON(), {
             authorName: oneLine`
@@ -85,6 +84,6 @@ module.exports = class ModLogsCommand extends Command {
             keysExclude: ['updatedAt', 'guild', user ? ('modId', 'modTag') : null],
             useDocId: true,
             components: [filterMenu]
-        })
+        });
     }
-}
+};

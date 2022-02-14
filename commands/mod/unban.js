@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { User } = require('discord.js')
-const { basicEmbed, confirmButtons, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { User } = require('discord.js');
+const { basicEmbed, confirmButtons, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -54,7 +53,7 @@ module.exports = class UnbanCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -66,38 +65,38 @@ module.exports = class UnbanCommand extends Command {
      */
     async run({ message, interaction }, { user, reason }) {
         if (interaction) {
-            user = user.user || user
-            reason ??= 'No reason given.'
+            user = user.user || user;
+            reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { members, bans, database } = (message || interaction).guild
-        const { active } = database
+        const { members, bans, database } = (message || interaction).guild;
+        const { active } = database;
 
-        const isBanned = await bans.fetch(user).catch(() => null)
+        const isBanned = await bans.fetch(user).catch(() => null);
         if (!isBanned) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is not banned.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'unban', user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'unban', user, { reason });
+        if (!confirmed) return;
 
-        await members.unban(user, reason)
+        await members.unban(user, reason);
 
-        const data = await active.fetch({ type: 'temp-ban', user: { id: user.id } })
-        if (data) await active.delete(data)
+        const data = await active.fetch({ type: 'temp-ban', user: { id: user.id } });
+        if (data) await active.delete(data);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been unbanned`,
             fieldValue: `**Reason:** ${reason}`
-        }))
+        }));
     }
-}
+};

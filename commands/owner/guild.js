@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent, oneLine } = require('common-tags')
-const { TextChannel, Invite, Collection } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandoMessage, CommandoGuild } = require('../../command-handler/typings')
-const { basicEmbed, getArgument, inviteButton, confirmButtons } = require('../../utils/functions')
+const { stripIndent, oneLine } = require('common-tags');
+const { TextChannel, Invite, Collection } = require('discord.js');
+const { Command, CommandInstances, CommandoGuild } = require('pixoll-commando');
+const { basicEmbed, getArgument, inviteButton, confirmButtons } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -42,7 +41,7 @@ module.exports = class GuildCommand extends Command {
                     required: false
                 }
             ]
-        })
+        });
     }
 
     /**
@@ -54,28 +53,28 @@ module.exports = class GuildCommand extends Command {
      * @param {string} args.reason Why the bot is leaving such guild
      */
     async run({ message }, { subCommand, guildId, reason }) {
-        subCommand = subCommand.toLowerCase()
-        guildId = guildId.toLowerCase()
+        subCommand = subCommand.toLowerCase();
+        guildId = guildId.toLowerCase();
 
-        const guilds = this.client.guilds.cache
-        const find = val => g => g.name.toLowerCase() === val || g.name.toLowerCase().includes(val)
-        let guild = guilds.get(guildId) || guilds.find(find(guildId))
+        const guilds = this.client.guilds.cache;
+        const find = val => g => g.name.toLowerCase() === val || g.name.toLowerCase().includes(val);
+        let guild = guilds.get(guildId) || guilds.find(find(guildId));
 
         if (message) {
             while (!guild || !guild._commando) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                guild = guilds.get(value) || guilds.find(find(value))
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                guild = guilds.get(value) || guilds.find(find(value));
             }
         }
 
         switch (subCommand) {
             case 'info':
-                return await this.info(message, guild)
+                return await this.info(message, guild);
             case 'invite':
-                return await this.invite(message, guild)
+                return await this.invite(message, guild);
             case 'remove':
-                return await this.remove(message, guild, reason)
+                return await this.remove(message, guild, reason);
         }
     }
 
@@ -85,9 +84,9 @@ module.exports = class GuildCommand extends Command {
      * @param {CommandoGuild} guild The guild to get information from
      */
     async info(message, guild) {
-        const serverInfo = this.client.registry.resolveCommand('server-info')
-        const embed = await serverInfo.run({ message }, guild)
-        await message.replyEmbed(embed)
+        const serverInfo = this.client.registry.resolveCommand('server-info');
+        const embed = await serverInfo.run({ message }, guild);
+        await message.replyEmbed(embed);
     }
 
     /**
@@ -97,15 +96,15 @@ module.exports = class GuildCommand extends Command {
      */
     async invite(message, guild) {
         /** @type {TextChannel} */
-        const channel = guild.channels.cache.filter(ch => ch.type === 'GUILD_TEXT').first()
+        const channel = guild.channels.cache.filter(ch => ch.type === 'GUILD_TEXT').first();
         /** @type {Collection<string, Invite>} */
-        const invites = await guild.invites.fetch().catch(() => null)
-        const invite = invites?.first() || await channel.createInvite({ maxUses: 1 })
+        const invites = await guild.invites.fetch().catch(() => null);
+        const invite = invites?.first() || await channel.createInvite({ maxUses: 1 });
 
         await message.reply({
             content: `Click the button bellow to join **${guild.name}**`,
             components: [inviteButton(invite, 'Join')]
-        })
+        });
     }
 
     /**
@@ -115,13 +114,13 @@ module.exports = class GuildCommand extends Command {
      * @param {string} reason Why the bot is leaving such guild
      */
     async remove(message, guild, reason) {
-        const guildOwner = await guild.fetchOwner()
-        const botOwner = this.client.owners[0]
+        const guildOwner = await guild.fetchOwner();
+        const botOwner = this.client.owners[0];
 
         const confirmed = await confirmButtons(
             message, 'remove guild', guild, { reason: reason || 'No reason given.' }
-        )
-        if (!confirmed) return
+        );
+        if (!confirmed) return;
 
         await guildOwner.send({
             embeds: [basicEmbed({
@@ -135,11 +134,11 @@ module.exports = class GuildCommand extends Command {
                     **The bot will be removed from your server in 30 seconds.**
                 `
             })]
-        })
+        });
 
-        await guild.leave()
+        await guild.leave();
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description: `The bot has been removed from **${guild.name}.**`
-        }))
+        }));
     }
-}
+};

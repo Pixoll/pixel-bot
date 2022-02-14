@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { GuildMember } = require('discord.js')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { GuildMember } = require('discord.js');
 const {
     userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed, getArgument
-} = require('../../utils/functions')
-const myMs = require('../../utils/my-ms')
-const { stripIndent } = require('common-tags')
+} = require('../../utils/functions');
+const myMs = require('../../utils/my-ms');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -105,7 +104,7 @@ module.exports = class TimeOutCommand extends Command {
                 ]
             },
             test: true
-        })
+        });
     }
 
     /**
@@ -118,36 +117,36 @@ module.exports = class TimeOutCommand extends Command {
      * @param {string} args.reason The reason of the time-out
      */
     async run({ message, interaction }, { subCommand, member, duration, reason }) {
-        subCommand = subCommand.toLowerCase()
+        subCommand = subCommand.toLowerCase();
 
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
             if (subCommand === 'set') {
-                const arg = this.argsCollector.args[2]
-                duration = await arg.parse(duration).catch(() => null) || null
+                const arg = this.argsCollector.args[2];
+                duration = await arg.parse(duration).catch(() => null) || null;
                 if (!duration) {
                     return await replyAll({ interaction }, basicEmbed({
                         color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                    }))
+                    }));
                 }
             }
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
-        reason ??= 'No reason given.'
+        reason ??= 'No reason given.';
 
         switch (subCommand) {
             case 'set':
-                return await this.set({ message, interaction }, member, duration, reason)
+                return await this.set({ message, interaction }, member, duration, reason);
             case 'remove':
-                return await this.remove({ message, interaction }, member, reason)
+                return await this.remove({ message, interaction }, member, reason);
         }
     }
 
@@ -159,43 +158,43 @@ module.exports = class TimeOutCommand extends Command {
      * @param {string} reason The reason of the time-out
      */
     async set({ message, interaction }, member, duration, reason) {
-        const now = Date.now()
+        const now = Date.now();
         if (message && !duration) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-                if (cancelled) return
-                duration = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+            if (cancelled) return;
+            duration = value;
         }
-        if (duration instanceof Date) duration = duration.getTime() - now
+        if (duration instanceof Date) duration = duration.getTime() - now;
 
         if (duration > myMs('28d')) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The max. duration of a time-out is 28 days.'
-            }))
+            }));
         }
 
-        const { guild, guildId, member: mod } = message || interaction
-        const author = message?.author || interaction.user
-        const { moderations } = guild.database
-        const { user } = member
-        const timedOut = member.isCommunicationDisabled()
+        const { guild, guildId, member: mod } = message || interaction;
+        const author = message?.author || interaction.user;
+        const { moderations } = guild.database;
+        const { user } = member;
+        const timedOut = member.isCommunicationDisabled();
 
-        const uExcept = userException(user, author, this)
-        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
+        const uExcept = userException(user, author, this);
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept));
 
-        const mExcept = memberException(member, mod, this)
-        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
+        const mExcept = memberException(member, mod, this);
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept));
 
         if (timedOut) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is already timed-out.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'time-out', member.user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'time-out', member.user, { reason });
+        if (!confirmed) return;
 
-        await member.timeout(duration, reason)
-        this.client.emit('guildMemberTimeout', guild, author, user, reason, duration + now)
+        await member.timeout(duration, reason);
+        this.client.emit('guildMemberTimeout', guild, author, user, reason, duration + now);
 
         if (!user.bot) {
             await user.send({
@@ -208,10 +207,10 @@ module.exports = class TimeOutCommand extends Command {
                         **Moderator:** ${author.toString()} ${author.tag}
                     `
                 })]
-            }).catch(() => null)
+            }).catch(() => null);
         }
 
-        const documentId = docId()
+        const documentId = docId();
 
         await moderations.add({
             _id: documentId,
@@ -223,7 +222,7 @@ module.exports = class TimeOutCommand extends Command {
             modTag: author.tag,
             reason,
             duration: myMs(duration, { long: true })
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -233,7 +232,7 @@ module.exports = class TimeOutCommand extends Command {
                 **Expires:** ${timestamp(duration + now, 'R')}
                 **Reason:** ${reason}
             `
-        }))
+        }));
     }
 
     /**
@@ -243,25 +242,25 @@ module.exports = class TimeOutCommand extends Command {
      * @param {string} reason The reason of the time-out
      */
     async remove({ message, interaction }, member, reason) {
-        const { user } = member
-        const timedOut = member.isCommunicationDisabled()
+        const { user } = member;
+        const timedOut = member.isCommunicationDisabled();
 
         if (!timedOut) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is not timed-out.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'remove time-out', member.user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'remove time-out', member.user, { reason });
+        if (!confirmed) return;
 
-        await member.timeout(null, reason)
+        await member.timeout(null, reason);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Removed ${user.tag}' time-out`,
             fieldValue: `**Reason:** ${reason}`
-        }))
+        }));
     }
-}
+};

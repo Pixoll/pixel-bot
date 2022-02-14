@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, addDashes } = require('../../utils/functions')
-const Database = require('../../schemas')
-const { capitalize } = require('lodash')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { generateEmbed, basicEmbed, addDashes } = require('../../utils/functions');
+const Database = require('../../schemas');
+const { capitalize } = require('lodash');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -11,11 +10,11 @@ const { capitalize } = require('lodash')
  * @param {string} str The string to parse
  */
 function removeDashes(str) {
-    if (!str) return
-    const arr = str.split('-')
-    const first = arr.shift()
-    const rest = arr.map(capitalize).join('')
-    return first + rest
+    if (!str) return;
+    const arr = str.split('-');
+    const first = arr.shift();
+    const rest = arr.map(capitalize).join('');
+    return first + rest;
 }
 
 /** A command that can be run in a client */
@@ -36,7 +35,7 @@ module.exports = class DatabaseCommand extends Command {
                     oneOf: Object.keys(Database).map(addDashes)
                 }
             ]
-        })
+        });
     }
 
     /**
@@ -46,21 +45,21 @@ module.exports = class DatabaseCommand extends Command {
      * @param {string} args.collection The collection to manage
      */
     async run({ message }, { collection }) {
-        const data = await Database[removeDashes(collection)].find({})
+        const data = await Database[removeDashes(collection)].find({});
 
         const array = data.map(({ _doc: val }) => {
-            delete val._id
-            delete val.__v
-            if (val.updatedAt) delete val.updatedAt
-            return val
-        })
+            delete val._id;
+            delete val.__v;
+            if (val.updatedAt) delete val.updatedAt;
+            return val;
+        });
 
-        const DBname = collection.replace('-', ' ').toUpperCase()
+        const DBname = collection.replace('-', ' ').toUpperCase();
 
         if (array.length === 0) {
             return message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description: `The ${DBname} collection is empty.`
-            }))
+            }));
         }
 
         await generateEmbed({ message }, array, {
@@ -68,6 +67,6 @@ module.exports = class DatabaseCommand extends Command {
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             title: 'Document',
             keysExclude: ['updatedAt']
-        })
+        });
     }
-}
+};

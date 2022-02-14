@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed, User, Collection } = require('discord.js')
-const { stripIndent } = require('common-tags')
-const { code, replyAll } = require('../../utils/functions')
-const { ModerationSchema } = require('../../schemas/types')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageEmbed, User, Collection } = require('discord.js');
+const { stripIndent } = require('common-tags');
+const { code, replyAll } = require('../../utils/functions');
+const { ModerationSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -13,12 +12,12 @@ const { ModerationSchema } = require('../../schemas/types')
  * @returns {number}
  */
 function getDayDiff(date) {
-    const string = typeof (date) === 'string' ? date : new Date(date).toISOString().split('T')[0]
-    const arr = string.split(/\/|,|-/, 3)
-    const newDate = new Date(arr)
-    const difference = new Date() - newDate.getTime()
-    const daysDiff = Math.trunc(difference / 86_400_000)
-    return daysDiff
+    const string = typeof (date) === 'string' ? date : new Date(date).toISOString().split('T')[0];
+    const arr = string.split(/\/|,|-/, 3);
+    const newDate = new Date(arr);
+    const difference = new Date() - newDate.getTime();
+    const daysDiff = Math.trunc(difference / 86_400_000);
+    return daysDiff;
 }
 
 /** A command that can be run in a client */
@@ -50,7 +49,7 @@ module.exports = class ModStatsCommand extends Command {
                     description: 'The moderator to check their stats.'
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -60,25 +59,25 @@ module.exports = class ModStatsCommand extends Command {
      * @param {User} args.user The user to get the mod stats from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) user = user?.user ?? user
+        if (interaction) user = user?.user ?? user;
 
-        const { guild } = message || interaction
-        const author = message?.author || interaction.user
-        const db = guild.database.moderations
-        user ??= author
+        const { guild } = message || interaction;
+        const author = message?.author || interaction.user;
+        const db = guild.database.moderations;
+        user ??= author;
 
-        const stats = await db.fetchMany({ modId: user.id })
+        const stats = await db.fetchMany({ modId: user.id });
 
-        const pad = 10
-        const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time'
+        const pad = 10;
+        const header = 'Type'.padEnd(pad, ' ') + '7 days'.padEnd(pad, ' ') + '30 days'.padEnd(pad, ' ') + 'All time';
 
-        const mutes = this.getStats(stats, 'mute', 'Mutes', pad)
-        const bans = this.getStats(stats, ['ban', 'temp-ban'], 'Bans', pad)
-        const kicks = this.getStats(stats, 'kick', 'Kicks', pad)
-        const warns = this.getStats(stats, 'warn', 'Warns', pad)
-        const total = this.getStats(stats, ['mute', 'ban', 'temp-ban', 'kick', 'warn'], 'Total', pad)
+        const mutes = this.getStats(stats, 'mute', 'Mutes', pad);
+        const bans = this.getStats(stats, ['ban', 'temp-ban'], 'Bans', pad);
+        const kicks = this.getStats(stats, 'kick', 'Kicks', pad);
+        const warns = this.getStats(stats, 'warn', 'Warns', pad);
+        const total = this.getStats(stats, ['mute', 'ban', 'temp-ban', 'kick', 'warn'], 'Total', pad);
 
-        const table = code(`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}`)
+        const table = code(`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}`);
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -87,9 +86,9 @@ module.exports = class ModStatsCommand extends Command {
             })
             .setDescription(table)
             .setFooter({ text: `User ID: ${user.id}` })
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, embed)
+        await replyAll({ message, interaction }, embed);
     }
 
     /**
@@ -100,12 +99,12 @@ module.exports = class ModStatsCommand extends Command {
      * @param {number} pad The padding for the content
      */
     getStats(stats, filter, row, pad) {
-        if (typeof filter === 'string') filter = [filter]
+        if (typeof filter === 'string') filter = [filter];
 
-        const seven = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 7).size.toString()
-        const thirty = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 30).size.toString()
-        const all = stats.filter(m => filter.includes(m.type)).size.toString()
+        const seven = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 7).size.toString();
+        const thirty = stats.filter(m => filter.includes(m.type) && getDayDiff(m.createdAt) <= 30).size.toString();
+        const all = stats.filter(m => filter.includes(m.type)).size.toString();
 
-        return row.padEnd(pad, ' ') + seven.padEnd(pad, ' ') + thirty.padEnd(pad, ' ') + all
+        return row.padEnd(pad, ' ') + seven.padEnd(pad, ' ') + thirty.padEnd(pad, ' ') + all;
     }
-}
+};

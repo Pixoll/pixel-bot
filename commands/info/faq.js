@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-const { Collection } = require('discord.js')
-const { stripIndent } = require('common-tags')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, basicCollector, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
-const { FaqSchema } = require('../../schemas/types')
+const { Collection } = require('discord.js');
+const { stripIndent } = require('common-tags');
+const { Command, CommandInstances } = require('pixoll-commando');
+const {
+    generateEmbed, basicEmbed, basicCollector, getArgument, confirmButtons, replyAll
+} = require('../../utils/functions');
+const { FaqSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -83,9 +84,9 @@ module.exports = class FaqCommand extends Command {
                     },
                 ]
             }
-        })
+        });
 
-        this.db = this.client.database.faq
+        this.db = this.client.database.faq;
     }
 
     /**
@@ -97,18 +98,18 @@ module.exports = class FaqCommand extends Command {
      * @param {string}
      */
     async run({ message, interaction }, { subCommand, item, question, answer }) {
-        subCommand = subCommand.toLowerCase()
-        const faqData = await this.db.fetchMany()
+        subCommand = subCommand.toLowerCase();
+        const faqData = await this.db.fetchMany();
 
         switch (subCommand) {
             case 'view':
-                return await this.view({ message, interaction }, faqData)
+                return await this.view({ message, interaction }, faqData);
             case 'add':
-                return await this.add({ message, interaction }, question, answer)
+                return await this.add({ message, interaction }, question, answer);
             case 'remove':
-                return await this.remove({ message, interaction }, item, faqData)
+                return await this.remove({ message, interaction }, item, faqData);
             case 'clear':
-                return await this.clear({ message, interaction }, faqData)
+                return await this.clear({ message, interaction }, faqData);
         }
     }
 
@@ -121,7 +122,7 @@ module.exports = class FaqCommand extends Command {
         if (faqData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
-            }))
+            }));
         }
 
         await generateEmbed({ message, interaction }, faqData.toJSON(), {
@@ -131,7 +132,7 @@ module.exports = class FaqCommand extends Command {
             keys: ['answer'],
             keyTitle: { suffix: 'question' },
             numbered: true
-        })
+        });
     }
 
     /**
@@ -142,30 +143,30 @@ module.exports = class FaqCommand extends Command {
      */
     async add({ message, interaction }, question, answer) {
         if (!this.client.isOwner(message || interaction.user)) {
-            return await this.onBlock({ message, interaction }, 'ownerOnly')
+            return await this.onBlock({ message, interaction }, 'ownerOnly');
         }
 
         if (!question) {
             const questionMsg = await basicCollector({ message, interaction }, {
                 fieldName: 'What question do you want to answer?'
-            }, { time: 2 * 60_000 })
-            if (!questionMsg) return
-            question = questionMsg.content
+            }, { time: 2 * 60_000 });
+            if (!questionMsg) return;
+            question = questionMsg.content;
         }
 
         if (!answer) {
             const answerMsg = await basicCollector({ message, interaction }, {
                 fieldName: 'Now, what would be it\'s answer?'
-            }, { time: 2 * 60_000 })
-            if (!answerMsg) return
-            answer = answerMsg.content
+            }, { time: 2 * 60_000 });
+            if (!answerMsg) return;
+            answer = answerMsg.content;
         }
 
-        await this.db.add({ question, answer })
+        await this.db.add({ question, answer });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The new entry has been added to the FAQ list.'
-        }))
+        }));
     }
 
     /**
@@ -176,35 +177,35 @@ module.exports = class FaqCommand extends Command {
      */
     async remove({ message, interaction }, item, faqData) {
         if (!this.client.isOwner(message || interaction.user)) {
-            return await this.onBlock({ message, interaction }, 'ownerOnly')
+            return await this.onBlock({ message, interaction }, 'ownerOnly');
         }
 
         if (message && !item) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            item = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            item = value;
         }
 
         if (faqData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
-            }))
+            }));
         }
 
-        const doc = faqData.first(item).pop()
+        const doc = faqData.first(item).pop();
         if (!doc) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That item is invalid inside the FAQ list.'
-            }))
+            }));
         }
 
-        await this.db.delete(doc)
+        await this.db.delete(doc);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Removed entry ${item} from the FAQ list.`
-        }))
+        }));
     }
 
     /**
@@ -214,24 +215,24 @@ module.exports = class FaqCommand extends Command {
      */
     async clear({ message, interaction }, faqData) {
         if (!this.client.isOwner(message || interaction.user)) {
-            return await this.onBlock({ message, interaction }, 'ownerOnly')
+            return await this.onBlock({ message, interaction }, 'ownerOnly');
         }
 
         if (faqData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'clear the FAQ list')
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'clear the FAQ list');
+        if (!confirmed) return;
 
         for (const doc of faqData.toJSON()) {
-            await this.db.delete(doc)
+            await this.db.delete(doc);
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The FAQ list has been cleared.'
-        }))
+        }));
     }
-}
+};

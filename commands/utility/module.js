@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { MessageEmbed } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, getArgument, addDashes, replyAll } = require('../../utils/functions')
-const { Module, AuditLog, ModuleSchema } = require('../../schemas/types')
-const { capitalize } = require('lodash')
+const { stripIndent } = require('common-tags');
+const { MessageEmbed } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, getArgument, addDashes, replyAll } = require('../../utils/functions');
+const { Module, AuditLog, ModuleSchema } = require('../../schemas/types');
+const { capitalize } = require('lodash');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -13,23 +12,23 @@ const { capitalize } = require('lodash')
  * @param {string} str The string to parse
  */
 function removeDashes(str) {
-    if (!str) return
-    const arr = str.split('-')
-    const first = arr.shift()
-    const rest = arr.map(capitalize).join('')
-    return first + rest
+    if (!str) return;
+    const arr = str.split('-');
+    const first = arr.shift();
+    const rest = arr.map(capitalize).join('');
+    return first + rest;
 }
 
-const Obj = require('../../schemas').modules.schema.obj
-const modules = Object.keys(Obj).slice(1).map(addDashes)
-const auditLogs = Object.keys(Obj.auditLogs).map(addDashes)
+const Obj = require('../../schemas').modules.schema.obj;
+const modules = Object.keys(Obj).slice(1).map(addDashes);
+const auditLogs = Object.keys(Obj.auditLogs).map(addDashes);
 
 /**
  * Patches the data of a {@link ModuleSchema}
  * @param {ModuleSchema} data The data to patch
  */
 function patchData(data) {
-    const _patch = b => b === true
+    const _patch = b => b === true;
 
     const patch = {
         // chatFilter: _patch(data?.chatFilter),
@@ -53,9 +52,9 @@ function patchData(data) {
             users: _patch(data?.auditLogs?.users),
             voice: _patch(data?.auditLogs?.voice)
         }
-    }
+    };
 
-    return patch
+    return patch;
 }
 
 /** A command that can be run in a client */
@@ -147,7 +146,7 @@ module.exports = class ModuleCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -159,21 +158,21 @@ module.exports = class ModuleCommand extends Command {
      * @param {AuditLog} args.subModule The sub-module to toggle or diagnose
      */
     async run({ message, interaction }, { subCommand, module, subModule }) {
-        subCommand = subCommand.toLowerCase()
-        module = module.toLowerCase()
-        if (module !== 'audit-logs') subModule = null
-        subModule &&= subModule.toLowerCase()
+        subCommand = subCommand.toLowerCase();
+        module = module.toLowerCase();
+        if (module !== 'audit-logs') subModule = null;
+        subModule &&= subModule.toLowerCase();
 
-        const { guild } = message || interaction
-        this.db = guild.database.modules
+        const { guild } = message || interaction;
+        this.db = guild.database.modules;
 
-        const data = await this.db.fetch()
+        const data = await this.db.fetch();
 
         switch (subCommand) {
             case 'diagnose':
-                return await this.diagnose({ message, interaction }, data, module, subModule)
+                return await this.diagnose({ message, interaction }, data, module, subModule);
             case 'toggle':
-                return await this.toggle({ message, interaction }, data, module, subModule)
+                return await this.toggle({ message, interaction }, data, module, subModule);
         }
     }
 
@@ -185,20 +184,20 @@ module.exports = class ModuleCommand extends Command {
      * @param {AuditLog} subModule The sub-module to diagnose
      */
     async diagnose({ message, interaction }, data, module, subModule) {
-        const patch = patchData(data)
+        const patch = patchData(data);
 
-        let part1 = patch[removeDashes(module)]
+        let part1 = patch[removeDashes(module)];
         if (typeof part1 === 'object') {
-            const full = Object.values(part1)
-            const part = full.filter(b => b === false)
-            if (full.length === part.length) part1 = false
-            else part1 = true
+            const full = Object.values(part1);
+            const part = full.filter(b => b === false);
+            if (full.length === part.length) part1 = false;
+            else part1 = true;
         }
         /** @type {boolean} */
-        const isEnabled = subModule ? patch[removeDashes(module)][removeDashes(subModule)] : part1
+        const isEnabled = subModule ? patch[removeDashes(module)][removeDashes(subModule)] : part1;
 
-        const { guild } = message || interaction
-        const type = subModule ? 'sub-module' : 'module'
+        const { guild } = message || interaction;
+        const type = subModule ? 'sub-module' : 'module';
 
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -210,9 +209,9 @@ module.exports = class ModuleCommand extends Command {
                 ${subModule ? `**Parent module:** ${capitalize(module)}` : ''}
                 ${subModule ? `**Parent module status:** ${part1 ? 'Enabled' : 'Disabled'}` : ''}
             `)
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, diagnose)
+        await replyAll({ message, interaction }, diagnose);
     }
 
     /**
@@ -224,31 +223,31 @@ module.exports = class ModuleCommand extends Command {
      */
     async toggle({ message, interaction }, data, module, subModule) {
         if (message && module === 'audit-logs' && !subModule) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            subModule = value.toLowerCase()
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+            if (cancelled) return;
+            subModule = value.toLowerCase();
         }
 
-        const { guildId, guild } = message || interaction
+        const { guildId, guild } = message || interaction;
 
-        const patch = { guild: guildId, ...patchData(data) }
-        if (!subModule) patch[removeDashes(module)] = !patch[removeDashes(module)]
-        else patch[removeDashes(module)][removeDashes(subModule)] = !patch[removeDashes(module)][removeDashes(subModule)]
+        const patch = { guild: guildId, ...patchData(data) };
+        if (!subModule) patch[removeDashes(module)] = !patch[removeDashes(module)];
+        else patch[removeDashes(module)][removeDashes(subModule)] = !patch[removeDashes(module)][removeDashes(subModule)];
 
-        if (data) await this.db.update(data, patch)
-        else await this.db.add(patch)
+        if (data) await this.db.update(data, patch);
+        else await this.db.add(patch);
 
-        const type = subModule ? 'sub-module' : 'module'
-        const target = subModule ? `${module}/${subModule}` : module
-        const status = subModule ? patch[removeDashes(module)][removeDashes(subModule)] : patch[removeDashes(module)]
+        const type = subModule ? 'sub-module' : 'module';
+        const target = subModule ? `${module}/${subModule}` : module;
+        const status = subModule ? patch[removeDashes(module)][removeDashes(subModule)] : patch[removeDashes(module)];
 
-        this.client.emit('moduleStatusChange', guild, target, status)
+        this.client.emit('moduleStatusChange', guild, target, status);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the ${type} \`${target}\``,
             fieldValue: `**New status:** ${status ? 'Enabled' : 'Disabled'}`
-        }))
+        }));
     }
-}
+};

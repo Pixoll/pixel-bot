@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { MessageEmbed, Collection } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { abcOrder, pagedEmbed, basicEmbed, replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags');
+const { MessageEmbed, Collection } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { abcOrder, pagedEmbed, basicEmbed, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 const timeZones = new Collection([
@@ -46,9 +45,9 @@ const timeZones = new Collection([
     ['Pacific/Guadalcanal', 'Solomon Islands'],
     ['Pacific/Auckland', 'New Zealand'],
     ['Pacific/Fiji', 'Fiji']
-])
+]);
 
-const cities = timeZones.toJSON()
+const cities = timeZones.toJSON();
 
 /** A command that can be run in a client */
 module.exports = class TimesCommand extends Command {
@@ -99,7 +98,7 @@ module.exports = class TimesCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -111,43 +110,43 @@ module.exports = class TimesCommand extends Command {
      */
     async run({ message, interaction }, { hour, place }) {
         if (interaction) {
-            const arg = this.argsCollector.args[0]
-            hour = arg.parse(hour ?? 'now') || null
+            const arg = this.argsCollector.args[0];
+            hour = arg.parse(hour ?? 'now') || null;
             if (!hour) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The hour you specified is invalid.'
-                }))
+                }));
             }
-            place = place?.toLowerCase()
+            place = place?.toLowerCase();
             if (place && !cities.map(c => c.toLowerCase()).includes(place)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The place you specified is invalid.'
-                }))
+                }));
             }
         }
 
-        const date = hour || new Date()
-        const toMatch = message?.parseArgs().trim() ?? interaction?.options.getString('hour')
-        const is12Hour = !!toMatch?.match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0]
+        const date = hour || new Date();
+        const toMatch = message?.parseArgs().trim() ?? interaction?.options.getString('hour');
+        const is12Hour = !!toMatch?.match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0];
 
-        const times = []
+        const times = [];
         /** @param {string} city */
         const timeZone = (tz, city) => {
             const format = new Intl.DateTimeFormat('en-GB', {
                 hour: 'numeric', minute: 'numeric', timeZone: tz, timeZoneName: 'short', hour12: is12Hour
-            }).format(date)
-            const sliced = format.split(/ /g)
-            const offset = sliced.pop()
-            const time = sliced.join(' ')
-            return { offset, time, city }
-        }
+            }).format(date);
+            const sliced = format.split(/ /g);
+            const offset = sliced.pop();
+            const time = sliced.join(' ');
+            return { offset, time, city };
+        };
 
         if (place) {
-            const tz = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase())
-            const city = timeZones.get(tz)
-            const { offset, time } = timeZone(tz, city)
-            const hour = parseInt(time.split(':').shift())
-            const clock = hour - (hour > 12 ? 12 : 0)
+            const tz = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase());
+            const city = timeZones.get(tz);
+            const { offset, time } = timeZone(tz, city);
+            const hour = parseInt(time.split(':').shift());
+            const clock = hour - (hour > 12 ? 12 : 0);
 
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')
@@ -156,41 +155,41 @@ module.exports = class TimesCommand extends Command {
                     **Time:** ${time}
                     **Time zone:** ${offset}
                 `)
-                .setTimestamp()
+                .setTimestamp();
 
-            return await replyAll({ message, interaction }, embed)
+            return await replyAll({ message, interaction }, embed);
         }
 
-        for (const data of timeZones) times.push(timeZone(...data))
+        for (const data of timeZones) times.push(timeZone(...data));
 
-        const sorted = times.sort((a, b) => abcOrder(a.city, b.city))
-        const divisor = Math.round((sorted.length / 3) + 0.1)
+        const sorted = times.sort((a, b) => abcOrder(a.city, b.city));
+        const divisor = Math.round((sorted.length / 3) + 0.1);
 
-        const firstPart = sorted.splice(0, divisor)
-        const secondPart = sorted.splice(0, divisor)
-        const thirdPart = sorted.splice(0, divisor)
+        const firstPart = sorted.splice(0, divisor);
+        const secondPart = sorted.splice(0, divisor);
+        const thirdPart = sorted.splice(0, divisor);
 
-        const hours = date.getUTCHours()
-        const clock = hours - (hours > 12 ? 12 : 0) || 12
+        const hours = date.getUTCHours();
+        const clock = hours - (hours > 12 ? 12 : 0) || 12;
 
         const base = new MessageEmbed()
             .setColor('#4c9f4c')
             .setTitle(`:clock${clock}: Times around the world`)
-            .setTimestamp()
+            .setTimestamp();
 
         const timesEmbed = /** @param {sorted} data */ data => {
             return new MessageEmbed(base)
                 .addField('City', data.map(d => d.city).join('\n'), true)
                 .addField('Time', data.map(d => d.time).join('\n'), true)
-                .addField('Time zone', data.map(d => d.offset).join('\n'), true)
-        }
+                .addField('Time zone', data.map(d => d.offset).join('\n'), true);
+        };
 
-        const pages = [timesEmbed(firstPart), timesEmbed(secondPart), timesEmbed(thirdPart)]
+        const pages = [timesEmbed(firstPart), timesEmbed(secondPart), timesEmbed(thirdPart)];
 
         const generate = page => ({
             embed: pages[page].setFooter({ text: `Page ${++page} of 3` })
-        })
+        });
 
-        await pagedEmbed({ message, interaction }, { number: 1, total: 3 }, generate)
+        await pagedEmbed({ message, interaction }, { number: 1, total: 3 }, generate);
     }
-}
+};

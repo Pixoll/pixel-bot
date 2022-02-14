@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { GuildMember } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { GuildMember } = require('discord.js');
+const { basicEmbed, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -56,7 +55,7 @@ module.exports = class NickCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -71,18 +70,18 @@ module.exports = class NickCommand extends Command {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
             if (nickname.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'Please keep the nickname below or exactly 32 characters.'
-                }))
+                }));
             }
         }
 
-        const { tag, username } = member.user
+        const { tag, username } = member.user;
 
         if (!member.manageable) {
             return await replyAll({ message, interaction }, basicEmbed({
@@ -90,26 +89,26 @@ module.exports = class NickCommand extends Command {
                 emoji: 'cross',
                 fieldName: `Unable to change ${tag}'s nickname`,
                 fieldValue: 'Please check the role hierarchy or server ownership.'
-            }))
+            }));
         }
 
-        const isRemove = nickname.toLowerCase() === 'remove'
+        const isRemove = nickname.toLowerCase() === 'remove';
 
-        const toApply = isRemove ? username : nickname
-        const wasApplied = await member.setNickname(toApply).catch(() => null)
+        const toApply = isRemove ? username : nickname;
+        const wasApplied = await member.setNickname(toApply).catch(() => null);
         if (!wasApplied) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'An error occurred when trying to change that member\'s nickname. Please try again.'
-            }))
+            }));
         }
 
         const description = isRemove ? `Removed \`${tag}\`'s nickname.` :
-            `Changed \`${tag}\`'s nickname to \`${nickname}\``
+            `Changed \`${tag}\`'s nickname to \`${nickname}\``;
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description
-        }))
+        }));
     }
-}
+};

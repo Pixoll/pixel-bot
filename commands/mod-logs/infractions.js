@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { User, MessageActionRow, MessageSelectMenu } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { User, MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -30,7 +29,7 @@ module.exports = class InfractionsCommand extends Command {
                     required: true
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -40,19 +39,19 @@ module.exports = class InfractionsCommand extends Command {
      * @param {User} args.user The user to get the infractions from
      */
     async run({ message, interaction }, { user }) {
-        if (interaction) user = user.user ?? user
+        if (interaction) user = user.user ?? user;
 
-        const { guild } = message || interaction
-        const db = guild.database.moderations
+        const { guild } = message || interaction;
+        const db = guild.database.moderations;
 
-        const mods = await db.fetchMany({ userId: user.id })
+        const mods = await db.fetchMany({ userId: user.id });
         if (mods.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no infractions.'
-            }))
+            }));
         }
 
-        const intMsg = await interaction?.fetchReply()
+        const intMsg = await interaction?.fetchReply();
 
         const filterMenu = new MessageActionRow().addComponents(
             new MessageSelectMenu()
@@ -68,7 +67,7 @@ module.exports = class InfractionsCommand extends Command {
                     { label: 'Mutes', value: 'mute', emoji: '🔇' },
                     { label: 'Warns', value: 'warn', emoji: '⚠' },
                 ])
-        )
+        );
 
         await generateEmbed({ message, interaction }, mods.toJSON(), {
             authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
@@ -78,6 +77,6 @@ module.exports = class InfractionsCommand extends Command {
             keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'userId', 'userTag'],
             useDocId: true,
             components: [filterMenu]
-        })
+        });
     }
-}
+};

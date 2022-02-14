@@ -1,4 +1,4 @@
-const { model, Schema } = require('mongoose')
+const { model, Schema } = require('mongoose');
 
 module.exports = {
     active: model('active', Schema({
@@ -128,4 +128,4 @@ module.exports = {
         channel: String,
         message: String
     }), 'welcome')
-}
+};

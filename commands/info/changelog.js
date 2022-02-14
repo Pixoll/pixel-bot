@@ -1,20 +1,19 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { generateEmbed, abcOrder, timestamp } = require('../../utils/functions')
-const { CommandInstances } = require('../../command-handler/typings')
-const { version } = require('../../package.json')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { generateEmbed, abcOrder, timestamp } = require('../../utils/functions');
+const { version } = require('../../package.json');
 /* eslint-enable no-unused-vars */
 
 const changelog = require('../../documents/changelog.json')
     .sort((a, b) => abcOrder(b.version, a.version))
     .map(log => {
-        if (version < log.version) return null
+        if (version < log.version) return null;
         const changes = log.changes.length === 1 ? log.changes[0] :
-            log.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n')
-        const title = `Version ${log.version} - ${timestamp(log.timestamp, 'F') ?? 'No date specified'}`
-        return { title, changes }
+            log.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n');
+        const title = `Version ${log.version} - ${timestamp(log.timestamp, 'F') ?? 'No date specified'}`;
+        return { title, changes };
     })
-    .filter(log => log)
+    .filter(log => log);
 
 /** A command that can be run in a client */
 module.exports = class ChangelogCommand extends Command {
@@ -25,7 +24,7 @@ module.exports = class ChangelogCommand extends Command {
             description: 'Displays the changelog history of the bot.',
             guarded: true,
             slash: true
-        })
+        });
     }
 
     /**
@@ -33,7 +32,7 @@ module.exports = class ChangelogCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { user } = this.client
+        const { user } = this.client;
 
         await generateEmbed({ message, interaction }, changelog, {
             number: 5,
@@ -41,6 +40,6 @@ module.exports = class ChangelogCommand extends Command {
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             keyTitle: { suffix: 'title' },
             keys: ['changes']
-        })
+        });
     }
-}
+};

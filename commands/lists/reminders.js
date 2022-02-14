@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { Collection } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll } = require('../../utils/functions')
-const { ReminderSchema } = require('../../schemas/types')
+const { stripIndent } = require('common-tags');
+const { Collection } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll } = require('../../utils/functions');
+const { ReminderSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -40,9 +39,9 @@ module.exports = class RemindersCommand extends Command {
                     }
                 ]
             }
-        })
+        });
 
-        this.db = this.client.database.reminders
+        this.db = this.client.database.reminders;
     }
 
     /**
@@ -52,23 +51,23 @@ module.exports = class RemindersCommand extends Command {
      * @param {'view'|'clear'} args.subCommand The sub-command to use
      */
     async run({ message, interaction }, { subCommand }) {
-        subCommand = subCommand.toLowerCase()
-        const author = message?.author || interaction.user
+        subCommand = subCommand.toLowerCase();
+        const author = message?.author || interaction.user;
 
-        const data = await this.db.fetchMany({ user: author.id })
+        const data = await this.db.fetchMany({ user: author.id });
         if (data.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'You have no active reminders. Use the `reminder` command to add reminders.'
-            }))
+            }));
         }
 
         switch (subCommand) {
             case 'view':
-                return await this.view({ message, interaction }, data)
+                return await this.view({ message, interaction }, data);
             case 'clear':
-                return await this.clear({ message, interaction }, data)
+                return await this.clear({ message, interaction }, data);
         }
     }
 
@@ -81,9 +80,9 @@ module.exports = class RemindersCommand extends Command {
         const list = reminders.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
             reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`
-        }))
+        }));
 
-        const author = message?.author || interaction.user
+        const author = message?.author || interaction.user;
         await generateEmbed({ message, interaction }, list, {
             authorName: `You have ${pluralize('reminder', reminders.size)}`,
             authorIconURL: author.displayAvatarURL({ dynamic: true }),
@@ -93,7 +92,7 @@ module.exports = class RemindersCommand extends Command {
             numbered: true,
             toUser: true,
             dmMsg: 'Check your DMs for the list of your reminders.'
-        })
+        });
     }
 
     /**
@@ -102,15 +101,15 @@ module.exports = class RemindersCommand extends Command {
      * @param {Collection<string, ReminderSchema>} reminders The reminders data
      */
     async clear({ message, interaction }, reminders) {
-        const confirmed = await confirmButtons({ message, interaction }, 'delete all of your reminders')
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'delete all of your reminders');
+        if (!confirmed) return;
 
         for (const doc of reminders.toJSON()) {
-            await this.db.delete(doc)
+            await this.db.delete(doc);
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Your reminders have been deleted.'
-        }))
+        }));
     }
-}
+};

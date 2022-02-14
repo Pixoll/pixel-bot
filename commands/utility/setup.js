@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { MessageEmbed, TextChannel, Role } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, basicCollector, isMod, getArgument, replyAll, isValidRole } = require('../../utils/functions')
-const { oneLine, stripIndent } = require('common-tags')
-const { SetupSchema } = require('../../schemas/types')
+const { MessageEmbed, TextChannel, Role } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, basicCollector, isMod, getArgument, replyAll, isValidRole } = require('../../utils/functions');
+const { oneLine, stripIndent } = require('common-tags');
+const { SetupSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -17,9 +16,9 @@ function defaultDoc(guildId, key, value) {
     /** @type {SetupSchema} */
     const doc = {
         guild: guildId
-    }
-    doc[key] = value
-    return doc
+    };
+    doc[key] = value;
+    return doc;
 }
 
 /** A command that can be run in a client */
@@ -167,7 +166,7 @@ module.exports = class SetupCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -184,30 +183,30 @@ module.exports = class SetupCommand extends Command {
     async run({ message, interaction }, {
         subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels, channel, role, channels
     }) {
-        subCommand = subCommand.toLowerCase()
-        const { guild } = message || interaction
-        this.db = guild.database.setup
+        subCommand = subCommand.toLowerCase();
+        const { guild } = message || interaction;
+        this.db = guild.database.setup;
 
-        const data = await this.db.fetch()
-        const fullData = { auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels }
+        const data = await this.db.fetch();
+        const fullData = { auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels };
 
         switch (subCommand) {
             case 'full':
-                return await this.full({ message, interaction }, data, fullData)
+                return await this.full({ message, interaction }, data, fullData);
             case 'view':
-                return await this.view({ message, interaction }, data)
+                return await this.view({ message, interaction }, data);
             case 'reload':
-                return await this.reloadSetup({ message, interaction }, data)
+                return await this.reloadSetup({ message, interaction }, data);
             case 'audit-logs':
-                return await this.auditLogs({ message, interaction }, data, value ?? channel)
+                return await this.auditLogs({ message, interaction }, data, value ?? channel);
             case 'muted-role':
-                return await this.mutedRole({ message, interaction }, data, value ?? role)
+                return await this.mutedRole({ message, interaction }, data, value ?? role);
             case 'member-role':
-                return await this.memberRole({ message, interaction }, data, value ?? role)
+                return await this.memberRole({ message, interaction }, data, value ?? role);
             case 'bot-role':
-                return await this.botRole({ message, interaction }, data, value ?? role)
+                return await this.botRole({ message, interaction }, data, value ?? role);
             case 'lockdown-channels':
-                return await this.lockdownChannels({ message, interaction }, data, value ?? channels)
+                return await this.lockdownChannels({ message, interaction }, data, value ?? channels);
         }
     }
 
@@ -223,128 +222,128 @@ module.exports = class SetupCommand extends Command {
      * @param {string} fullData.lockdownChannels
      */
     async full({ message, interaction }, data, fullData) {
-        const { guildId, client } = message || interaction
-        const { types } = client.registry
-        const textChanType = types.get('text-channel')
-        const roleType = types.get('role')
+        const { guildId, client } = message || interaction;
+        const { types } = client.registry;
+        const textChanType = types.get('text-channel');
+        const roleType = types.get('role');
 
         /** @type {TextChannel} */
-        let logsChannel = fullData.auditLogsChannel
+        let logsChannel = fullData.auditLogsChannel;
         /** @type {Role} */
-        let mutedRole = fullData.mutedRole
+        let mutedRole = fullData.mutedRole;
         /** @type {Role} */
-        let memberRole = fullData.memberRole
+        let memberRole = fullData.memberRole;
         /** @type {Role} */
-        let botRole = fullData.botRole
+        let botRole = fullData.botRole;
         /** @type {TextChannel[]} */
-        const lockChannels = []
+        const lockChannels = [];
 
         if (message) {
-            let toDelete
+            let toDelete;
             while (!logsChannel || logsChannel.type !== 'GUILD_TEXT') {
                 const msg = await basicCollector({ message }, {
                     fieldName: 'In what __text channel__ should I send the audit-logs?'
-                }, null, true)
-                if (!msg) return
-                toDelete = msg
-                logsChannel = textChanType.parse(msg.content, message)
+                }, null, true);
+                if (!msg) return;
+                toDelete = msg;
+                logsChannel = textChanType.parse(msg.content, message);
             }
 
-            await toDelete?.delete()
+            await toDelete?.delete();
 
             while (!memberRole || isMod(memberRole)) {
                 const description = isMod(memberRole) ?
                     'This is considered as a moderation role, please try again with another one.' :
-                    `Audit logs will be sent in ${logsChannel}.`
+                    `Audit logs will be sent in ${logsChannel}.`;
 
                 const msg = await basicCollector({ message }, {
                     description,
                     fieldName: 'What __role__ should I give to a __member__ when they join the server?'
-                }, null, true)
-                if (!msg) return
-                toDelete = msg
-                memberRole = roleType.parse(msg.content, message)
+                }, null, true);
+                if (!msg) return;
+                toDelete = msg;
+                memberRole = roleType.parse(msg.content, message);
             }
 
-            await toDelete?.delete()
+            await toDelete?.delete();
 
             while (!botRole) {
                 const msg = await basicCollector({ message }, {
                     description: `The default member role will be ${memberRole}.`,
                     fieldName: 'What __role__ should I give to a __bot__ when they join the server?'
-                }, null, true)
-                if (!msg) return
-                toDelete = msg
-                botRole = roleType.parse(msg.content, message)
+                }, null, true);
+                if (!msg) return;
+                toDelete = msg;
+                botRole = roleType.parse(msg.content, message);
             }
 
-            await toDelete?.delete()
+            await toDelete?.delete();
 
             while (!mutedRole) {
                 const msg = await basicCollector({ message }, {
                     description: `The default bot role will be ${botRole}.`,
                     fieldName: 'What __role__ should I give to a __member__ when they get muted?'
-                }, null, true)
-                if (!msg) return
-                toDelete = msg
-                mutedRole = roleType.parse(msg.content, message)
+                }, null, true);
+                if (!msg) return;
+                toDelete = msg;
+                mutedRole = roleType.parse(msg.content, message);
             }
 
-            await toDelete?.delete()
+            await toDelete?.delete();
 
             while (lockChannels.length === 0) {
                 const msg = await basicCollector({ message }, {
                     description: `The role given to muted people will be ${mutedRole}.`,
                     fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-                }, { time: 2 * 60_000 }, true)
-                if (!msg) return
-                toDelete = msg
+                }, { time: 2 * 60_000 }, true);
+                if (!msg) return;
+                toDelete = msg;
                 for (const val of msg.content.split(/ +/)) {
-                    if (lockChannels.length === 30) break
-                    const chan = textChanType.parse(val, message)
-                    if (!chan || lockChannels.includes(chan)) continue
-                    lockChannels.push(chan)
+                    if (lockChannels.length === 30) break;
+                    const chan = textChanType.parse(val, message);
+                    if (!chan || lockChannels.includes(chan)) continue;
+                    lockChannels.push(chan);
                 }
             }
 
-            await toDelete?.delete()
+            await toDelete?.delete();
         } else {
-            const intMsg = await interaction.fetchReply()
+            const intMsg = await interaction.fetchReply();
 
             if (!isValidRole(intMsg, mutedRole)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'The chosen muted role is invalid. Please check the role hierarchy.'
-                }))
+                }));
             }
             if (!isValidRole(intMsg, memberRole)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'The chosen default member role is invalid. Please check the role hierarchy.'
-                }))
+                }));
             }
             if (!isValidRole(intMsg, botRole)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'The chosen default bot role is invalid. Please check the role hierarchy.'
-                }))
+                }));
             }
 
             for (const val of fullData.lockdownChannels.split(/ +/)) {
-                if (lockChannels.length === 30) break
-                const chan = textChanType.parse(val, intMsg)
-                if (!chan || lockChannels.includes(chan)) continue
-                lockChannels.push(chan)
+                if (lockChannels.length === 30) break;
+                const chan = textChanType.parse(val, intMsg);
+                if (!chan || lockChannels.includes(chan)) continue;
+                lockChannels.push(chan);
             }
             if (lockChannels.length === 0) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'None of the lockdown channels you specified were valid. Please try again.'
-                }))
+                }));
             }
         }
 
@@ -358,10 +357,10 @@ module.exports = class SetupCommand extends Command {
                 Lockdown channels: ${lockChannels.map(c => c.toString()).join(', ')}
             `,
             fieldName: 'Is this data correct? If so, type `confirm` to proceed.'
-        }, null, true)
-        if (!msg) return
+        }, null, true);
+        if (!msg) return;
         if (msg.content.toLowerCase() !== 'confirm') {
-            return await replyAll({ message, interaction }, { content: 'Cancelled command.', embeds: [] })
+            return await replyAll({ message, interaction }, { content: 'Cancelled command.', embeds: [] });
         }
 
         const doc = {
@@ -371,15 +370,15 @@ module.exports = class SetupCommand extends Command {
             botRole: botRole.id,
             mutedRole: mutedRole.id,
             lockChannels: lockChannels.map(c => c.id)
-        }
-        if (data) await this.db.update(data, doc)
-        else await this.db.add(doc)
+        };
+        if (data) await this.db.update(data, doc);
+        else await this.db.add(doc);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.'
-        }))
+        }));
     }
 
     /**
@@ -394,16 +393,16 @@ module.exports = class SetupCommand extends Command {
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
                 fieldValue: 'Please run the `setup full` command first.'
-            }))
+            }));
         }
 
-        const { guild } = message || interaction
+        const { guild } = message || interaction;
 
-        const logsChannel = data.logsChannel ? `<#${data.logsChannel}>` : null
-        const memberRole = data.memberRole ? `<@&${data.memberRole}> (${data.memberRole})` : null
-        const botRole = data.botRole ? `<@&${data.botRole}> (${data.botRole})` : null
-        const mutedRole = data.mutedRole ? `<@&${data.mutedRole}> (${data.mutedRole})` : null
-        const lockdownChannels = data.lockChannels?.map(c => `<#${c}>`).slice(0, 78).join(', ') || null
+        const logsChannel = data.logsChannel ? `<#${data.logsChannel}>` : null;
+        const memberRole = data.memberRole ? `<@&${data.memberRole}> (${data.memberRole})` : null;
+        const botRole = data.botRole ? `<@&${data.botRole}> (${data.botRole})` : null;
+        const mutedRole = data.mutedRole ? `<@&${data.mutedRole}> (${data.mutedRole})` : null;
+        const lockdownChannels = data.lockChannels?.map(c => `<#${c}>`).slice(0, 78).join(', ') || null;
 
         const toDisplay = [
             { key: 'Audit logs channel', value: logsChannel },
@@ -411,12 +410,12 @@ module.exports = class SetupCommand extends Command {
             { key: 'Default bots role', value: botRole },
             { key: 'Muted members role', value: mutedRole },
             { key: 'Lockdown channels', value: lockdownChannels },
-        ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`)
+        ].filter(obj => obj.value).map(obj => `**${obj.key}:** ${obj.value}`);
 
         if (toDisplay.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
-            }))
+            }));
         }
 
         const embed = new MessageEmbed()
@@ -425,9 +424,9 @@ module.exports = class SetupCommand extends Command {
                 name: `${guild.name}'s setup data`, iconURL: guild.iconURL({ dynamic: true })
             })
             .setDescription(toDisplay.join('\n'))
-            .setFooter({ text: 'Missing or wrong data? Try using the "reload" sub-command.' })
+            .setFooter({ text: 'Missing or wrong data? Try using the "reload" sub-command.' });
 
-        await replyAll({ message, interaction }, embed)
+        await replyAll({ message, interaction }, embed);
     }
 
     /**
@@ -442,58 +441,58 @@ module.exports = class SetupCommand extends Command {
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
                 fieldValue: 'Please run the `setup full` command first.'
-            }))
+            }));
         }
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Reloading setup data...'
-        })
-        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
+        });
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
-        const { guild } = message || interaction
-        const newDoc = { $set: {}, $unset: {} }
+        const { guild } = message || interaction;
+        const newDoc = { $set: {}, $unset: {} };
 
         if (data.logsChannel) {
-            const logsChannel = await guild.channels.fetch(data.logsChannel).catch(() => null)
-            if (!logsChannel) newDoc.$unset.logsChannel = ''
+            const logsChannel = await guild.channels.fetch(data.logsChannel).catch(() => null);
+            if (!logsChannel) newDoc.$unset.logsChannel = '';
         }
 
         if (data.memberRole) {
-            const memberRole = await guild.roles.fetch(data.memberRole).catch(() => null)
-            if (!memberRole) newDoc.$unset.memberRole = ''
+            const memberRole = await guild.roles.fetch(data.memberRole).catch(() => null);
+            if (!memberRole) newDoc.$unset.memberRole = '';
         }
 
         if (data.botRole) {
-            const botRole = await guild.roles.fetch(data.botRole).catch(() => null)
-            if (!botRole) newDoc.$unset.botRole = ''
+            const botRole = await guild.roles.fetch(data.botRole).catch(() => null);
+            if (!botRole) newDoc.$unset.botRole = '';
         }
 
         if (data.mutedRole) {
-            const mutedRole = await guild.roles.fetch(data.mutedRole).catch(() => null)
-            if (!mutedRole) newDoc.$unset.mutedRole = ''
+            const mutedRole = await guild.roles.fetch(data.mutedRole).catch(() => null);
+            if (!mutedRole) newDoc.$unset.mutedRole = '';
         }
 
         if (data.lockChannels?.length !== 0) {
-            const lockChannels = []
+            const lockChannels = [];
             for (const chanId of data.lockChannels) {
-                const channel = await guild.channels.fetch(chanId).catch(() => null)
-                if (channel) lockChannels.push(channel.id)
+                const channel = await guild.channels.fetch(chanId).catch(() => null);
+                if (channel) lockChannels.push(channel.id);
             }
             if (data.lockChannels.length !== lockChannels.length) {
-                newDoc.$set.lockChannels = lockChannels
+                newDoc.$set.lockChannels = lockChannels;
             }
         }
 
-        if (Object.keys(newDoc.$set).length === 0) delete newDoc.$set
-        if (Object.keys(newDoc.$unset).length === 0) delete newDoc.$unset
+        if (Object.keys(newDoc.$set).length === 0) delete newDoc.$set;
+        if (Object.keys(newDoc.$unset).length === 0) delete newDoc.$unset;
         if (Object.keys(newDoc).length !== 0) {
-            await this.db.update(data, newDoc)
+            await this.db.update(data, newDoc);
         }
 
-        await toDelete?.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'Reloaded data.'
-        }))
+        }));
     }
 
     /**
@@ -505,15 +504,15 @@ module.exports = class SetupCommand extends Command {
     async auditLogs({ message, interaction }, data, channel) {
         if (message) {
             while (!(channel instanceof TextChannel)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                channel = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                channel = value;
             }
         }
 
-        const { guildId } = message || interaction
-        if (data) await this.db.update(data, { logsChannel: channel.id })
-        else await this.db.add(defaultDoc(guildId, 'logsChannel', channel.id))
+        const { guildId } = message || interaction;
+        if (data) await this.db.update(data, { logsChannel: channel.id });
+        else await this.db.add(defaultDoc(guildId, 'logsChannel', channel.id));
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -522,7 +521,7 @@ module.exports = class SetupCommand extends Command {
                 The new audit logs channel will be ${channel.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
-        }))
+        }));
     }
 
     /**
@@ -534,15 +533,15 @@ module.exports = class SetupCommand extends Command {
     async mutedRole({ message, interaction }, data, role) {
         if (message) {
             while (!(role instanceof Role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                role = value;
             }
         }
 
-        const { guildId } = message || interaction
-        if (data) await this.db.update(data, { mutedRole: role.id })
-        else await this.db.add(defaultDoc(guildId, 'mutedRole', role.id))
+        const { guildId } = message || interaction;
+        if (data) await this.db.update(data, { mutedRole: role.id });
+        else await this.db.add(defaultDoc(guildId, 'mutedRole', role.id));
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -551,7 +550,7 @@ module.exports = class SetupCommand extends Command {
                 The new role for muted members will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
-        }))
+        }));
     }
 
     /**
@@ -563,15 +562,15 @@ module.exports = class SetupCommand extends Command {
     async memberRole({ message, interaction }, data, role) {
         if (message) {
             while (!(role instanceof Role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                role = value;
             }
         }
 
-        const { guildId } = message || interaction
-        if (data) await this.db.update(data, { memberRole: role.id })
-        else await this.db.add(defaultDoc(guildId, 'memberRole', role.id))
+        const { guildId } = message || interaction;
+        if (data) await this.db.update(data, { memberRole: role.id });
+        else await this.db.add(defaultDoc(guildId, 'memberRole', role.id));
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -580,7 +579,7 @@ module.exports = class SetupCommand extends Command {
                 The new default role for all members will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
-        }))
+        }));
     }
 
     /**
@@ -592,17 +591,17 @@ module.exports = class SetupCommand extends Command {
     async botRole({ message, interaction }, data, role) {
         if (message) {
             while (!(role instanceof Role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                role = value;
             }
         }
 
-        const { guildId } = message || interaction
-        await this.db.add(defaultDoc(guildId, 'botRole', role.id))
+        const { guildId } = message || interaction;
+        await this.db.add(defaultDoc(guildId, 'botRole', role.id));
 
-        if (data) await this.db.update(data, { botRole: role.id })
-        else await this.db.add(defaultDoc(guildId, 'botRole', role.id))
+        if (data) await this.db.update(data, { botRole: role.id });
+        else await this.db.add(defaultDoc(guildId, 'botRole', role.id));
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -611,7 +610,7 @@ module.exports = class SetupCommand extends Command {
                 The new default role for all bots will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
             `
-        }))
+        }));
     }
 
     /**
@@ -623,39 +622,39 @@ module.exports = class SetupCommand extends Command {
     async lockdownChannels({ message, interaction }, data, channelsStr) {
         if (message) {
             while (channelsStr instanceof Role) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                channelsStr = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                channelsStr = value;
             }
         }
 
-        const { client, guildId } = message || interaction
-        const { types } = client.registry
+        const { client, guildId } = message || interaction;
+        const { types } = client.registry;
         /** @type {TextChannelType} */
-        const textChanType = types.get('text-channel')
+        const textChanType = types.get('text-channel');
 
-        const channels = []
+        const channels = [];
         if (typeof channelsStr === 'string') {
-            const intMsg = await interaction?.fetchReply()
+            const intMsg = await interaction?.fetchReply();
             for (const val of channelsStr.split(/ +/)) {
-                if (channels.length === 30) break
-                const chan = textChanType.parse(val, message || intMsg)
-                if (chan) channels.push(chan)
+                if (channels.length === 30) break;
+                const chan = textChanType.parse(val, message || intMsg);
+                if (chan) channels.push(chan);
             }
         } else {
-            channels.push(channelsStr)
+            channels.push(channelsStr);
         }
 
         if (message) {
             while (channels.length === 0) {
                 const msg = await basicCollector({ message }, {
                     fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
-                }, { time: 2 * 60_000 }, true)
-                if (!msg) return
+                }, { time: 2 * 60_000 }, true);
+                if (!msg) return;
                 for (const val of msg.content.split(/ +/)) {
-                    if (channels.length === 30) break
-                    const chan = textChanType.parse(val, message)
-                    if (chan) channels.push(chan)
+                    if (channels.length === 30) break;
+                    const chan = textChanType.parse(val, message);
+                    if (chan) channels.push(chan);
                 }
             }
         } else {
@@ -664,18 +663,18 @@ module.exports = class SetupCommand extends Command {
                     color: 'RED',
                     emoji: 'cross',
                     description: 'None of the channels you specified were valid. Please try again.'
-                }))
+                }));
             }
         }
 
-        if (data) await this.db.update(data, { $push: { lockChannels: { $each: channels.map(c => c.id) } } })
-        else await this.db.add(defaultDoc(guildId, 'lockChannels', channels.map(c => c.id)))
+        if (data) await this.db.update(data, { $push: { lockChannels: { $each: channels.map(c => c.id) } } });
+        else await this.db.add(defaultDoc(guildId, 'lockChannels', channels.map(c => c.id)));
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: oneLine`
                 I have saved all the lockdown channels you specified.
                 Use the \`view\` sub-command if you wish to check it out.
             `
-        }))
+        }));
     }
-}
+};

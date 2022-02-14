@@ -1,23 +1,22 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed, PremiumTier } = require('discord.js')
-const { replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageEmbed, PremiumTier } = require('discord.js');
+const { replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** @param {string[]} arr */
 function sliceEmojis(arr) {
-    const dummy = []
-    const normal = []
+    const dummy = [];
+    const normal = [];
     for (const emoji of arr) {
         if (dummy.join(' ').length + emoji.length + 1 > 1024) {
-            normal.push(dummy)
-            dummy.splice(0, dummy.length)
+            normal.push(dummy);
+            dummy.splice(0, dummy.length);
         }
-        dummy.push(emoji)
+        dummy.push(emoji);
     }
-    normal.push(dummy)
-    return normal
+    normal.push(dummy);
+    return normal;
 }
 
 /**
@@ -26,10 +25,10 @@ function sliceEmojis(arr) {
  */
 function parseEmojiTier(tier) {
     switch (tier) {
-        case 'NONE': return 50
-        case 'TIER_1': return 100
-        case 'TIER_2': return 150
-        case 'TIER_3': return 250
+        case 'NONE': return 50;
+        case 'TIER_1': return 100;
+        case 'TIER_2': return 150;
+        case 'TIER_3': return 250;
     }
 }
 
@@ -43,7 +42,7 @@ module.exports = class EmojisCommand extends Command {
             details: 'If the amount of emojis is too big, I will only display the maximum amount I\'m able to.',
             guildOnly: true,
             slash: true
-        })
+        });
     }
 
     /**
@@ -51,43 +50,43 @@ module.exports = class EmojisCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { guild } = message || interaction
-        const _emojis = await guild.emojis.fetch()
-        const maxEmojis = parseEmojiTier(guild.premiumTier)
+        const { guild } = message || interaction;
+        const _emojis = await guild.emojis.fetch();
+        const maxEmojis = parseEmojiTier(guild.premiumTier);
 
         const emojis = _emojis.map(emoji => ({
             animated: emoji.animated,
             string: emoji.toString()
-        }))
+        }));
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
                 name: `${guild.name}'s emojis`, iconURL: guild.iconURL({ dynamic: true })
-            })
+            });
 
-        const notAnimated = emojis.filter(e => !e.animated).map(e => e.string)
-        const isAnimated = emojis.filter(e => e.animated).map(e => e.string)
+        const notAnimated = emojis.filter(e => !e.animated).map(e => e.string);
+        const isAnimated = emojis.filter(e => e.animated).map(e => e.string);
 
-        const normal = sliceEmojis(notAnimated)
-        const animated = sliceEmojis(isAnimated)
+        const normal = sliceEmojis(notAnimated);
+        const animated = sliceEmojis(isAnimated);
 
         embed.addField(
             `Normal emojis: ${notAnimated.length}/${maxEmojis}`,
             normal.shift().join(' ') || 'No emojis found.'
-        )
+        );
         while (normal.length !== 0) {
-            embed.addField('\u2800', normal.shift().join(' '))
+            embed.addField('\u2800', normal.shift().join(' '));
         }
 
         embed.addField(
             `Animated emojis: ${isAnimated.length}/${maxEmojis}`,
             animated.shift().join(' ') || 'No emojis found.'
-        )
+        );
         while (animated.length !== 0) {
-            embed.addField('\u2800', animated.shift().join(' '))
+            embed.addField('\u2800', animated.shift().join(' '));
         }
 
-        await replyAll({ message, interaction }, embed)
+        await replyAll({ message, interaction }, embed);
     }
-}
+};

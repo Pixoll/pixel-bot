@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { stripIndent } = require('common-tags')
-const { basicEmbed } = require('../../utils/functions')
-const { CommandInstances } = require('../../command-handler/typings')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { stripIndent } = require('common-tags');
+const { basicEmbed } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -26,9 +25,9 @@ module.exports = class PrefixCommand extends Command {
                 type: 'string',
                 required: false
             }]
-        })
+        });
 
-        this.globalDb = this.client.database.prefixes
+        this.globalDb = this.client.database.prefixes;
     }
 
     /**
@@ -38,64 +37,64 @@ module.exports = class PrefixCommand extends Command {
      * @param {string} args.newPrefix The new prefix to set
      */
     async run({ message }, { newPrefix }) {
-        const { guild, client, member } = message
+        const { guild, client, member } = message;
 
         if (!newPrefix) {
-            const prefix = guild?.prefix || client.prefix
+            const prefix = guild?.prefix || client.prefix;
             const description = guild ? `The bot prefix in this server is \`${prefix}\`` :
-                `The global bot prefix is \`${prefix}\``
+                `The global bot prefix is \`${prefix}\``;
 
             return await message.replyEmbed(basicEmbed({
                 color: 'BLUE', emoji: 'info', description
-            }))
+            }));
         }
 
         if (!guild && !client.isOwner(message)) {
-            return await this.onBlock({ message }, 'ownerOnly')
+            return await this.onBlock({ message }, 'ownerOnly');
         }
 
         if (guild && !client.isOwner(message) && !member.permissions.has('ADMINISTRATOR')) {
-            return await this.onBlock({ message }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
+            return await this.onBlock({ message }, 'userPermissions', { missing: ['ADMINISTRATOR'] });
         }
 
-        const current = guild?.prefix || client?.prefix
+        const current = guild?.prefix || client?.prefix;
         if (current === newPrefix) {
             return await message.replyEmbed(basicEmbed({
                 color: 'RED', emoji: 'cross', description: `The current prefix is already \`${newPrefix}\``
-            }))
+            }));
         }
 
-        if (guild) guild.prefix = newPrefix
-        else client.prefix = newPrefix
+        if (guild) guild.prefix = newPrefix;
+        else client.prefix = newPrefix;
 
-        const targetDb = guild ? guild.database.prefixes : this.globalDb
-        const doc = await targetDb.fetch()
+        const targetDb = guild ? guild.database.prefixes : this.globalDb;
+        const doc = await targetDb.fetch();
 
         if (client.prefix === guild?.prefix) {
-            await targetDb.delete(doc)
+            await targetDb.delete(doc);
         } else {
-            if (doc) await targetDb.update(doc, { prefix: newPrefix })
+            if (doc) await targetDb.update(doc, { prefix: newPrefix });
             else {
                 await targetDb.add({
                     global: !guild,
                     guild: guild?.id,
                     prefix: newPrefix
-                })
+                });
             }
         }
 
         const description = guild ? `Changed the bot prefix of this server to \`${newPrefix}\`` :
-            `Changed the global bot prefix to \`${newPrefix}\``
+            `Changed the global bot prefix to \`${newPrefix}\``;
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN', emoji: 'check', description
-        }))
+        }));
 
         if (!guild) {
             client.user.setActivity({
                 name: `for ${newPrefix}help`,
                 type: 'WATCHING'
-            })
+            });
         }
     }
-}
+};

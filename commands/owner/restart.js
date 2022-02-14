@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, confirmButtons } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, confirmButtons } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +12,7 @@ module.exports = class RestartCommand extends Command {
             description: 'Restarts the bot.',
             ownerOnly: true,
             guarded: true
-        })
+        });
     }
 
     /**
@@ -21,18 +20,18 @@ module.exports = class RestartCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message }) {
-        const confirmed = await confirmButtons({ message }, 'restart the bot')
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message }, 'restart the bot');
+        if (!confirmed) return;
 
         await message.replyEmbed(basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Restarting...'
-        }))
+        }));
 
         this.client.user.setActivity({
             name: 'Restarting...',
             type: 'PLAYING'
-        })
+        });
 
-        process.exit()
+        process.exit();
     }
-}
+};

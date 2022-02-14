@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed, Invite } = require('discord.js')
-const { timestamp, basicEmbed, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageEmbed, Invite } = require('discord.js');
+const { timestamp, basicEmbed, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -33,7 +32,7 @@ module.exports = class InviteInfoCommand extends Command {
                     required: true
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -44,22 +43,22 @@ module.exports = class InviteInfoCommand extends Command {
      */
     async run({ message, interaction }, { invite }) {
         if (interaction) {
-            invite = await this.client.fetchInvite(invite).catch(() => null)
+            invite = await this.client.fetchInvite(invite).catch(() => null);
             if (!invite) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That invite is invalid.'
-                }))
+                }));
             }
         }
 
-        const { guild, channel, url, inviter, presenceCount, memberCount, maxUses, expiresAt, temporary } = invite
+        const { guild, channel, url, inviter, presenceCount, memberCount, maxUses, expiresAt, temporary } = invite;
 
         const info = guild ? stripIndent`
             **Channel:** ${channel.toString()} ${channel.name}
             **Online members:** ${presenceCount}/${memberCount}
         ` : stripIndent`
             **Members:** ${memberCount}
-        `
+        `;
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -79,8 +78,8 @@ module.exports = class InviteInfoCommand extends Command {
                 text: guild ?
                     `Server ID: ${guild.id}` :
                     `Group DM ID: ${channel.id}`
-            })
+            });
 
-        await replyAll({ message, interaction }, embed)
+        await replyAll({ message, interaction }, embed);
     }
-}
+};

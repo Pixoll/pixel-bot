@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, generateEmbed, pluralize, getArgument, confirmButtons, replyAll } = require('../../utils/functions')
-const { CommandInstances } = require('../../command-handler/typings')
-const { SetupSchema } = require('../../schemas/types')
-const { TextChannel } = require('discord.js')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { stripIndent, oneLine } = require('common-tags');
+const { basicEmbed, generateEmbed, pluralize, getArgument, confirmButtons, replyAll } = require('../../utils/functions');
+const { SetupSchema } = require('../../schemas/types');
+const { TextChannel } = require('discord.js');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -49,31 +48,31 @@ module.exports = class LockdownCommand extends Command {
                     type: 'string',
                     validate: async (val, msg, arg) => {
                         if (typeof msg.parseArgs === 'function') {
-                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                            if (!['add', 'remove', 'channels'].includes(sc)) return true
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase();
+                            if (!['add', 'remove', 'channels'].includes(sc)) return true;
                         }
-                        const type = msg.client.registry.types.get('text-channel')
-                        const array = val.split(/ +/).slice(0, 30)
-                        const valid = []
+                        const type = msg.client.registry.types.get('text-channel');
+                        const array = val.split(/ +/).slice(0, 30);
+                        const valid = [];
                         for (const str of array) {
-                            valid.push(await type.validate(str, msg, arg))
+                            valid.push(await type.validate(str, msg, arg));
                         }
-                        return valid.filter(b => b !== true).length !== array.length
+                        return valid.filter(b => b !== true).length !== array.length;
                     },
                     parse: async (val, msg, arg) => {
                         if (typeof msg.parseArgs === 'function') {
-                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                            if (!['add', 'remove', 'channels'].includes(sc)) return val || 'No reason given.'
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase();
+                            if (!['add', 'remove', 'channels'].includes(sc)) return val || 'No reason given.';
                         }
-                        const type = msg.client.registry.types.get('text-channel')
-                        const array = val.split(/ +/).slice(0, 30)
-                        const valid = []
+                        const type = msg.client.registry.types.get('text-channel');
+                        const array = val.split(/ +/).slice(0, 30);
+                        const valid = [];
                         for (const str of array) {
-                            const isValid = await type.validate(str, msg, arg)
-                            if (!isValid) continue
-                            valid.push(await type.parse(str, msg))
+                            const isValid = await type.validate(str, msg, arg);
+                            if (!isValid) continue;
+                            valid.push(await type.parse(str, msg));
                         }
-                        return valid
+                        return valid;
                     },
                     required: false,
                     error: 'None of the channels you specified were valid. Please try again.'
@@ -137,7 +136,7 @@ module.exports = class LockdownCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -150,46 +149,46 @@ module.exports = class LockdownCommand extends Command {
      */
     async run({ message, interaction }, { subCommand, channels, reason }) {
         if (interaction && channels) {
-            const arg = this.argsCollector.args[1]
-            const msg = await interaction.fetchReply()
-            const isValid = await arg.validate(channels, msg)
+            const arg = this.argsCollector.args[1];
+            const msg = await interaction.fetchReply();
+            const isValid = await arg.validate(channels, msg);
             if (isValid !== true) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: arg.error
-                }))
+                }));
             }
-            channels = await arg.parse(channels, msg)
+            channels = await arg.parse(channels, msg);
         }
 
-        const { guild } = message || interaction
-        this.db = guild.database.setup
-        const _channels = guild.channels
-        subCommand = subCommand.toLowerCase()
+        const { guild } = message || interaction;
+        this.db = guild.database.setup;
+        const _channels = guild.channels;
+        subCommand = subCommand.toLowerCase();
 
-        const data = await this.db.fetch()
+        const data = await this.db.fetch();
 
-        const savedChannels = []
+        const savedChannels = [];
         if (data) {
             for (const channelId of data.lockChannels) {
                 /** @type {TextChannel} */
-                const channel = await _channels.fetch(channelId).catch(() => null)
-                if (!channel) continue
-                savedChannels.push(channel)
+                const channel = await _channels.fetch(channelId).catch(() => null);
+                if (!channel) continue;
+                savedChannels.push(channel);
             }
         }
 
         switch (subCommand) {
             case 'start':
-                return await this.start({ message, interaction }, savedChannels, channels || reason)
+                return await this.start({ message, interaction }, savedChannels, channels || reason);
             case 'end':
-                return await this.end({ message, interaction }, savedChannels, channels || reason)
+                return await this.end({ message, interaction }, savedChannels, channels || reason);
             case 'channels':
             case 'view':
-                return await this.channels({ message, interaction }, savedChannels)
+                return await this.channels({ message, interaction }, savedChannels);
             case 'add':
-                return await this.add({ message, interaction }, data, savedChannels.map(c => c.id), channels)
+                return await this.add({ message, interaction }, data, savedChannels.map(c => c.id), channels);
             case 'remove':
-                return await this.remove({ message, interaction }, data, savedChannels.map(c => c.id), channels)
+                return await this.remove({ message, interaction }, data, savedChannels.map(c => c.id), channels);
         }
     }
 
@@ -205,51 +204,51 @@ module.exports = class LockdownCommand extends Command {
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            }));
         }
-        reason ??= 'We\'ll be back shortly.'
+        reason ??= 'We\'ll be back shortly.';
 
-        const confirmed = await confirmButtons({ message, interaction }, 'start lockdown', null, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'start lockdown', null, { reason });
+        if (!confirmed) return;
 
-        const { guild, guildId } = message || interaction
-        const { everyone } = guild.roles
+        const { guild, guildId } = message || interaction;
+        const { everyone } = guild.roles;
 
         const locking = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
-        })
-        const toDelete = await message?.replyEmbed(locking)
-        await replyAll({ interaction }, locking)
+        });
+        const toDelete = await message?.replyEmbed(locking);
+        await replyAll({ interaction }, locking);
 
-        let amount = 0
+        let amount = 0;
         for (const channel of savedChannels) {
-            const permsManager = channel.permissionOverwrites
-            const perms = permsManager.cache.get(guildId)
-            if (perms?.deny.has('SEND_MESSAGES')) continue
+            const permsManager = channel.permissionOverwrites;
+            const perms = permsManager.cache.get(guildId);
+            if (perms?.deny.has('SEND_MESSAGES')) continue;
 
-            await permsManager.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 })
+            await permsManager.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 });
             await channel.send({
                 embeds: [basicEmbed({
                     emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason
                 })]
-            })
-            amount++
+            });
+            amount++;
         }
 
-        await toDelete?.delete().catch(() => null)
-        await message?.channel.sendTyping().catch(() => null)
+        await toDelete?.delete().catch(() => null);
+        await message?.channel.sendTyping().catch(() => null);
 
         if (amount === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'GOLD', description: 'No changes were made.'
-            }))
+            }));
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Locked ${amount}/${savedChannels.length} lockdown channels.`
-        }))
+        }));
     }
 
     /**
@@ -264,51 +263,51 @@ module.exports = class LockdownCommand extends Command {
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            }));
         }
-        reason ??= 'Thanks for waiting.'
+        reason ??= 'Thanks for waiting.';
 
-        const confirmed = await confirmButtons({ message, interaction }, 'end lockdown', null, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'end lockdown', null, { reason });
+        if (!confirmed) return;
 
-        const { guild, guildId } = message || interaction
-        const { everyone } = guild.roles
+        const { guild, guildId } = message || interaction;
+        const { everyone } = guild.roles;
 
         const unlocking = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Unlocking all lockdown channels, please wait...'
-        })
-        const toDelete = await message?.replyEmbed(unlocking)
-        await replyAll({ interaction }, unlocking)
+        });
+        const toDelete = await message?.replyEmbed(unlocking);
+        await replyAll({ interaction }, unlocking);
 
-        let amount = 0
+        let amount = 0;
         for (const channel of savedChannels) {
-            const permsManager = channel.permissionOverwrites
-            const perms = permsManager.cache.get(guildId)
-            if (!perms?.deny.has('SEND_MESSAGES')) continue
+            const permsManager = channel.permissionOverwrites;
+            const perms = permsManager.cache.get(guildId);
+            if (!perms?.deny.has('SEND_MESSAGES')) continue;
 
-            await permsManager.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })
+            await permsManager.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 });
             await channel.send({
                 embeds: [basicEmbed({
                     emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason
                 })]
-            })
-            amount++
+            });
+            amount++;
         }
 
-        await toDelete?.delete().catch(() => null)
-        await message?.channel.sendTyping().catch(() => null)
+        await toDelete?.delete().catch(() => null);
+        await message?.channel.sendTyping().catch(() => null);
 
         if (amount === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'GOLD', description: 'No changes were made.'
-            }))
+            }));
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             description: `Unocked ${amount}/${savedChannels.length} lockdown channels.`
-        }))
+        }));
     }
 
     /**
@@ -322,7 +321,7 @@ module.exports = class LockdownCommand extends Command {
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            }));
         }
 
         await generateEmbed({ message, interaction }, channelsData, {
@@ -330,7 +329,7 @@ module.exports = class LockdownCommand extends Command {
             authorName: `There's ${pluralize('lockdown channel', channelsData.length)}`,
             authorIconURL: (message || interaction).guild.iconURL({ dynamic: true }),
             useDescription: true
-        })
+        });
     }
 
     /**
@@ -342,28 +341,28 @@ module.exports = class LockdownCommand extends Command {
      */
     async add({ message, interaction }, data, savedChannels, channels) {
         if (message && !channels) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channels = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            channels = value;
         }
 
-        const channelsList = channels.filter(c => !savedChannels.includes(c.id))
+        const channelsList = channels.filter(c => !savedChannels.includes(c.id));
         if (channelsList.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The channels you specified have already been added.'
-            }))
+            }));
         }
 
-        const { guildId } = message || interaction
+        const { guildId } = message || interaction;
         if (!data) {
             await this.db.add({
                 guild: guildId,
                 lockChannels: channelsList.map(c => c.id)
-            })
+            });
         } else {
             await this.db.update(data, {
                 $push: { lockChannels: { $each: channelsList.map(c => c.id) } }
-            })
+            });
         }
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -371,7 +370,7 @@ module.exports = class LockdownCommand extends Command {
             emoji: 'check',
             fieldName: 'The following lockdown channels have been added:',
             fieldValue: channelsList.join(', ')
-        }))
+        }));
     }
 
     /**
@@ -387,31 +386,31 @@ module.exports = class LockdownCommand extends Command {
                 color: 'BLUE',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
-            }))
+            }));
         }
 
         if (message && !channels) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            channels = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            channels = value;
         }
 
-        const channelsList = channels.filter(c => savedChannels.includes(c.id))
+        const channelsList = channels.filter(c => savedChannels.includes(c.id));
         if (channelsList.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The channels you specified have not been added.'
-            }))
+            }));
         }
 
         await this.db.update(data, {
             $pull: { lockChannels: { $in: channelsList.map(c => c.id) } }
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been removed:',
             fieldValue: channelsList.join(', ')
-        }))
+        }));
     }
-}
+};

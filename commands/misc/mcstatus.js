@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageEmbed, MessageAttachment, MessageOptions, Util } = require('discord.js')
-const { status: statusJava, statusBedrock } = require('minecraft-server-util')
-const { basicEmbed, getArgument, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageEmbed, MessageAttachment, MessageOptions, Util } = require('discord.js');
+const { status: statusJava, statusBedrock } = require('minecraft-server-util');
+const { basicEmbed, getArgument, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -140,7 +139,7 @@ module.exports = class McStatusCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -152,21 +151,21 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} args.port The IP of the server to save/look for
      */
     async run({ message, interaction }, { subCommand, ip, port }) {
-        subCommand = subCommand.toLowerCase()
-        const { guild } = message || interaction
-        this.db = guild?.database.mcIps
+        subCommand = subCommand.toLowerCase();
+        const { guild } = message || interaction;
+        this.db = guild?.database.mcIps;
 
         switch (subCommand) {
             case 'check':
-                return await this.check({ message, interaction })
+                return await this.check({ message, interaction });
             case 'java':
-                return await this.java({ message, interaction }, ip, port ?? 25565)
+                return await this.java({ message, interaction }, ip, port ?? 25565);
             case 'bedrock':
-                return await this.bedrock({ message, interaction }, ip, port ?? 19132)
+                return await this.bedrock({ message, interaction }, ip, port ?? 19132);
             case 'save-java':
-                return await this.saveJava({ message, interaction }, ip, port ?? 25565)
+                return await this.saveJava({ message, interaction }, ip, port ?? 25565);
             case 'save-bedrock':
-                return await this.saveBedrock({ message, interaction }, ip, port ?? 19132)
+                return await this.saveBedrock({ message, interaction }, ip, port ?? 19132);
         }
     }
 
@@ -176,26 +175,26 @@ module.exports = class McStatusCommand extends Command {
      */
     async check({ message, interaction }) {
         if (!(message || interaction).guild) {
-            return await this.onBlock({ message, interaction }, 'guildOnly')
+            return await this.onBlock({ message, interaction }, 'guildOnly');
         }
 
-        const savedServer = await this.db.fetch()
+        const savedServer = await this.db.fetch();
 
         if (!savedServer) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
                 description: 'Please run the `save:java` or `save:bedrock` sub-commands before using this.'
-            }))
+            }));
         }
 
-        const { type, ip, port } = savedServer
+        const { type, ip, port } = savedServer;
 
         const response = type === 'java' ?
             await this.getJavaStatus(ip, port) :
-            await this.getBedrockStatus(ip, port)
+            await this.getBedrockStatus(ip, port);
 
-        await replyAll({ message, interaction }, response)
+        await replyAll({ message, interaction }, response);
     }
 
     /**
@@ -206,13 +205,13 @@ module.exports = class McStatusCommand extends Command {
      */
     async java({ message, interaction }, ip, port) {
         if (message && !ip) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            ip = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            ip = value;
         }
 
-        const response = await this.getJavaStatus(ip, port)
-        await replyAll({ message, interaction }, response)
+        const response = await this.getJavaStatus(ip, port);
+        await replyAll({ message, interaction }, response);
     }
 
     /**
@@ -223,13 +222,13 @@ module.exports = class McStatusCommand extends Command {
      */
     async bedrock({ message, interaction }, ip, port) {
         if (message && !ip) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            ip = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            ip = value;
         }
 
-        const response = await this.getBedrockStatus(ip, port)
-        await replyAll({ message, interaction }, response)
+        const response = await this.getBedrockStatus(ip, port);
+        await replyAll({ message, interaction }, response);
     }
 
     /**
@@ -239,21 +238,21 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} port The port of the Java server to save
      */
     async saveJava({ message, interaction }, ip, port) {
-        const { guildId, member } = message || interaction
-        const { permissions } = member
+        const { guildId, member } = message || interaction;
+        const { permissions } = member;
 
         if (!guildId) {
-            return await this.onBlock({ message, interaction }, 'guildOnly')
+            return await this.onBlock({ message, interaction }, 'guildOnly');
         }
 
         if (!this.client.isOwner(message || interaction.user) && !permissions.has('ADMINISTRATOR')) {
-            return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
+            return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] });
         }
 
         if (message && !ip) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            ip = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            ip = value;
         }
 
         await this.db.add({
@@ -261,7 +260,7 @@ module.exports = class McStatusCommand extends Command {
             type: 'java',
             ip: ip,
             port: port
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -271,7 +270,7 @@ module.exports = class McStatusCommand extends Command {
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
             `
-        }))
+        }));
     }
 
     /**
@@ -281,21 +280,21 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} port The port of the Bedrock server to save
      */
     async saveBedrock({ message, interaction }, ip, port) {
-        const { guildId, member } = message || interaction
-        const { permissions } = member
+        const { guildId, member } = message || interaction;
+        const { permissions } = member;
 
         if (!guildId) {
-            return await this.onBlock({ message, interaction }, 'guildOnly')
+            return await this.onBlock({ message, interaction }, 'guildOnly');
         }
 
         if (!this.client.isOwner(message || interaction.user) && !permissions.has('ADMINISTRATOR')) {
-            return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
+            return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] });
         }
 
         if (message && !ip) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            ip = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            ip = value;
         }
 
         await this.db.add({
@@ -303,7 +302,7 @@ module.exports = class McStatusCommand extends Command {
             type: 'bedrock',
             ip: ip,
             port: port
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -313,7 +312,7 @@ module.exports = class McStatusCommand extends Command {
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
             `
-        }))
+        }));
     }
 
     /**
@@ -323,10 +322,10 @@ module.exports = class McStatusCommand extends Command {
      * @returns {Promise<MessageEmbed|MessageOptions>}
      */
     async getJavaStatus(ip, port) {
-        const reqStart = Date.now()
-        let status
+        const reqStart = Date.now();
+        let status;
         try {
-            status = await statusJava(ip, port)
+            status = await statusJava(ip, port);
         } catch {
             return basicEmbed({
                 color: 'RED',
@@ -336,15 +335,15 @@ module.exports = class McStatusCommand extends Command {
                     **IP:** \`${ip}\`
                     **Port:** \`${port}\`
                 `,
-            })
+            });
         }
 
-        const ping = Date.now() - reqStart
-        const { motd, version, favicon, players } = status
+        const ping = Date.now() - reqStart;
+        const { motd, version, favicon, players } = status;
 
         // Server favicon
-        const buffer = favicon ? new Buffer.from(favicon.split(',')[1], 'base64') : null
-        const icon = buffer ? new MessageAttachment(buffer, 'icon.png') : null
+        const buffer = favicon ? new Buffer.from(favicon.split(',')[1], 'base64') : null;
+        const icon = buffer ? new MessageAttachment(buffer, 'icon.png') : null;
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -353,25 +352,25 @@ module.exports = class McStatusCommand extends Command {
             })
             .addField('MOTD', Util.escapeMarkdown(motd.clean.trimStart()))
             .setThumbnail('attachment://icon.png')
-            .setTimestamp()
+            .setTimestamp();
 
         if (players.sample?.length > 0) {
             serverInfo.addField(
                 'Player list',
                 players.sample.map(p => `\`${p.name}\``).join(', ')
-            )
+            );
         }
 
         serverInfo.addField('Information', stripIndent`
             **Online players:** ${players.online}/${players.max}
             **Version:** ${version.name}
             **Ping:** ${ping}ms
-        `)
+        `);
 
         return {
             embeds: [serverInfo],
             files: [icon].filter(a => a)
-        }
+        };
     }
 
     /**
@@ -380,10 +379,10 @@ module.exports = class McStatusCommand extends Command {
      * @param {number} port the port of the server to look for
      */
     async getBedrockStatus(ip, port) {
-        const reqStart = Date.now()
-        let status
+        const reqStart = Date.now();
+        let status;
         try {
-            status = await statusBedrock(ip, port)
+            status = await statusBedrock(ip, port);
         } catch {
             return basicEmbed({
                 color: 'RED',
@@ -393,11 +392,11 @@ module.exports = class McStatusCommand extends Command {
                     **IP:** \`${ip}\`
                     **Port:** \`${port}\`
                 `
-            })
+            });
         }
 
-        const ping = Date.now() - reqStart
-        const { motd, players, version } = status
+        const ping = Date.now() - reqStart;
+        const { motd, players, version } = status;
 
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -408,8 +407,8 @@ module.exports = class McStatusCommand extends Command {
                 **Version:** ${version.name}
                 **Ping:** ${ping}ms
             `)
-            .setTimestamp()
+            .setTimestamp();
 
-        return serverInfo
+        return serverInfo;
     }
-}
+};

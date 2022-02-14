@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { GuildMember } = require('discord.js')
-const { docId, basicEmbed, userException, confirmButtons, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { GuildMember } = require('discord.js');
+const { docId, basicEmbed, userException, confirmButtons, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -47,7 +46,7 @@ module.exports = class warnCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -62,30 +61,30 @@ module.exports = class warnCommand extends Command {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { guild, guildId } = message || interaction
-        const author = message?.author || interaction.user
-        const { user } = member
+        const { guild, guildId } = message || interaction;
+        const author = message?.author || interaction.user;
+        const { user } = member;
 
-        const uExcept = userException(user, author, this)
-        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept))
+        const uExcept = userException(user, author, this);
+        if (uExcept) return await replyAll({ message, interaction }, basicEmbed(uExcept));
 
         if (user.bot) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'You can\'t warn a bot.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'warn', user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'warn', user, { reason });
+        if (!confirmed) return;
 
         await user.send(basicEmbed({
             color: 'GOLD',
@@ -94,7 +93,7 @@ module.exports = class warnCommand extends Command {
                 **Reason:** ${reason}
                 **Moderator:** ${author.toString()} ${author.tag}
             `
-        })).catch(() => null)
+        })).catch(() => null);
 
         await guild.database.moderations.add({
             _id: docId(),
@@ -105,14 +104,14 @@ module.exports = class warnCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason
-        })
-        this.client.emit('guildMemberWarn', guild, author, user, reason)
+        });
+        this.client.emit('guildMemberWarn', guild, author, user, reason);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been warned`,
             fieldValue: `**Reason:** ${reason}`
-        }))
+        }));
     }
-}
+};

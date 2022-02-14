@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { MessageActionRow, MessageButton } = require('discord.js')
-const { noReplyInDMs, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { MessageActionRow, MessageButton } = require('discord.js');
+const { noReplyInDMs, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +12,7 @@ module.exports = class VoteCommand extends Command {
             group: 'misc',
             description: 'Vote for the bot and make it grow!',
             slash: true
-        })
+        });
     }
 
     /**
@@ -28,11 +27,11 @@ module.exports = class VoteCommand extends Command {
                     .setEmoji('👍')
                     .setLabel('Vote me')
                     .setURL('https://top.gg/bot/802267523058761759/vote')
-            )
+            );
 
         await replyAll({ message, interaction }, {
             content: 'Vote for the bot with the button below!',
             components: [row]
-        })
+        });
     }
-}
+};

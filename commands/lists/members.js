@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { Role } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, abcOrder, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { Role } = require('discord.js');
+const { generateEmbed, basicEmbed, pluralize, abcOrder, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -29,7 +28,7 @@ module.exports = class MembersCommand extends Command {
                     required: true
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -40,20 +39,20 @@ module.exports = class MembersCommand extends Command {
      */
     async run({ message, interaction }, { role }) {
         const members = role.members.sort((a, b) => abcOrder(a.user.tag, b.user.tag))
-            .map(m => `${m.toString()} ${m.user.tag}`)
+            .map(m => `${m.toString()} ${m.user.tag}`);
 
         if (members.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: `The \`${role.name}\` role has no members.`
-            }))
+            }));
         }
 
-        const { guild } = message || interaction
+        const { guild } = message || interaction;
         await generateEmbed({ message, interaction }, members, {
             number: 20,
             authorName: `There's ${pluralize('member', members.length)} in ${role.name}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             useDescription: true
-        })
+        });
     }
-}
+};

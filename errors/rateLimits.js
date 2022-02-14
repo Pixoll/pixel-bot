@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { oneLine, stripIndent } = require('common-tags')
-const { TextChannel, MessageEmbed, RateLimitData } = require('discord.js')
-const { CommandoClient } = require('../command-handler/typings')
-const { timestamp } = require('../utils/functions')
+const { oneLine, stripIndent } = require('common-tags');
+const { TextChannel, MessageEmbed, RateLimitData } = require('discord.js');
+const { CommandoClient } = require('pixoll-commando');
+const { timestamp } = require('../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -10,11 +10,11 @@ const { timestamp } = require('../utils/functions')
  * @param {CommandoClient} client The client instance
  */
 module.exports = (client) => {
-    client.on('rateLimit', async data => await manager(data))
+    client.on('rateLimit', async data => await manager(data));
 
     client.on('debug', async msg => {
-        const isRateLimit = msg.includes('while executing a request')
-        if (!isRateLimit) return
+        const isRateLimit = msg.includes('while executing a request');
+        if (!isRateLimit) return;
 
         const data = {
             global: !!msg.match(/Global *: true/)?.map(m => m)[0].split(/ +/).pop(),
@@ -23,20 +23,20 @@ module.exports = (client) => {
             route: msg.match(/Route *: .*/)?.map(m => m)[0].split(/ +/).pop(),
             limit: parseInt(msg.match(/Limit *: .+/)?.map(m => m)[0].split(/ +/).pop()),
             timeout: parseInt(msg.match(/Timeout *: .+/)?.map(m => m)[0].split(/ +/).pop()),
-        }
+        };
 
-        await manager(data)
-    })
+        await manager(data);
+    });
 
     /** @param {RateLimitData} data */
     async function manager(data) {
-        const { global, limit, method, path, route, timeout } = data
+        const { global, limit, method, path, route, timeout } = data;
 
         if (global) {
-            console.log('rateLimit >', data)
+            console.log('rateLimit >', data);
 
             /** @type {TextChannel} */
-            const errorsChannel = await client.channels.fetch('906740370304540702')
+            const errorsChannel = await client.channels.fetch('906740370304540702');
 
             const embed = new MessageEmbed()
                 .setColor('GOLD')
@@ -49,18 +49,18 @@ module.exports = (client) => {
                     **Route:** ${route}
                     **Method:** ${method}
                 `)
-                .setTimestamp()
+                .setTimestamp();
 
-            await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] })
-            return
+            await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] });
+            return;
         }
 
-        const isMessageCooldown = !!route.match(/\/channels\/\d{17,20}\/messages/)?.map(m => m)[0]
-        if (isMessageCooldown) return
+        const isMessageCooldown = !!route.match(/\/channels\/\d{17,20}\/messages/)?.map(m => m)[0];
+        if (isMessageCooldown) return;
 
-        const isTypingCooldown = !!route.match(/\/channels\/\d{17,20}\/typing/)?.map(m => m)[0] && method === 'post'
-        if (isTypingCooldown) return
+        const isTypingCooldown = !!route.match(/\/channels\/\d{17,20}\/typing/)?.map(m => m)[0] && method === 'post';
+        if (isTypingCooldown) return;
 
-        console.log('rateLimit >', data)
+        console.log('rateLimit >', data);
     }
-}
+};

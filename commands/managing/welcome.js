@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { TextChannel, MessageEmbed } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, basicCollector, replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags');
+const { TextChannel, MessageEmbed } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, basicCollector, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -72,7 +71,7 @@ module.exports = class WelcomeCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -83,11 +82,11 @@ module.exports = class WelcomeCommand extends Command {
      * @param {string} args.msg The welcome message to send
      */
     async run({ message, interaction }, { channel, msg, message: intMsg }) {
-        if (interaction) msg = intMsg
+        if (interaction) msg = intMsg;
 
-        const { guild, guildId } = message || interaction
-        this.db = guild.database.welcome
-        const data = await this.db.fetch()
+        const { guild, guildId } = message || interaction;
+        this.db = guild.database.welcome;
+        const data = await this.db.fetch();
 
         if (!channel) {
             const embed = new MessageEmbed()
@@ -99,34 +98,34 @@ module.exports = class WelcomeCommand extends Command {
                     **Channel:** ${data?.channel ? `<#${data?.channel}>` : '`No saved channel found.`'}
                     **Message:** ${data?.message?.replace(/{[\w_]+}/g, '`$&`') || '`No saved message found.`'}
                 `)
-                .setTimestamp()
+                .setTimestamp();
 
-            return await replyAll({ message, interaction }, embed)
+            return await replyAll({ message, interaction }, embed);
         }
 
         if (message && !msg) {
             const welcomeMsg = await basicCollector({ message }, {
                 fieldName: `What message would you like me to send in #${channel.name}?`
-            }, { time: 2 * 60_000 })
-            if (!welcomeMsg) return
-            msg = welcomeMsg.content
+            }, { time: 2 * 60_000 });
+            if (!welcomeMsg) return;
+            msg = welcomeMsg.content;
         }
 
         if (data) {
             await this.db.update(data, {
                 channel: channel.id,
                 message: msg
-            })
+            });
         } else {
             await this.db.add({
                 guild: guildId,
                 channel: channel.id,
                 message: msg
-            })
+            });
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
-        }))
+        }));
     }
-}
+};

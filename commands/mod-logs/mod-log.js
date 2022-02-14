@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { stripIndent, oneLine } = require('common-tags')
-const { MessageEmbed, User } = require('discord.js')
-const { basicEmbed, docId, confirmButtons, timestamp, replyAll } = require('../../utils/functions')
-const { ModerationSchema } = require('../../schemas/types')
-const { capitalize } = require('lodash')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { stripIndent, oneLine } = require('common-tags');
+const { MessageEmbed, User } = require('discord.js');
+const { basicEmbed, docId, confirmButtons, timestamp, replyAll } = require('../../utils/functions');
+const { ModerationSchema } = require('../../schemas/types');
+const { capitalize } = require('lodash');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -69,7 +68,7 @@ module.exports = class ModLogCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -80,22 +79,22 @@ module.exports = class ModLogCommand extends Command {
      * @param {string} args.modlogId The mod log ID
      */
     async run({ message, interaction }, { subCommand, modlogId }) {
-        subCommand = subCommand.toLowerCase()
-        const { guild } = message || interaction
-        this.db = guild.database.moderations
+        subCommand = subCommand.toLowerCase();
+        const { guild } = message || interaction;
+        this.db = guild.database.moderations;
 
-        const modLog = await this.db.fetch(modlogId)
+        const modLog = await this.db.fetch(modlogId);
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
-            }))
+            }));
         }
 
         switch (subCommand) {
             case 'view':
-                return await this.view({ message, interaction }, modLog)
+                return await this.view({ message, interaction }, modLog);
             case 'delete':
-                return await this.delete({ message, interaction }, modLog)
+                return await this.delete({ message, interaction }, modLog);
         }
     }
 
@@ -105,13 +104,13 @@ module.exports = class ModLogCommand extends Command {
      * @param {ModerationSchema} modlog The modlog to view
      */
     async view({ message, interaction }, modlog) {
-        const { users } = this.client
+        const { users } = this.client;
 
         /** @type {User} */
-        const user = await users.fetch(modlog.userId).catch(() => null)
+        const user = await users.fetch(modlog.userId).catch(() => null);
         /** @type {User} */
-        const moderator = await users.fetch(modlog.modId).catch(() => null)
-        const duration = modlog.duration ? `**Duration:** ${modlog.duration}` : ''
+        const moderator = await users.fetch(modlog.modId).catch(() => null);
+        const duration = modlog.duration ? `**Duration:** ${modlog.duration}` : '';
 
         const modlogInfo = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -126,9 +125,9 @@ module.exports = class ModLogCommand extends Command {
                 ${duration}
                 **Date:** ${timestamp(modlog.createdAt)}
             `)
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, modlogInfo)
+        await replyAll({ message, interaction }, modlogInfo);
     }
 
     /**
@@ -137,23 +136,23 @@ module.exports = class ModLogCommand extends Command {
      * @param {ModerationSchema} modlog The modlog to delete
      */
     async delete({ message, interaction }, modlog) {
-        const { client, member } = message || interaction
-        const user = message?.author || interaction.user
+        const { client, member } = message || interaction;
+        const user = message?.author || interaction.user;
         if (!client.isOwner(user) || member.permissions.has('ADMINISTRATOR')) {
-            return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] })
+            return await this.onBlock({ message, interaction }, 'userPermissions', { missing: ['ADMINISTRATOR'] });
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, 'delete mod log', modlog._id, modlog)
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'delete mod log', modlog._id, modlog);
+        if (!confirmed) return;
 
-        const activeDB = this.db.guild.database.active
-        const activeLog = await activeDB.fetch(`\`${modlog._id}\``)
+        const activeDB = this.db.guild.database.active;
+        const activeLog = await activeDB.fetch(`\`${modlog._id}\``);
 
-        if (activeLog) await activeDB.delete(activeLog)
-        await this.db.delete(modlog)
+        if (activeLog) await activeDB.delete(activeLog);
+        await this.db.delete(modlog);
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Deleted mod log with ID \`${modlog._id}\``
-        }))
+        }));
     }
-}
+};

@@ -1,10 +1,10 @@
-const s = 1000
-const m = s * 60
-const h = m * 60
-const d = h * 24
-const w = d * 7
-const y = d * 365.25
-const mth = y / 12
+const s = 1000;
+const m = s * 60;
+const h = m * 60;
+const d = h * 24;
+const w = d * 7;
+const y = d * 365.25;
+const mth = y / 12;
 
 /**
  * Parses the milliseconds into a string, or a string into milliseconds
@@ -19,19 +19,19 @@ const mth = y / 12
  * @returns {string|number}
  */
 function myMs(val, options = {}) {
-    if (typeof val === 'undefined' || val === null) return
-    if (!['number', 'string'].includes(typeof val)) throw new TypeError('Expected a number or string.')
+    if (typeof val === 'undefined' || val === null) return;
+    if (!['number', 'string'].includes(typeof val)) throw new TypeError('Expected a number or string.');
 
-    const isNumber = !!Number(val) || Number(val) === 0
+    const isNumber = !!Number(val) || Number(val) === 0;
 
     if (options.number) {
-        if (isNumber) return Math.abs(Number(val))
-        return parseMs(val)
+        if (isNumber) return Math.abs(Number(val));
+        return parseMs(val);
     }
 
     if (typeof val === 'string' && !isNumber) {
-        const ms = parseMs(val)
-        return ms
+        const ms = parseMs(val);
+        return ms;
     }
 
     const obj = {
@@ -43,40 +43,40 @@ function myMs(val, options = {}) {
         minute: Math.trunc(val / m) % 60,
         second: Math.trunc(val / s) % 60,
         millisecond: val % 1000,
-    }
+    };
 
-    const arr = []
+    const arr = [];
     for (const prop in obj) {
-        const val = Math.abs(obj[prop])
-        if (typeof val !== 'number' || val === 0) continue
+        const val = Math.abs(obj[prop]);
+        if (typeof val !== 'number' || val === 0) continue;
 
-        if (!options.showMs && prop === 'millisecond') continue
+        if (!options.showMs && prop === 'millisecond') continue;
 
         if (options.long) {
-            const plural = val > 1 ? prop + 's' : prop
-            arr.push(`${val} ${plural}`)
+            const plural = val > 1 ? prop + 's' : prop;
+            arr.push(`${val} ${plural}`);
         } else {
-            let char = prop.charAt(0)
-            if (prop === 'month') char = 'mth'
-            if (prop === 'millisecond') char = 'ms'
+            let char = prop.charAt(0);
+            if (prop === 'month') char = 'mth';
+            if (prop === 'millisecond') char = 'ms';
 
-            arr.push(`${val}${char}`)
+            arr.push(`${val}${char}`);
         }
     }
 
     if (arr.length === 0) {
-        if (options.long) return '0 milliseconds'
-        return '0ms'
+        if (options.long) return '0 milliseconds';
+        return '0ms';
     }
 
-    const and = str => options.showAnd ? str.replace(/,(?=[^,]*$)/, ' and') : str
+    const and = str => options.showAnd ? str.replace(/,(?=[^,]*$)/, ' and') : str;
 
-    const commas = options.noCommas ? '' : ', '
-    if (options.length) return and(arr.slice(0, options.length).join(commas))
-    return and(arr.join(commas))
+    const commas = options.noCommas ? '' : ', ';
+    if (options.length) return and(arr.slice(0, options.length).join(commas));
+    return and(arr.join(commas));
 }
 
-module.exports = myMs
+module.exports = myMs;
 
 /**
  * Parses the string into milliseconds
@@ -84,32 +84,32 @@ module.exports = myMs
  * @private
  */
 function parseMs(str) {
-    if (typeof str !== 'string') throw new TypeError('Expected a string.')
+    if (typeof str !== 'string') throw new TypeError('Expected a string.');
 
     const regex = new RegExp(
-        '(-?(?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|' +
+        '((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|' +
         'minutes?|mins?|hours?|hrs?|days?|weeks?|months?|mths?|years?|yrs?|[smhdwy])?',
         'gi'
-    )
-    const match = str.match(regex)
-    if (!match) return
+    );
+    const match = str.match(regex);
+    if (!match) return;
 
-    const arr = match.map((q, n, p) => regex.exec(p)).map((array) => array.splice(1))
-    let number = 0
+    const arr = match.map((q, n, p) => regex.exec(p)).map((array) => array.splice(1));
+    let number = 0;
 
     for (const [val, char] of arr) {
-        const res = Number(val)
-        const type = (char || 'ms').toLowerCase()
+        const res = Number(val);
+        const type = (char || 'ms').toLowerCase();
 
-        if (type === 'y') number += res * y
-        if (type === 'mth') number += res * mth
-        if (type === 'w') number += res * w
-        if (type === 'd') number += res * d
-        if (type === 'h') number += res * h
-        if (type === 'm') number += res * m
-        if (type === 's') number += res * s
-        if (type === 'ms') number += res
+        if (type === 'y') number += res * y;
+        if (type === 'mth') number += res * mth;
+        if (type === 'w') number += res * w;
+        if (type === 'd') number += res * d;
+        if (type === 'h') number += res * h;
+        if (type === 'm') number += res * m;
+        if (type === 's') number += res * s;
+        if (type === 'ms') number += res;
     }
 
-    return number
+    return number;
 }

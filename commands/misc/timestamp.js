@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { timestamp, basicEmbed, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { timestamp, basicEmbed, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -34,7 +33,7 @@ module.exports = class TimestampCommand extends Command {
                     description: 'The date for the timestamp.'
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -45,24 +44,24 @@ module.exports = class TimestampCommand extends Command {
      */
     async run({ message, interaction }, { date }) {
         if (interaction) {
-            const arg = this.argsCollector.args[0]
-            date = await arg.parse(date ?? 'now').catch(() => null) || null
+            const arg = this.argsCollector.args[0];
+            date = await arg.parse(date ?? 'now').catch(() => null) || null;
             if (!date) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.'
-                }))
+                }));
             }
         }
 
-        if (typeof date === 'number') date += Date.now()
-        if (date instanceof Date) date = date.getTime()
+        if (typeof date === 'number') date += Date.now();
+        if (date instanceof Date) date = date.getTime();
 
-        const timestamps = []
+        const timestamps = [];
         for (const letter of ['t', 'T', 'd', 'D', 'f', 'F', 'R']) {
-            const string = timestamp(date, letter)
-            timestamps.push(`\`${string}\` ${string}`)
+            const string = timestamp(date, letter);
+            timestamps.push(`\`${string}\` ${string}`);
         }
 
-        await replyAll({ message, interaction }, timestamps.join('\n'))
+        await replyAll({ message, interaction }, timestamps.join('\n'));
     }
-}
+};

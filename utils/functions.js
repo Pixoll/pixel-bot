@@ -2,14 +2,14 @@
 const {
     MessageEmbed, GuildMember, User, Role, MessageOptions, GuildChannel, Message, ColorResolvable, AwaitMessagesOptions,
     MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util
-} = require('discord.js')
-const { CommandoMessage, CommandoGuild, Command, Argument, CommandInstances } = require('../command-handler/typings')
-const CGuildClass = require('../command-handler/extensions/guild')
-const { transform, isEqual, isArray, isObject, capitalize } = require('lodash')
-const { stripIndent } = require('common-tags')
-const myMs = require('./my-ms')
-const { permissions } = require('../command-handler/util')
-const { Module, AuditLog } = require('../schemas/types')
+} = require('discord.js');
+const {
+    CommandoMessage, CommandoGuild, Command, Argument, CommandInstances, util: { permissions }
+} = require('pixoll-commando');
+const { transform, isEqual, isArray, isObject, capitalize } = require('lodash');
+const { stripIndent } = require('common-tags');
+const myMs = require('./my-ms');
+const { Module, AuditLog } = require('../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -17,7 +17,7 @@ const { Module, AuditLog } = require('../schemas/types')
  * @param {number} s Amount of seconds
  */
 function sleep(s) {
-    return new Promise(resolve => setTimeout(resolve, s * 1000))
+    return new Promise(resolve => setTimeout(resolve, s * 1000));
 }
 
 /**
@@ -26,9 +26,9 @@ function sleep(s) {
  * @param {string} str2 The seconds string
  */
 function abcOrder(str1, str2) {
-    if (str1 < str2) return -1
-    if (str1 > str2) return 1
-    return 0
+    if (str1 < str2) return -1;
+    if (str1 > str2) return 1;
+    return 0;
 }
 
 /**
@@ -37,7 +37,7 @@ function abcOrder(str1, str2) {
  * @param {string} [lang] The language to use for this block
  */
 function code(str, lang = '') {
-    return `\`\`\`${lang}\n${Util.escapeMarkdown(str)}\n\`\`\``
+    return `\`\`\`${lang}\n${Util.escapeMarkdown(str)}\n\`\`\``;
 }
 
 /**
@@ -46,9 +46,9 @@ function code(str, lang = '') {
  * @param {boolean} [under] Wether to use underscores instead or not
  */
 function addDashes(str, under = false) {
-    if (!str) return
-    if (typeof under !== 'boolean') under = false
-    return str.replace(/[A-Z]/g, under ? '_$&' : '-$&').toLowerCase()
+    if (!str) return;
+    if (typeof under !== 'boolean') under = false;
+    return str.replace(/[A-Z]/g, under ? '_$&' : '-$&').toLowerCase();
 }
 
 /**
@@ -56,11 +56,11 @@ function addDashes(str, under = false) {
  * @param {string} str The string to parse
  */
 function removeDashes(str) {
-    if (!str) return
-    const arr = str.split('-')
-    const first = arr.shift()
-    const rest = arr.map(capitalize).join('')
-    return first + rest
+    if (!str) return;
+    const arr = str.split('-');
+    const first = arr.shift();
+    const rest = arr.map(capitalize).join('');
+    return first + rest;
 }
 
 /**
@@ -70,19 +70,19 @@ function removeDashes(str) {
  * @param {AuditLog} [subModule] The sub-module to check
  */
 async function isModuleEnabled(guild, module, subModule) {
-    const data = await guild.database.modules.fetch()
-    module = removeDashes(module)
-    subModule = removeDashes(subModule)
-    const check = subModule ? data?.[module]?.[subModule] : data?.[module]
+    const data = await guild.database.modules.fetch();
+    module = removeDashes(module);
+    subModule = removeDashes(subModule);
+    const check = subModule ? data?.[module]?.[subModule] : data?.[module];
     if (typeof check === 'object') {
-        const status = []
+        const status = [];
         for (const prop in check) {
-            if (typeof check[prop] === 'function') continue
-            status.push(!!check[prop])
+            if (typeof check[prop] === 'function') continue;
+            status.push(!!check[prop]);
         }
-        return !!status.filter(b => b)[0]
+        return !!status.filter(b => b)[0];
     }
-    return !!check
+    return !!check;
 }
 
 /**
@@ -97,27 +97,27 @@ async function isModuleEnabled(guild, module, subModule) {
  * @returns {string}
  */
 function customEmoji(emoji = '', animated = false) {
-    if (!emoji) return ''
+    if (!emoji) return '';
 
     switch (emoji) {
-        case 'boost': return '<a:boost:806364586231595028>'
-        case 'bot': return '<:bot1:893998060965883904><:bot2:893998060718399528>'
+        case 'boost': return '<a:boost:806364586231595028>';
+        case 'bot': return '<:bot1:893998060965883904><:bot2:893998060718399528>';
         case 'check': {
-            if (animated) return '<a:check:863118691808706580>'
-            return '<:check:802617654396715029>'
+            if (animated) return '<a:check:863118691808706580>';
+            return '<:check:802617654396715029>';
         }
         case 'cross': {
-            if (animated) return '<a:cross:863118691917889556>'
-            return '<:cross:802617654442852394>'
+            if (animated) return '<a:cross:863118691917889556>';
+            return '<:cross:802617654442852394>';
         }
-        case 'dnd': return '<:dnd:806022690284240936>'
-        case 'idle': return '<:idle:806022690443624458>'
-        case 'info': return '<:info:802617654262890527>'
-        case 'invis': return '<:invis:806022690326315078>'
-        case 'loading': return '<a:loading:863666168053366814>'
-        case 'neutral': return '<:neutral:819395069608984617>'
-        case 'online': return '<:online:806022690196291625>'
-        default: return emoji
+        case 'dnd': return '<:dnd:806022690284240936>';
+        case 'idle': return '<:idle:806022690443624458>';
+        case 'info': return '<:info:802617654262890527>';
+        case 'invis': return '<:invis:806022690326315078>';
+        case 'loading': return '<a:loading:863666168053366814>';
+        case 'neutral': return '<:neutral:819395069608984617>';
+        case 'online': return '<:online:806022690196291625>';
+        default: return emoji;
     }
 }
 
@@ -138,21 +138,21 @@ function customEmoji(emoji = '', animated = false) {
  * @param {BasicEmbedOptions} options Options for the embed.
  */
 function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldValue, footer }) {
-    if (!description && !fieldName) throw new Error('The argument description or fieldName must be specified')
+    if (!description && !fieldName) throw new Error('The argument description or fieldName must be specified');
 
-    emoji = customEmoji(emoji)
+    emoji = customEmoji(emoji);
 
     const embed = new MessageEmbed()
-        .setColor(typeof color === 'string' ? color.toUpperCase() : color)
+        .setColor(typeof color === 'string' ? color.toUpperCase() : color);
 
-    if (description) embed.setDescription(`${emoji} ${description}`)
+    if (description) embed.setDescription(`${emoji} ${description}`);
     if (fieldName) {
-        if (!fieldValue) throw new Error('The argument fieldValue must be specified')
-        embed.addField(`${emoji} ${fieldName}`, fieldValue)
+        if (!fieldValue) throw new Error('The argument fieldValue must be specified');
+        embed.addField(`${emoji} ${fieldName}`, fieldValue);
     }
-    if (footer) embed.setFooter({ text: footer })
+    if (footer) embed.setFooter({ text: footer });
 
-    return embed
+    return embed;
 }
 
 /**
@@ -169,17 +169,17 @@ function basicEmbed({ color = '#4c9f4c', description, emoji, fieldName, fieldVal
  * @param {?boolean} [exact=false] Whether the timestamp should be exact and not rounded
  */
 function timestamp(time, format = 'f', exact = false) {
-    if (!time) return
-    if (time instanceof Date) time = time.getTime()
+    if (!time) return;
+    if (time instanceof Date) time = time.getTime();
 
-    const trunc = Math.trunc(time / 1000)
-    if (exact) return `<t:${trunc}:${format}>`
+    const trunc = Math.trunc(time / 1000);
+    if (exact) return `<t:${trunc}:${format}>`;
 
-    const rem = trunc % 60
-    const roundUp = rem >= 20
-    const epoch = trunc - rem + (roundUp ? 60 : 0)
+    const rem = trunc % 60;
+    const roundUp = rem >= 20;
+    const epoch = trunc - rem + (roundUp ? 60 : 0);
 
-    return `<t:${epoch}:${format}>`
+    return `<t:${epoch}:${format}>`;
 }
 
 /**
@@ -189,13 +189,13 @@ function timestamp(time, format = 'f', exact = false) {
  * @returns Whether the user should be pinged or not.
  */
 function noReplyInDMs(msg) {
-    if (!msg) return {}
+    if (!msg) return {};
     /** @type {MessageOptions} */
     const options = msg.channel.type === 'DM' ? {
         allowedMentions: { repliedUser: false }
-    } : {}
+    } : {};
 
-    return options
+    return options;
 }
 
 /**
@@ -205,16 +205,16 @@ function noReplyInDMs(msg) {
  * @returns {Promise<?Message<boolean>>}
  */
 async function replyAll({ message, interaction }, options) {
-    if (options instanceof MessageEmbed) options = { embeds: [options] }
-    if (typeof options === 'string') options = { content: options }
+    if (options instanceof MessageEmbed) options = { embeds: [options] };
+    if (typeof options === 'string') options = { content: options };
     if (interaction) {
-        if (interaction.deferred || interaction.replied) return await interaction.editReply(options).catch(() => null)
-        else return await interaction.reply(options).catch(() => null)
+        if (interaction.deferred || interaction.replied) return await interaction.editReply(options).catch(() => null);
+        else return await interaction.reply(options).catch(() => null);
     }
     if (message) {
-        return await message.reply({ ...options, ...noReplyInDMs(message) }).catch(() => null)
+        return await message.reply({ ...options, ...noReplyInDMs(message) }).catch(() => null);
     }
-    return null
+    return null;
 }
 
 /**
@@ -225,39 +225,39 @@ async function replyAll({ message, interaction }, options) {
  * @param {boolean} [shouldDelete] Whether the prompt should be deleted after it gets a value or not.
  */
 async function basicCollector({ message, interaction } = {}, embedOptions, collectorOptions = {}, shouldDelete) {
-    if (!message && !interaction) throw new Error('The argument instances must be specified')
-    if (!embedOptions) throw new Error('The argument embedOptions must be specified')
-    if (collectorOptions === null) collectorOptions = {}
+    if (!message && !interaction) throw new Error('The argument instances must be specified');
+    if (!embedOptions) throw new Error('The argument embedOptions must be specified');
+    if (collectorOptions === null) collectorOptions = {};
 
-    if (!collectorOptions.time) collectorOptions.time = 30 * 1000
-    if (!collectorOptions.max) collectorOptions.max = 1
+    if (!collectorOptions.time) collectorOptions.time = 30 * 1000;
+    if (!collectorOptions.max) collectorOptions.max = 1;
     if (!collectorOptions.filter) {
-        collectorOptions.filter = m => m.author.id === (message?.author || interaction.user).id
+        collectorOptions.filter = m => m.author.id === (message?.author || interaction.user).id;
     }
 
-    if (!embedOptions.color) embedOptions.color = 'BLUE'
-    if (!embedOptions.fieldValue) embedOptions.fieldValue = 'Respond with `cancel` to cancel the command.'
+    if (!embedOptions.color) embedOptions.color = 'BLUE';
+    if (!embedOptions.fieldValue) embedOptions.fieldValue = 'Respond with `cancel` to cancel the command.';
     if (!embedOptions.footer) {
         embedOptions.footer = `The command will automatically be cancelled in ${myMs(
             collectorOptions.time, { long: true, length: 1 }
-        )}`
+        )}`;
     }
 
-    const toDelete = await replyAll({ message, interaction }, basicEmbed(embedOptions))
+    const toDelete = await replyAll({ message, interaction }, basicEmbed(embedOptions));
 
-    const messages = await (message || interaction).channel.awaitMessages(collectorOptions)
-    if (message && shouldDelete) await toDelete?.delete().catch(() => null)
+    const messages = await (message || interaction).channel.awaitMessages(collectorOptions);
+    if (message && shouldDelete) await toDelete?.delete().catch(() => null);
 
     if (messages.size === 0) {
-        await replyAll({ message, interaction }, { content: 'You didn\'t answer in time.', embeds: [] })
-        return null
+        await replyAll({ message, interaction }, { content: 'You didn\'t answer in time.', embeds: [] });
+        return null;
     }
     if (messages.first().content.toLowerCase() === 'cancel') {
-        await replyAll({ message, interaction }, { content: 'Cancelled command.', embeds: [] })
-        return null
+        await replyAll({ message, interaction }, { content: 'Cancelled command.', embeds: [] });
+        return null;
     }
 
-    return messages.first()
+    return messages.first();
 }
 
 /**
@@ -266,11 +266,11 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
  * @param {Argument} arg The argument to get
  */
 async function getArgument(msg, arg) {
-    arg.required = true
-    const response = await arg.obtain(msg)
-    arg.required = false
-    if (response.cancelled) await msg.reply({ content: 'Cancelled command.', ...noReplyInDMs(msg) })
-    return response
+    arg.required = true;
+    const response = await arg.obtain(msg);
+    arg.required = false;
+    if (response.cancelled) await msg.reply({ content: 'Cancelled command.', ...noReplyInDMs(msg) });
+    return response;
 }
 
 /**
@@ -282,18 +282,18 @@ async function getArgument(msg, arg) {
  */
 function userException(user, author, { client, name }) {
     /** @type {BasicEmbedOptions} */
-    const options = { color: 'RED', emoji: 'cross' }
+    const options = { color: 'RED', emoji: 'cross' };
 
     if (user.id === client.user.id) {
-        options.description = `You can't make me ${name} myself.`
-        return options
+        options.description = `You can't make me ${name} myself.`;
+        return options;
     }
     if (user.id === author.id) {
-        options.description = `You can't ${name} yourself.`
-        return options
+        options.description = `You can't ${name} yourself.`;
+        return options;
     }
 
-    return null
+    return null;
 }
 
 /**
@@ -304,33 +304,33 @@ function userException(user, author, { client, name }) {
  * @returns {?BasicEmbedOptions}
  */
 function memberException(member, moderator, { client, name }) {
-    if (!member) return null
+    if (!member) return null;
 
     /** @type {BasicEmbedOptions} */
-    const options = { color: 'RED', emoji: 'cross' }
+    const options = { color: 'RED', emoji: 'cross' };
     if (!member.bannable) {
-        options.fieldName = `Unable to ${name} ${member.user.tag}`
-        options.fieldValue = 'Please check the role hierarchy or server ownership.'
-        return options
+        options.fieldName = `Unable to ${name} ${member.user.tag}`;
+        options.fieldValue = 'Please check the role hierarchy or server ownership.';
+        return options;
     }
 
-    if (client.isOwner(moderator)) return null
+    if (client.isOwner(moderator)) return null;
 
-    const highestTarget = member.roles.highest
-    const highestMod = moderator.roles.highest
-    const bannable = highestMod.comparePositionTo(highestTarget) > 0
+    const highestTarget = member.roles.highest;
+    const highestMod = moderator.roles.highest;
+    const bannable = highestMod.comparePositionTo(highestTarget) > 0;
     if (!bannable || client.isOwner(member)) {
-        options.fieldName = `You can't ${name} ${member.user.tag}`
-        options.fieldValue = 'Please check the role hierarchy or server ownership.'
-        return options
+        options.fieldName = `You can't ${name} ${member.user.tag}`;
+        options.fieldValue = 'Please check the role hierarchy or server ownership.';
+        return options;
     }
 
     if (isMod(member)) {
-        options.description = `That user is a mod/admin, you can't ${name} them.`
-        return options
+        options.description = `That user is a mod/admin, you can't ${name} them.`;
+        return options;
     }
 
-    return null
+    return null;
 }
 
 /**
@@ -345,40 +345,40 @@ function inviteButton(invite, label = 'Join back') {
                 .setLabel(label)
                 .setStyle('LINK')
                 .setURL(invite.toString())
-        )
+        );
 }
 
 /**
  * Checks if the role or member is considered a moderator by checking their permissions.
  * @param {Role|GuildMember} roleOrMember A role or member.
- * @param {boolean} noAdmin Whether to skip the `ADMINISTRATOR` permission or not.
+ * @param {boolean} [noAdmin] Whether to skip the `ADMINISTRATOR` permission or not.
  */
 function isMod(roleOrMember, noAdmin) {
-    if (!roleOrMember) return
-    const { permissions } = roleOrMember
+    if (!roleOrMember) return;
+    const { permissions } = roleOrMember;
 
     const conditions = [
         'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
         'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
         'MUTE_MEMBERS'
-    ]
+    ];
 
-    const values = []
+    const values = [];
     if (noAdmin) {
         for (const condition of conditions) {
-            values.push(permissions.has(condition))
+            values.push(permissions.has(condition));
         }
-        const isTrue = values.filter(b => b === true)[0] ?? false
-        return !permissions.has('ADMINISTRATOR') && isTrue
+        const isTrue = values.filter(b => b === true)[0] ?? false;
+        return !permissions.has('ADMINISTRATOR') && isTrue;
     }
 
-    if (permissions.has('ADMINISTRATOR')) return true
+    if (permissions.has('ADMINISTRATOR')) return true;
 
     for (const condition of conditions) {
-        values.push(permissions.has(condition))
+        values.push(permissions.has(condition));
     }
-    const isTrue = values.filter(b => b === true)[0] ?? false
-    return isTrue
+    const isTrue = values.filter(b => b === true)[0] ?? false;
+    return isTrue;
 }
 
 /**
@@ -386,21 +386,21 @@ function isMod(roleOrMember, noAdmin) {
  * @param {Role|GuildMember} roleOrMember A role or member.
  */
 function getKeyPerms(roleOrMember) {
-    if (!roleOrMember) return
-    const perms = roleOrMember.permissions
+    if (!roleOrMember) return;
+    const perms = roleOrMember.permissions;
 
-    if (perms.has('ADMINISTRATOR')) return 'Administrator'
+    if (perms.has('ADMINISTRATOR')) return 'Administrator';
 
     const filter = [
         'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
         'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
         'MUTE_MEMBERS'
-    ]
+    ];
 
-    const filtered = perms.toArray().filter(perm => filter.includes(perm))
-    if (filtered.length === 0) return 'None'
+    const filtered = perms.toArray().filter(perm => filter.includes(perm));
+    if (filtered.length === 0) return 'None';
 
-    return filtered.map(perm => permissions[perm]).join(', ')
+    return filtered.map(perm => permissions[perm]).join(', ');
 }
 
 /**
@@ -411,17 +411,17 @@ function getKeyPerms(roleOrMember) {
  */
 function pluralize(string, number, showNum = true) {
     if (number === 1) {
-        if (!showNum) return string
-        return `${number} ${string}`
+        if (!showNum) return string;
+        return `${number} ${string}`;
     }
 
-    let es
+    let es;
     for (const end of ['ch', 'sh', 's', 'x', 'z']) {
-        if (string.endsWith(end)) es = true
+        if (string.endsWith(end)) es = true;
     }
 
-    if (!showNum) return string + (es ? 'es' : 's')
-    return `${number} ${string}${es ? 'es' : 's'}`
+    if (!showNum) return string + (es ? 'es' : 's');
+    return `${number} ${string}${es ? 'es' : 's'}`;
 }
 
 /**
@@ -430,13 +430,13 @@ function pluralize(string, number, showNum = true) {
  * @param {number} length The length of the sliced string
  */
 function sliceDots(string, length) {
-    if (!string) return
+    if (!string) return;
 
-    const og = string
-    const sliced = string.slice(0, length - 3)
-    const dots = og.length > sliced.length ? '...' : ''
+    const og = string;
+    const sliced = string.slice(0, length - 3);
+    const dots = og.length > sliced.length ? '...' : '';
 
-    return sliced + dots
+    return sliced + dots;
 }
 
 // /**
@@ -494,14 +494,14 @@ function sliceDots(string, length) {
  * @returns {boolean}
  */
 function arrayEquals(first, second) {
-    if (first.length !== second.length) return false
-    const uniqueValues = new Set([...first, ...second])
+    if (first.length !== second.length) return false;
+    const uniqueValues = new Set([...first, ...second]);
     for (const value of uniqueValues) {
-        const aCount = first.filter(e => e === value).length
-        const bCount = second.filter(e => e === value).length
-        if (aCount !== bCount) return false
+        const aCount = first.filter(e => e === value).length;
+        const bCount = second.filter(e => e === value).length;
+        if (aCount !== bCount) return false;
     }
-    return true
+    return true;
 }
 
 /**
@@ -511,15 +511,15 @@ function arrayEquals(first, second) {
  * @returns {[any[], any[]]} `[added, removed]`
  */
 function compareArrays(oldArr = [], newArr = []) {
-    const map1 = new Map()
-    oldArr.forEach(e => map1.set(e, true))
-    const added = newArr.filter(e => !map1.has(e))
+    const map1 = new Map();
+    oldArr.forEach(e => map1.set(e, true));
+    const added = newArr.filter(e => !map1.has(e));
 
-    const map2 = new Map()
-    newArr.forEach(e => map2.set(e, true))
-    const removed = oldArr.filter(e => !map2.has(e))
+    const map2 = new Map();
+    newArr.forEach(e => map2.set(e, true));
+    const removed = oldArr.filter(e => !map2.has(e));
 
-    return [added, removed]
+    return [added, removed];
 }
 
 /**
@@ -530,15 +530,15 @@ function compareArrays(oldArr = [], newArr = []) {
  */
 function difference(first, second) {
     function changes(newObj, origObj) {
-        let arrayIndexCounter = 0
+        let arrayIndexCounter = 0;
         return transform(newObj, function (result, value, key) {
             if (!isEqual(value, origObj[key])) {
-                const resultKey = isArray(origObj) ? arrayIndexCounter++ : key
-                result[resultKey] = (isObject(value) && isObject(origObj[key])) ? changes(value, origObj[key]) : value
+                const resultKey = isArray(origObj) ? arrayIndexCounter++ : key;
+                result[resultKey] = (isObject(value) && isObject(origObj[key])) ? changes(value, origObj[key]) : value;
             }
-        })
+        });
     }
-    return changes(second, first)
+    return changes(second, first);
 }
 
 /** Checks whether the string is a valid URL.
@@ -546,16 +546,16 @@ function difference(first, second) {
  * @returns {boolean}
 */
 function validURL(str) {
-    if (!str.includes('.') || !str.includes('/')) return false
+    if (!str.includes('.') || !str.includes('/')) return false;
 
     const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
         '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-        '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+        '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
 
-    return pattern.test(str)
+    return pattern.test(str);
 }
 
 /**
@@ -564,24 +564,24 @@ function validURL(str) {
  * @param {Role} role The role to validate
  */
 function isValidRole(msg, role) {
-    if (!(role instanceof Role)) return false
-    if (!role) return false
-    if (role.managed) return false
+    if (!(role instanceof Role)) return false;
+    if (!role) return false;
+    if (role.managed) return false;
 
-    const { member, client, author, guild } = msg
-    const botId = client.user.id
+    const { member, client, author, guild } = msg;
+    const botId = client.user.id;
 
-    const botManageable = guild.me.roles.highest.comparePositionTo(role)
-    if (botManageable < 1) return false
+    const botManageable = guild.me.roles.highest.comparePositionTo(role);
+    if (botManageable < 1) return false;
 
-    const isOwner = author.id === botId
-    if (isOwner) return true
+    const isOwner = author.id === botId;
+    if (isOwner) return true;
 
-    const memberManageable = member.roles.highest.comparePositionTo(role)
-    if (memberManageable < 1) return false
-    if (isMod(role)) return false
+    const memberManageable = member.roles.highest.comparePositionTo(role);
+    if (memberManageable < 1) return false;
+    if (isMod(role)) return false;
 
-    return true
+    return true;
 }
 
 /**
@@ -589,8 +589,8 @@ function isValidRole(msg, role) {
  * @returns {string}
  */
 function docId() {
-    const int = Math.floor(Math.random() * (2 ** 48))
-    return int.toString(16)
+    const int = Math.floor(Math.random() * (2 ** 48));
+    return int.toString(16);
 }
 
 /**
@@ -610,13 +610,13 @@ function docId() {
  * @param {TemplateEmbedFunction} template The embed template to use.
  */
 async function pagedEmbed({ message, interaction }, data, template) {
-    const { channel, id } = message || interaction
-    const author = message?.author || interaction.user
-    const isDMs = channel.type === 'DM'
-    const targetChan = data.toUser ? await author.createDM() : channel
+    const { channel, id } = message || interaction;
+    const author = message?.author || interaction.user;
+    const isDMs = channel.type === 'DM';
+    const targetChan = data.toUser ? await author.createDM() : channel;
 
     if (!data.components) {
-        data.components = []
+        data.components = [];
     }
 
     const ids = {
@@ -624,153 +624,153 @@ async function pagedEmbed({ message, interaction }, data, template) {
         down: `${id}:page_down`,
         up: `${id}:page_up`,
         end: `${id}:page_end`
-    }
+    };
 
     const pageStart = new MessageButton()
         .setStyle('PRIMARY')
         .setCustomId(ids.start)
         .setEmoji('⏪')
-        .setDisabled()
+        .setDisabled();
     const pageDown = new MessageButton()
         .setStyle('PRIMARY')
         .setCustomId(ids.down)
         .setEmoji('⬅️')
-        .setDisabled()
+        .setDisabled();
     const pageUp = new MessageButton()
         .setStyle('PRIMARY')
         .setCustomId(ids.up)
-        .setEmoji('➡️')
+        .setEmoji('➡️');
     const pageEnd = new MessageButton()
         .setStyle('PRIMARY')
         .setCustomId(ids.end)
-        .setEmoji('⏩')
+        .setEmoji('⏩');
 
     const buttons = data.total <= data.number ? null : new MessageActionRow()
         .addComponents(data.skipMaxButtons ?
             [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
-        )
+        );
 
     if (data.toUser && !isDMs) {
         await replyAll({ message, interaction }, stripIndent`
             ${data.dmMsg || ''}
             **Didn\'t get the DM?** Then please allow DMs from server members.
-        `)
+        `);
     }
 
-    if (message) await targetChan.sendTyping().catch(() => null)
+    if (message) await targetChan.sendTyping().catch(() => null);
 
-    const first = await template(0)
+    const first = await template(0);
     const msgOptions = {
         embeds: [first.embed],
         components: [...data.components, buttons].filter(c => c),
         ...noReplyInDMs(message)
-    }
+    };
 
     /** @type {Message} */
-    let msg
-    if (data.toUser && !isDMs) msg = await targetChan.send(msgOptions).catch(() => null)
+    let msg;
+    if (data.toUser && !isDMs) msg = await targetChan.send(msgOptions).catch(() => null);
     else {
-        if (interaction) msg = await replyAll({ interaction }, msgOptions)
-        else msg = await message.reply(msgOptions)
+        if (interaction) msg = await replyAll({ interaction }, msgOptions);
+        else msg = await message.reply(msgOptions);
     }
 
-    if (!msg || (data.total <= data.number && !data.components[0])) return
+    if (!msg || (data.total <= data.number && !data.components[0])) return;
 
-    let index = 0
+    let index = 0;
     const collector = targetChan.createMessageComponentCollector({
         filter: async int => {
-            if (msg.id !== int.message?.id) return false
-            if (!int.isButton() && !int.isSelectMenu()) return false
+            if (msg.id !== int.message?.id) return false;
+            if (!int.isButton() && !int.isSelectMenu()) return false;
             if (int.user.id !== author.id) {
                 await int.reply({
                     content: 'This interaction doesn\'t belong to you.', ephemeral: true
-                })
-                return false
+                });
+                return false;
             }
-            return true
+            return true;
         },
         time: 60 * 1000
-    })
+    });
 
     const disableButton = (target, disabled = true) => {
-        const button = buttons?.components.find(b => b.customId.endsWith(target))
-        if (!button) return
-        button.setDisabled(disabled)
-    }
+        const button = buttons?.components.find(b => b.customId.endsWith(target));
+        if (!button) return;
+        button.setDisabled(disabled);
+    };
 
     /** @type {?string[]} */
     const menuOptions = data.components[0] ?
         data.components[0].components.filter(c => c instanceof MessageSelectMenu)[0].options.map(op => op.value) :
-        []
-    let option = 'all'
+        [];
+    let option = 'all';
 
     collector.on('collect', async int => {
         if (int.isButton()) {
-            const oldData = await template(index, option)
-            if (typeof oldData.total !== 'number') oldData.total = data.total
+            const oldData = await template(index, option);
+            if (typeof oldData.total !== 'number') oldData.total = data.total;
 
             if (int.customId === ids.start) {
-                index = 0
-                disableButton('up', false)
-                disableButton('end', false)
-                disableButton('down')
-                disableButton('start')
+                index = 0;
+                disableButton('up', false);
+                disableButton('end', false);
+                disableButton('down');
+                disableButton('start');
             }
             if (int.customId === ids.down) {
-                index -= data.number
-                disableButton('up', false)
-                disableButton('end', false)
+                index -= data.number;
+                disableButton('up', false);
+                disableButton('end', false);
                 if (index === 0) {
-                    disableButton('down')
-                    disableButton('start')
+                    disableButton('down');
+                    disableButton('start');
                 }
             }
             if (int.customId === ids.up) {
-                index += data.number
-                disableButton('down', false)
-                disableButton('start', false)
+                index += data.number;
+                disableButton('down', false);
+                disableButton('start', false);
                 if (index >= oldData.total - data.number) {
-                    disableButton('up')
-                    disableButton('end')
+                    disableButton('up');
+                    disableButton('end');
                 }
             }
             if (int.customId === ids.end) {
-                const newIndex = oldData.total - (oldData.total % data.number)
-                index = oldData.total === newIndex ? newIndex - data.number : newIndex
-                disableButton('down', false)
-                disableButton('start', false)
-                disableButton('up')
-                disableButton('end')
+                const newIndex = oldData.total - (oldData.total % data.number);
+                index = oldData.total === newIndex ? newIndex - data.number : newIndex;
+                disableButton('down', false);
+                disableButton('start', false);
+                disableButton('up');
+                disableButton('end');
             }
-            const templateData = await template(index, option)
+            const templateData = await template(index, option);
 
             return await int.update({
                 embeds: [templateData.embed],
                 components: [...data.components, buttons].filter(c => c),
                 ...noReplyInDMs(msg)
-            }).catch(() => null)
+            }).catch(() => null);
         }
 
         if (int.isSelectMenu()) {
-            option = menuOptions.find(op => op === int.values[0])
-            const templateData = await template(0, option)
-            disableButton('up', templateData.total <= data.number)
-            disableButton('end', templateData.total <= data.number)
-            disableButton('down')
-            disableButton('start')
+            option = menuOptions.find(op => op === int.values[0]);
+            const templateData = await template(0, option);
+            disableButton('up', templateData.total <= data.number);
+            disableButton('end', templateData.total <= data.number);
+            disableButton('down');
+            disableButton('start');
 
             return await int.update({
                 embeds: [templateData.embed],
                 components: [...data.components, buttons].filter(c => c),
                 ...noReplyInDMs(msg)
-            }).catch(() => null)
+            }).catch(() => null);
         }
-    })
+    });
 
     collector.on('end', async () => {
-        if (msg) await msg.edit({ components: [] }).catch(() => null)
-        else replyAll({ interaction }, { components: [] }).catch(() => null)
-    })
+        if (msg) await msg.edit({ components: [] }).catch(() => null);
+        else replyAll({ interaction }, { components: [] }).catch(() => null);
+    });
 }
 
 /**
@@ -806,104 +806,104 @@ async function generateEmbed({ message, interaction }, array, data) {
         title = '', inLine = false, toUser = false, dmMsg = '', hasObjects = true, keyTitle = {},
         keys, keysExclude = [], useDocId = false, components = [], embedTitle, skipMaxButtons = false,
         numbered = false
-    } = data
+    } = data;
 
-    if (array.length === 0) throw new Error('array cannot be empty')
-    keysExclude.push(...[keyTitle.prefix, keyTitle.suffix, '_id', '__v'])
+    if (array.length === 0) throw new Error('array cannot be empty');
+    keysExclude.push(...[keyTitle.prefix, keyTitle.suffix, '_id', '__v']);
 
     /** @param {number} start @param {string} [filter] */
     async function createEmbed(start, filter) {
         const _array = filter ? (
             filter === 'all' ? array :
                 array.filter(doc => doc.type === filter)
-        ) : array
+        ) : array;
 
-        const pages = Math.trunc(_array.length / number) + ((_array.length / number) % 1 === 0 ? 0 : 1)
-        const current = _array.slice(start, start + number)
+        const pages = Math.trunc(_array.length / number) + ((_array.length / number) % 1 === 0 ? 0 : 1);
+        const current = _array.slice(start, start + number);
 
         const embed = new MessageEmbed()
             .setColor(color.toUpperCase())
-            .setTimestamp()
+            .setTimestamp();
 
-        if (embedTitle) embed.setTitle(embedTitle)
+        if (embedTitle) embed.setTitle(embedTitle);
         if (authorName) {
             embed.setAuthor({
                 name: authorName, iconURL: authorIconURL
-            })
+            });
         }
-        if (pages > 1) embed.setFooter({ text: `Page ${Math.round(start / number + 1)} of ${pages}` })
+        if (pages > 1) embed.setFooter({ text: `Page ${Math.round(start / number + 1)} of ${pages}` });
         if (useDescription) {
             return {
                 embed: embed.setDescription(current.join('\n')),
                 total: _array.length
-            }
+            };
         }
 
         if (_array.length === 0) {
             return {
                 embed: embed.addField('There\'s nothing to see here', 'Please try with another filter.'),
                 total: _array.length
-            }
+            };
         }
 
-        const { channels } = (message || interaction).client
+        const { channels } = (message || interaction).client;
 
-        let index = 0
+        let index = 0;
         for (const item of current) {
-            const objFilter = key => (keys ? keys.includes(key) : key) && !keysExclude.includes(key)
-            const objKeys = hasObjects ? Object.keys(item._doc || item).filter(objFilter) : []
+            const objFilter = key => (keys ? keys.includes(key) : key) && !keysExclude.includes(key);
+            const objKeys = hasObjects ? Object.keys(item._doc || item).filter(objFilter) : [];
 
-            const docId = useDocId ? item._doc?._id || item._id : null
-            const numberPrefix = numbered ? `${start + index + 1}.` : ''
-            const prefix = capitalize(item[keyTitle?.prefix] || null)
+            const docId = useDocId ? item._doc?._id || item._id : null;
+            const numberPrefix = numbered ? `${start + index + 1}.` : '';
+            const prefix = capitalize(item[keyTitle?.prefix] || null);
             const suffix = docId ||
                 (
                     item[keyTitle?.suffix] && typeof item[keyTitle?.suffix] !== 'string' ?
                         timestamp(item[keyTitle?.suffix] / 1) : null
                 ) ||
-                item[keyTitle?.suffix] || start + index + 1
+                item[keyTitle?.suffix] || start + index + 1;
 
-            const value = []
+            const value = [];
             for (const key of objKeys) {
                 if (objKeys.length === 1) {
-                    value.push(item[key])
-                    break
+                    value.push(item[key]);
+                    break;
                 }
 
-                const propName = capitalize(key.replace('createdAt', 'date')).replace('id', '')
-                if (propName.endsWith('tag')) continue
+                const propName = capitalize(key.replace('createdAt', 'date')).replace('id', '');
+                if (propName.endsWith('tag')) continue;
 
-                const userStr = key === 'userId' ? `<@${item.userId}> ${item.userTag}` : null
-                const modStr = key === 'modId' ? `<@${item.modId}> ${item.modTag}` : null
+                const userStr = key === 'userId' ? `<@${item.userId}> ${item.userTag}` : null;
+                const modStr = key === 'modId' ? `<@${item.modId}> ${item.modTag}` : null;
                 /** @type {GuildChannel} */
-                const channel = key === 'channel' ? channels.resolve(item[key]) : null
+                const channel = key === 'channel' ? channels.resolve(item[key]) : null;
 
-                const created = key === 'createdAt' ? timestamp(item[key]) : null
+                const created = key === 'createdAt' ? timestamp(item[key]) : null;
                 const duration = key === 'duration' && Number(item[key]) ?
-                    myMs(item[key], { long: true, length: 2, showAnd: true }) : null
-                const endsAt = key === 'endsAt' ? `${timestamp(item[key])} (${timestamp(item[key], 'R')})` : null
+                    myMs(item[key], { long: true, length: 2, showAnd: true }) : null;
+                const endsAt = key === 'endsAt' ? `${timestamp(item[key])} (${timestamp(item[key], 'R')})` : null;
 
-                const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key]
+                const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key];
 
-                value.push(`**${propName}:** ${docData}`)
+                value.push(`**${propName}:** ${docData}`);
             }
 
             embed.addField(
                 `${numberPrefix} ${prefix} ${title} ${suffix}`.replace(/ +/g, ' '),
                 `${value.length !== 0 ? value.join('\n') : item}`,
                 inLine
-            )
-            index++
+            );
+            index++;
         }
 
-        return { embed: embed, total: _array.length }
+        return { embed: embed, total: _array.length };
     }
 
     await pagedEmbed(
         { message, interaction },
         { number, total: array.length, toUser, dmMsg, components, skipMaxButtons },
         createEmbed
-    )
+    );
 }
 
 /**
@@ -917,19 +917,19 @@ async function generateEmbed({ message, interaction }, array, data) {
  * @param {boolean} [sendCancelled=true] Whether to send 'Cancelled command.' or not
  */
 async function confirmButtons({ message, interaction }, action, target, data = {}, sendCancelled = true) {
-    const { id } = message || interaction
-    const author = message?.author || interaction.user
+    const { id } = message || interaction;
+    const author = message?.author || interaction.user;
 
-    const ids = { yes: `${id}:yes`, no: `${id}:no` }
+    const ids = { yes: `${id}:yes`, no: `${id}:no` };
     const targetStr = target instanceof User ? target.tag :
-        target instanceof CGuildClass ? target.name : target || null
+        target instanceof CommandoGuild ? target.name : target || null;
 
     const confirmEmbed = new MessageEmbed()
         .setColor('GOLD')
-        .setFooter({ text: 'The command will automatically be cancelled in 30 seconds.' })
+        .setFooter({ text: 'The command will automatically be cancelled in 30 seconds.' });
 
     if (!targetStr && Object.keys(data).length === 0) {
-        confirmEmbed.setDescription(`**Are you sure you want to ${action}?**`)
+        confirmEmbed.setDescription(`**Are you sure you want to ${action}?**`);
     } else {
         confirmEmbed.addField(
             `Are you sure you want to ${action}${targetStr ? ` ${targetStr}` : ''}?`,
@@ -942,58 +942,58 @@ async function confirmButtons({ message, interaction }, action, target, data = {
                 ${data.reason ? `**Reason:** ${data.reason}` : ''}
                 ${data.duration ? `**Duration:** ${data.duration}` : ''}
             `
-        )
+        );
     }
 
     const yesButton = new MessageButton()
         .setStyle('SUCCESS')
         .setCustomId(ids.yes)
-        .setEmoji(customEmoji('check'))
+        .setEmoji(customEmoji('check'));
     const noButton = new MessageButton()
         .setStyle('DANGER')
         .setCustomId(ids.no)
-        .setEmoji(customEmoji('cross'))
+        .setEmoji(customEmoji('cross'));
 
     /** @type {Message} */
-    let msg
+    let msg;
     const msgData = {
         embeds: [confirmEmbed],
         components: [new MessageActionRow().addComponents(yesButton, noButton)],
         ...noReplyInDMs(message)
-    }
-    if (interaction) msg = await replyAll({ interaction }, msgData)
-    else msg = await message.reply(msgData)
+    };
+    if (interaction) msg = await replyAll({ interaction }, msgData);
+    else msg = await message.reply(msgData);
 
     const pushed = await msg.awaitMessageComponent({
         filter: async int => {
-            if (msg.id !== int.message?.id) return false
+            if (msg.id !== int.message?.id) return false;
             if (int.user.id !== author.id) {
                 await int.reply({
                     content: 'This interaction doesn\'t belong to you.', ephemeral: true
-                })
-                return false
+                });
+                return false;
             }
-            return true
+            return true;
         },
         time: 30_000,
         componentType: 'BUTTON'
-    }).catch(() => null)
+    }).catch(() => null);
 
-    if (message) await msg?.delete()
+    if (message) await msg?.delete();
 
-    await replyAll({ interaction }, { components: [] })
+    await replyAll({ interaction }, { components: [] });
 
     if (!pushed || pushed.customId === ids.no) {
         if (sendCancelled) {
             await replyAll({ message, interaction }, {
                 content: 'Cancelled command.', embeds: []
-            })
+            });
         }
-        return false
+        return false;
     }
 
-    await message?.channel.sendTyping().catch(() => null)
-    return true
+    await message?.channel.sendTyping().catch(() => null);
+    return true;
 }
 
 module.exports = {
@@ -1026,4 +1026,4 @@ module.exports = {
     timestamp,
     userException,
     validURL
-}
+};

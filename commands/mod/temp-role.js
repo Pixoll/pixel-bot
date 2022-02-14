@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { Role, GuildMember } = require('discord.js')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { Role, GuildMember } = require('discord.js');
 const {
     timestamp, isValidRole, getArgument, replyAll, basicEmbed, docId
-} = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+} = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -78,7 +77,7 @@ module.exports = class TempRoleCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -95,50 +94,50 @@ module.exports = class TempRoleCommand extends Command {
             if (!isValidRole(await interaction.fetchReply(), role)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid role to use.'
-                }))
+                }));
             }
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
-            const arg = this.argsCollector.args[1]
-            duration = await arg.parse(duration).catch(() => null) || null
+            const arg = this.argsCollector.args[1];
+            duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                }))
+                }));
             }
-            reason ??= 'No reason given.'
+            reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        if (typeof duration === 'number') duration = duration + Date.now()
-        if (duration instanceof Date) duration = duration.getTime()
+        if (typeof duration === 'number') duration = duration + Date.now();
+        if (duration instanceof Date) duration = duration.getTime();
 
         if (message) {
             while (!isValidRole(message, role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+                if (cancelled) return;
+                role = value;
             }
         }
 
-        const { guild, guildId } = message || interaction
-        const author = message?.author || interaction.user
-        const { user, roles } = member
+        const { guild, guildId } = message || interaction;
+        const author = message?.author || interaction.user;
+        const { user, roles } = member;
 
         if (roles.cache.has(role.id)) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That member already has that role.'
-            }))
+            }));
         }
 
-        await roles.add(role, reason)
+        await roles.add(role, reason);
 
         if (!user.bot) {
             await user.send({
@@ -151,7 +150,7 @@ module.exports = class TempRoleCommand extends Command {
                         **Moderator:** ${author.toString()} ${author.tag}
                     `
                 })]
-            }).catch(() => null)
+            }).catch(() => null);
         }
 
         await guild.database.active.add({
@@ -162,7 +161,7 @@ module.exports = class TempRoleCommand extends Command {
             userTag: user.tag,
             role: role.id,
             duration
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -172,6 +171,6 @@ module.exports = class TempRoleCommand extends Command {
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
             `
-        }))
+        }));
     }
-}
+};

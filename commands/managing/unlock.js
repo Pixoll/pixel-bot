@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { TextChannel } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { TextChannel } = require('discord.js');
+const { basicEmbed, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -51,7 +50,7 @@ module.exports = class UnlockCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -63,39 +62,39 @@ module.exports = class UnlockCommand extends Command {
      */
     async run({ message, interaction }, { channel, reason }) {
         if (interaction) {
-            channel ??= interaction.channel
-            reason ??= 'We\'ll be back shortly.'
+            channel ??= interaction.channel;
+            reason ??= 'We\'ll be back shortly.';
             if (reason.length > 512) {
                 return replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { guildId, channelId, guild } = message || interaction
-        const permissions = channel.permissionOverwrites
-        const { everyone } = guild.roles
+        const { guildId, channelId, guild } = message || interaction;
+        const permissions = channel.permissionOverwrites;
+        const { everyone } = guild.roles;
 
-        const perms = permissions.cache.find(p => p.id === guildId)
+        const perms = permissions.cache.find(p => p.id === guildId);
         if (!perms.deny.has('SEND_MESSAGES')) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
-            }))
+            }));
         }
 
-        await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 })
+        await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 });
         await channel.send({
             embeds: [basicEmbed({
                 emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason
             })]
-        })
+        });
 
         const embed = basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
-        })
-        await replyAll({ interaction }, embed)
+        });
+        await replyAll({ interaction }, embed);
         if (channelId !== channel.id) {
-            await message?.replyEmbed(embed)
+            await message?.replyEmbed(embed);
         }
     }
-}
+};

@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, customEmoji, timestamp, replyAll } = require('../../utils/functions')
+const { stripIndent } = require('common-tags');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, customEmoji, timestamp, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -54,9 +53,9 @@ module.exports = class ReminderCommand extends Command {
                     }
                 ]
             }
-        })
+        });
 
-        this.db = this.client.database.reminders
+        this.db = this.client.database.reminders;
     }
 
     /**
@@ -68,23 +67,23 @@ module.exports = class ReminderCommand extends Command {
      */
     async run({ message, interaction }, { time, reminder }) {
         if (interaction) {
-            const arg = this.argsCollector.args[0]
-            time = await arg.parse(time).catch(() => null)
+            const arg = this.argsCollector.args[0];
+            time = await arg.parse(time).catch(() => null);
             if (!time) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.'
-                }))
+                }));
             }
-            reminder ??= '`Not specified`'
+            reminder ??= '`Not specified`';
         }
 
-        if (typeof time === 'number') time += Date.now()
-        if (time instanceof Date) time = time.getTime()
+        if (typeof time === 'number') time += Date.now();
+        if (time instanceof Date) time = time.getTime();
 
-        const msg = await interaction?.fetchReply()
-        const { id, channelId, url } = message || msg
-        const author = interaction?.user || message.author
-        const stamp = timestamp(time, 'R')
+        const msg = await interaction?.fetchReply();
+        const { id, channelId, url } = message || msg;
+        const author = interaction?.user || message.author;
+        const stamp = timestamp(time, 'R');
 
         await this.db.add({
             user: author.id,
@@ -93,9 +92,9 @@ module.exports = class ReminderCommand extends Command {
             message: id,
             msgURL: url,
             channel: channelId,
-        })
+        });
 
-        await (message || msg).react(customEmoji('cross'))
+        await (message || msg).react(customEmoji('cross'));
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -103,6 +102,6 @@ module.exports = class ReminderCommand extends Command {
             fieldName: `I'll remind you ${stamp} for:`,
             fieldValue: reminder,
             footer: 'React with ❌ to cancel the reminder.'
-        }))
+        }));
     }
-}
+};

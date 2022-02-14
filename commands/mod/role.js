@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { Role, GuildMember, Collection } = require('discord.js')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { Role, GuildMember, Collection } = require('discord.js');
 const {
     basicEmbed, isValidRole, getArgument, replyAll, confirmButtons
-} = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
+} = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -57,37 +56,37 @@ module.exports = class RoleCommand extends Command {
                     type: 'string',
                     validate: async (val, msg, arg) => {
                         if (typeof msg.parseArgs === 'function') {
-                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                            if (sc !== 'toggle') return true
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase();
+                            if (sc !== 'toggle') return true;
                         }
-                        const type = msg.client.registry.types.get('role')
-                        const array = val.split(/\s*,\s*/).slice(0, 10)
-                        const valid = []
+                        const type = msg.client.registry.types.get('role');
+                        const array = val.split(/\s*,\s*/).slice(0, 10);
+                        const valid = [];
                         for (const str of array) {
-                            const con1 = await type.validate(str, msg, arg)
-                            if (!con1) valid.push(false)
-                            const con2 = isValidRole(msg, await type.parse(str, msg))
-                            valid.push(con2)
+                            const con1 = await type.validate(str, msg, arg);
+                            if (!con1) valid.push(false);
+                            const con2 = isValidRole(msg, await type.parse(str, msg));
+                            valid.push(con2);
                         }
-                        return valid.filter(b => b !== true).length !== array.length
+                        return valid.filter(b => b !== true).length !== array.length;
                     },
                     parse: async (val, msg, arg) => {
                         if (typeof msg.parseArgs === 'function') {
-                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase()
-                            if (sc !== 'toggle') return null
+                            const sc = msg.parseArgs().split(/ +/)[0].toLowerCase();
+                            if (sc !== 'toggle') return null;
                         }
-                        const type = msg.client.registry.types.get('role')
-                        const array = val.split(/\s*,\s*/).slice(0, 10)
-                        const valid = []
+                        const type = msg.client.registry.types.get('role');
+                        const array = val.split(/\s*,\s*/).slice(0, 10);
+                        const valid = [];
                         for (const str of array) {
-                            const con1 = await type.validate(str, msg, arg)
-                            if (!con1) continue
-                            const role = await type.parse(str, msg)
-                            const con2 = isValidRole(msg, role)
-                            if (!con2) continue
-                            valid.push(role)
+                            const con1 = await type.validate(str, msg, arg);
+                            if (!con1) continue;
+                            const role = await type.parse(str, msg);
+                            const con2 = isValidRole(msg, role);
+                            if (!con2) continue;
+                            valid.push(role);
                         }
-                        return [...new Set(valid)]
+                        return [...new Set(valid)];
                     },
                     required: false,
                     error: 'None of the roles you specified were valid. Please try again.'
@@ -160,7 +159,7 @@ module.exports = class RoleCommand extends Command {
                     },
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -172,39 +171,39 @@ module.exports = class RoleCommand extends Command {
      * @param {Role[]} args.roles The array of roles to toggle from the member
      */
     async run({ message, interaction }, { subCommand, memberOrRole, roles, member, role }) {
-        subCommand = subCommand.toLowerCase()
+        subCommand = subCommand.toLowerCase();
 
         if (interaction) {
             if (member && !(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
-                }))
+                }));
             }
-            memberOrRole = member ?? role
+            memberOrRole = member ?? role;
             if (roles) {
-                const arg = this.argsCollector.args[2]
-                const msg = await interaction.fetchReply()
-                const isValid = await arg.validate(roles, msg)
+                const arg = this.argsCollector.args[2];
+                const msg = await interaction.fetchReply();
+                const isValid = await arg.validate(roles, msg);
                 if (isValid !== true) {
                     return await replyAll({ interaction }, basicEmbed({
                         color: 'RED', emoji: 'cross', description: arg.error
-                    }))
+                    }));
                 }
-                roles = await arg.parse(roles, msg)
+                roles = await arg.parse(roles, msg);
             }
         }
 
         switch (subCommand) {
             case 'toggle':
-                return await this.toggle({ message, interaction }, memberOrRole, roles)
+                return await this.toggle({ message, interaction }, memberOrRole, roles);
             case 'remove-all':
-                return await this.removeAll({ message, interaction }, memberOrRole)
+                return await this.removeAll({ message, interaction }, memberOrRole);
             case 'all':
-                return await this.all({ message, interaction }, memberOrRole)
+                return await this.all({ message, interaction }, memberOrRole);
             case 'bots':
-                return await this.bots({ message, interaction }, memberOrRole)
+                return await this.bots({ message, interaction }, memberOrRole);
             case 'users':
-                return await this.users({ message, interaction }, memberOrRole)
+                return await this.users({ message, interaction }, memberOrRole);
         }
     }
 
@@ -216,43 +215,43 @@ module.exports = class RoleCommand extends Command {
     async all({ message, interaction }, role) {
         if (message) {
             while (!(role instanceof Role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                role = value;
             }
         } else {
-            const intMsg = await interaction.fetchReply()
+            const intMsg = await interaction.fetchReply();
             if (!isValidRole(intMsg, role)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'The chosen role is invalid. Please check the role hierarchy.'
-                }))
+                }));
             }
         }
 
         const confirmed = await confirmButtons({ message, interaction },
             `toggle the ${role.name} role in all members and bots`
-        )
-        if (!confirmed) return
+        );
+        if (!confirmed) return;
 
         /** @type {Collection<string, GuildMember>} */
-        const members = await (message || interaction).guild.members.fetch().catch(() => null)
+        const members = await (message || interaction).guild.members.fetch().catch(() => null);
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members and bots... Please be patient.'
-        })
-        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
+        });
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
         for (const [, { roles }] of members) {
-            if (roles.cache.has(role.id)) await roles.remove(role)
-            else await roles.add(role)
+            if (roles.cache.has(role.id)) await roles.remove(role);
+            else await roles.add(role);
         }
 
-        await toDelete?.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members and bots.`
-        }))
+        }));
     }
 
     /**
@@ -263,42 +262,42 @@ module.exports = class RoleCommand extends Command {
     async bots({ message, interaction }, role) {
         if (message) {
             while (!(role instanceof Role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                role = value;
             }
         } else {
-            const intMsg = await interaction.fetchReply()
+            const intMsg = await interaction.fetchReply();
             if (!isValidRole(intMsg, role)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'The chosen role is invalid. Please check the role hierarchy.'
-                }))
+                }));
             }
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all bots`)
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all bots`);
+        if (!confirmed) return;
 
         /** @type {Collection<string, GuildMember>} */
-        const members = await (message || interaction).guild.members.fetch().catch(() => null)
-        const bots = members.filter(m => m.user.bot)
+        const members = await (message || interaction).guild.members.fetch().catch(() => null);
+        const bots = members.filter(m => m.user.bot);
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling role in all bots... Please be patient.'
-        })
-        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
+        });
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
         for (const [, { roles }] of bots) {
-            if (roles.cache.has(role.id)) await roles.remove(role)
-            else await roles.add(role)
+            if (roles.cache.has(role.id)) await roles.remove(role);
+            else await roles.add(role);
         }
 
-        await toDelete?.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all bots.`
-        }))
+        }));
     }
 
     /**
@@ -309,42 +308,42 @@ module.exports = class RoleCommand extends Command {
     async users({ message, interaction }, role) {
         if (message) {
             while (!(role instanceof Role)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                role = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                role = value;
             }
         } else {
-            const intMsg = await interaction.fetchReply()
+            const intMsg = await interaction.fetchReply();
             if (!isValidRole(intMsg, role)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
                     description: 'The chosen role is invalid. Please check the role hierarchy.'
-                }))
+                }));
             }
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all users`)
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, `toggle the ${role.name} role in all users`);
+        if (!confirmed) return;
 
         /** @type {Collection<string, GuildMember>} */
-        const members = await (message || interaction).guild.members.fetch().catch(() => null)
-        const users = members.filter(m => !m.user.bot)
+        const members = await (message || interaction).guild.members.fetch().catch(() => null);
+        const users = members.filter(m => !m.user.bot);
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members... Please be patient.'
-        })
-        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
+        });
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
         for (const [, { roles }] of users) {
-            if (roles.cache.has(role.id)) await roles.remove(role)
-            else await roles.add(role)
+            if (roles.cache.has(role.id)) await roles.remove(role);
+            else await roles.add(role);
         }
 
-        await toDelete?.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members.`
-        }))
+        }));
     }
 
     /**
@@ -355,35 +354,35 @@ module.exports = class RoleCommand extends Command {
     async removeAll({ message, interaction }, member) {
         if (message) {
             while (!(member instanceof GuildMember)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                member = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                member = value;
             }
         }
 
-        const { roles, user } = member
+        const { roles, user } = member;
         if (roles.cache.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That member has no roles.'
-            }))
+            }));
         }
 
-        const confirmed = await confirmButtons({ message, interaction }, `remove all roles from ${member.toString()}`)
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, `remove all roles from ${member.toString()}`);
+        if (!confirmed) return;
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Removing all roles... Please be patient.'
-        })
-        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
+        });
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
-        const intMsg = await interaction?.fetchReply()
-        const memberRoles = roles.cache.filter(r => isValidRole(intMsg || message, r)).toJSON()
-        for (const role of memberRoles) await roles.remove(role)
+        const intMsg = await interaction?.fetchReply();
+        const memberRoles = roles.cache.filter(r => isValidRole(intMsg || message, r)).toJSON();
+        for (const role of memberRoles) await roles.remove(role);
 
-        await toDelete?.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Removed every role from ${user.toString()} (${user.tag}).`
-        }))
+        }));
     }
 
     /**
@@ -395,43 +394,43 @@ module.exports = class RoleCommand extends Command {
     async toggle({ message, interaction }, member, roles) {
         if (message) {
             while (!(member instanceof GuildMember)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-                if (cancelled) return
-                member = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+                if (cancelled) return;
+                member = value;
             }
             if (!roles) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-                if (cancelled) return
-                roles = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+                if (cancelled) return;
+                roles = value;
             }
         }
 
-        const memberRoles = member.roles
+        const memberRoles = member.roles;
 
-        const alreadyHas = roles.filter(r => memberRoles.cache.has(r.id))
-        const doesntHas = roles.filter(r => !memberRoles.cache.has(r.id))
+        const alreadyHas = roles.filter(r => memberRoles.cache.has(r.id));
+        const doesntHas = roles.filter(r => !memberRoles.cache.has(r.id));
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling the roles... Please be patient.'
-        })
-        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] })
+        });
+        const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
         if (alreadyHas.length !== 0) {
-            for (const role of alreadyHas) await memberRoles.remove(role)
+            for (const role of alreadyHas) await memberRoles.remove(role);
         }
         if (doesntHas.length !== 0) {
-            for (const role of doesntHas) await memberRoles.add(role)
+            for (const role of doesntHas) await memberRoles.add(role);
         }
 
         const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesntHas.map(r => '+' + r.name)]
-            .filter(s => s).join(', ')
+            .filter(s => s).join(', ');
 
-        await toDelete?.delete().catch(() => null)
+        await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldValue: rolesStr,
             fieldName: `Toggled the following roles for ${member.user.tag}:`
-        }))
+        }));
     }
-}
+};

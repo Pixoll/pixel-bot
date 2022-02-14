@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { MessageButton, MessageActionRow } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { replyAll } = require('../../utils/functions')
+const { MessageButton, MessageActionRow } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -15,7 +14,7 @@ module.exports = class InviteCommand extends Command {
             description: 'Invite this bot to your server.',
             guarded: true,
             slash: true
-        })
+        });
     }
 
     /**
@@ -23,22 +22,22 @@ module.exports = class InviteCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { botInvite, options } = this.client
+        const { botInvite, options } = this.client;
 
         const invite = new MessageButton()
             .setEmoji('🔗')
             .setLabel('Invite me')
             .setStyle('LINK')
-            .setURL(botInvite)
+            .setURL(botInvite);
         const support = new MessageButton()
             .setEmoji('🛠')
             .setLabel('Support server')
             .setStyle('LINK')
-            .setURL(options.serverInvite)
+            .setURL(options.serverInvite);
 
         const row = new MessageActionRow()
-            .addComponents(invite, support)
+            .addComponents(invite, support);
 
-        await replyAll({ message, interaction }, { content: '\u200B', components: [row] })
+        await replyAll({ message, interaction }, { content: '\u200B', components: [row] });
     }
-}
+};

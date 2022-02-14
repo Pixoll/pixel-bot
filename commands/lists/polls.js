@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -13,7 +12,7 @@ module.exports = class PollsCommand extends Command {
             description: 'Displays all the on-going polls on this server. Use the `poll` command to add polls.',
             guildOnly: true,
             slash: true
-        })
+        });
     }
 
     /**
@@ -21,14 +20,14 @@ module.exports = class PollsCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { guild } = message || interaction
-        const db = guild.database.polls
+        const { guild } = message || interaction;
+        const db = guild.database.polls;
 
-        const pollsData = await db.fetchMany()
+        const pollsData = await db.fetchMany();
         if (pollsData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'There are no active polls.'
-            }))
+            }));
         }
 
         await generateEmbed({ message, interaction }, pollsData.toJSON(), {
@@ -37,6 +36,6 @@ module.exports = class PollsCommand extends Command {
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Poll',
             keys: ['channel', 'duration', 'endsAt']
-        })
+        });
     }
-}
+};

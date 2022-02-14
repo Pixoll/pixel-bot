@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { TextChannel } = require('discord.js')
-const { basicEmbed, replyAll } = require('../../utils/functions')
-const { CommandInstances } = require('../../command-handler/typings')
-const { stripIndent } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { TextChannel } = require('discord.js');
+const { basicEmbed, replyAll } = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -51,7 +50,7 @@ module.exports = class LockCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -63,35 +62,35 @@ module.exports = class LockCommand extends Command {
      */
     async run({ message, interaction }, { channel, reason }) {
         if (interaction) {
-            channel ??= interaction.channel
-            reason ??= 'We\'ll be back shortly.'
+            channel ??= interaction.channel;
+            reason ??= 'We\'ll be back shortly.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const { guildId, guild } = message || interaction
-        const permissions = channel.permissionOverwrites
-        const { everyone } = guild.roles
+        const { guildId, guild } = message || interaction;
+        const permissions = channel.permissionOverwrites;
+        const { everyone } = guild.roles;
 
-        const perms = permissions.resolve(guildId)
+        const perms = permissions.resolve(guildId);
         if (perms && perms.deny.has('SEND_MESSAGES')) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: `${channel} is already locked.`
-            }))
+            }));
         }
 
-        await permissions.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 })
+        await permissions.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 });
         await channel.send({
             embeds: [basicEmbed({
                 emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason
             })]
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`
-        }))
+        }));
     }
-}
+};

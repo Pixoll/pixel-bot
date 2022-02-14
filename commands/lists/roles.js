@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { GuildMember } = require('discord.js')
-const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { GuildMember } = require('discord.js');
+const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -29,7 +28,7 @@ module.exports = class RolesCommand extends Command {
                     description: 'The member to get the roles from.'
                 }]
             }
-        })
+        });
     }
 
     /**
@@ -39,27 +38,27 @@ module.exports = class RolesCommand extends Command {
      * @param {GuildMember} args.member The member to get the roles from
      */
     async run({ message, interaction }, { member }) {
-        const { guild, guildId } = message || interaction
+        const { guild, guildId } = message || interaction;
 
-        const memberRoles = member?.roles.cache.filter(role => role.id !== guildId)
-        const guildRoles = !memberRoles ? await guild.roles.fetch() : null
+        const memberRoles = member?.roles.cache.filter(role => role.id !== guildId);
+        const guildRoles = !memberRoles ? await guild.roles.fetch() : null;
 
-        const rolesCache = memberRoles || guildRoles.filter(role => role.id !== guildId)
+        const rolesCache = memberRoles || guildRoles.filter(role => role.id !== guildId);
         if (!rolesCache) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'I couldn\'t find any roles..'
-            }))
+            }));
         }
 
-        const name = member?.user.username || guild.name
-        const avatar = member?.user.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true })
+        const name = member?.user.username || guild.name;
+        const avatar = member?.user.displayAvatarURL({ dynamic: true }) || guild.iconURL({ dynamic: true });
 
-        const roles = rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) || null
+        const roles = rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) || null;
 
         if (!roles) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'This member has no roles.'
-            }))
+            }));
         }
 
         await generateEmbed({ message, interaction }, roles, {
@@ -67,6 +66,6 @@ module.exports = class RolesCommand extends Command {
             authorName: `${name} has ${pluralize('role', roles.length)}`,
             authorIconURL: avatar,
             useDescription: true
-        })
+        });
     }
-}
+};

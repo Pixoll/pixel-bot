@@ -1,12 +1,11 @@
 /* eslint-disable no-unused-vars */
-const { User, GuildMember, TextChannel } = require('discord.js')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
+const { User, GuildMember, TextChannel } = require('discord.js');
+const { Command, CommandInstances } = require('pixoll-commando');
 const {
     docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll
-} = require('../../utils/functions')
-const { stripIndent } = require('common-tags')
-const myMs = require('../../utils/my-ms')
+} = require('../../utils/functions');
+const { stripIndent } = require('common-tags');
+const myMs = require('../../utils/my-ms');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -70,7 +69,7 @@ module.exports = class TempBanCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -83,48 +82,48 @@ module.exports = class TempBanCommand extends Command {
      */
     async run({ message, interaction }, { user, duration, reason }) {
         if (interaction) {
-            user = user.user || user
-            const arg = this.argsCollector.args[1]
-            duration = await arg.parse(duration).catch(() => null) || null
+            user = user.user || user;
+            const arg = this.argsCollector.args[1];
+            duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                }))
+                }));
             }
-            reason ??= 'No reason given.'
+            reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
-                }))
+                }));
             }
         }
 
-        const now = Date.now()
-        if (typeof duration === 'number') duration = duration + now
-        if (duration instanceof Date) duration = duration.getTime()
+        const now = Date.now();
+        if (typeof duration === 'number') duration = duration + now;
+        if (duration instanceof Date) duration = duration.getTime();
 
-        const { guild, guildId, member: mod } = message || interaction
-        const author = message?.author || interaction.user
-        const { members, bans, database } = guild
-        const { moderations, active } = database
+        const { guild, guildId, member: mod } = message || interaction;
+        const author = message?.author || interaction.user;
+        const { members, bans, database } = guild;
+        const { moderations, active } = database;
 
-        const uExcept = userException(user, author, this)
-        if (uExcept) return replyAll({ message, interaction }, basicEmbed(uExcept))
+        const uExcept = userException(user, author, this);
+        if (uExcept) return replyAll({ message, interaction }, basicEmbed(uExcept));
 
-        const isBanned = await bans.fetch(user).catch(() => null)
+        const isBanned = await bans.fetch(user).catch(() => null);
         if (isBanned) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That user is already banned.'
-            }))
+            }));
         }
 
         /** @type {GuildMember} */
-        const member = await members.fetch(user).catch(() => null)
-        const mExcept = memberException(member, mod, this)
-        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept))
+        const member = await members.fetch(user).catch(() => null);
+        const mExcept = memberException(member, mod, this);
+        if (mExcept) return await replyAll({ message, interaction }, basicEmbed(mExcept));
 
-        const confirmed = await confirmButtons({ message, interaction }, 'temp-ban', user, { reason })
-        if (!confirmed) return
+        const confirmed = await confirmButtons({ message, interaction }, 'temp-ban', user, { reason });
+        if (!confirmed) return;
 
         if (!user.bot && member) {
             const embed = basicEmbed({
@@ -137,20 +136,20 @@ module.exports = class TempBanCommand extends Command {
 
                     *The invite will expire in 1 week.*
                 `
-            })
+            });
 
             /** @type {TextChannel} */
-            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first()
+            const channel = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').first();
             const button = inviteButton(
                 await channel.createInvite({ maxAge: 0, maxUses: 1 })
-            )
+            );
 
-            await user.send({ embeds: [embed], components: [button] }).catch(() => null)
+            await user.send({ embeds: [embed], components: [button] }).catch(() => null);
         }
 
-        await members.ban(user, { days: 7, reason })
+        await members.ban(user, { days: 7, reason });
 
-        const documentId = docId()
+        const documentId = docId();
 
         await moderations.add({
             _id: documentId,
@@ -162,7 +161,7 @@ module.exports = class TempBanCommand extends Command {
             modTag: author.tag,
             reason,
             duration: myMs(duration - now, { long: true })
-        })
+        });
         await active.add({
             _id: documentId,
             type: 'temp-ban',
@@ -170,7 +169,7 @@ module.exports = class TempBanCommand extends Command {
             userId: user.id,
             userTag: user.tag,
             duration
-        })
+        });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
@@ -180,6 +179,6 @@ module.exports = class TempBanCommand extends Command {
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
             `
-        }))
+        }));
     }
-}
+};

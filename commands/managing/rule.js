@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-vars */
-const { stripIndent } = require('common-tags')
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { basicEmbed, basicCollector, getArgument, replyAll } = require('../../utils/functions')
-const { RuleSchema } = require('../../schemas/types')
-const { MessageEmbed } = require('discord.js')
+const { stripIndent } = require('common-tags');
+const { Command, CommandInstances } = require('pixoll-commando');
+const { basicEmbed, basicCollector, getArgument, replyAll } = require('../../utils/functions');
+const { RuleSchema } = require('../../schemas/types');
+const { MessageEmbed } = require('discord.js');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -72,7 +71,7 @@ module.exports = class RuleCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -83,17 +82,17 @@ module.exports = class RuleCommand extends Command {
      * @param {string} args.rule The number of the rule you want to remove
      */
     async run({ message, interaction }, { subCommand, rule }) {
-        subCommand = subCommand.toLowerCase()
-        this.db = (message || interaction).guild.database.rules
-        const rulesData = await this.db.fetch()
+        subCommand = subCommand.toLowerCase();
+        this.db = (message || interaction).guild.database.rules;
+        const rulesData = await this.db.fetch();
 
         switch (subCommand) {
             case 'view':
-                return await this.view({ message, interaction }, rulesData, rule)
+                return await this.view({ message, interaction }, rulesData, rule);
             case 'add':
-                return await this.add({ message, interaction }, rulesData, rule)
+                return await this.add({ message, interaction }, rulesData, rule);
             case 'remove':
-                return await this.remove({ message, interaction }, rulesData, rule)
+                return await this.remove({ message, interaction }, rulesData, rule);
         }
     }
 
@@ -107,16 +106,16 @@ module.exports = class RuleCommand extends Command {
         if (!rulesData || rulesData.rules.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
-            }))
+            }));
         }
 
         if (message && (!rule || rule > rulesData.rules.length)) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1])
-            if (cancelled) return
-            rule = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
+            if (cancelled) return;
+            rule = value;
         }
 
-        const { guild } = message || interaction
+        const { guild } = message || interaction;
 
         const ruleEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
@@ -124,9 +123,9 @@ module.exports = class RuleCommand extends Command {
                 name: `${guild.name}'s rules`, iconURL: guild.iconURL({ dynamic: true })
             })
             .addField(`Rule ${rule--}`, rulesData.rules[rule])
-            .setTimestamp()
+            .setTimestamp();
 
-        await replyAll({ message, interaction }, ruleEmbed)
+        await replyAll({ message, interaction }, ruleEmbed);
     }
 
     /**
@@ -136,35 +135,35 @@ module.exports = class RuleCommand extends Command {
      * @param {string} rule The rule to add
      */
     async add({ message, interaction }, rulesData, rule) {
-        const { guildId, guild, client } = message || interaction
-        const author = message?.author || interaction.user
+        const { guildId, guild, client } = message || interaction;
+        const author = message?.author || interaction.user;
 
         if (!client.isOwner(author) && guild.ownerId !== author.id) {
-            return await this.onBlock({ message, interaction }, 'guildOwnerOnly')
+            return await this.onBlock({ message, interaction }, 'guildOwnerOnly');
         }
 
         if (message) {
             while (!rule || rule.length > 1024 || typeof rule === 'number') {
                 const ruleMsg = await basicCollector({ message }, {
                     fieldName: 'What rule do you want to add?'
-                }, { time: 2 * 60_000 })
-                if (!ruleMsg) return
-                rule = ruleMsg.content
+                }, { time: 2 * 60_000 });
+                if (!ruleMsg) return;
+                rule = ruleMsg.content;
             }
         } else if (rule.length > 1024) {
             return await replyAll({ interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'The rule must be at most 1024 characters long.'
-            }))
+            }));
         }
 
-        if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } })
-        else await this.db.add({ guild: guildId, rules: rule })
+        if (rulesData) await this.db.update(rulesData, { $push: { rules: rule } });
+        else await this.db.add({ guild: guildId, rules: rule });
 
-        const number = rulesData ? rulesData.rules.length + 1 : 1
+        const number = rulesData ? rulesData.rules.length + 1 : 1;
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN', emoji: 'check', description: `The rule has been added under \`Rule ${number}\``
-        }))
+        }));
     }
 
     /**
@@ -177,43 +176,43 @@ module.exports = class RuleCommand extends Command {
         if (!rulesData || rulesData.rules.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
-            }))
+            }));
         }
 
-        const { guild, client } = message || interaction
-        const author = message?.author || interaction.user
+        const { guild, client } = message || interaction;
+        const author = message?.author || interaction.user;
 
         if (!client.isOwner(author) && guild.ownerId !== author.id) {
-            return await this.onBlock({ message, interaction }, 'guildOwnerOnly')
+            return await this.onBlock({ message, interaction }, 'guildOwnerOnly');
         }
 
-        rule = Number(rule) || null
+        rule = Number(rule) || null;
 
         if (message) {
             while (typeof rule !== 'number' || rule < 1) {
                 const ruleMsg = await basicCollector({ message }, {
                     fieldName: 'What rule do you want to remove?'
-                }, { time: 2 * 60_000 })
-                if (!ruleMsg) return
-                rule = Number(ruleMsg.content)
+                }, { time: 2 * 60_000 });
+                if (!ruleMsg) return;
+                rule = Number(ruleMsg.content);
             }
         }
 
         if (rule > rulesData.rules.length) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That rule doesn\'t exist.'
-            }))
+            }));
         }
 
-        rule--
-        await rulesData.updateOne({ $pull: { rules: rulesData.rules[rule] } })
-        rule++
+        rule--;
+        await rulesData.updateOne({ $pull: { rules: rulesData.rules[rule] } });
+        rule++;
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Removed rule number ${rule--}:`,
             fieldValue: rulesData.rules[rule]
-        }))
+        }));
     }
-}
+};

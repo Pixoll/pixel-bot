@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { stripIndent, oneLine } = require('common-tags')
-const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions')
-const myMs = require('../../utils/my-ms')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { stripIndent, oneLine } = require('common-tags');
+const { basicEmbed, docId, confirmButtons, replyAll } = require('../../utils/functions');
+const myMs = require('../../utils/my-ms');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -57,7 +56,7 @@ module.exports = class DurationCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -69,51 +68,51 @@ module.exports = class DurationCommand extends Command {
      */
     async run({ message, interaction }, { modlogId, duration }) {
         if (interaction) {
-            const arg = this.argsCollector.args[1]
-            duration = await arg.parse(duration).catch(() => null) || null
+            const arg = this.argsCollector.args[1];
+            duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
-                }))
+                }));
             }
         }
 
-        const { guild } = message || interaction
-        const { moderations, active } = guild.database
+        const { guild } = message || interaction;
+        const { moderations, active } = guild.database;
 
-        const modLog = await moderations.fetch(modlogId)
+        const modLog = await moderations.fetch(modlogId);
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
-            }))
+            }));
         }
 
-        const activeLog = await active.fetch(modlogId)
+        const activeLog = await active.fetch(modlogId);
         if (!activeLog) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED', emoji: 'cross', description: 'That punishment has expired.'
-            }))
+            }));
         }
 
-        if (typeof duration === 'number') duration = duration + Date.now()
-        if (duration instanceof Date) duration = duration.getTime()
+        if (typeof duration === 'number') duration = duration + Date.now();
+        if (duration instanceof Date) duration = duration.getTime();
 
         /** @type {string} */
-        const longTime = myMs(duration - Date.now(), { long: true })
+        const longTime = myMs(duration - Date.now(), { long: true });
 
         const confirmed = await confirmButtons(
             { message, interaction }, 'update mod log duration', modlogId, { duration: longTime }
-        )
-        if (!confirmed) return
+        );
+        if (!confirmed) return;
 
-        await moderations.update(modLog, { duration: longTime })
-        await active.update(activeLog, { duration })
+        await moderations.update(modLog, { duration: longTime });
+        await active.update(activeLog, { duration });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated duration for mod log \`${modlogId}\``,
             fieldValue: `**New duration:** ${longTime}`
-        }))
+        }));
     }
-}
+};

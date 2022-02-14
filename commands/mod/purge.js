@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command } = require('../../command-handler')
-const { CommandInstances } = require('../../command-handler/typings')
-const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js')
-const { validURL, basicEmbed, getArgument, sleep, replyAll } = require('../../utils/functions')
-const { stripIndent, oneLine } = require('common-tags')
+const { Command, CommandInstances } = require('pixoll-commando');
+const { User, Collection, Message, ChannelLogsQueryOptions } = require('discord.js');
+const { validURL, basicEmbed, getArgument, sleep, replyAll } = require('../../utils/functions');
+const { stripIndent, oneLine } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -15,22 +14,22 @@ async function bulkDelete({ message, interaction }, messages) {
     if (messages.length === 0) {
         return await replyAll({ message, interaction }, basicEmbed({
             color: 'RED', emoji: 'cross', description: 'I couldn\'t find any messages.'
-        }))
+        }));
     }
 
-    const { channel } = message || interaction
+    const { channel } = message || interaction;
     /** @type {Collection<string, Message>} */
-    const bulk = await channel.bulkDelete(messages)
+    const bulk = await channel.bulkDelete(messages);
 
     const embed = basicEmbed({
         color: 'GREEN', emoji: 'check', description: `Deleted ${bulk.size} messages.`
-    })
+    });
 
-    const toDelete = await replyAll({ message, interaction }, embed)
-    if (message) await message.delete().catch(() => null)
+    const toDelete = await replyAll({ message, interaction }, embed);
+    if (message) await message.delete().catch(() => null);
 
-    await sleep(10)
-    await toDelete?.delete().catch(() => null)
+    await sleep(10);
+    await toDelete?.delete().catch(() => null);
 }
 
 /**
@@ -39,16 +38,16 @@ async function bulkDelete({ message, interaction }, messages) {
  * @param {ChannelLogsQueryOptions} options The filtering options for the fetch
  */
 async function fetchMessages({ message, interaction }, options) {
-    const { channel } = message || interaction
+    const { channel } = message || interaction;
     /** @type {Collection<string, Message>} */
-    const fetch = await channel.messages.fetch(options).catch(() => null)
+    const fetch = await channel.messages.fetch(options).catch(() => null);
     const msgs = fetch?.filter(({ pinned, createdTimestamp }) => {
-        const isPinned = pinned
-        const isOver14 = (Date.now() - createdTimestamp) >= 1_209_600_000
-        return !isPinned && !isOver14
-    })
-    const ref = message || await interaction.fetchReply()
-    return msgs.filter(msg => msg.id !== ref.id)
+        const isPinned = pinned;
+        const isOver14 = (Date.now() - createdTimestamp) >= 1_209_600_000;
+        return !isPinned && !isOver14;
+    });
+    const ref = message || await interaction.fetchReply();
+    return msgs.filter(msg => msg.id !== ref.id);
 }
 
 /** A command that can be run in a client */
@@ -325,7 +324,7 @@ module.exports = class PurgeCommand extends Command {
                     }
                 ]
             }
-        })
+        });
     }
 
     /**
@@ -342,57 +341,57 @@ module.exports = class PurgeCommand extends Command {
      * @param {User|Message|string} args.filter The filter to use for the deleted messages
      */
     async run({ message, interaction }, { amount, subCommand, filter, user, messageId, text }) {
-        subCommand = subCommand.toLowerCase()
+        subCommand = subCommand.toLowerCase();
 
         if (interaction) {
-            amount = Math.abs(amount > 100 ? 100 : amount)
+            amount = Math.abs(amount > 100 ? 100 : amount);
             switch (subCommand) {
                 case 'user':
-                    filter = user.user ?? user
-                    break
+                    filter = user.user ?? user;
+                    break;
                 case 'before':
                 case 'after':
-                    filter = await interaction.channel.messages.fetch(messageId).catch(() => null)
+                    filter = await interaction.channel.messages.fetch(messageId).catch(() => null);
                     if (!filter) {
                         return await replyAll({ interaction }, basicEmbed({
                             color: 'RED', emoji: 'cross', description: 'The message ID is invalid.'
-                        }))
+                        }));
                     }
-                    break
+                    break;
                 case 'match':
                 case 'starts-with':
                 case 'ends-with':
-                    filter = text
+                    filter = text;
             }
         }
 
-        if (amount < 100) amount++
+        if (amount < 100) amount++;
 
         switch (subCommand) {
             case 'all':
-                return await this.all({ message, interaction }, amount)
+                return await this.all({ message, interaction }, amount);
             case 'links':
-                return await this.links({ message, interaction }, amount)
+                return await this.links({ message, interaction }, amount);
             case 'files':
-                return await this.files({ message, interaction }, amount)
+                return await this.files({ message, interaction }, amount);
             case 'embeds':
-                return await this.embeds({ message, interaction }, amount)
+                return await this.embeds({ message, interaction }, amount);
             case 'users':
-                return await this.users({ message, interaction }, amount)
+                return await this.users({ message, interaction }, amount);
             case 'bots':
-                return await this.bots({ message, interaction }, amount)
+                return await this.bots({ message, interaction }, amount);
             case 'user':
-                return await this.user({ message, interaction }, amount, filter)
+                return await this.user({ message, interaction }, amount, filter);
             case 'before':
-                return await this.before({ message, interaction }, amount, filter)
+                return await this.before({ message, interaction }, amount, filter);
             case 'after':
-                return await this.after({ message, interaction }, amount, filter)
+                return await this.after({ message, interaction }, amount, filter);
             case 'match':
-                return await this.match({ message, interaction }, amount, filter)
+                return await this.match({ message, interaction }, amount, filter);
             case 'starts-with':
-                return await this.startsWith({ message, interaction }, amount, filter)
+                return await this.startsWith({ message, interaction }, amount, filter);
             case 'ends-with':
-                return await this.endsWith({ message, interaction }, amount, filter)
+                return await this.endsWith({ message, interaction }, amount, filter);
         }
     }
 
@@ -405,14 +404,14 @@ module.exports = class PurgeCommand extends Command {
     async after({ message, interaction }, amount, filter) {
         if (message) {
             while (!(filter instanceof Message)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-                if (cancelled) return
-                filter = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+                if (cancelled) return;
+                filter = value;
             }
         }
 
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, after: filter.id })
-        await bulkDelete({ message, interaction }, msgs)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount, after: filter.id });
+        await bulkDelete({ message, interaction }, msgs);
     }
 
     /**
@@ -421,8 +420,8 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async all({ message, interaction }, amount) {
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        await bulkDelete({ message, interaction }, msgs)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        await bulkDelete({ message, interaction }, msgs);
     }
 
     /**
@@ -434,14 +433,14 @@ module.exports = class PurgeCommand extends Command {
     async before({ message, interaction }, amount, filter) {
         if (message) {
             while (!(filter instanceof Message)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-                if (cancelled) return
-                filter = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+                if (cancelled) return;
+                filter = value;
             }
         }
 
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: filter.id })
-        await bulkDelete({ message, interaction }, msgs)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount, before: filter.id });
+        await bulkDelete({ message, interaction }, msgs);
     }
 
     /**
@@ -450,9 +449,9 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async bots({ message, interaction }, amount) {
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.author.bot)
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.author.bot);
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -461,9 +460,9 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async embeds({ message, interaction }, amount) {
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.embeds.length !== 0)
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.embeds.length !== 0);
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -474,15 +473,15 @@ module.exports = class PurgeCommand extends Command {
      */
     async endsWith({ message, interaction }, amount, filter) {
         if (message && !filter) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            filter = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+            if (cancelled) return;
+            filter = value;
         }
-        filter = filter.toString()
+        filter = filter.toString();
 
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.content.toLowerCase().endsWith(filter))
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.content.toLowerCase().endsWith(filter));
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -491,9 +490,9 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async files({ message, interaction }, amount) {
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.attachments.size !== 0)
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.attachments.size !== 0);
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -502,14 +501,14 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async links({ message, interaction }, amount) {
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
         const filtered = msgs.filter(msg => {
             for (const str of msg.content?.split(/ +/)) {
-                if (validURL(str)) return true
+                if (validURL(str)) return true;
             }
-            return false
-        })
-        await bulkDelete({ message, interaction }, filtered)
+            return false;
+        });
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -520,15 +519,15 @@ module.exports = class PurgeCommand extends Command {
      */
     async match({ message, interaction }, amount, filter) {
         if (message && !filter) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            filter = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+            if (cancelled) return;
+            filter = value;
         }
-        filter = filter.toString()
+        filter = filter.toString();
 
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.content.includes(filter.toString()))
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.content.includes(filter.toString()));
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -539,15 +538,15 @@ module.exports = class PurgeCommand extends Command {
      */
     async startsWith({ message, interaction }, amount, filter) {
         if (message && !filter) {
-            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-            if (cancelled) return
-            filter = value
+            const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+            if (cancelled) return;
+            filter = value;
         }
-        filter = filter.toString()
+        filter = filter.toString();
 
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.content.startsWith(filter.toString()))
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.content.startsWith(filter.toString()));
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -559,15 +558,15 @@ module.exports = class PurgeCommand extends Command {
     async user({ message, interaction }, amount, filter) {
         if (message) {
             while (!(filter instanceof User)) {
-                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2])
-                if (cancelled) return
-                filter = value
+                const { value, cancelled } = await getArgument(message, this.argsCollector.args[2]);
+                if (cancelled) return;
+                filter = value;
             }
         }
 
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => msg.author.id === filter.id)
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => msg.author.id === filter.id);
+        await bulkDelete({ message, interaction }, filtered);
     }
 
     /**
@@ -576,8 +575,8 @@ module.exports = class PurgeCommand extends Command {
      * @param {number} amount The amount of messages to delete
      */
     async users({ message, interaction }, amount) {
-        const msgs = await fetchMessages({ message, interaction }, { limit: amount })
-        const filtered = msgs.filter(msg => !msg.author.bot)
-        await bulkDelete({ message, interaction }, filtered)
+        const msgs = await fetchMessages({ message, interaction }, { limit: amount });
+        const filtered = msgs.filter(msg => !msg.author.bot);
+        await bulkDelete({ message, interaction }, filtered);
     }
-}
+};
