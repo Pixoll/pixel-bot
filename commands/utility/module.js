@@ -19,9 +19,8 @@ function removeDashes(str) {
     return first + rest;
 }
 
-const Obj = require('../../schemas').modules.schema.obj;
-const modules = Object.keys(Obj).slice(1).map(addDashes);
-const auditLogs = Object.keys(Obj.auditLogs).map(addDashes);
+const modules = [];
+const auditLogs = [];
 
 /**
  * Patches the data of a {@link ModuleSchema}
@@ -147,6 +146,10 @@ module.exports = class ModuleCommand extends Command {
                 ]
             }
         });
+
+        const modulesObj = this.client.databaseSchemas.modules.schema.obj;
+        modules.push(...Object.keys(modulesObj).slice(1).map(addDashes));
+        auditLogs.push(Object.keys(modulesObj.auditLogs).map(addDashes));
     }
 
     /**

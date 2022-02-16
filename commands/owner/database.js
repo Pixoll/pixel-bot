@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Command, CommandInstances } = require('pixoll-commando');
 const { generateEmbed, basicEmbed, addDashes } = require('../../utils/functions');
-const Database = require('../../schemas');
 const { capitalize } = require('lodash');
 /* eslint-enable no-unused-vars */
 
@@ -31,11 +30,12 @@ module.exports = class DatabaseCommand extends Command {
                 {
                     key: 'collection',
                     prompt: 'What collection do you want to manage?',
-                    type: 'string',
-                    oneOf: Object.keys(Database).map(addDashes)
+                    type: 'string'
                 }
             ]
         });
+
+        this.argsCollector.args[0].oneOf = Object.keys(this.client.databaseSchemas).map(addDashes);
     }
 
     /**
@@ -45,7 +45,7 @@ module.exports = class DatabaseCommand extends Command {
      * @param {string} args.collection The collection to manage
      */
     async run({ message }, { collection }) {
-        const data = await Database[removeDashes(collection)].find({});
+        const data = await this.client.databaseSchemas[removeDashes(collection)].find({});
 
         const array = data.map(({ _doc: val }) => {
             delete val._id;

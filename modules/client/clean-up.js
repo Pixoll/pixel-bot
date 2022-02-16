@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Document } = require('mongoose');
 const { CommandoClient, CommandoGuild } = require('pixoll-commando');
-const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = require('../../schemas');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -57,6 +56,7 @@ module.exports = async (client, forceCleanup = false) => {
     if (forceCleanup || new Date().getUTCDate() === 1) {
         client.emit('debug', 'Cleaning up database...');
 
+        const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = client.databaseSchemas;
         const guilds = client.guilds.cache.map(d => d.id);
         const filter = doc => !guilds.includes(doc.guild);
 
