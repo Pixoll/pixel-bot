@@ -61,7 +61,7 @@ client.emit('debug', `Loaded ${client.registry.groups.size} groups`);
 client.registry.registerCommandsIn(path.join(__dirname, '/commands'));
 client.emit('debug', `Loaded ${client.registry.commands.size} commands`);
 
-client.on('databaseReady', async () => {
+client.on('guildsReady', async () => {
     notifier(client);
     rateLimits(client);
 
