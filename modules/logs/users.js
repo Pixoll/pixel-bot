@@ -70,8 +70,14 @@ module.exports = (client) => {
             const array2 = flags2?.toArray().map(flag => parseUserFlag(flag)) || [];
             const [added, removed] = compareArrays(array1, array2);
 
-            if (added.length !== 0) embed.addField(`${customEmoji('check')} Added badges`, added.join(', '));
-            if (removed.length !== 0) embed.addField(`${customEmoji('cross')} Removed badges`, removed.join(', '));
+            if (added.length !== 0) {
+                console.log('modules/logs/users.js:74', added);
+                embed.addField(`${customEmoji('check')} Added badges`, added.join(', '));
+            }
+            if (removed.length !== 0) {
+                console.log('modules/logs/users.js:78', removed);
+                embed.addField(`${customEmoji('cross')} Removed badges`, removed.join(', '));
+            }
         }
 
         if (embed.fields.length === 0) return;
