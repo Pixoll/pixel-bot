@@ -68,16 +68,10 @@ module.exports = (client) => {
         if (flags1 !== flags2) {
             const array1 = flags1?.toArray().map(flag => parseUserFlag(flag)) || [];
             const array2 = flags2?.toArray().map(flag => parseUserFlag(flag)) || [];
-            const [added, removed] = compareArrays(array1, array2);
+            const [added, removed] = compareArrays(array1, array2).map(arr => arr.filter(e => e));
 
-            if (added.length !== 0) {
-                console.log('modules/logs/users.js:74', added);
-                embed.addField(`${customEmoji('check')} Added badges`, added.join(', '));
-            }
-            if (removed.length !== 0) {
-                console.log('modules/logs/users.js:78', removed);
-                embed.addField(`${customEmoji('cross')} Removed badges`, removed.join(', '));
-            }
+            if (added.length !== 0) embed.addField(`${customEmoji('check')} Added badges`, added.join(', '));
+            if (removed.length !== 0) embed.addField(`${customEmoji('cross')} Removed badges`, removed.join(', '));
         }
 
         if (embed.fields.length === 0) return;
