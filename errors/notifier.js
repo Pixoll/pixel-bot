@@ -65,7 +65,7 @@ module.exports = (client) => {
             const stack = error.stack?.substring(lentgh, error.stack?.length).replace(/ +/g, ' ').split('\n');
 
             const files = stack.filter(str => {
-                const match = /node_modules|\(internal|\(<anonymous>\)/.test(str);
+                const match = /node_modules\/(?!pixoll-commando)|\(internal|\(<anonymous>\)/.test(str);
                 if (match) return false;
                 return str.includes(root);
             }).map((str) =>
