@@ -42,7 +42,7 @@ module.exports = class InfoCommand extends Command {
             .addField('Information', stripIndent`
                 **Version:** ${version}
                 **Library:** [discord.js v${djsVersion}](https://discord.js.org/#/)
-                **Framework:** [pixoll-commando v${pixComVersion}](https://github.com/Pixoll/Commando-v13)
+                **Framework:** [pixoll-commando v${pixComVersion}](https://github.com/Pixoll/pixoll-commando)
                 **Developer:** ${owners[0].toString()} (${owners[0].tag})
             `, true)
             .addField('Links', oneLine`
