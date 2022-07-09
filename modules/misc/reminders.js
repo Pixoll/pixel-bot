@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { MessageEmbed, User, TextBasedChannels, Message, GuildMember } = require('discord.js');
+const { MessageEmbed, User, TextBasedChannel, Message, GuildMember } = require('discord.js');
 const { CommandoClient } = require('pixoll-commando');
 const { noReplyInDMs, basicEmbed } = require('../../utils/functions');
 const myMs = require('../../utils/my-ms');
@@ -23,7 +23,7 @@ module.exports = async (client) => {
             const user = await users.fetch(reminder.user).catch(() => null);
             if (!user) continue;
 
-            /** @type {TextBasedChannels} */
+            /** @type {TextBasedChannel} */
             const channel = channels.resolve(reminder.channel);
             if (!channel) continue;
 
@@ -68,7 +68,7 @@ module.exports = async (client) => {
 
     await sendReminders();
 
-    // Cancells the reminders
+    // Cancels the reminders
     client.on('messageReactionAdd', async (reaction, user) => {
         if (reaction.partial) {
             reaction = await reaction.fetch().catch(() => null);

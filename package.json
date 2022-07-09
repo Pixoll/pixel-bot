@@ -1,23 +1,33 @@
 {
   "name": "pixel",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "main": "index.js",
-  "dependencies": {
-    "common-tags": "^1.8.2",
-    "discord.js": "^13.6.0",
-    "dotenv": "^16.0.0",
-    "emoji-regex": "^10.0.0",
-    "lodash": "^4.17.21",
-    "minecraft-server-util": "^5.2.9",
-    "mongoose": "^6.2.1",
-    "pixoll-commando": "^0.13.8",
-    "require-all": "^3.0.0"
-  },
   "scripts": {
     "compile": "tsc.cmd",
-    "lint": "eslint . --ext .ts",
-    "lint:layout": "eslint . --ext .ts --fix --fix-type layout"
+    "lint": "eslint . --ext .js",
+    "lint:layout": "eslint . --ext .js --fix --fix-type layout",
+    "lint:ts": "eslint . --ext .ts",
+    "lint:layout:ts": "eslint . --ext .ts --fix --fix-type layout"
+  },
+  "dependencies": {
+    "common-tags": "^1.8.2",
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1",
+    "emoji-regex": "^10.1.0",
+    "lodash": "^4.17.21",
+    "minecraft-server-util": "^5.2.10",
+    "mongoose": "^6.4.4",
+    "pixoll-commando": "^0.14.2",
+    "require-all": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/common-tags": "^1.8.1",
+    "@types/lodash": "^4.14.182",
+    "@types/require-all": "^3.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.17.0"
   },
   "engines": {
     "node": "16.x",
@@ -32,14 +42,5 @@
   "bugs": {
     "url": "https://github.com/Pixoll/pixel-bot/issues"
   },
-  "homepage": "https://github.com/Pixoll/pixel-bot/#readme",
-  "devDependencies": {
-    "@types/common-tags": "^1.8.1",
-    "@types/lodash": "^4.14.178",
-    "@types/require-all": "^3.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.12.0",
-    "canvas": "^2.9.0",
-    "eslint": "^8.9.0"
-  }
+  "homepage": "https://github.com/Pixoll/pixel-bot/#readme"
 }

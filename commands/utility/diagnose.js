@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags');
 const { MessageEmbed, GuildChannel } = require('discord.js');
-const { Command, CommandInstances, CommandGroup, util: { permissions } } = require('pixoll-commando');
+const { Command, CommandInstances, CommandGroup, Util: { permissions } } = require('pixoll-commando');
 const { getArgument, replyAll, basicEmbed } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 

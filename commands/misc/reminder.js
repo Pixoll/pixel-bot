@@ -28,7 +28,7 @@ module.exports = class ReminderCommand extends Command {
                 {
                     key: 'time',
                     prompt: 'When would you like to be reminded?',
-                    type: ['date', 'duration']
+                    type: ['duration', 'date']
                 },
                 {
                     key: 'reminder',
@@ -83,7 +83,7 @@ module.exports = class ReminderCommand extends Command {
         const msg = await interaction?.fetchReply();
         const { id, channelId, url } = message || msg;
         const author = interaction?.user || message.author;
-        const stamp = timestamp(time, 'R');
+        const stamp = timestamp(time, 'R', true);
 
         await this.db.add({
             user: author.id,

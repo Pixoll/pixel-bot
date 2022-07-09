@@ -4,7 +4,7 @@ const { generateEmbed, basicEmbed, pluralize, replyAll } = require('../../utils/
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
-module.exports = class AdminisCommand extends Command {
+module.exports = class AdminsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'admins',

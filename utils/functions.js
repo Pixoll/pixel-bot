@@ -4,12 +4,11 @@ const {
     MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util
 } = require('discord.js');
 const {
-    CommandoMessage, CommandoGuild, Command, Argument, CommandInstances, util: { permissions }
+    CommandoMessage, CommandoGuild, Command, Argument, CommandInstances, Util: { permissions }, Module, AuditLog
 } = require('pixoll-commando');
 const { transform, isEqual, isArray, isObject, capitalize } = require('lodash');
 const { stripIndent } = require('common-tags');
 const myMs = require('./my-ms');
-const { Module, AuditLog } = require('../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /**
@@ -176,8 +175,7 @@ function timestamp(time, format = 'f', exact = false) {
     if (exact) return `<t:${trunc}:${format}>`;
 
     const rem = trunc % 60;
-    const roundUp = rem >= 20;
-    const epoch = trunc - rem + (roundUp ? 60 : 0);
+    const epoch = trunc - rem;
 
     return `<t:${epoch}:${format}>`;
 }
@@ -266,9 +264,10 @@ async function basicCollector({ message, interaction } = {}, embedOptions, colle
  * @param {Argument} arg The argument to get
  */
 async function getArgument(msg, arg) {
+    const initialValue = arg.required;
     arg.required = true;
     const response = await arg.obtain(msg);
-    arg.required = false;
+    arg.required = initialValue;
     if (response.cancelled) await msg.reply({ content: 'Cancelled command.', ...noReplyInDMs(msg) });
     return response;
 }
@@ -548,12 +547,15 @@ function difference(first, second) {
 function validURL(str) {
     if (!str.includes('.') || !str.includes('/')) return false;
 
-    const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-        '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+    const pattern = new RegExp(
+        '^(https?:\\/\\/)?' // protocol
+        + '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' // domain name
+        + '((\\d{1,3}\\.){3}\\d{1,3}))' // OR ip (v4) address
+        + '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' // port and path
+        + '(\\?[;&a-z\\d%_.~+=-]*)?' // query string
+        + '(\\#[-a-z\\d_]*)?$', // fragment locator
+        'i'
+    );
 
     return pattern.test(str);
 }
@@ -605,7 +607,7 @@ function docId() {
  * @param {number} data.total The total chunks of data.
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not.
  * @param {string} [data.dmMsg=''] Whether to send the embed to the user DMs or not.
- * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
+ * @param {MessageActionRow[]} [data.components=[]] The components to attach to the message
  * @param {boolean} [data.skipMaxButtons=false] Whether to skip the page start and page end buttons
  * @param {TemplateEmbedFunction} template The embed template to use.
  */
@@ -785,7 +787,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
  * @param {string} [data.authorIconURL=null] The icon URL of the author
  * @param {string} [data.title=''] The title of each section in the embed
  * @param {boolean} [data.useDescription=false] Whether to use `setDescription()` or not
- * @param {MessageActionRow[]} [data.components=[]] The components to attatch to the message
+ * @param {MessageActionRow[]} [data.components=[]] The components to attach to the message
  * @param {boolean} [data.inLine=false] Whether the data should be displayed inline in the embed
  * @param {boolean} [data.toUser=false] Whether to send the embed to the user DMs or not
  * @param {boolean} [data.dmMsg=''] The message to send to the user in DMs. Only if `toUser` is true
@@ -856,12 +858,12 @@ async function generateEmbed({ message, interaction }, array, data) {
             const docId = useDocId ? item._doc?._id || item._id : null;
             const numberPrefix = numbered ? `${start + index + 1}.` : '';
             const prefix = capitalize(item[keyTitle?.prefix] || null);
-            const suffix = docId ||
-                (
+            const suffix = docId
+                || (
                     item[keyTitle?.suffix] && typeof item[keyTitle?.suffix] !== 'string' ?
                         timestamp(item[keyTitle?.suffix] / 1) : null
-                ) ||
-                item[keyTitle?.suffix] || start + index + 1;
+                )
+                || item[keyTitle?.suffix] || start + index + 1;
 
             const value = [];
             for (const key of objKeys) {

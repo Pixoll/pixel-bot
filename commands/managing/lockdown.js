@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, SetupSchema } = require('pixoll-commando');
 const { stripIndent, oneLine } = require('common-tags');
 const { basicEmbed, generateEmbed, pluralize, getArgument, confirmButtons, replyAll } = require('../../utils/functions');
-const { SetupSchema } = require('../../schemas/types');
 const { TextChannel } = require('discord.js');
 /* eslint-enable no-unused-vars */
 
@@ -306,7 +305,7 @@ module.exports = class LockdownCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `Unocked ${amount}/${savedChannels.length} lockdown channels.`
+            description: `Unlocked ${amount}/${savedChannels.length} lockdown channels.`
         }));
     }
 

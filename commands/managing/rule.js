@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags');
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, RuleSchema } = require('pixoll-commando');
 const { basicEmbed, basicCollector, getArgument, replyAll } = require('../../utils/functions');
-const { RuleSchema } = require('../../schemas/types');
 const { MessageEmbed } = require('discord.js');
 /* eslint-enable no-unused-vars */
 

@@ -342,6 +342,7 @@ module.exports = class McStatusCommand extends Command {
         const { motd, version, favicon, players } = status;
 
         // Server favicon
+        // eslint-disable-next-line new-cap
         const buffer = favicon ? new Buffer.from(favicon.split(',')[1], 'base64') : null;
         const icon = buffer ? new MessageAttachment(buffer, 'icon.png') : null;
 

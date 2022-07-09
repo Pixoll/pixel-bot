@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags');
 const { MessageEmbed, Permissions } = require('discord.js');
-const { CommandoClient } = require('pixoll-commando');
+const { CommandoClient, Util: { permissions } } = require('pixoll-commando');
 const { customEmoji, isModuleEnabled, getKeyPerms, compareArrays } = require('../../utils/functions');
-const { permissions } = require('pixoll-commando').util;
 /* eslint-enable no-unused-vars */
 
 /**
@@ -15,7 +14,7 @@ function format(perms) {
 }
 
 /**
- * Returns a clickable link to the image. `None` if the link is invald
+ * Returns a clickable link to the image. `None` if the link is invalid
  * @param {string} link The link of the image
  */
 function imageLink(link) {

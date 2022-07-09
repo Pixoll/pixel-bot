@@ -28,7 +28,7 @@ function parseUserFlag(flag) {
 }
 
 /**
- * Returns a clickable link to the image. `None` if the link is invald
+ * Returns a clickable link to the image. `None` if the link is invalid
  * @param {string} link The link of the image
  */
 function imageLink(link) {

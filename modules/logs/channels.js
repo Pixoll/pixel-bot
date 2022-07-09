@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed, GuildMember, Role, PermissionOverwrites, Util } = require('discord.js');
-const { CommandoClient } = require('pixoll-commando');
+const { CommandoClient, Util: { permissions } } = require('pixoll-commando');
 const { compareArrays, sliceDots, customEmoji, isModuleEnabled } = require('../../utils/functions');
-const { permissions } = require('pixoll-commando').util;
 const { capitalize } = require('lodash');
 const myMs = require('../../utils/my-ms');
 /* eslint-enable no-unused-vars */
@@ -267,16 +266,16 @@ module.exports = (client) => {
                 const str2 = typeof autoArchive2 === 'number' ?
                     myMs(autoArchive2 * 60_000, { long: true }) :
                     capitalize(autoArchive2);
-                embed.addField('Archive after innactivity', `${str1} ➜ ${str2}`);
+                embed.addField('Archive after inactivity', `${str1} ➜ ${str2}`);
             }
 
             if (type1 === 'GUILD_TEXT' && type2 === 'GUILD_TEXT') {
                 const rate1 = oldChannel.rateLimitPerUser;
                 const rate2 = newChannel.rateLimitPerUser;
                 if (rate1 !== rate2) {
-                    const slowmo1 = rate1 ? myMs(rate1 * 1000, { long: true }) : 'Off';
-                    const slowmo2 = rate2 ? myMs(rate2 * 1000, { long: true }) : 'Off';
-                    embed.addField('Slowmode', `${slowmo1} ➜ ${slowmo2}`);
+                    const slowmode1 = rate1 ? myMs(rate1 * 1000, { long: true }) : 'Off';
+                    const slowmode2 = rate2 ? myMs(rate2 * 1000, { long: true }) : 'Off';
+                    embed.addField('Slowmode', `${slowmode1} ➜ ${slowmode2}`);
                 }
             }
 

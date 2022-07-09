@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { oneLine, stripIndent } = require('common-tags');
-const { MessageEmbed, TextBasedChannels } = require('discord.js');
+const { MessageEmbed, TextBasedChannel } = require('discord.js');
 const { CommandoClient } = require('pixoll-commando');
 const { customEmoji } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
@@ -16,13 +16,13 @@ module.exports = async (client) => {
         const { user, owners, prefix, options, users } = client;
         const { channels, id, ownerId } = guild;
 
-        /** @type {TextBasedChannels} */
+        /** @type {TextBasedChannel} */
         let channel = channels.cache.sort((a, b) => a.rawPosition - b.rawPosition)
             .filter(ch => {
                 if (ch.type !== 'GUILD_TEXT') return false;
-                const eveyonePerms = ch.permissionOverwrites.resolve(id)?.allow;
-                if (!eveyonePerms) return false;
-                const hasPerms = eveyonePerms.bitfield === 0n || eveyonePerms.has(['SEND_MESSAGES', 'VIEW_CHANNEL']);
+                const everyonePerms = ch.permissionOverwrites.resolve(id)?.allow;
+                if (!everyonePerms) return false;
+                const hasPerms = everyonePerms.bitfield === 0n || everyonePerms.has(['SEND_MESSAGES', 'VIEW_CHANNEL']);
                 return hasPerms;
             }).first();
         if (!channel) {

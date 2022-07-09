@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, ModerationSchema } = require('pixoll-commando');
 const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed, User } = require('discord.js');
 const { basicEmbed, docId, confirmButtons, timestamp, replyAll } = require('../../utils/functions');
-const { ModerationSchema } = require('../../schemas/types');
 const { capitalize } = require('lodash');
 /* eslint-enable no-unused-vars */
 

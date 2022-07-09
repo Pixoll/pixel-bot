@@ -2,7 +2,7 @@
 const { oneLine, stripIndent } = require('common-tags');
 const { TextChannel, MessageEmbed, RateLimitData } = require('discord.js');
 const { CommandoClient } = require('pixoll-commando');
-const { timestamp } = require('../utils/functions');
+const { timestamp } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /**

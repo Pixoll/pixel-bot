@@ -2,8 +2,6 @@ console.log('Starting bot...');
 
 const { CommandoClient } = require('pixoll-commando');
 const path = require('path');
-const notifier = require('./errors/notifier');
-const rateLimits = require('./errors/rateLimits');
 require('dotenv').config();
 
 // Heroku logs command: heroku logs -a pixel-bot-main -n NUMBER_OF_LINES
@@ -19,7 +17,9 @@ const client = new CommandoClient({
             'ADD_REACTIONS', 'ADMINISTRATOR', 'ATTACH_FILES', 'BAN_MEMBERS', 'CHANGE_NICKNAME', 'CREATE_INSTANT_INVITE',
             'EMBED_LINKS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
             'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'SEND_MESSAGES',
-            'SEND_MESSAGES_IN_THREADS', 'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'VIEW_AUDIT_LOG', 'VIEW_CHANNEL'
+            'SEND_MESSAGES_IN_THREADS', 'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'VIEW_AUDIT_LOG', 'VIEW_CHANNEL',
+            'READ_MESSAGE_HISTORY', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MANAGE_EVENTS', 'CREATE_PRIVATE_THREADS',
+            'CREATE_PRIVATE_THREADS', 'MODERATE_MEMBERS'
         ]
     },
     intents: [
@@ -33,11 +33,12 @@ const client = new CommandoClient({
     excludeModules: ['chat-filter', 'scam-detector'],
 });
 
+const excludeDebugEvents
+    = /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request|Created new/;
+
 client.on('debug', (...msgs) => {
     const msg = msgs.join(' ');
-    const exclude =
-        /Heartbeat|Registered|WS|Loaded feature|finished for guild|Garbage collection|executing a request|Created new/;
-    if (exclude.test(msg)) return;
+    if (excludeDebugEvents.test(msg)) return;
     console.log('debug >', msg);
 });
 client.emit('debug', 'Created client');
@@ -61,10 +62,7 @@ client.emit('debug', `Loaded ${client.registry.groups.size} groups`);
 client.registry.registerCommandsIn(path.join(__dirname, '/commands'));
 client.emit('debug', `Loaded ${client.registry.commands.size} commands`);
 
-client.on('databaseReady', async () => {
-    notifier(client);
-    rateLimits(client);
-
+client.on('modulesReady', async () => {
     client.user.setActivity({
         name: `for ${client.prefix}help`,
         type: 'WATCHING'

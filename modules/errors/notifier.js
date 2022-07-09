@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { CommandoClient } = require('pixoll-commando');
-const { CommandInstances, Command } = require('pixoll-commando');
-const { MessageEmbed, TextChannel, Util, CommandInteractionOption, SnowflakeUtil } = require('discord.js');
-const { customEmoji, docId, code, replyAll } = require('../utils/functions');
+const { CommandoClient, CommandInstances, Command } = require('pixoll-commando');
+const { MessageEmbed, TextChannel, Util, CommandInteractionOption } = require('discord.js');
+const { customEmoji, docId, code, replyAll, sliceDots } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
 
@@ -61,11 +60,11 @@ module.exports = (client) => {
             if (command?.name === 'eval') return;
             console.error(error);
 
-            const lentgh = error.name.length + error.message.length + 3;
-            const stack = error.stack?.substring(lentgh, error.stack?.length).replace(/ +/g, ' ').split('\n');
+            const length = error.name.length + error.message.length + 3;
+            const stack = error.stack?.substring(length, error.stack?.length).replace(/ +/g, ' ').split('\n');
 
             const files = stack.filter(str => {
-                const match = /node_modules\/(?!pixoll-commando)|\(internal|\(<anonymous>\)/.test(str);
+                const match = /node:events|node_modules(\/|\\+)(?!pixoll-commando)|\(internal|\(<anonymous>\)/.test(str);
                 if (match) return false;
                 return str.includes(root);
             }).map((str) =>
@@ -124,7 +123,7 @@ module.exports = (client) => {
             }
 
             const msg = (error.name + whatCommand + ': ' + error.message).split('Require stack:').shift();
-            embed.addField(msg, code(files || 'No files.'));
+            embed.addField(msg, code(sliceDots(files, 1016) || 'No files.'));
 
             await errorsChannel.send({ content: client.owners[0].toString(), embeds: [embed] });
 

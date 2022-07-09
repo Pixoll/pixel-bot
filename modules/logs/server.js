@@ -37,7 +37,7 @@ function guildFeature(feat) {
         case 'INVITE_SPLASH': return 'Invite splash';
         case 'MEMBER_VERIFICATION_GATE_ENABLED': return 'Membership screening';
         case 'NEWS': return 'News';
-        case 'PARTNERED': return 'Partened';
+        case 'PARTNERED': return 'Partnered';
         case 'PREVIEW_ENABLED': return 'Preview';
         case 'VANITY_URL': return 'Vanity URL';
         case 'VERIFIED': return 'Verified';
@@ -132,7 +132,7 @@ function locale(lang) {
 }
 
 /**
- * Returns a clickable link to the image. `None` if the link is invald
+ * Returns a clickable link to the image. `None` if the link is invalid
  * @param {string} link The link of the image
  */
 function imageLink(link) {
@@ -303,7 +303,7 @@ module.exports = (client) => {
             embed.addField('Features', `${added}\n${removed}`);
         }
 
-        if (partner1 !== partner2) embed.addField('Partened', partner1 ? 'Yes ➜ No' : 'No ➜ Yes');
+        if (partner1 !== partner2) embed.addField('Partnered', partner1 ? 'Yes ➜ No' : 'No ➜ Yes');
 
         if (verified1 !== verified2) embed.addField('Verified', verified1 ? 'Yes ➜ No' : 'No ➜ Yes');
 
@@ -358,7 +358,7 @@ module.exports = (client) => {
 
         if (rulesChan1 !== rulesChan2) {
             embed.addField(
-                'Rules or Guildelines channel',
+                'Rules or Guidelines channel',
                 `${rulesChan1?.toString() || 'None'} ➜ ${rulesChan2?.toString() || 'None'}`
             );
         }

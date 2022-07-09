@@ -41,14 +41,17 @@ module.exports = class AvatarCommand extends Command {
         if (interaction) user = user?.user ?? user ?? interaction.user;
         if (message) user ??= message.author;
 
-        const avatar = user.displayAvatarURL({ dynamic: true, size: 2048 });
+        let avatarUrl = user.displayAvatarURL({ dynamic: true, size: 2048 });
+        if (/\.webp/.test(avatarUrl)) {
+            avatarUrl = user.displayAvatarURL({ format: 'png', size: 2048 });
+        }
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
                 name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
             })
-            .setImage(avatar)
+            .setImage(avatarUrl)
             .setTimestamp();
 
         const row = new MessageActionRow()
@@ -56,7 +59,7 @@ module.exports = class AvatarCommand extends Command {
                 new MessageButton()
                     .setStyle('LINK')
                     .setLabel('Download')
-                    .setURL(avatar)
+                    .setURL(avatarUrl)
             );
 
         await replyAll({ message, interaction }, { embeds: [embed], components: [row] });

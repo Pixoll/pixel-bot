@@ -1,4 +1,5 @@
 /.env
+/.vscode
 /node_modules
 /commands/owner/test.js
 /commands/info/legal.js
@@ -7,3 +8,4 @@
 /debug.js
 /src
 /build
+/test

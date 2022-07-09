@@ -22,16 +22,19 @@ module.exports = class ServerIconCommand extends Command {
      * @param {CommandInstances} instances The instances the command is being run for
      */
     async run({ message, interaction }) {
-        const { guild } = message || interaction;
+        const guild = message?.guild || interaction.guild;
 
-        const icon = guild.iconURL({ dynamic: true, size: 2048 });
+        let iconUrl = guild.iconURL({ dynamic: true, size: 2048 });
+        if (/\.webp/.test(iconUrl)) {
+            iconUrl = guild.iconURL({ format: 'png', size: 2048 });
+        }
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
                 name: guild.name, iconURL: guild.iconURL({ dynamic: true })
             })
-            .setImage(icon)
+            .setImage(iconUrl)
             .setTimestamp();
 
         const row = new MessageActionRow()
@@ -39,7 +42,7 @@ module.exports = class ServerIconCommand extends Command {
                 new MessageButton()
                     .setStyle('LINK')
                     .setLabel('Download')
-                    .setURL(icon)
+                    .setURL(iconUrl)
             );
 
         await replyAll({ message, interaction }, { embeds: [embed], components: [row] });

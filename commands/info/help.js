@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { Command, CommandInstances, util: { permissions } } = require('pixoll-commando');
+const { Command, CommandInstances, Util: { permissions } } = require('pixoll-commando');
 const { MessageEmbed } = require('discord.js');
 const { pagedEmbed, getArgument, replyAll, pluralize } = require('../../utils/functions');
 const { version } = require('../../package.json');
@@ -154,10 +154,10 @@ module.exports = class HelpCommand extends Command {
                         `}
 
                         **Argument types:**
-                        **1. Square paranthesis** \`[]\`: Required.
+                        **1. Square parenthesis** \`[]\`: Required.
                         **2. Arrow parenthesis** \`<>\`: Optional.
 
-                        *Note: Don't include these brakets (\`[]\` or \`<>\`) in the argument.*
+                        *Note: Don't include these brackets (\`[]\` or \`<>\`) in the argument.*
                     `)
                     .addField('Moderator permissions', stripIndent`
                         ${oneLine`

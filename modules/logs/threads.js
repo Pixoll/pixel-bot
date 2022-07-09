@@ -119,9 +119,9 @@ module.exports = (client) => {
         if (locked1 !== locked2) embed.addField('Anyone can unarchive', locked2 ? 'Yes ➜ No' : 'No ➜ Yes');
 
         if (rateLimit1 !== rateLimit2) {
-            const slowmo1 = rateLimit1 ? myMs(rateLimit1 * 1000, { long: true }) : 'Off';
-            const slowmo2 = rateLimit2 ? myMs(rateLimit2 * 1000, { long: true }) : 'Off';
-            embed.addField('Slowmode', `${slowmo1} ➜ ${slowmo2}`);
+            const slowmode1 = rateLimit1 ? myMs(rateLimit1 * 1000, { long: true }) : 'Off';
+            const slowmode2 = rateLimit2 ? myMs(rateLimit2 * 1000, { long: true }) : 'Off';
+            embed.addField('Slowmode', `${slowmode1} ➜ ${slowmode2}`);
         }
 
         if (embed.fields.length !== 0) guild.queuedLogs.push(embed);

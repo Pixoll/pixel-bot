@@ -30,7 +30,7 @@ module.exports = async (client) => {
         else toggled = await member.roles.add(roleId).catch(() => null);
 
         const content = toggled ? `You've been ${action} the \`${role.name}\` role.` :
-            'An unnexpected error happened, please contact an admin of this server.';
+            'An unexpected error happened, please contact an admin of this server.';
 
         await int.reply({ content, ephemeral: true });
     });

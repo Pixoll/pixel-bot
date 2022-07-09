@@ -39,7 +39,7 @@ module.exports = (client) => {
             .setAuthor({
                 name: 'Created event', iconURL: guild.iconURL({ dynamic: true }), url
             })
-            .setDescription(stripIndent`
+            .setDescription(/* eslint-disable indent */ stripIndent`
                 **Name:** ${name}
                 ${channel ?
                     `**Channel:** ${channel.toString()}` :
@@ -50,7 +50,7 @@ module.exports = (client) => {
                 ${scheduledEndAt ?
                     `**Ending:** ${timestamp(scheduledEndAt)} (${timestamp(scheduledEndAt, 'R')})` : ''
                 }
-            `)
+            ` /* eslint-enable indent */)
             .setFooter({ text: `Event ID: ${id}` })
             .setTimestamp();
 
@@ -72,7 +72,7 @@ module.exports = (client) => {
             .setAuthor({
                 name: 'Deleted event', iconURL: guild.iconURL({ dynamic: true }), url
             })
-            .setDescription(stripIndent`
+            .setDescription(/* eslint-disable indent */ stripIndent`
                 **Name:** ${name}
                 ${channel ?
                     `**Channel:** ${channel.toString()}` :
@@ -83,7 +83,7 @@ module.exports = (client) => {
                 ${scheduledEndAt ?
                     `**Ending:** ${timestamp(scheduledEndAt)} (${timestamp(scheduledEndAt, 'R')})` : ''
                 }
-            `)
+            ` /* eslint-enable indent */)
             .setFooter({ text: `Event ID: ${id}` })
             .setTimestamp();
 

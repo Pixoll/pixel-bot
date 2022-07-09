@@ -347,7 +347,7 @@ module.exports = class RoleCommand extends Command {
     }
 
     /**
-     * The `removeall` sub-command
+     * The `remove-all` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {GuildMember} member The member to remove the roles from
      */
@@ -408,7 +408,7 @@ module.exports = class RoleCommand extends Command {
         const memberRoles = member.roles;
 
         const alreadyHas = roles.filter(r => memberRoles.cache.has(r.id));
-        const doesntHas = roles.filter(r => !memberRoles.cache.has(r.id));
+        const doesNotHave = roles.filter(r => !memberRoles.cache.has(r.id));
 
         const embed = basicEmbed({
             color: 'GOLD', emoji: 'loading', description: 'Toggling the roles... Please be patient.'
@@ -418,11 +418,11 @@ module.exports = class RoleCommand extends Command {
         if (alreadyHas.length !== 0) {
             for (const role of alreadyHas) await memberRoles.remove(role);
         }
-        if (doesntHas.length !== 0) {
-            for (const role of doesntHas) await memberRoles.add(role);
+        if (doesNotHave.length !== 0) {
+            for (const role of doesNotHave) await memberRoles.add(role);
         }
 
-        const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesntHas.map(r => '+' + r.name)]
+        const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesNotHave.map(r => '+' + r.name)]
             .filter(s => s).join(', ');
 
         await toDelete?.delete().catch(() => null);

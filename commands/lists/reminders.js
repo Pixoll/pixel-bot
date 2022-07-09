@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags');
 const { Collection } = require('discord.js');
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, ReminderSchema } = require('pixoll-commando');
 const { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll } = require('../../utils/functions');
-const { ReminderSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
-const { Command, CommandInstances, CommandoMessage } = require('pixoll-commando');
+const { Command, CommandInstances, CommandoMessage, ReactionRoleSchema } = require('pixoll-commando');
 const { TextChannel, Role, Message } = require('discord.js');
 const { basicEmbed, basicCollector, getArgument, isValidRole } = require('../../utils/functions');
 const { stripIndent, oneLine } = require('common-tags');
-const { ReactionRoleSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 const emojiRegex = new RegExp(`${require('emoji-regex')().source}|\\d{17,20}`, 'g');

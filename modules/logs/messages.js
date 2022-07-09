@@ -5,7 +5,7 @@ const { sliceDots, isModuleEnabled, pluralize } = require('../../utils/functions
 /* eslint-enable no-unused-vars */
 
 /**
- * Formats the bytes to its most divisable point
+ * Formats the bytes to its most divisible point
  * @param {number|string} bytes The bytes to format
  * @param {number} [decimals] The amount od decimals to display
  * @param {boolean} [showUnit] Whether to display the units or not

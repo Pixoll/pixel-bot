@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, TodoSchema } = require('pixoll-commando');
 const { generateEmbed, basicEmbed, getArgument, confirmButtons, replyAll } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
-const { TodoSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -16,7 +15,7 @@ module.exports = class TodoCommand extends Command {
             details: '`items` can be different **positive** numbers, separated by spaces.',
             format: stripIndent`
                 todo <view> - Display your to-do list.
-                todo add [item] - Add an item to yout to-do list.
+                todo add [item] - Add an item to your to-do list.
                 todo remove [item] - Remove an item from your to-do list.
                 todo clear - Remove all of the items in your to-do list.
             `,
@@ -52,7 +51,7 @@ module.exports = class TodoCommand extends Command {
                     {
                         type: 'subcommand',
                         name: 'add',
-                        description: 'Add an item to yout to-do list.',
+                        description: 'Add an item to your to-do list.',
                         options: [{
                             type: 'string',
                             name: 'item',

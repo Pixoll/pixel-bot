@@ -73,7 +73,7 @@
     {
         "version": "2.1.1",
         "changes": [
-            "Fixed embed dysplaying of `mod-logs` and `infractions` commands.",
+            "Fixed embed displaying of `mod-logs` and `infractions` commands.",
             "Fixed `warn` command: It wouldn't save the moderator in the database (missing data).",
             "Added on and off emojis to the `modules` command.",
             "Back-end improvements for better performance.",
@@ -115,7 +115,27 @@
         "timestamp": 1641748320000
     },
     {
+        "version": "2.2.1",
+        "changes": [
+            "Back-end changes."
+        ],
+        "timestamp": 1644806460000
+    },
+    {
         "version": "2.3.0",
+        "changes": [
+            "Added missing changelog for previous version.",
+            "Fixed multiple typos throughout the code.",
+            "Back-end changes.",
+            "Whole bot and framework codebase update.",
+            "Fixed ocasional \"missing permissions\" error.",
+            "Fixed date detection issue with reminders.",
+            "QoL improvements."
+        ],
+        "timestamp": 1653687300000
+    },
+    {
+        "version": "2.4.0",
         "changes": [
             "Added `legal` command.",
             "Added the bot's **Terms of Service (ToS)** and **Privacy Policy.** Access them with the `legal` command."

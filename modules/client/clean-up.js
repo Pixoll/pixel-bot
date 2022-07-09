@@ -57,37 +57,38 @@ module.exports = async (client, forceCleanup = false) => {
         client.emit('debug', 'Cleaning up database...');
 
         const { active, afk, mcIp, modules, moderations, polls, reactionRoles, rules, stickyRoles } = client.databaseSchemas;
-        const guilds = client.guilds.cache.map(d => d.id);
-        const filter = doc => !guilds.includes(doc.guild);
+        const guilds = client.guilds.cache.map(g => g.id);
+        /** @type {string[]} */
+        const removedGuilds = [];
+        const getRemovedGuilds = ({ guild }) => {
+            if (!guilds.includes(guild)) {
+                if (removedGuilds.some(guildId => guildId !== guild)) {
+                    removedGuilds.push(guild);
+                }
+                return true;
+            }
+            return false;
+        };
 
-        /** @type {Document[]} */
         const Active = await active.find({});
-        /** @type {Document[]} */
         const Afk = await afk.find({});
-        /** @type {Document[]} */
         const McIp = await mcIp.find({});
-        /** @type {Document[]} */
         const Modules = await modules.find({});
-        /** @type {Document[]} */
         const Moderations = await moderations.find({});
-        /** @type {Document[]} */
         const Polls = await polls.find({});
-        /** @type {Document[]} */
         const ReactionRoles = await reactionRoles.find({});
-        /** @type {Document[]} */
         const Rules = await rules.find({});
-        /** @type {Document[]} */
         const StickyRoles = await stickyRoles.find({});
 
-        const notActive = Active.filter(filter);
-        const notAfk = Afk.filter(filter);
-        const notMcIp = McIp.filter(filter);
-        const notModules = Modules.filter(filter);
-        const notModerations = Moderations.filter(filter);
-        const notPolls = Polls.filter(filter);
-        const notReactionRoles = ReactionRoles.filter(filter);
-        const notRules = Rules.filter(filter);
-        const notStickyRoles = StickyRoles.filter(filter);
+        const notActive = Active.filter(getRemovedGuilds);
+        const notAfk = Afk.filter(getRemovedGuilds);
+        const notMcIp = McIp.filter(getRemovedGuilds);
+        const notModules = Modules.filter(getRemovedGuilds);
+        const notModerations = Moderations.filter(getRemovedGuilds);
+        const notPolls = Polls.filter(getRemovedGuilds);
+        const notReactionRoles = ReactionRoles.filter(getRemovedGuilds);
+        const notRules = Rules.filter(getRemovedGuilds);
+        const notStickyRoles = StickyRoles.filter(getRemovedGuilds);
 
         for (const doc of notActive) await doc.deleteOne();
         for (const doc of notAfk) await doc.deleteOne();
@@ -98,6 +99,11 @@ module.exports = async (client, forceCleanup = false) => {
         for (const doc of notReactionRoles) await doc.deleteOne();
         for (const doc of notRules) await doc.deleteOne();
         for (const doc of notStickyRoles) await doc.deleteOne();
+
+        for (const guildId of removedGuilds) {
+            // Delete from client cache
+            client.databases.delete(guildId);
+        }
 
         client.emit('debug', 'Cleaned up database');
     }

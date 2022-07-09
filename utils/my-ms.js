@@ -9,7 +9,7 @@ const mth = y / 12;
 /**
  * Parses the milliseconds into a string, or a string into milliseconds
  * @param {number|string} val The amount of milliseconds or string to parse
- * @param {object} [options] Only appliable if the input is a number
+ * @param {object} [options] Only applicable if the input is a number
  * @param {boolean} [options.number=false] Whether to force the returned value to be a number or not
  * @param {boolean} [options.long=false] If the string should return the whole words
  * @param {number} [options.length] How many parameters should the string return
@@ -87,8 +87,8 @@ function parseMs(str) {
     if (typeof str !== 'string') throw new TypeError('Expected a string.');
 
     const regex = new RegExp(
-        '((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|' +
-        'minutes?|mins?|hours?|hrs?|days?|weeks?|months?|mths?|years?|yrs?|[smhdwy])?',
+        '((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|'
+        + 'minutes?|mins?|hours?|hrs?|days?|weeks?|months?|mths?|years?|yrs?|[smhdwy])?',
         'gi'
     );
     const match = str.match(regex);

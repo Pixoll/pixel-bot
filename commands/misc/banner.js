@@ -41,11 +41,14 @@ module.exports = class BannerCommand extends Command {
         if (message) user ??= message.author;
         user = await user.fetch();
 
-        const banner = user.bannerURL({ dynamic: true, size: 2048 });
-        if (!banner) {
+        let bannerUrl = user.bannerURL({ dynamic: true, size: 2048 });
+        if (!bannerUrl) {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE', emoji: 'info', description: 'That user has no banner on their profile.'
             }));
+        }
+        if (/\.webp/.test(bannerUrl)) {
+            bannerUrl = user.displayAvatarURL({ format: 'png', size: 2048 });
         }
 
         const embed = new MessageEmbed()
@@ -53,7 +56,7 @@ module.exports = class BannerCommand extends Command {
             .setAuthor({
                 name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
             })
-            .setImage(banner)
+            .setImage(bannerUrl)
             .setTimestamp();
 
         const row = new MessageActionRow()
@@ -61,7 +64,7 @@ module.exports = class BannerCommand extends Command {
                 new MessageButton()
                     .setStyle('LINK')
                     .setLabel('Download')
-                    .setURL(banner)
+                    .setURL(bannerUrl)
             );
 
         await replyAll({ message, interaction }, { embeds: [embed], components: [row] });

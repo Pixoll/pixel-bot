@@ -32,8 +32,8 @@ module.exports = (client) => {
         }
 
         const badWordRegex = new RegExp(
-            'bastard|blowjob|boner|boob|buttplug|cock|coon|cum|cunt|dick|dildo|fag|faggot|nigga|nigger|paki|porn|pussy|' +
-            'slut|wank|whores|cum|sex',
+            'bastard|blowjob|boner|boob|buttplug|cock|coon|cum|cunt|dick|dildo|fag|faggot|nigga|nigger|paki|porn|pussy|'
+            + 'slut|wank|whores|cum|sex',
             'm'
         );
 

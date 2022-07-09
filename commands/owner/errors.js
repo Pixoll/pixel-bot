@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { MessageActionRow, MessageSelectMenu, Collection } = require('discord.js');
-const { Command, CommandInstances, CommandoMessage } = require('pixoll-commando');
+const { Command, CommandInstances, CommandoMessage, ErrorSchema } = require('pixoll-commando');
 const { basicEmbed, generateEmbed, getArgument } = require('../../utils/functions');
-const { ErrorSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

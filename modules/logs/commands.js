@@ -6,6 +6,17 @@ const { isModuleEnabled, sliceDots, code } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /**
+ * @param {CommandInteractionOption} opt
+ * @param {string} string
+ */
+function concatOptions(opt, string) {
+    if (opt.name && [undefined, null].includes(opt.value)) string += ` ${opt.name}`;
+    else string += ` ${opt.name}: "${opt.value}"`;
+    opt.options?.forEach(concatOptions);
+    return string;
+}
+
+/**
  * Handles all of the command logs.
  * @param {CommandoClient} client
  */
@@ -13,8 +24,8 @@ module.exports = (client) => {
     client.on('commandRun', async (command, _, { message, interaction }) => {
         const { guild, channel } = message || interaction;
         const author = message?.author || interaction.user;
-        const isModCommand = !!command.userPermissions || command.ownerOnly ||
-            command.guildOwnerOnly || command.name === 'prefix' || command.modPermissions;
+        const isModCommand = !!command.userPermissions || command.ownerOnly
+            || command.guildOwnerOnly || command.name === 'prefix' || command.modPermissions;
 
         if (channel.type === 'DM' || command.hidden || !isModCommand) return;
 
@@ -27,13 +38,7 @@ module.exports = (client) => {
         if (message) string = message.cleanContent;
         else {
             string = `/${command.name}`;
-            /** @param {CommandInteractionOption} opt */
-            function concat(opt) {
-                if (opt.name && [undefined, null].includes(opt.value)) string += ` ${opt.name}`;
-                else string += ` ${opt.name}: "${opt.value}"`;
-                opt.options?.forEach(concat);
-            }
-            for (const option of interaction.options.data) concat(option);
+            for (const option of interaction.options.data) concatOptions(option, string);
         }
         const content = sliceDots(string, 1016);
 

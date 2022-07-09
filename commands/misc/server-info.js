@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Command, CommandInstances, CommandoGuild } = require('pixoll-commando');
-const { MessageEmbed, PremiumTier, Guild } = require('discord.js');
+const { MessageEmbed, PremiumTier } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const { replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
@@ -53,21 +53,21 @@ module.exports = class ServerInfoCommand extends Command {
             })
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
             .addField('Information', stripIndent`
-                **Owner:** ${owner.user.tag} '<a:owner_crown:806558872440930425>'
+                **Owner:** ${owner.user.tag} <a:owner_crown:806558872440930425>
                 **Channel categories:** ${categories.toLocaleString()}
                 **Text channels:** ${text.toLocaleString()}
                 **Voice channels:** ${voice.toLocaleString()}
             `, true)
             .addField('\u200B', stripIndent`
                 **Server boost lvl:** ${formatLvl(premiumTier)}
-                **Server boosts:** ${premiumSubscriptionCount.toLocaleString()} '<a:boost:806364586231595028>'
+                **Server boosts:** ${premiumSubscriptionCount.toLocaleString()} <a:boost:806364586231595028>
                 **Members:** ${memberCount.toLocaleString()}
                 **Roles:** ${_roles.size.toLocaleString()}
             `, true)
             .setFooter({ text: `Server ID: ${id} • Created at` })
             .setTimestamp(createdTimestamp);
 
-        if (guild instanceof Guild) return serverInfo;
+        if (guild instanceof CommandoGuild) return serverInfo;
         await replyAll({ message, interaction }, serverInfo);
     }
 };

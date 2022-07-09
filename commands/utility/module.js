@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, CommandoClient, Module, AuditLog, ModuleSchema } = require('pixoll-commando');
 const { basicEmbed, getArgument, addDashes, replyAll } = require('../../utils/functions');
-const { Module, AuditLog, ModuleSchema } = require('../../schemas/types');
 const { capitalize } = require('lodash');
 /* eslint-enable no-unused-vars */
 
@@ -19,7 +18,9 @@ function removeDashes(str) {
     return first + rest;
 }
 
+/** @type {string[]} */
 const modules = [];
+/** @type {string[]} */
 const auditLogs = [];
 
 /**
@@ -58,7 +59,12 @@ function patchData(data) {
 
 /** A command that can be run in a client */
 module.exports = class ModuleCommand extends Command {
+    /** @param {CommandoClient} client */
     constructor(client) {
+        const modulesObj = client.databaseSchemas.modules.schema.obj;
+        modules.push(...Object.keys(modulesObj).slice(1).map(addDashes));
+        auditLogs.push(...Object.keys(modulesObj.auditLogs).map(addDashes));
+
         super(client, {
             name: 'module',
             group: 'utility',
@@ -146,10 +152,6 @@ module.exports = class ModuleCommand extends Command {
                 ]
             }
         });
-
-        const modulesObj = this.client.databaseSchemas.modules.schema.obj;
-        modules.push(...Object.keys(modulesObj).slice(1).map(addDashes));
-        auditLogs.push(Object.keys(modulesObj.auditLogs).map(addDashes));
     }
 
     /**

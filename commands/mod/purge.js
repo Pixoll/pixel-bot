@@ -466,7 +466,7 @@ module.exports = class PurgeCommand extends Command {
     }
 
     /**
-     * The `endswith` sub-command
+     * The `ends-with` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {number} amount The amount of messages to delete
      * @param {User|Message|string} filter The filter to use for the deleted messages
@@ -503,7 +503,8 @@ module.exports = class PurgeCommand extends Command {
     async links({ message, interaction }, amount) {
         const msgs = await fetchMessages({ message, interaction }, { limit: amount });
         const filtered = msgs.filter(msg => {
-            for (const str of msg.content?.split(/ +/)) {
+            if (!msg.content) return false;
+            for (const str of msg.content.split(/ +/)) {
                 if (validURL(str)) return true;
             }
             return false;
@@ -531,7 +532,7 @@ module.exports = class PurgeCommand extends Command {
     }
 
     /**
-     * The `startswith` sub-command
+     * The `starts-with` sub-command
      * @param {CommandInstances} instances The instances the command is being run for
      * @param {number} amount The amount of messages to delete
      * @param {User|Message|string} filter The filter to use for the deleted messages

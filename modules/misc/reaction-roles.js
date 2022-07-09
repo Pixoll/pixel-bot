@@ -9,7 +9,7 @@ const { CommandoClient, CommandoMessage } = require('pixoll-commando');
  * @param {array} second The second array.
  * @returns {boolean}
  */
- function findCommonElement(first, second) {
+function findCommonElement(first, second) {
     for (let i = 0; i < first?.length; i++) {
         for (let j = 0; j < second?.length; j++) {
             if (first[i] === second[j]) return true;
@@ -70,7 +70,8 @@ module.exports = async (client) => {
             if (!user) return;
         }
 
-        let { message, emoji } = reaction;
+        let { message } = reaction;
+        const { emoji } = reaction;
         if (message.partial) {
             message = await message.fetch().catch(() => null);
             if (!message) return;
@@ -108,7 +109,8 @@ module.exports = async (client) => {
             if (!user) return;
         }
 
-        let { message, emoji } = reaction;
+        let { message } = reaction;
+        const { emoji } = reaction;
         if (message.partial) {
             message = await message.fetch().catch(() => null);
             if (!message) return;

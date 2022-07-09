@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { Command, CommandInstances, CommandGroup } = require('pixoll-commando');
+const { Command, CommandInstances, CommandGroup, DisabledSchema } = require('pixoll-commando');
 const { basicEmbed, getArgument, replyAll } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
-const { DisabledSchema } = require('../../schemas/types');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */

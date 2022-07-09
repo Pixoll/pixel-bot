@@ -61,7 +61,7 @@ module.exports = class GuildCommand extends Command {
         let guild = guilds.get(guildId) || guilds.find(find(guildId));
 
         if (message) {
-            while (!guild || !guild._commando) {
+            while (!guild) {
                 const { value, cancelled } = await getArgument(message, this.argsCollector.args[1]);
                 if (cancelled) return;
                 guild = guilds.get(value) || guilds.find(find(value));
@@ -128,8 +128,8 @@ module.exports = class GuildCommand extends Command {
                 fieldName: `Dear owner of ${guild.name}`,
                 fieldValue: stripIndent`
                     The owner of this bot, ${botOwner.toString()}, has decided to remove the bot from your server.
-                    ${(reason ? `**Reason:** ${reason}\n` : '') +
-                    'If you want to know more information please contact him.'}
+                    ${(reason ? `**Reason:** ${reason}\n` : '')
+                    + 'If you want to know more information please contact him.'}
 
                     **The bot will be removed from your server in 30 seconds.**
                 `
