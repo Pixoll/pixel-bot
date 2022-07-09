@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
 const util = require('util');
-const { Util: { splitMessage } } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const { Command, CommandInstances } = require('pixoll-commando');
+const { Command, CommandInstances, Util: { splitMessage } } = require('pixoll-commando');
 /* eslint-enable no-unused-vars */
 
 /** @param {string} str */
