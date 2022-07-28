@@ -48,13 +48,13 @@ module.exports = class BannerCommand extends Command {
             }));
         }
         if (/\.webp/.test(bannerUrl)) {
-            bannerUrl = user.displayAvatarURL({ format: 'png', size: 2048 });
+            bannerUrl = user.bannerURL({ format: 'png', size: 2048 });
         }
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: user.tag, iconURL: user.bannerURL({ dynamic: true })
             })
             .setImage(bannerUrl)
             .setTimestamp();
