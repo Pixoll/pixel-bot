@@ -21,7 +21,7 @@ module.exports = (client) => {
             method: msg.match(/Method *: .+/)?.map(m => m)[0].split(/ +/).pop(),
             path: msg.match(/Path *: .*/)?.map(m => m)[0].split(/ +/).pop(),
             route: msg.match(/Route *: .*/)?.map(m => m)[0].split(/ +/).pop(),
-            limit: parseInt(msg.match(/Limit *: .+/)?.map(m => m)[0].split(/ +/).pop()),
+            limit: msg.match(/Limit *: .+/)?.map(m => m)[0].split(/ +/).pop(),
             timeout: parseInt(msg.match(/Timeout *: .+/)?.map(m => m)[0].split(/ +/).pop()),
         };
 

@@ -2,7 +2,7 @@
 const { stripIndent } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const { Command, CommandInstances } = require('pixoll-commando');
-const { basicEmbed } = require('../../utils/functions');
+const { basicEmbed, replyAll } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
 /** A command that can be run in a client */
@@ -41,7 +41,7 @@ module.exports = class PingCommand extends Command {
                 **API ping:** ${heartbeat}ms
             `);
 
-        await interaction?.editReply({ embeds: [embed] });
+        await replyAll({ interaction }, embed);
         await pingMsg?.edit({ embeds: [embed] }).catch(() => null);
     }
 };
