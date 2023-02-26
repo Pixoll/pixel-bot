@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "pixel",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "author": "Pixoll",
   "license": "AGPL-3.0-only",
@@ -14,14 +14,15 @@
     "tslint:fix": "eslint --fix src"
   },
   "dependencies": {
+    "better-ms": "^1.1.7",
     "common-tags": "^1.8.2",
-    "discord.js": "^13.8.1",
+    "discord.js": "^14.7.1",
     "dotenv": "^16.0.1",
     "emoji-regex": "^10.1.0",
     "lodash": "^4.17.21",
     "minecraft-server-util": "^5.2.10",
     "mongoose": "^6.4.4",
-    "pixoll-commando": "^0.14.3",
+    "pixoll-commando": "^1.0.0-dev.23",
     "require-all": "^3.0.0"
   },
   "devDependencies": {
