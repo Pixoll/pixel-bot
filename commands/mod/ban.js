@@ -2,7 +2,7 @@
 const { User, GuildMember } = require('discord.js');
 const { Command, CommandInstances } = require('pixoll-commando');
 const {
-    docId, basicEmbed, userException, memberException, confirmButtons, replyAll
+    docId, basicEmbed, userException, memberException, confirmButtons, replyAll,
 } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
@@ -21,7 +21,7 @@ module.exports = class BanCommand extends Command {
             format: 'ban [user] <reason>',
             examples: [
                 'ban Pixoll',
-                'ban Pixoll The Ban Hammer has Spoken!'
+                'ban Pixoll The Ban Hammer has Spoken!',
             ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
@@ -30,15 +30,15 @@ module.exports = class BanCommand extends Command {
                 {
                     key: 'user',
                     prompt: 'What user do you want to ban?',
-                    type: 'user'
+                    type: 'user',
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the ban?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -46,15 +46,15 @@ module.exports = class BanCommand extends Command {
                         type: 'user',
                         name: 'user',
                         description: 'The user to ban.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the ban.'
-                    }
-                ]
-            }
+                        description: 'The reason of the ban.',
+                    },
+                ],
+            },
         });
     }
 
@@ -71,7 +71,7 @@ module.exports = class BanCommand extends Command {
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -86,7 +86,7 @@ module.exports = class BanCommand extends Command {
         const isBanned = await bans.fetch(user).catch(() => null);
         if (isBanned) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is already banned.'
+                color: 'RED', emoji: 'cross', description: 'That user is already banned.',
             }));
         }
 
@@ -106,8 +106,8 @@ module.exports = class BanCommand extends Command {
                     fieldValue: stripIndent`
                         **Reason:** ${reason}
                         **Moderator:** ${author.toString()} ${author.tag}
-                    `
-                })]
+                    `,
+                })],
             }).catch(() => null);
         }
 
@@ -121,14 +121,14 @@ module.exports = class BanCommand extends Command {
             userTag: user.tag,
             modId: author.id,
             modTag: author.tag,
-            reason
+            reason,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been banned`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

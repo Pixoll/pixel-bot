@@ -28,14 +28,14 @@ module.exports = class ReasonCommand extends Command {
                     label: 'modlog ID',
                     prompt: 'What is the ID of the mod log you want to change the duration?',
                     type: 'string',
-                    max: 12
+                    max: 12,
                 },
                 {
                     key: 'reason',
                     prompt: 'What will be the new reason of the mod log?',
                     type: 'string',
-                    max: 512
-                }
+                    max: 512,
+                },
             ],
             slash: {
                 options: [
@@ -43,16 +43,16 @@ module.exports = class ReasonCommand extends Command {
                         type: 'string',
                         name: 'modlog-id',
                         description: 'The ID of the mod log to update.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
                         description: 'The new reason of the mod log.',
-                        required: true
-                    }
-                ]
-            }
+                        required: true,
+                    },
+                ],
+            },
         });
     }
 
@@ -66,7 +66,7 @@ module.exports = class ReasonCommand extends Command {
     async run({ message, interaction }, { modlogId, reason }) {
         if (interaction && reason.length > 512) {
             return await replyAll({ interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
             }));
         }
 
@@ -76,7 +76,7 @@ module.exports = class ReasonCommand extends Command {
         const modLog = await moderations.fetch(modlogId);
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
+                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.',
             }));
         }
 
@@ -92,7 +92,7 @@ module.exports = class ReasonCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated reason for mod log \`${modlogId}\``,
-            fieldValue: `**New reason:** ${reason}`
+            fieldValue: `**New reason:** ${reason}`,
         }));
     }
 };

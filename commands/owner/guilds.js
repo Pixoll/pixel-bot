@@ -23,7 +23,7 @@ module.exports = class GuildsCommand extends Command {
         const { guilds, user } = this.client;
         if (guilds.cache.size === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There bot is not in any server.'
+                color: 'BLUE', emoji: 'info', description: 'There bot is not in any server.',
             }));
         }
 
@@ -33,7 +33,7 @@ module.exports = class GuildsCommand extends Command {
             guildsList.push({
                 name: guild.name,
                 'Guild ID': guild.id,
-                owner: `${gOwner.user.toString()} ${gOwner.user.tag}`
+                owner: `${gOwner.user.toString()} ${gOwner.user.tag}`,
             });
         }
 
@@ -41,7 +41,7 @@ module.exports = class GuildsCommand extends Command {
         await generateEmbed({ message }, sorted, {
             authorName: `${user.username}'s guilds`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
-            keyTitle: { suffix: 'name' }
+            keyTitle: { suffix: 'name' },
         });
     }
 };

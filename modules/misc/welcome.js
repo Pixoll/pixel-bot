@@ -33,7 +33,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `Welcome to ${guild.name}!`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Welcome to ${guild.name}!`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setFooter({ text: 'Enjoy your stay' })
             .setTimestamp();

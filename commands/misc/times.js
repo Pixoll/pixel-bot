@@ -44,7 +44,7 @@ const timeZones = new Collection([
     ['Australia/Sydney', 'Eastern Australia'],
     ['Pacific/Guadalcanal', 'Solomon Islands'],
     ['Pacific/Auckland', 'New Zealand'],
-    ['Pacific/Fiji', 'Fiji']
+    ['Pacific/Fiji', 'Fiji'],
 ]);
 
 const cities = timeZones.toJSON();
@@ -66,7 +66,7 @@ module.exports = class TimesCommand extends Command {
             examples: [
                 'times 10am',
                 'time "13:00 -5" London',
-                'time now New York'
+                'time now New York',
             ],
             args: [
                 {
@@ -74,30 +74,30 @@ module.exports = class TimesCommand extends Command {
                     prompt: 'What hour would you like to check?',
                     type: 'time',
                     required: false,
-                    skipValidation: true
+                    skipValidation: true,
                 },
                 {
                     key: 'place',
                     prompt: 'What place would you like to check its time?',
                     type: 'string',
                     oneOf: cities,
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'string',
                         name: 'hour',
-                        description: 'The time of the day to check.'
+                        description: 'The time of the day to check.',
                     },
                     {
                         type: 'string',
                         name: 'place',
-                        description: 'The place to check its time.'
-                    }
-                ]
-            }
+                        description: 'The place to check its time.',
+                    },
+                ],
+            },
         });
     }
 
@@ -114,13 +114,13 @@ module.exports = class TimesCommand extends Command {
             hour = arg.parse(hour ?? 'now') || null;
             if (!hour) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The hour you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The hour you specified is invalid.',
                 }));
             }
             place = place?.toLowerCase();
             if (place && !cities.map(c => c.toLowerCase()).includes(place)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The place you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The place you specified is invalid.',
                 }));
             }
         }
@@ -133,7 +133,7 @@ module.exports = class TimesCommand extends Command {
         /** @param {string} city */
         const timeZone = (tz, city) => {
             const format = new Intl.DateTimeFormat('en-GB', {
-                hour: 'numeric', minute: 'numeric', timeZone: tz, timeZoneName: 'short', hour12: is12Hour
+                hour: 'numeric', minute: 'numeric', timeZone: tz, timeZoneName: 'short', hour12: is12Hour,
             }).format(date);
             const sliced = format.split(/ /g);
             const offset = sliced.pop();
@@ -187,7 +187,7 @@ module.exports = class TimesCommand extends Command {
         const pages = [timesEmbed(firstPart), timesEmbed(secondPart), timesEmbed(thirdPart)];
 
         const generate = page => ({
-            embed: pages[page].setFooter({ text: `Page ${++page} of 3` })
+            embed: pages[page].setFooter({ text: `Page ${++page} of 3` }),
         });
 
         await pagedEmbed({ message, interaction }, { number: 1, total: 3 }, generate);

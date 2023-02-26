@@ -22,15 +22,15 @@ module.exports = class ModLogsCommand extends Command {
                 key: 'user',
                 prompt: 'What moderator do you want to get the mod logs from?',
                 type: 'user',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
-                    description: 'The moderator to check their mod logs.'
-                }]
-            }
+                    description: 'The moderator to check their mod logs.',
+                }],
+            },
         });
     }
 
@@ -49,7 +49,7 @@ module.exports = class ModLogsCommand extends Command {
         const modLogs = await db.fetchMany(user ? { modId: user.id } : {});
         if (modLogs.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There are no moderation logs.'
+                color: 'BLUE', emoji: 'info', description: 'There are no moderation logs.',
             }));
         }
 
@@ -83,7 +83,7 @@ module.exports = class ModLogsCommand extends Command {
             keyTitle: { prefix: 'type' },
             keysExclude: ['updatedAt', 'guild', user ? ('modId', 'modTag') : null],
             useDocId: true,
-            components: [filterMenu]
+            components: [filterMenu],
         });
     }
 };

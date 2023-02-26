@@ -2,7 +2,7 @@
 const { Command, CommandInstances } = require('pixoll-commando');
 const { GuildMember } = require('discord.js');
 const {
-    userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed, getArgument
+    userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed, getArgument,
 } = require('../../utils/functions');
 const myMs = require('../../utils/my-ms');
 const { stripIndent } = require('common-tags');
@@ -35,18 +35,18 @@ module.exports = class TimeOutCommand extends Command {
                     label: 'sub-command',
                     prompt: 'Would you like to `set` or `remove` a time-out?',
                     type: 'string',
-                    oneOf: ['set', 'remove']
+                    oneOf: ['set', 'remove'],
                 },
                 {
                     key: 'member',
                     prompt: 'What member do you want to time-out?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'duration',
                     prompt: 'How long should the time-out last? (max. of 28 days)',
                     type: ['date', 'duration'],
-                    required: false
+                    required: false,
                 },
                 {
                     key: 'reason',
@@ -54,8 +54,8 @@ module.exports = class TimeOutCommand extends Command {
                     type: 'string',
                     max: 512,
                     default: 'No reason given.',
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
@@ -68,20 +68,20 @@ module.exports = class TimeOutCommand extends Command {
                                 type: 'user',
                                 name: 'member',
                                 description: 'The member to time-out.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'duration',
                                 description: 'The duration of the time-out (max. of 28 days).',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'reason',
-                                description: 'The reason of the time-out.'
-                            }
-                        ]
+                                description: 'The reason of the time-out.',
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -92,18 +92,18 @@ module.exports = class TimeOutCommand extends Command {
                                 type: 'user',
                                 name: 'member',
                                 description: 'The member to time-out.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'reason',
-                                description: 'The reason of the time-out.'
-                            }
-                        ]
-                    }
-                ]
+                                description: 'The reason of the time-out.',
+                            },
+                        ],
+                    },
+                ],
             },
-            test: true
+            test: true,
         });
     }
 
@@ -122,7 +122,7 @@ module.exports = class TimeOutCommand extends Command {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             if (subCommand === 'set') {
@@ -130,13 +130,13 @@ module.exports = class TimeOutCommand extends Command {
                 duration = await arg.parse(duration).catch(() => null) || null;
                 if (!duration) {
                     return await replyAll({ interaction }, basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                        color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.',
                     }));
                 }
             }
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -168,7 +168,7 @@ module.exports = class TimeOutCommand extends Command {
 
         if (duration > myMs('28d')) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'The max. duration of a time-out is 28 days.'
+                color: 'RED', emoji: 'cross', description: 'The max. duration of a time-out is 28 days.',
             }));
         }
 
@@ -186,7 +186,7 @@ module.exports = class TimeOutCommand extends Command {
 
         if (timedOut) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is already timed-out.'
+                color: 'RED', emoji: 'cross', description: 'That user is already timed-out.',
             }));
         }
 
@@ -205,8 +205,8 @@ module.exports = class TimeOutCommand extends Command {
                         **Expires:** ${timestamp(duration + now, 'R')}
                         **Reason:** ${reason}
                         **Moderator:** ${author.toString()} ${author.tag}
-                    `
-                })]
+                    `,
+                })],
             }).catch(() => null);
         }
 
@@ -221,7 +221,7 @@ module.exports = class TimeOutCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(duration, { long: true })
+            duration: myMs(duration, { long: true }),
         });
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -231,7 +231,7 @@ module.exports = class TimeOutCommand extends Command {
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration + now, 'R')}
                 **Reason:** ${reason}
-            `
+            `,
         }));
     }
 
@@ -247,7 +247,7 @@ module.exports = class TimeOutCommand extends Command {
 
         if (!timedOut) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is not timed-out.'
+                color: 'RED', emoji: 'cross', description: 'That user is not timed-out.',
             }));
         }
 
@@ -260,7 +260,7 @@ module.exports = class TimeOutCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Removed ${user.tag}' time-out`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

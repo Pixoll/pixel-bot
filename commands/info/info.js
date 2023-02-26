@@ -16,7 +16,7 @@ module.exports = class InfoCommand extends Command {
             group: 'info',
             description: 'Displays some information about the bot.',
             guarded: true,
-            slash: true
+            slash: true,
         });
     }
 

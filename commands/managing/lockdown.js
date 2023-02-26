@@ -36,7 +36,7 @@ module.exports = class LockdownCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['start', 'end', 'channels', 'add', 'remove']
+                    oneOf: ['start', 'end', 'channels', 'add', 'remove'],
                 },
                 {
                     key: 'channels',
@@ -74,8 +74,8 @@ module.exports = class LockdownCommand extends Command {
                         return valid;
                     },
                     required: false,
-                    error: 'None of the channels you specified were valid. Please try again.'
-                }
+                    error: 'None of the channels you specified were valid. Please try again.',
+                },
             ],
             slash: {
                 options: [
@@ -86,8 +86,8 @@ module.exports = class LockdownCommand extends Command {
                         options: [{
                             type: 'string',
                             name: 'reason',
-                            description: 'Why are you starting the lockdown.'
-                        }]
+                            description: 'Why are you starting the lockdown.',
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -96,8 +96,8 @@ module.exports = class LockdownCommand extends Command {
                         options: [{
                             type: 'string',
                             name: 'reason',
-                            description: 'Why are you ending the lockdown.'
-                        }]
+                            description: 'Why are you ending the lockdown.',
+                        }],
                     },
                     {
                         type: 'subcommand-group',
@@ -112,8 +112,8 @@ module.exports = class LockdownCommand extends Command {
                                     type: 'string',
                                     name: 'channels',
                                     description: 'The channels to add, separated by spaces.',
-                                    required: true
-                                }]
+                                    required: true,
+                                }],
                             },
                             {
                                 type: 'subcommand',
@@ -123,18 +123,18 @@ module.exports = class LockdownCommand extends Command {
                                     type: 'string',
                                     name: 'channels',
                                     description: 'The channels to remove, separated by spaces.',
-                                    required: true
-                                }]
+                                    required: true,
+                                }],
                             },
                             {
                                 type: 'subcommand',
                                 name: 'view',
-                                description: 'Display the lockdown channels.'
+                                description: 'Display the lockdown channels.',
                             },
-                        ]
-                    }
-                ]
-            }
+                        ],
+                    },
+                ],
+            },
         });
     }
 
@@ -153,7 +153,7 @@ module.exports = class LockdownCommand extends Command {
             const isValid = await arg.validate(channels, msg);
             if (isValid !== true) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: arg.error
+                    color: 'RED', emoji: 'cross', description: arg.error,
                 }));
             }
             channels = await arg.parse(channels, msg);
@@ -202,7 +202,7 @@ module.exports = class LockdownCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
             }));
         }
         reason ??= 'We\'ll be back shortly.';
@@ -214,7 +214,7 @@ module.exports = class LockdownCommand extends Command {
         const { everyone } = guild.roles;
 
         const locking = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...'
+            color: 'GOLD', emoji: 'loading', description: 'Locking all lockdown channels, please wait...',
         });
         const toDelete = await message?.replyEmbed(locking);
         await replyAll({ interaction }, locking);
@@ -228,8 +228,8 @@ module.exports = class LockdownCommand extends Command {
             await permsManager.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 });
             await channel.send({
                 embeds: [basicEmbed({
-                    emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason
-                })]
+                    emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason,
+                })],
             });
             amount++;
         }
@@ -239,14 +239,14 @@ module.exports = class LockdownCommand extends Command {
 
         if (amount === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'GOLD', description: 'No changes were made.'
+                color: 'GOLD', description: 'No changes were made.',
             }));
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `Locked ${amount}/${savedChannels.length} lockdown channels.`
+            description: `Locked ${amount}/${savedChannels.length} lockdown channels.`,
         }));
     }
 
@@ -261,7 +261,7 @@ module.exports = class LockdownCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
             }));
         }
         reason ??= 'Thanks for waiting.';
@@ -273,7 +273,7 @@ module.exports = class LockdownCommand extends Command {
         const { everyone } = guild.roles;
 
         const unlocking = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Unlocking all lockdown channels, please wait...'
+            color: 'GOLD', emoji: 'loading', description: 'Unlocking all lockdown channels, please wait...',
         });
         const toDelete = await message?.replyEmbed(unlocking);
         await replyAll({ interaction }, unlocking);
@@ -287,8 +287,8 @@ module.exports = class LockdownCommand extends Command {
             await permsManager.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 });
             await channel.send({
                 embeds: [basicEmbed({
-                    emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason
-                })]
+                    emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason,
+                })],
             });
             amount++;
         }
@@ -298,14 +298,14 @@ module.exports = class LockdownCommand extends Command {
 
         if (amount === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'GOLD', description: 'No changes were made.'
+                color: 'GOLD', description: 'No changes were made.',
             }));
         }
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `Unlocked ${amount}/${savedChannels.length} lockdown channels.`
+            description: `Unlocked ${amount}/${savedChannels.length} lockdown channels.`,
         }));
     }
 
@@ -319,7 +319,7 @@ module.exports = class LockdownCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
             }));
         }
 
@@ -327,7 +327,7 @@ module.exports = class LockdownCommand extends Command {
             number: 20,
             authorName: `There's ${pluralize('lockdown channel', channelsData.length)}`,
             authorIconURL: (message || interaction).guild.iconURL({ dynamic: true }),
-            useDescription: true
+            useDescription: true,
         });
     }
 
@@ -348,7 +348,7 @@ module.exports = class LockdownCommand extends Command {
         const channelsList = channels.filter(c => !savedChannels.includes(c.id));
         if (channelsList.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'The channels you specified have already been added.'
+                color: 'RED', emoji: 'cross', description: 'The channels you specified have already been added.',
             }));
         }
 
@@ -356,11 +356,11 @@ module.exports = class LockdownCommand extends Command {
         if (!data) {
             await this.db.add({
                 guild: guildId,
-                lockChannels: channelsList.map(c => c.id)
+                lockChannels: channelsList.map(c => c.id),
             });
         } else {
             await this.db.update(data, {
-                $push: { lockChannels: { $each: channelsList.map(c => c.id) } }
+                $push: { lockChannels: { $each: channelsList.map(c => c.id) } },
             });
         }
 
@@ -368,7 +368,7 @@ module.exports = class LockdownCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been added:',
-            fieldValue: channelsList.join(', ')
+            fieldValue: channelsList.join(', '),
         }));
     }
 
@@ -384,7 +384,7 @@ module.exports = class LockdownCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'There are no lockdown channels, please use the `add` sub-command to add some.'
+                description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
             }));
         }
 
@@ -397,19 +397,19 @@ module.exports = class LockdownCommand extends Command {
         const channelsList = channels.filter(c => savedChannels.includes(c.id));
         if (channelsList.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'The channels you specified have not been added.'
+                color: 'RED', emoji: 'cross', description: 'The channels you specified have not been added.',
             }));
         }
 
         await this.db.update(data, {
-            $pull: { lockChannels: { $in: channelsList.map(c => c.id) } }
+            $pull: { lockChannels: { $in: channelsList.map(c => c.id) } },
         });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been removed:',
-            fieldValue: channelsList.join(', ')
+            fieldValue: channelsList.join(', '),
         }));
     }
 };

@@ -25,15 +25,15 @@ module.exports = class LockCommand extends Command {
                 {
                     key: 'channel',
                     prompt: 'What channel do you want to lock?',
-                    type: 'text-channel'
+                    type: 'text-channel',
                 },
                 {
                     key: 'reason',
                     prompt: 'What message do you want to send when the channel get\'s locked?',
                     type: 'string',
                     max: 512,
-                    default: 'We\'ll be back shortly.'
-                }
+                    default: 'We\'ll be back shortly.',
+                },
             ],
             slash: {
                 options: [
@@ -41,15 +41,15 @@ module.exports = class LockCommand extends Command {
                         type: 'channel',
                         channelTypes: ['guild-text'],
                         name: 'channel',
-                        description: 'The channel to lock.'
+                        description: 'The channel to lock.',
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'Why are you locking the channel.'
-                    }
-                ]
-            }
+                        description: 'Why are you locking the channel.',
+                    },
+                ],
+            },
         });
     }
 
@@ -66,7 +66,7 @@ module.exports = class LockCommand extends Command {
             reason ??= 'We\'ll be back shortly.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -78,19 +78,19 @@ module.exports = class LockCommand extends Command {
         const perms = permissions.resolve(guildId);
         if (perms && perms.deny.has('SEND_MESSAGES')) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: `${channel} is already locked.`
+                color: 'RED', emoji: 'cross', description: `${channel} is already locked.`,
             }));
         }
 
         await permissions.edit(everyone, { SEND_MESSAGES: false }, { reason, type: 0 });
         await channel.send({
             embeds: [basicEmbed({
-                emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason
-            })]
+                emoji: '\\🔒', fieldName: 'This channel has been locked', fieldValue: reason,
+            })],
         });
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`
+            color: 'GREEN', emoji: 'check', description: `Locked ${channel}.`,
         }));
     }
 };

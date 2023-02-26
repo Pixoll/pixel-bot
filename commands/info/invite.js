@@ -13,7 +13,7 @@ module.exports = class InviteCommand extends Command {
             group: 'info',
             description: 'Invite this bot to your server.',
             guarded: true,
-            slash: true
+            slash: true,
         });
     }
 

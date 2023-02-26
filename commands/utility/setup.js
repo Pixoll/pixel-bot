@@ -14,7 +14,7 @@ const { oneLine, stripIndent } = require('common-tags');
 function defaultDoc(guildId, key, value) {
     /** @type {SetupSchema} */
     const doc = {
-        guild: guildId
+        guild: guildId,
     };
     doc[key] = value;
     return doc;
@@ -52,23 +52,23 @@ module.exports = class SetupCommand extends Command {
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: [
-                        'view', 'full', 'reload', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels'
+                        'view', 'full', 'reload', 'audit-logs', 'muted-role', 'member-role', 'bot-role', 'lockdown-channels',
                     ],
-                    default: 'full'
+                    default: 'full',
                 },
                 {
                     key: 'value',
                     prompt: 'Please specify the value to set for that sub-command.',
                     type: ['text-channel', 'role', 'string'],
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'view',
-                        description: 'View the current setup data of the server.'
+                        description: 'View the current setup data of the server.',
                     },
                     {
                         type: 'subcommand',
@@ -79,33 +79,33 @@ module.exports = class SetupCommand extends Command {
                             channelTypes: ['guild-text'],
                             name: 'audit-logs-channel',
                             description: 'The channel where to send the audit logs.',
-                            required: true
+                            required: true,
                         }, {
                             type: 'role',
                             name: 'muted-role',
                             description: 'The role that will be given to muted members.',
-                            required: true
+                            required: true,
                         }, {
                             type: 'role',
                             name: 'member-role',
                             description: 'The role that will be given to a member upon joining.',
-                            required: true
+                            required: true,
                         }, {
                             type: 'role',
                             name: 'bot-role',
                             description: 'The role that will be given to a bot upon joining.',
-                            required: true
+                            required: true,
                         }, {
                             type: 'string',
                             name: 'lockdown-channels',
                             description: 'The channels for the lockdown command, separated by spaces (max. 30 at once).',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
                         name: 'reload',
-                        description: 'Reloads the data of the server.'
+                        description: 'Reloads the data of the server.',
                     },
                     {
                         type: 'subcommand',
@@ -116,8 +116,8 @@ module.exports = class SetupCommand extends Command {
                             channelTypes: ['guild-text'],
                             name: 'channel',
                             description: 'The channel where to send the audit logs.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -127,8 +127,8 @@ module.exports = class SetupCommand extends Command {
                             type: 'role',
                             name: 'role',
                             description: 'The role that will be given to muted members.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -138,8 +138,8 @@ module.exports = class SetupCommand extends Command {
                             type: 'role',
                             name: 'role',
                             description: 'The role that will be given to a member upon joining.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -149,8 +149,8 @@ module.exports = class SetupCommand extends Command {
                             type: 'role',
                             name: 'role',
                             description: 'The role that will be given to a bot upon joining.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -160,11 +160,11 @@ module.exports = class SetupCommand extends Command {
                             type: 'string',
                             name: 'channels',
                             description: 'The channels for the lockdown command, separated by spaces (max. 30 at once).',
-                            required: true
-                        }]
-                    }
-                ]
-            }
+                            required: true,
+                        }],
+                    },
+                ],
+            },
         });
     }
 
@@ -180,7 +180,7 @@ module.exports = class SetupCommand extends Command {
      * @param {TextChannel|Role|string} args.value The value to set for that sub-command
      */
     async run({ message, interaction }, {
-        subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels, channel, role, channels
+        subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels, channel, role, channels,
     }) {
         subCommand = subCommand.toLowerCase();
         const { guild } = message || interaction;
@@ -241,7 +241,7 @@ module.exports = class SetupCommand extends Command {
             let toDelete;
             while (!logsChannel || logsChannel.type !== 'GUILD_TEXT') {
                 const msg = await basicCollector({ message }, {
-                    fieldName: 'In what __text channel__ should I send the audit-logs?'
+                    fieldName: 'In what __text channel__ should I send the audit-logs?',
                 }, null, true);
                 if (!msg) return;
                 toDelete = msg;
@@ -251,13 +251,13 @@ module.exports = class SetupCommand extends Command {
             await toDelete?.delete();
 
             while (!memberRole || isMod(memberRole)) {
-                const description = isMod(memberRole) ?
-                    'This is considered as a moderation role, please try again with another one.' :
-                    `Audit logs will be sent in ${logsChannel}.`;
+                const description = isMod(memberRole)
+                    ? 'This is considered as a moderation role, please try again with another one.'
+                    : `Audit logs will be sent in ${logsChannel}.`;
 
                 const msg = await basicCollector({ message }, {
                     description,
-                    fieldName: 'What __role__ should I give to a __member__ when they join the server?'
+                    fieldName: 'What __role__ should I give to a __member__ when they join the server?',
                 }, null, true);
                 if (!msg) return;
                 toDelete = msg;
@@ -269,7 +269,7 @@ module.exports = class SetupCommand extends Command {
             while (!botRole) {
                 const msg = await basicCollector({ message }, {
                     description: `The default member role will be ${memberRole}.`,
-                    fieldName: 'What __role__ should I give to a __bot__ when they join the server?'
+                    fieldName: 'What __role__ should I give to a __bot__ when they join the server?',
                 }, null, true);
                 if (!msg) return;
                 toDelete = msg;
@@ -281,7 +281,7 @@ module.exports = class SetupCommand extends Command {
             while (!mutedRole) {
                 const msg = await basicCollector({ message }, {
                     description: `The default bot role will be ${botRole}.`,
-                    fieldName: 'What __role__ should I give to a __member__ when they get muted?'
+                    fieldName: 'What __role__ should I give to a __member__ when they get muted?',
                 }, null, true);
                 if (!msg) return;
                 toDelete = msg;
@@ -293,7 +293,7 @@ module.exports = class SetupCommand extends Command {
             while (lockChannels.length === 0) {
                 const msg = await basicCollector({ message }, {
                     description: `The role given to muted people will be ${mutedRole}.`,
-                    fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
+                    fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?',
                 }, { time: 2 * 60_000 }, true);
                 if (!msg) return;
                 toDelete = msg;
@@ -313,21 +313,21 @@ module.exports = class SetupCommand extends Command {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'The chosen muted role is invalid. Please check the role hierarchy.'
+                    description: 'The chosen muted role is invalid. Please check the role hierarchy.',
                 }));
             }
             if (!isValidRole(intMsg, memberRole)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'The chosen default member role is invalid. Please check the role hierarchy.'
+                    description: 'The chosen default member role is invalid. Please check the role hierarchy.',
                 }));
             }
             if (!isValidRole(intMsg, botRole)) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'The chosen default bot role is invalid. Please check the role hierarchy.'
+                    description: 'The chosen default bot role is invalid. Please check the role hierarchy.',
                 }));
             }
 
@@ -341,7 +341,7 @@ module.exports = class SetupCommand extends Command {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'None of the lockdown channels you specified were valid. Please try again.'
+                    description: 'None of the lockdown channels you specified were valid. Please try again.',
                 }));
             }
         }
@@ -355,7 +355,7 @@ module.exports = class SetupCommand extends Command {
                 Muted members role: ${mutedRole}
                 Lockdown channels: ${lockChannels.map(c => c.toString()).join(', ')}
             `,
-            fieldName: 'Is this data correct? If so, type `confirm` to proceed.'
+            fieldName: 'Is this data correct? If so, type `confirm` to proceed.',
         }, null, true);
         if (!msg) return;
         if (msg.content.toLowerCase() !== 'confirm') {
@@ -368,7 +368,7 @@ module.exports = class SetupCommand extends Command {
             memberRole: memberRole.id,
             botRole: botRole.id,
             mutedRole: mutedRole.id,
-            lockChannels: lockChannels.map(c => c.id)
+            lockChannels: lockChannels.map(c => c.id),
         };
         if (data) await this.db.update(data, doc);
         else await this.db.add(doc);
@@ -376,7 +376,7 @@ module.exports = class SetupCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.'
+            description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.',
         }));
     }
 
@@ -391,7 +391,7 @@ module.exports = class SetupCommand extends Command {
                 color: 'RED',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
-                fieldValue: 'Please run the `setup full` command first.'
+                fieldValue: 'Please run the `setup full` command first.',
             }));
         }
 
@@ -413,14 +413,14 @@ module.exports = class SetupCommand extends Command {
 
         if (toDisplay.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.'
+                color: 'RED', emoji: 'cross', description: 'There is no saved data for this server yet.',
             }));
         }
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${guild.name}'s setup data`, iconURL: guild.iconURL({ dynamic: true })
+                name: `${guild.name}'s setup data`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(toDisplay.join('\n'))
             .setFooter({ text: 'Missing or wrong data? Try using the "reload" sub-command.' });
@@ -439,12 +439,12 @@ module.exports = class SetupCommand extends Command {
                 color: 'RED',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
-                fieldValue: 'Please run the `setup full` command first.'
+                fieldValue: 'Please run the `setup full` command first.',
             }));
         }
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Reloading setup data...'
+            color: 'GOLD', emoji: 'loading', description: 'Reloading setup data...',
         });
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
@@ -490,7 +490,7 @@ module.exports = class SetupCommand extends Command {
 
         await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'Reloaded data.'
+            color: 'GREEN', emoji: 'check', description: 'Reloaded data.',
         }));
     }
 
@@ -519,7 +519,7 @@ module.exports = class SetupCommand extends Command {
             description: oneLine`
                 The new audit logs channel will be ${channel.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
-            `
+            `,
         }));
     }
 
@@ -548,7 +548,7 @@ module.exports = class SetupCommand extends Command {
             description: oneLine`
                 The new role for muted members will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
-            `
+            `,
         }));
     }
 
@@ -577,7 +577,7 @@ module.exports = class SetupCommand extends Command {
             description: oneLine`
                 The new default role for all members will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
-            `
+            `,
         }));
     }
 
@@ -608,7 +608,7 @@ module.exports = class SetupCommand extends Command {
             description: oneLine`
                 The new default role for all bots will be ${role.toString()}.
                 Use the \`view\` sub-command if you wish to check it out.
-            `
+            `,
         }));
     }
 
@@ -647,7 +647,7 @@ module.exports = class SetupCommand extends Command {
         if (message) {
             while (channels.length === 0) {
                 const msg = await basicCollector({ message }, {
-                    fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?'
+                    fieldName: 'What __text channels__ should I lock when you use the `lockdown` command?',
                 }, { time: 2 * 60_000 }, true);
                 if (!msg) return;
                 for (const val of msg.content.split(/ +/)) {
@@ -661,7 +661,7 @@ module.exports = class SetupCommand extends Command {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'None of the channels you specified were valid. Please try again.'
+                    description: 'None of the channels you specified were valid. Please try again.',
                 }));
             }
         }
@@ -673,7 +673,7 @@ module.exports = class SetupCommand extends Command {
             color: 'GREEN', emoji: 'check', description: oneLine`
                 I have saved all the lockdown channels you specified.
                 Use the \`view\` sub-command if you wish to check it out.
-            `
+            `,
         }));
     }
 };

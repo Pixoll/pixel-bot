@@ -2,7 +2,7 @@
 const { User, GuildMember, TextChannel } = require('discord.js');
 const { Command, CommandInstances } = require('pixoll-commando');
 const {
-    docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll
+    docId, basicEmbed, userException, memberException, timestamp, inviteButton, confirmButtons, replyAll,
 } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 const myMs = require('../../utils/my-ms');
@@ -24,7 +24,7 @@ module.exports = class TempBanCommand extends Command {
             format: 'tempban [user] [duration] <reason>',
             examples: [
                 'tempban Pixoll 1d',
-                'tempban Pixoll 30d Advertising in DM\'s'
+                'tempban Pixoll 30d Advertising in DM\'s',
             ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
@@ -33,20 +33,20 @@ module.exports = class TempBanCommand extends Command {
                 {
                     key: 'user',
                     prompt: 'What user do you want to ban?',
-                    type: 'user'
+                    type: 'user',
                 },
                 {
                     key: 'duration',
                     prompt: 'How long should the ban last?',
-                    type: ['date', 'duration']
+                    type: ['date', 'duration'],
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the ban?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -54,21 +54,21 @@ module.exports = class TempBanCommand extends Command {
                         type: 'user',
                         name: 'user',
                         description: 'The user to ban.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'duration',
                         description: 'The duration of the ban.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the ban.'
-                    }
-                ]
-            }
+                        description: 'The reason of the ban.',
+                    },
+                ],
+            },
         });
     }
 
@@ -87,13 +87,13 @@ module.exports = class TempBanCommand extends Command {
             duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.',
                 }));
             }
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -113,7 +113,7 @@ module.exports = class TempBanCommand extends Command {
         const isBanned = await bans.fetch(user).catch(() => null);
         if (isBanned) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is already banned.'
+                color: 'RED', emoji: 'cross', description: 'That user is already banned.',
             }));
         }
 
@@ -135,7 +135,7 @@ module.exports = class TempBanCommand extends Command {
                     **Moderator:** ${author.toString()} ${author.tag}
 
                     *The invite will expire in 1 week.*
-                `
+                `,
             });
 
             /** @type {TextChannel} */
@@ -160,7 +160,7 @@ module.exports = class TempBanCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(duration - now, { long: true })
+            duration: myMs(duration - now, { long: true }),
         });
         await active.add({
             _id: documentId,
@@ -168,7 +168,7 @@ module.exports = class TempBanCommand extends Command {
             guild: guildId,
             userId: user.id,
             userTag: user.tag,
-            duration
+            duration,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -178,7 +178,7 @@ module.exports = class TempBanCommand extends Command {
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
-            `
+            `,
         }));
     }
 };

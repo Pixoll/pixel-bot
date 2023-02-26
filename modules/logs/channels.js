@@ -58,7 +58,7 @@ function rtcRegion(region) {
 function format(perms) {
     return [
         perms?.deny.toArray(false).map(perm => permissions[perm]) || [],
-        perms?.allow.toArray(false).map(perm => permissions[perm]) || []
+        perms?.allow.toArray(false).map(perm => permissions[perm]) || [],
     ];
 }
 
@@ -80,7 +80,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: `Created ${channelType(type).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Created ${channelType(type).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`${channel.toString()} ${category}`)
             .setFooter({ text: `Channel ID: ${id}` })
@@ -126,7 +126,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: `Deleted ${channelType(type).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Deleted ${channelType(type).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`\`#${name}\` ${category}`)
             .setFooter({ text: `Channel ID: ${id}` })
@@ -147,7 +147,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated channel pins', iconURL: channel.guild.iconURL({ dynamic: true })
+                name: 'Updated channel pins', iconURL: channel.guild.iconURL({ dynamic: true }),
             })
             .setDescription(`Pinned or unpinned a message in ${channel.toString()}`)
             .setFooter({ text: `Channel ID: ${id}` })
@@ -167,16 +167,16 @@ module.exports = (client) => {
         client.emit('debug', 'Running event "logs/channels#update".');
 
         const {
-            name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, permissionsLocked: locked1, id
+            name: name1, parent: parent1, permissionOverwrites: permissions1, type: type1, permissionsLocked: locked1, id,
         } = oldChannel;
         const {
-            name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2, permissionsLocked: locked2
+            name: name2, parent: parent2, permissionOverwrites: permissions2, type: type2, permissionsLocked: locked2,
         } = newChannel;
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: `Updated ${channelType(type1).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Updated ${channelType(type1).toLowerCase()} channel`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(oldChannel.toString())
             .setFooter({ text: `Channel ID: ${id}` })
@@ -260,12 +260,12 @@ module.exports = (client) => {
                 `);
             }
             if (autoArchive1 !== autoArchive2) {
-                const str1 = typeof autoArchive1 === 'number' ?
-                    myMs(autoArchive1 * 60_000, { long: true }) :
-                    capitalize(autoArchive1);
-                const str2 = typeof autoArchive2 === 'number' ?
-                    myMs(autoArchive2 * 60_000, { long: true }) :
-                    capitalize(autoArchive2);
+                const str1 = typeof autoArchive1 === 'number'
+                    ? myMs(autoArchive1 * 60_000, { long: true })
+                    : capitalize(autoArchive1);
+                const str2 = typeof autoArchive2 === 'number'
+                    ? myMs(autoArchive2 * 60_000, { long: true })
+                    : capitalize(autoArchive2);
                 embed.addField('Archive after inactivity', `${str1} ➜ ${str2}`);
             }
 

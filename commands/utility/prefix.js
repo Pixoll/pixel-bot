@@ -23,8 +23,8 @@ module.exports = class PrefixCommand extends Command {
                 label: 'new prefix',
                 prompt: 'What is the new prefix you want to set for the bot?',
                 type: 'string',
-                required: false
-            }]
+                required: false,
+            }],
         });
 
         this.globalDb = this.client.database.prefixes;
@@ -41,11 +41,11 @@ module.exports = class PrefixCommand extends Command {
 
         if (!newPrefix) {
             const prefix = guild?.prefix || client.prefix;
-            const description = guild ? `The bot prefix in this server is \`${prefix}\`` :
-                `The global bot prefix is \`${prefix}\``;
+            const description = guild ? `The bot prefix in this server is \`${prefix}\``
+                : `The global bot prefix is \`${prefix}\``;
 
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info', description
+                color: 'BLUE', emoji: 'info', description,
             }));
         }
 
@@ -60,7 +60,7 @@ module.exports = class PrefixCommand extends Command {
         const current = guild?.prefix || client?.prefix;
         if (current === newPrefix) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: `The current prefix is already \`${newPrefix}\``
+                color: 'RED', emoji: 'cross', description: `The current prefix is already \`${newPrefix}\``,
             }));
         }
 
@@ -78,22 +78,22 @@ module.exports = class PrefixCommand extends Command {
                 await targetDb.add({
                     global: !guild,
                     guild: guild?.id,
-                    prefix: newPrefix
+                    prefix: newPrefix,
                 });
             }
         }
 
-        const description = guild ? `Changed the bot prefix of this server to \`${newPrefix}\`` :
-            `Changed the global bot prefix to \`${newPrefix}\``;
+        const description = guild ? `Changed the bot prefix of this server to \`${newPrefix}\``
+            : `Changed the global bot prefix to \`${newPrefix}\``;
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description
+            color: 'GREEN', emoji: 'check', description,
         }));
 
         if (!guild) {
             client.user.setActivity({
                 name: `for ${newPrefix}help`,
-                type: 'WATCHING'
+                type: 'WATCHING',
             });
         }
     }

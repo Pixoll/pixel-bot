@@ -20,7 +20,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated module status', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Updated module status', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`The \`${module}\` module has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
             .setTimestamp();

@@ -18,23 +18,23 @@ module.exports = class AfkCommand extends Command {
             `,
             examples: [
                 'afk Coding',
-                'afk off'
+                'afk off',
             ],
             guildOnly: true,
             args: [{
                 key: 'status',
                 prompt: 'What is the status you want to set? Respond with `off` to remove it (if existent).',
                 type: 'string',
-                max: 512
+                max: 512,
             }],
             slash: {
                 options: [{
                     type: 'string',
                     name: 'status',
                     description: 'What is the status you want to set? Respond with `off` to remove it (if existent).',
-                    required: true
-                }]
-            }
+                    required: true,
+                }],
+            },
         });
     }
 
@@ -55,30 +55,30 @@ module.exports = class AfkCommand extends Command {
             if (status.toLowerCase() === 'off') {
                 await afkStatus.deleteOne();
                 return await replyAll({ message, interaction }, basicEmbed({
-                    color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status`
+                    color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status`,
                 }));
             }
 
             await afkStatus.updateOne({ status });
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'GREEN', emoji: 'check', fieldName: 'I updated your AFK status to:', fieldValue: status
+                color: 'GREEN', emoji: 'check', fieldName: 'I updated your AFK status to:', fieldValue: status,
             }));
         }
 
         if (status.toLowerCase() === 'off') {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'You can\'t set your status as `off`'
+                color: 'RED', emoji: 'cross', description: 'You can\'t set your status as `off`',
             }));
         }
 
         await db.add({
             guild: guildId,
             user: author.id,
-            status
+            status,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', fieldName: 'I set your AFK status as:', fieldValue: status
+            color: 'GREEN', emoji: 'check', fieldName: 'I set your AFK status as:', fieldValue: status,
         }));
     }
 };

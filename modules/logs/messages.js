@@ -48,7 +48,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted message', iconURL: author.displayAvatarURL({ dynamic: true })
+                name: 'Deleted message', iconURL: author.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()}`)
             .setFooter({ text: `Author ID: ${author.id}` })
@@ -94,7 +94,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted multiple messages', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Deleted multiple messages', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`Deleted **${pluralize('message', messages.size)}** in ${channel.toString()}`)
             .setFooter({ text: `Channel ID: ${channel.id}` })
@@ -119,15 +119,15 @@ module.exports = (client) => {
 
         client.emit('debug', 'Running event "logs/messages#update".');
 
-        const oldContent = content1 !== null ?
-            sliceDots(content1, 1024) || '`Empty`' :
-            '`Couldn\'t get old message content.`';
+        const oldContent = content1 !== null
+            ? sliceDots(content1, 1024) || '`Empty`'
+            : '`Couldn\'t get old message content.`';
         const newContent = sliceDots(content2, 1024);
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Edited message', iconURL: author.displayAvatarURL({ dynamic: true })
+                name: 'Edited message', iconURL: author.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()} [Jump to message](${url})`)
             .addField('Before', oldContent)

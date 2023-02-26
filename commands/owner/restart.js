@@ -11,7 +11,7 @@ module.exports = class RestartCommand extends Command {
             group: 'owner',
             description: 'Restarts the bot.',
             ownerOnly: true,
-            guarded: true
+            guarded: true,
         });
     }
 
@@ -24,12 +24,12 @@ module.exports = class RestartCommand extends Command {
         if (!confirmed) return;
 
         await message.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Restarting...'
+            color: 'GOLD', emoji: 'loading', description: 'Restarting...',
         }));
 
         this.client.user.setActivity({
             name: 'Restarting...',
-            type: 'PLAYING'
+            type: 'PLAYING',
         });
 
         process.exit();

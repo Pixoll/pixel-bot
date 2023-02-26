@@ -24,11 +24,11 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: 'Created sticker', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Created sticker', iconURL: guild.iconURL({ dynamic: true }),
             })
-            .setDescription(user ?
-                `**${user.toString()} added a sticker:** ${name}` :
-                `**Added a sticker:** ${name}`
+            .setDescription(user
+                ? `**${user.toString()} added a sticker:** ${name}`
+                : `**Added a sticker:** ${name}`
             )
             .addField('Information', stripIndent`
                 **Related emoji:** ${tags.map(s => `:${s}:`).join(' ')}
@@ -52,7 +52,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted sticker', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Deleted sticker', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Name:** ${name}
@@ -80,7 +80,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated sticker', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Updated sticker', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setThumbnail(url)
             .setFooter({ text: `Sticker ID: ${id}` })

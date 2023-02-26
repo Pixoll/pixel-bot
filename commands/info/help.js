@@ -22,15 +22,15 @@ module.exports = class HelpCommand extends Command {
                 key: 'command',
                 prompt: 'What command do you want to get information about?',
                 type: 'command',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'string',
                     name: 'command',
-                    description: 'The command to get info from.'
-                }]
-            }
+                    description: 'The command to get info from.',
+                }],
+            },
         });
     }
 
@@ -86,13 +86,13 @@ module.exports = class HelpCommand extends Command {
                     [Support server](${options.serverInvite}) -
                     [Invite the bot](${topgg}/invite) -
                     [Vote here](${topgg}/vote)
-                `
+                `,
             });
 
             const base = new MessageEmbed()
                 .setColor('#4c9f4c')
                 .setAuthor({
-                    name: `${user.username}'s help`, iconURL: user.displayAvatarURL({ dynamic: true })
+                    name: `${user.username}'s help`, iconURL: user.displayAvatarURL({ dynamic: true }),
                 });
 
             const strikethrough = 'with a strikethrough (~~`like this`~~), mean they\'ve been marked as deprecated';
@@ -203,21 +203,21 @@ module.exports = class HelpCommand extends Command {
                             by a number, like this: \`1pm -4\`. This means that time will be used as if it's
                             from UTC-4.
                         `}
-                    `)
+                    `),
             ];
 
             const generate = page => ({
                 embed: pages[page].setFooter({
                     text: `Page ${page + 1} of ${pages.length} • Version: ${version} • Developer: ${owner.tag}`,
-                    iconURL: user.displayAvatarURL({ dynamic: true })
-                })
+                    iconURL: user.displayAvatarURL({ dynamic: true }),
+                }),
             });
 
             return await pagedEmbed({ message, interaction }, {
                 number: 1,
                 total: pages.length,
                 toUser: true,
-                dmMsg: 'Check your DMs for a list of the commands and information about the bot.'
+                dmMsg: 'Check your DMs for a list of the commands and information about the bot.',
             }, generate);
         }
 
@@ -250,7 +250,7 @@ function commandInfo(cmd, guild) {
     const { prefix: _prefix, user, owners } = cmd.client;
     const {
         name, description, details, examples, aliases, group, guarded, throttling, ownerOnly, guildOnly,
-        dmOnly, deprecated, replacing, slash
+        dmOnly, deprecated, replacing, slash,
     } = cmd;
 
     const prefix = guild?.prefix || _prefix;
@@ -274,7 +274,7 @@ function commandInfo(cmd, guild) {
         .setColor('#4c9f4c')
         .setAuthor({
             name: `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
-            iconURL: user.displayAvatarURL({ dynamic: true })
+            iconURL: user.displayAvatarURL({ dynamic: true }),
         })
         .setDescription(stripIndent`
             ${deprecated ? oneLine`
@@ -287,7 +287,7 @@ function commandInfo(cmd, guild) {
         .addField('Usage', usage)
         .setFooter({
             text: `Version: ${version} • Developer: ${owners[0].tag}`,
-            iconURL: user.displayAvatarURL({ dynamic: true })
+            iconURL: user.displayAvatarURL({ dynamic: true }),
         });
 
     if (examples) embed.addField('Examples', examples.map(ex => `**>** \`${prefix + ex}\``).join('\n'));
@@ -296,15 +296,15 @@ function commandInfo(cmd, guild) {
         Category: group.name,
         Aliases: aliases.join(', ') || null,
         Slash: slash ? 'Yes' : 'No',
-        Cooldown: throttling ?
-            `${pluralize('usage', throttling.usages)} per ${myMs(throttling.duration * 1000, { long: true })}` :
-            null,
+        Cooldown: throttling
+            ? `${pluralize('usage', throttling.usages)} per ${myMs(throttling.duration * 1000, { long: true })}`
+            : null,
         Guarded: guarded ? 'Yes' : 'No',
         Status: !guarded ? (cmd.isEnabledIn(guild) ? 'Enabled' : 'Disabled') : null,
         'Server only': guildOnly ? 'Yes' : null,
         'DMs only': dmOnly ? 'Yes' : null,
         'Bot perms': clientPermissions || null,
-        'User perms': userPermissions || (ownerOnly ? 'Bot\'s owner only' : null)
+        'User perms': userPermissions || (ownerOnly ? 'Bot\'s owner only' : null),
     };
 
     const info = [];

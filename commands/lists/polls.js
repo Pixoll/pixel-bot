@@ -11,7 +11,7 @@ module.exports = class PollsCommand extends Command {
             group: 'lists',
             description: 'Displays all the on-going polls on this server. Use the `poll` command to add polls.',
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -26,7 +26,7 @@ module.exports = class PollsCommand extends Command {
         const pollsData = await db.fetchMany();
         if (pollsData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There are no active polls.'
+                color: 'BLUE', emoji: 'info', description: 'There are no active polls.',
             }));
         }
 
@@ -35,7 +35,7 @@ module.exports = class PollsCommand extends Command {
             authorName: `There's ${pluralize('active poll', pollsData.size)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Poll',
-            keys: ['channel', 'duration', 'endsAt']
+            keys: ['channel', 'duration', 'endsAt'],
         });
     }
 };

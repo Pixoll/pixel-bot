@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 const {
     MessageEmbed, GuildMember, User, Role, MessageOptions, GuildChannel, Message, ColorResolvable, AwaitMessagesOptions,
-    MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util
+    MessageActionRow, MessageButton, Invite, MessageSelectMenu, Util,
 } = require('discord.js');
 const {
-    CommandoMessage, CommandoGuild, Command, Argument, CommandInstances, Util: { permissions }, Module, AuditLog
+    CommandoMessage, CommandoGuild, Command, Argument, CommandInstances, Util: { permissions }, Module, AuditLog,
 } = require('pixoll-commando');
 const { transform, isEqual, isArray, isObject, capitalize } = require('lodash');
 const { stripIndent } = require('common-tags');
@@ -190,7 +190,7 @@ function noReplyInDMs(msg) {
     if (!msg) return {};
     /** @type {MessageOptions} */
     const options = msg.channel.type === 'DM' ? {
-        allowedMentions: { repliedUser: false }
+        allowedMentions: { repliedUser: false },
     } : {};
 
     return options;
@@ -357,9 +357,19 @@ function isMod(roleOrMember, noAdmin) {
     const { permissions } = roleOrMember;
 
     const conditions = [
-        'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
-        'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
-        'MUTE_MEMBERS'
+        'BAN_MEMBERS',
+        'DEAFEN_MEMBERS',
+        'KICK_MEMBERS',
+        'MANAGE_CHANNELS',
+        'MANAGE_EMOJIS_AND_STICKERS',
+        'MANAGE_GUILD',
+        'MANAGE_MESSAGES',
+        'MANAGE_NICKNAMES',
+        'MANAGE_ROLES',
+        'MANAGE_THREADS',
+        'MANAGE_WEBHOOKS',
+        'MOVE_MEMBERS',
+        'MUTE_MEMBERS',
     ];
 
     const values = [];
@@ -391,9 +401,19 @@ function getKeyPerms(roleOrMember) {
     if (perms.has('ADMINISTRATOR')) return 'Administrator';
 
     const filter = [
-        'BAN_MEMBERS', 'DEAFEN_MEMBERS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
-        'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'MANAGE_WEBHOOKS', 'MOVE_MEMBERS',
-        'MUTE_MEMBERS'
+        'BAN_MEMBERS',
+        'DEAFEN_MEMBERS',
+        'KICK_MEMBERS',
+        'MANAGE_CHANNELS',
+        'MANAGE_EMOJIS_AND_STICKERS',
+        'MANAGE_GUILD',
+        'MANAGE_MESSAGES',
+        'MANAGE_NICKNAMES',
+        'MANAGE_ROLES',
+        'MANAGE_THREADS',
+        'MANAGE_WEBHOOKS',
+        'MOVE_MEMBERS',
+        'MUTE_MEMBERS',
     ];
 
     const filtered = perms.toArray().filter(perm => filter.includes(perm));
@@ -625,7 +645,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
         start: `${id}:page_start`,
         down: `${id}:page_down`,
         up: `${id}:page_up`,
-        end: `${id}:page_end`
+        end: `${id}:page_end`,
     };
 
     const pageStart = new MessageButton()
@@ -648,8 +668,8 @@ async function pagedEmbed({ message, interaction }, data, template) {
         .setEmoji('⏩');
 
     const buttons = data.total <= data.number ? null : new MessageActionRow()
-        .addComponents(data.skipMaxButtons ?
-            [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
+        .addComponents(data.skipMaxButtons
+            ? [pageDown, pageUp] : [pageStart, pageDown, pageUp, pageEnd]
         );
 
     if (data.toUser && !isDMs) {
@@ -665,7 +685,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
     const msgOptions = {
         embeds: [first.embed],
         components: [...data.components, buttons].filter(c => c),
-        ...noReplyInDMs(message)
+        ...noReplyInDMs(message),
     };
 
     /** @type {Message} */
@@ -685,13 +705,13 @@ async function pagedEmbed({ message, interaction }, data, template) {
             if (!int.isButton() && !int.isSelectMenu()) return false;
             if (int.user.id !== author.id) {
                 await int.reply({
-                    content: 'This interaction doesn\'t belong to you.', ephemeral: true
+                    content: 'This interaction doesn\'t belong to you.', ephemeral: true,
                 });
                 return false;
             }
             return true;
         },
-        time: 60 * 1000
+        time: 60 * 1000,
     });
 
     const disableButton = (target, disabled = true) => {
@@ -701,9 +721,9 @@ async function pagedEmbed({ message, interaction }, data, template) {
     };
 
     /** @type {?string[]} */
-    const menuOptions = data.components[0] ?
-        data.components[0].components.filter(c => c instanceof MessageSelectMenu)[0].options.map(op => op.value) :
-        [];
+    const menuOptions = data.components[0]
+        ? data.components[0].components.filter(c => c instanceof MessageSelectMenu)[0].options.map(op => op.value)
+        : [];
     let option = 'all';
 
     collector.on('collect', async int => {
@@ -749,7 +769,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
             return await int.update({
                 embeds: [templateData.embed],
                 components: [...data.components, buttons].filter(c => c),
-                ...noReplyInDMs(msg)
+                ...noReplyInDMs(msg),
             }).catch(() => null);
         }
 
@@ -764,7 +784,7 @@ async function pagedEmbed({ message, interaction }, data, template) {
             return await int.update({
                 embeds: [templateData.embed],
                 components: [...data.components, buttons].filter(c => c),
-                ...noReplyInDMs(msg)
+                ...noReplyInDMs(msg),
             }).catch(() => null);
         }
     });
@@ -807,7 +827,7 @@ async function generateEmbed({ message, interaction }, array, data) {
         number = 6, color = '#4c9f4c', authorName, authorIconURL = null, useDescription = false,
         title = '', inLine = false, toUser = false, dmMsg = '', hasObjects = true, keyTitle = {},
         keys, keysExclude = [], useDocId = false, components = [], embedTitle, skipMaxButtons = false,
-        numbered = false
+        numbered = false,
     } = data;
 
     if (array.length === 0) throw new Error('array cannot be empty');
@@ -816,8 +836,8 @@ async function generateEmbed({ message, interaction }, array, data) {
     /** @param {number} start @param {string} [filter] */
     async function createEmbed(start, filter) {
         const _array = filter ? (
-            filter === 'all' ? array :
-                array.filter(doc => doc.type === filter)
+            filter === 'all' ? array
+                : array.filter(doc => doc.type === filter)
         ) : array;
 
         const pages = Math.trunc(_array.length / number) + ((_array.length / number) % 1 === 0 ? 0 : 1);
@@ -830,21 +850,21 @@ async function generateEmbed({ message, interaction }, array, data) {
         if (embedTitle) embed.setTitle(embedTitle);
         if (authorName) {
             embed.setAuthor({
-                name: authorName, iconURL: authorIconURL
+                name: authorName, iconURL: authorIconURL,
             });
         }
         if (pages > 1) embed.setFooter({ text: `Page ${Math.round(start / number + 1)} of ${pages}` });
         if (useDescription) {
             return {
                 embed: embed.setDescription(current.join('\n')),
-                total: _array.length
+                total: _array.length,
             };
         }
 
         if (_array.length === 0) {
             return {
                 embed: embed.addField('There\'s nothing to see here', 'Please try with another filter.'),
-                total: _array.length
+                total: _array.length,
             };
         }
 
@@ -860,8 +880,8 @@ async function generateEmbed({ message, interaction }, array, data) {
             const prefix = capitalize(item[keyTitle?.prefix] || null);
             const suffix = docId
                 || (
-                    item[keyTitle?.suffix] && typeof item[keyTitle?.suffix] !== 'string' ?
-                        timestamp(item[keyTitle?.suffix] / 1) : null
+                    item[keyTitle?.suffix] && typeof item[keyTitle?.suffix] !== 'string'
+                        ? timestamp(item[keyTitle?.suffix] / 1) : null
                 )
                 || item[keyTitle?.suffix] || start + index + 1;
 
@@ -881,8 +901,8 @@ async function generateEmbed({ message, interaction }, array, data) {
                 const channel = key === 'channel' ? channels.resolve(item[key]) : null;
 
                 const created = key === 'createdAt' ? timestamp(item[key]) : null;
-                const duration = key === 'duration' && Number(item[key]) ?
-                    myMs(item[key], { long: true, length: 2, showAnd: true }) : null;
+                const duration = key === 'duration' && Number(item[key])
+                    ? myMs(item[key], { long: true, length: 2, showAnd: true }) : null;
                 const endsAt = key === 'endsAt' ? `${timestamp(item[key])} (${timestamp(item[key], 'R')})` : null;
 
                 const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || item[key];
@@ -923,8 +943,8 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     const author = message?.author || interaction.user;
 
     const ids = { yes: `${id}:yes`, no: `${id}:no` };
-    const targetStr = target instanceof User ? target.tag :
-        target instanceof CommandoGuild ? target.name : target || null;
+    const targetStr = target instanceof User ? target.tag
+        : target instanceof CommandoGuild ? target.name : target || null;
 
     const confirmEmbed = new MessageEmbed()
         .setColor('GOLD')
@@ -961,7 +981,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     const msgData = {
         embeds: [confirmEmbed],
         components: [new MessageActionRow().addComponents(yesButton, noButton)],
-        ...noReplyInDMs(message)
+        ...noReplyInDMs(message),
     };
     if (interaction) msg = await replyAll({ interaction }, msgData);
     else msg = await message.reply(msgData);
@@ -971,14 +991,14 @@ async function confirmButtons({ message, interaction }, action, target, data = {
             if (msg.id !== int.message?.id) return false;
             if (int.user.id !== author.id) {
                 await int.reply({
-                    content: 'This interaction doesn\'t belong to you.', ephemeral: true
+                    content: 'This interaction doesn\'t belong to you.', ephemeral: true,
                 });
                 return false;
             }
             return true;
         },
         time: 30_000,
-        componentType: 'BUTTON'
+        componentType: 'BUTTON',
     }).catch(() => null);
 
     if (message) await msg?.delete();
@@ -988,7 +1008,7 @@ async function confirmButtons({ message, interaction }, action, target, data = {
     if (!pushed || pushed.customId === ids.no) {
         if (sendCancelled) {
             await replyAll({ message, interaction }, {
-                content: 'Cancelled command.', embeds: []
+                content: 'Cancelled command.', embeds: [],
             });
         }
         return false;
@@ -1027,5 +1047,5 @@ module.exports = {
     sliceDots,
     timestamp,
     userException,
-    validURL
+    validURL,
 };

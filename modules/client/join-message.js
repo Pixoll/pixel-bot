@@ -75,7 +75,7 @@ module.exports = async (client) => {
             `)
             .setFooter({
                 text: `Created with ❤️ by ${owners[0].tag}`,
-                iconURL: owners[0].displayAvatarURL({ dynamic: true })
+                iconURL: owners[0].displayAvatarURL({ dynamic: true }),
             });
 
         await channel?.send({ embeds: [embed] }).catch(() => null);

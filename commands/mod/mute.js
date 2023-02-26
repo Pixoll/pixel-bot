@@ -2,7 +2,7 @@
 const { Command, CommandInstances } = require('pixoll-commando');
 const { GuildMember } = require('discord.js');
 const {
-    userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed
+    userException, memberException, timestamp, confirmButtons, replyAll, docId, basicEmbed,
 } = require('../../utils/functions');
 const myMs = require('../../utils/my-ms');
 const { stripIndent } = require('common-tags');
@@ -29,20 +29,20 @@ module.exports = class MuteCommand extends Command {
                 {
                     key: 'member',
                     prompt: 'What member do you want to mute?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'duration',
                     prompt: 'How long should the mute last?',
-                    type: ['date', 'duration']
+                    type: ['date', 'duration'],
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the mute?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -50,21 +50,21 @@ module.exports = class MuteCommand extends Command {
                         type: 'user',
                         name: 'member',
                         description: 'The member to mute.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'duration',
                         description: 'The duration of the mute.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the mute.'
-                    }
-                ]
-            }
+                        description: 'The reason of the mute.',
+                    },
+                ],
+            },
         });
     }
 
@@ -80,20 +80,20 @@ module.exports = class MuteCommand extends Command {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             const arg = this.argsCollector.args[1];
             duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.',
                 }));
             }
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -112,7 +112,7 @@ module.exports = class MuteCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: 'No mute role found in this server, please use the `setup` command before using this.'
+                description: 'No mute role found in this server, please use the `setup` command before using this.',
             }));
         }
 
@@ -130,13 +130,13 @@ module.exports = class MuteCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: 'No mute role found in this server, please use the `setup` command before using this.'
+                description: 'No mute role found in this server, please use the `setup` command before using this.',
             }));
         }
 
         if (roles.cache.has(role.id)) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is already muted.'
+                color: 'RED', emoji: 'cross', description: 'That user is already muted.',
             }));
         }
 
@@ -152,8 +152,8 @@ module.exports = class MuteCommand extends Command {
                         **Expires:** ${timestamp(duration, 'R')}
                         **Reason:** ${reason}
                         **Moderator:** ${author.toString()} ${author.tag}
-                    `
-                })]
+                    `,
+                })],
             }).catch(() => null);
         }
 
@@ -168,7 +168,7 @@ module.exports = class MuteCommand extends Command {
             modId: author.id,
             modTag: author.tag,
             reason,
-            duration: myMs(duration - now, { long: true })
+            duration: myMs(duration - now, { long: true }),
         });
         await active.add({
             _id: documentId,
@@ -176,7 +176,7 @@ module.exports = class MuteCommand extends Command {
             guild: guildId,
             userId: user.id,
             userTag: user.tag,
-            duration
+            duration,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -186,7 +186,7 @@ module.exports = class MuteCommand extends Command {
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
-            `
+            `,
         }));
     }
 };

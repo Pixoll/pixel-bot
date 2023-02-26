@@ -8,8 +8,8 @@ const changelog = require('../../documents/changelog.json')
     .sort((a, b) => abcOrder(b.version, a.version))
     .map(log => {
         if (version < log.version) return null;
-        const changes = log.changes.length === 1 ? log.changes[0] :
-            log.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n');
+        const changes = log.changes.length === 1 ? log.changes[0]
+            : log.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n');
         const title = `Version ${log.version} - ${timestamp(log.timestamp, 'F') ?? 'No date specified'}`;
         return { title, changes };
     })
@@ -23,7 +23,7 @@ module.exports = class ChangelogCommand extends Command {
             group: 'info',
             description: 'Displays the changelog history of the bot.',
             guarded: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -39,7 +39,7 @@ module.exports = class ChangelogCommand extends Command {
             authorName: `${user.username}'s changelog`,
             authorIconURL: user.displayAvatarURL({ dynamic: true }),
             keyTitle: { suffix: 'title' },
-            keys: ['changes']
+            keys: ['changes'],
         });
     }
 };

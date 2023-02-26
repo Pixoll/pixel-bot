@@ -13,7 +13,7 @@ module.exports = class xpCommand extends Command {
             description: 'Gets the xp.',
             format: 'xp [message]',
             ownerOnly: true,
-            hidden: true
+            hidden: true,
         });
     }
 

@@ -24,15 +24,15 @@ module.exports = class MemberAvatarCommand extends Command {
                 key: 'member',
                 prompt: 'What member do you want to get their server avatar from?',
                 type: 'member',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'member',
-                    description: 'The member to get the avatar from.'
-                }]
-            }
+                    description: 'The member to get the avatar from.',
+                }],
+            },
         });
     }
 
@@ -54,7 +54,7 @@ module.exports = class MemberAvatarCommand extends Command {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${user.tag} • AKA. ${displayName}`, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: `${user.tag} • AKA. ${displayName}`, iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setImage(avatarUrl)
             .setTimestamp();

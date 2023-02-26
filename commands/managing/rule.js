@@ -24,14 +24,14 @@ module.exports = class RuleCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['view', 'add', 'remove']
+                    oneOf: ['view', 'add', 'remove'],
                 },
                 {
                     key: 'rule',
                     prompt: 'What rule do you want to remove/add?',
                     type: 'string',
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
@@ -43,8 +43,8 @@ module.exports = class RuleCommand extends Command {
                             type: 'integer',
                             name: 'rule',
                             description: 'The number of the rule to view.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -54,8 +54,8 @@ module.exports = class RuleCommand extends Command {
                             type: 'string',
                             name: 'rule',
                             description: 'The rule you want to add.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -65,11 +65,11 @@ module.exports = class RuleCommand extends Command {
                             type: 'integer',
                             name: 'rule',
                             description: 'The number of the rule to remove.',
-                            required: true
-                        }]
-                    }
-                ]
-            }
+                            required: true,
+                        }],
+                    },
+                ],
+            },
         });
     }
 
@@ -104,7 +104,7 @@ module.exports = class RuleCommand extends Command {
     async view({ message, interaction }, rulesData, rule) {
         if (!rulesData || rulesData.rules.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
+                color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.',
             }));
         }
 
@@ -119,7 +119,7 @@ module.exports = class RuleCommand extends Command {
         const ruleEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${guild.name}'s rules`, iconURL: guild.iconURL({ dynamic: true })
+                name: `${guild.name}'s rules`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .addField(`Rule ${rule--}`, rulesData.rules[rule])
             .setTimestamp();
@@ -144,14 +144,14 @@ module.exports = class RuleCommand extends Command {
         if (message) {
             while (!rule || rule.length > 1024 || typeof rule === 'number') {
                 const ruleMsg = await basicCollector({ message }, {
-                    fieldName: 'What rule do you want to add?'
+                    fieldName: 'What rule do you want to add?',
                 }, { time: 2 * 60_000 });
                 if (!ruleMsg) return;
                 rule = ruleMsg.content;
             }
         } else if (rule.length > 1024) {
             return await replyAll({ interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'The rule must be at most 1024 characters long.'
+                color: 'RED', emoji: 'cross', description: 'The rule must be at most 1024 characters long.',
             }));
         }
 
@@ -161,7 +161,7 @@ module.exports = class RuleCommand extends Command {
         const number = rulesData ? rulesData.rules.length + 1 : 1;
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `The rule has been added under \`Rule ${number}\``
+            color: 'GREEN', emoji: 'check', description: `The rule has been added under \`Rule ${number}\``,
         }));
     }
 
@@ -174,7 +174,7 @@ module.exports = class RuleCommand extends Command {
     async remove({ message, interaction }, rulesData, rule) {
         if (!rulesData || rulesData.rules.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.'
+                color: 'BLUE', emoji: 'info', description: 'The are no saved rules for this server.',
             }));
         }
 
@@ -190,7 +190,7 @@ module.exports = class RuleCommand extends Command {
         if (message) {
             while (typeof rule !== 'number' || rule < 1) {
                 const ruleMsg = await basicCollector({ message }, {
-                    fieldName: 'What rule do you want to remove?'
+                    fieldName: 'What rule do you want to remove?',
                 }, { time: 2 * 60_000 });
                 if (!ruleMsg) return;
                 rule = Number(ruleMsg.content);
@@ -199,7 +199,7 @@ module.exports = class RuleCommand extends Command {
 
         if (rule > rulesData.rules.length) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That rule doesn\'t exist.'
+                color: 'RED', emoji: 'cross', description: 'That rule doesn\'t exist.',
             }));
         }
 
@@ -211,7 +211,7 @@ module.exports = class RuleCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Removed rule number ${rule--}:`,
-            fieldValue: rulesData.rules[rule]
+            fieldValue: rulesData.rules[rule],
         }));
     }
 };

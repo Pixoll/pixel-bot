@@ -18,15 +18,15 @@ module.exports = class MsgInfoCommand extends Command {
                 {
                     key: 'msg',
                     prompt: 'What is the ID of the message?',
-                    type: 'message'
+                    type: 'message',
                 },
                 {
                     key: 'property',
                     prompt: 'What property do you want to get?',
                     type: 'string',
-                    required: false
-                }
-            ]
+                    required: false,
+                },
+            ],
         });
     }
 

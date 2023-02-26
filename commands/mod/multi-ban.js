@@ -49,7 +49,7 @@ module.exports = class MultiBanCommand extends Command {
                     key: 'reason',
                     prompt: 'What is the reason of the ban?',
                     type: 'string',
-                    max: 512
+                    max: 512,
                 },
                 {
                     key: 'members',
@@ -81,8 +81,8 @@ module.exports = class MultiBanCommand extends Command {
                         }
                         return valid;
                     },
-                    error: 'None of the members you specified were valid. Please try again.'
-                }
+                    error: 'None of the members you specified were valid. Please try again.',
+                },
             ],
             slash: {
                 options: [
@@ -90,16 +90,16 @@ module.exports = class MultiBanCommand extends Command {
                         type: 'string',
                         name: 'members',
                         description: 'The members to ban, separated by commas (max. 30 at once).',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
                         description: 'The reason of the multi-ban.',
-                        required: true
-                    }
-                ]
-            }
+                        required: true,
+                    },
+                ],
+            },
         });
     }
 
@@ -117,14 +117,14 @@ module.exports = class MultiBanCommand extends Command {
             const isValid = await arg.validate(members, msg);
             if (isValid !== true) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: arg.error
+                    color: 'RED', emoji: 'cross', description: arg.error,
                 }));
             }
             members = await arg.parse(members, msg);
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -134,7 +134,7 @@ module.exports = class MultiBanCommand extends Command {
         const manager = guild.members;
 
         const embed = n => basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: `Banned ${n}/${members.length} members...`
+            color: 'GOLD', emoji: 'loading', description: `Banned ${n}/${members.length} members...`,
         });
         const toEdit = await message?.replyEmbed(embed(0)) || await interaction.channel.send({ embeds: [embed(0)] });
 
@@ -151,8 +151,8 @@ module.exports = class MultiBanCommand extends Command {
                         fieldValue: stripIndent`
                             **Reason:** ${reason}
                             **Moderator:** ${author.toString()} ${author.tag}
-                        `
-                    })]
+                        `,
+                    })],
                 }).catch(() => null);
             }
 
@@ -166,7 +166,7 @@ module.exports = class MultiBanCommand extends Command {
                 userTag: user.tag,
                 modId: author.id,
                 modTag: author.tag,
-                reason
+                reason,
             });
 
             banned.push(user);
@@ -177,9 +177,9 @@ module.exports = class MultiBanCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: 'Banned the following members:',
-            fieldValue: banned.map(u => u.toString()).join(', ')
+            fieldValue: banned.map(u => u.toString()).join(', '),
         } : {
-            color: 'RED', emoji: 'cross', description: 'No members were banned.'
+            color: 'RED', emoji: 'cross', description: 'No members were banned.',
         };
 
         await toEdit?.delete().catch(() => null);

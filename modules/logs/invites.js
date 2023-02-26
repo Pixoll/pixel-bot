@@ -21,7 +21,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Created invite', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Created invite', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Link:** ${invite.toString()}
@@ -48,7 +48,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted invite', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Deleted invite', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Link:** ${invite.toString()}
@@ -77,7 +77,7 @@ module.exports = (client) => {
             if (!invite || invites?.get(invite.code)) continue;
 
             const {
-                channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild, inviter
+                channel: invChannel, maxUses, expiresAt, temporary, presenceCount, memberCount, guild: invGuild, inviter,
             } = invite;
 
             const info = invGuild ? stripIndent`
@@ -92,7 +92,7 @@ module.exports = (client) => {
             const embed = new MessageEmbed()
                 .setColor('BLUE')
                 .setAuthor({
-                    name: `${author.tag} posted an invite`, iconURL: author.displayAvatarURL({ dynamic: true })
+                    name: `${author.tag} posted an invite`, iconURL: author.displayAvatarURL({ dynamic: true }),
                 })
                 .setDescription(stripIndent`
                     ${author.toString()} posted an invite in ${channel.toString()} [Jump to message](${url})
@@ -106,9 +106,9 @@ module.exports = (client) => {
                     **Temporary membership:** ${temporary ? 'Yes' : 'No'}
                 `)
                 .setFooter({
-                    text: invGuild ?
-                        `Server ID: ${invGuild.id}` :
-                        `Group DM ID: ${invChannel.id}`
+                    text: invGuild
+                        ? `Server ID: ${invGuild.id}`
+                        : `Group DM ID: ${invChannel.id}`,
                 })
                 .setTimestamp();
 

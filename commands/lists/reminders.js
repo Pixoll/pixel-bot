@@ -22,22 +22,22 @@ module.exports = class RemindersCommand extends Command {
                 prompt: 'What sub-command do you want to use?',
                 type: 'string',
                 oneOf: ['view', 'clear'],
-                default: 'view'
+                default: 'view',
             }],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'view',
-                        description: 'Display your reminders.'
+                        description: 'Display your reminders.',
                     },
                     {
                         type: 'subcommand',
                         name: 'clear',
-                        description: 'Delete all of your reminders.'
-                    }
-                ]
-            }
+                        description: 'Delete all of your reminders.',
+                    },
+                ],
+            },
         });
 
         this.db = this.client.database.reminders;
@@ -58,7 +58,7 @@ module.exports = class RemindersCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'You have no active reminders. Use the `reminder` command to add reminders.'
+                description: 'You have no active reminders. Use the `reminder` command to add reminders.',
             }));
         }
 
@@ -78,7 +78,7 @@ module.exports = class RemindersCommand extends Command {
     async view({ message, interaction }, reminders) {
         const list = reminders.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
-            reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`
+            reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`,
         }));
 
         const author = message?.author || interaction.user;
@@ -90,7 +90,7 @@ module.exports = class RemindersCommand extends Command {
             keys: ['reminder'],
             numbered: true,
             toUser: true,
-            dmMsg: 'Check your DMs for the list of your reminders.'
+            dmMsg: 'Check your DMs for the list of your reminders.',
         });
     }
 
@@ -108,7 +108,7 @@ module.exports = class RemindersCommand extends Command {
         }
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'Your reminders have been deleted.'
+            color: 'GREEN', emoji: 'check', description: 'Your reminders have been deleted.',
         }));
     }
 };

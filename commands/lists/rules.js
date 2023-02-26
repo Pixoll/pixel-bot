@@ -22,22 +22,22 @@ module.exports = class RulesCommand extends Command {
                 prompt: 'What sub-command do you want to use?',
                 type: 'string',
                 oneOf: ['view', 'clear'],
-                default: 'view'
+                default: 'view',
             }],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'view',
-                        description: 'Display the server rules.'
+                        description: 'Display the server rules.',
                     },
                     {
                         type: 'subcommand',
                         name: 'clear',
-                        description: 'Delete all of the server rules (server owner only).'
-                    }
-                ]
-            }
+                        description: 'Delete all of the server rules (server owner only).',
+                    },
+                ],
+            },
         });
     }
 
@@ -58,7 +58,7 @@ module.exports = class RulesCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'The are no saved rules for this server. Use the `rule` command to add rules.'
+                description: 'The are no saved rules for this server. Use the `rule` command to add rules.',
             }));
         }
 
@@ -83,7 +83,7 @@ module.exports = class RulesCommand extends Command {
             authorName: `${guild.name}'s rules`,
             authorIconURL: guild.iconURL({ dynamic: true }),
             title: 'Rule',
-            hasObjects: false
+            hasObjects: false,
         });
     }
 
@@ -108,7 +108,7 @@ module.exports = class RulesCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: 'All the server rules have been deleted.'
+            description: 'All the server rules have been deleted.',
         }));
     }
 };

@@ -41,7 +41,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: `Created ${chanType} channel`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Created ${chanType} channel`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 ${oneLine`
@@ -67,7 +67,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: `Deleted ${channelType(type)} channel`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Deleted ${channelType(type)} channel`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 \`#${name}\` under ${channelType(parent.type)} channel ${parent.toString()}
@@ -89,17 +89,17 @@ module.exports = (client) => {
 
         const {
             autoArchiveDuration: autoArchive1, archived: archived1, name: name1, locked: locked1,
-            rateLimitPerUser: rateLimit1
+            rateLimitPerUser: rateLimit1,
         } = oldThread;
         const {
             autoArchiveDuration: autoArchive2, archived: archived2, name: name2, locked: locked2,
-            rateLimitPerUser: rateLimit2, id, parentId, type
+            rateLimitPerUser: rateLimit2, id, parentId, type,
         } = newThread;
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: `Updated ${channelType(type)} channel`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Updated ${channelType(type)} channel`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(newThread.toString())
             .setFooter({ text: `Thread ID: ${id} • Channel ID: ${parentId}` })

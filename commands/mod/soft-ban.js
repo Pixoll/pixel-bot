@@ -2,7 +2,7 @@
 const { Command, CommandInstances } = require('pixoll-commando');
 const { User, TextChannel, GuildMember } = require('discord.js');
 const {
-    docId, basicEmbed, userException, memberException, inviteButton, confirmButtons, replyAll
+    docId, basicEmbed, userException, memberException, inviteButton, confirmButtons, replyAll,
 } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
@@ -22,7 +22,7 @@ module.exports = class SoftBanCommand extends Command {
             format: 'softban [user] <reason>',
             examples: [
                 'softban Pixoll',
-                'softban Pixoll Mass-spam'
+                'softban Pixoll Mass-spam',
             ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
@@ -31,15 +31,15 @@ module.exports = class SoftBanCommand extends Command {
                 {
                     key: 'user',
                     prompt: 'What user do you want to soft-ban?',
-                    type: 'user'
+                    type: 'user',
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the soft-ban?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -47,15 +47,15 @@ module.exports = class SoftBanCommand extends Command {
                         type: 'user',
                         name: 'user',
                         description: 'The user to soft-ban.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the soft-ban.'
-                    }
-                ]
-            }
+                        description: 'The reason of the soft-ban.',
+                    },
+                ],
+            },
         });
     }
 
@@ -72,7 +72,7 @@ module.exports = class SoftBanCommand extends Command {
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -87,7 +87,7 @@ module.exports = class SoftBanCommand extends Command {
         const isBanned = await bans.fetch(user).catch(() => null);
         if (isBanned) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is already banned.'
+                color: 'RED', emoji: 'cross', description: 'That user is already banned.',
             }));
         }
 
@@ -108,7 +108,7 @@ module.exports = class SoftBanCommand extends Command {
                     **Moderator:** ${author.toString()} ${author.tag}
 
                     *The invite will expire in 1 week.*
-                `
+                `,
             });
 
             /** @type {TextChannel} */
@@ -131,14 +131,14 @@ module.exports = class SoftBanCommand extends Command {
             userTag: user.tag,
             modId: author.id,
             modTag: author.tag,
-            reason
+            reason,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been soft-banned`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

@@ -27,7 +27,7 @@ module.exports = class PollCommand extends Command {
             examples: [
                 'poll create polls 12h',
                 'poll end #polls',
-                'poll end polls 890317796221792336'
+                'poll end polls 890317796221792336',
             ],
             modPermissions: true,
             guildOnly: true,
@@ -37,21 +37,21 @@ module.exports = class PollCommand extends Command {
                     label: 'sub-command',
                     prompt: 'Do you want to create or end a poll?',
                     type: 'string',
-                    oneOf: ['create', 'end']
+                    oneOf: ['create', 'end'],
                 },
                 {
                     key: 'channel',
                     prompt: 'On what channel do you want to create/end the poll?',
                     type: 'text-channel',
-                    required: false
+                    required: false,
                 },
                 {
                     key: 'durationOrMsg',
                     label: 'duration or message',
                     prompt: 'How long should the poll last? Or what\'s the message ID of the poll you want to end?',
                     type: ['date', 'duration', 'string'],
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
@@ -65,27 +65,27 @@ module.exports = class PollCommand extends Command {
                                 channelTypes: ['guild-text'],
                                 name: 'channel',
                                 description: 'The channel where to create the poll.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'duration',
                                 description: 'The duration of the poll.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'message',
                                 description: 'The message to send with the poll.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'emojis',
                                 description: 'The emojis for the options of the poll (min. of 2).',
-                                required: true
-                            }
-                        ]
+                                required: true,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -96,12 +96,12 @@ module.exports = class PollCommand extends Command {
                                 type: 'string',
                                 name: 'message-url',
                                 description: 'The link/url of the poll to end.',
-                                required: true
-                            }
-                        ]
-                    }
-                ]
-            }
+                                required: true,
+                            },
+                        ],
+                    },
+                ],
+            },
         });
     }
 
@@ -126,7 +126,7 @@ module.exports = class PollCommand extends Command {
                 durationOrMsg = await arg.parse(duration).catch(() => null) || null;
                 if (!durationOrMsg || typeof durationOrMsg === 'string') {
                     return await replyAll({ interaction }, basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'That duration is invalid.'
+                        color: 'RED', emoji: 'cross', description: 'That duration is invalid.',
                     }));
                 }
                 if (typeof durationOrMsg === 'number') durationOrMsg += Date.now();
@@ -142,12 +142,12 @@ module.exports = class PollCommand extends Command {
                 }
                 if (emojisArr.length < 2) {
                     return await replyAll({ interaction }, basicEmbed({
-                        color: 'RED', emoji: 'cross', description: 'You need to send at least 2 emojis.'
+                        color: 'RED', emoji: 'cross', description: 'You need to send at least 2 emojis.',
                     }));
                 }
             } else if (!validURL(messageUrl)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That message url is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'That message url is invalid.',
                 }));
             }
         }
@@ -192,7 +192,7 @@ module.exports = class PollCommand extends Command {
             this.now = Date.now();
 
             const pollMsg = await basicCollector({ message }, {
-                fieldName: 'What will the message of the poll be?'
+                fieldName: 'What will the message of the poll be?',
             }, { time: 2 * 60_000 });
             if (!pollMsg) return;
             msg = pollMsg.content;
@@ -200,7 +200,7 @@ module.exports = class PollCommand extends Command {
             const allEmojis = client.emojis.cache;
             while (emojis.length < 2) {
                 const emojisMsg = await basicCollector({ message }, {
-                    fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**'
+                    fieldName: 'Now, what emojis should the bot react with in the poll message? Please send **at least 2.**',
                 }, { time: 2 * 60_000 });
                 if (!emojisMsg) return;
 
@@ -225,11 +225,11 @@ module.exports = class PollCommand extends Command {
             channel: channel.id,
             message: sent.id,
             emojis,
-            duration: duration
+            duration: duration,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `The poll was successfully created [here](${sent.url}).`
+            color: 'GREEN', emoji: 'check', description: `The poll was successfully created [here](${sent.url}).`,
         }));
     }
 
@@ -249,13 +249,13 @@ module.exports = class PollCommand extends Command {
             channel = await channels.fetch(chanId).catch(() => null);
             if (!channel) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'I couldn\'t get the channel from the url.'
+                    color: 'RED', emoji: 'cross', description: 'I couldn\'t get the channel from the url.',
                 }));
             }
             msg = await channel.messages.fetch(msgId).catch(() => null);
             if (!msg) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'I couldn\'t get the message from the url.'
+                    color: 'RED', emoji: 'cross', description: 'I couldn\'t get the message from the url.',
                 }));
             }
         } else {
@@ -273,7 +273,7 @@ module.exports = class PollCommand extends Command {
         );
         if (!pollData) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the poll you were looking for.'
+                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the poll you were looking for.',
             }));
         }
 
@@ -283,7 +283,7 @@ module.exports = class PollCommand extends Command {
         const pollMsg = msg || await pollChannel?.messages.fetch(pollData.message);
         if (!pollMsg) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That poll message or the channel were deleted.'
+                color: 'RED', emoji: 'cross', description: 'That poll message or the channel were deleted.',
             }));
         }
 
@@ -300,19 +300,19 @@ module.exports = class PollCommand extends Command {
 
         const winners = results.sort((a, b) => b.votes - a.votes).filter((d, i, arr) => arr[0].votes === d.votes);
 
-        const winner = winners.length === 1 ?
-            `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null;
+        const winner = winners.length === 1
+            ? `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null;
 
-        const draw = winners.length > 1 ?
-            `It seems like there was a draw between these choices: ${winners.map(d => d.emoji).join(', ')}` : null;
+        const draw = winners.length > 1
+            ? `It seems like there was a draw between these choices: ${winners.map(d => d.emoji).join(', ')}` : null;
 
-        const noVotes = results.filter(d => d.votes === 0).length === results.length ?
-            'It seems like no one voted on this poll...' : null;
+        const noVotes = results.filter(d => d.votes === 0).length === results.length
+            ? 'It seems like no one voted on this poll...' : null;
 
         const pollEmbed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: 'The poll has ended!', iconURL: guild.iconURL({ dynamic: true }), url: pollMsg.url
+                name: 'The poll has ended!', iconURL: guild.iconURL({ dynamic: true }), url: pollMsg.url,
             })
             .setDescription(winner || noVotes || draw)
             .setTimestamp();
@@ -328,7 +328,7 @@ module.exports = class PollCommand extends Command {
         await this.db.delete(pollData);
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `[This poll](${pollMsg.url}) has been ended.`
+            color: 'GREEN', emoji: 'check', description: `[This poll](${pollMsg.url}) has been ended.`,
         }));
     }
 };

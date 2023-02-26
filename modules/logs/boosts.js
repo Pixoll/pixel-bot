@@ -25,7 +25,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('#f47fff')
             .setAuthor({
-                name: user.tag, iconURL: newMember.displayAvatarURL({ dynamic: true })
+                name: user.tag, iconURL: newMember.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(`${user.toString()} ${action} boosting ${emoji}`)
             .setFooter({ text: `User ID: ${id}` })

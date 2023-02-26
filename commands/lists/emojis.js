@@ -41,7 +41,7 @@ module.exports = class EmojisCommand extends Command {
             description: 'Displays a list of server emojis.',
             details: 'If the amount of emojis is too big, I will only display the maximum amount I\'m able to.',
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -56,13 +56,13 @@ module.exports = class EmojisCommand extends Command {
 
         const emojis = _emojis.map(emoji => ({
             animated: emoji.animated,
-            string: emoji.toString()
+            string: emoji.toString(),
         }));
 
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${guild.name}'s emojis`, iconURL: guild.iconURL({ dynamic: true })
+                name: `${guild.name}'s emojis`, iconURL: guild.iconURL({ dynamic: true }),
             });
 
         const notAnimated = emojis.filter(e => !e.animated).map(e => e.string);

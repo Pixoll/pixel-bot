@@ -12,7 +12,7 @@ module.exports = class BotListCommand extends Command {
             group: 'lists',
             description: 'Displays the bot list of the server.',
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -30,7 +30,7 @@ module.exports = class BotListCommand extends Command {
         await generateEmbed({ message, interaction }, botList, {
             number: 20,
             authorName: `There's ${pluralize('bot', botList.length)}`,
-            useDescription: true
+            useDescription: true,
         });
     }
 };

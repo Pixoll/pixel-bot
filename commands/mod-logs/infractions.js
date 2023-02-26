@@ -19,16 +19,16 @@ module.exports = class InfractionsCommand extends Command {
             args: [{
                 key: 'user',
                 prompt: 'What user do you want to get the infractions from?',
-                type: 'user'
+                type: 'user',
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
                     description: 'The user to check their infractions.',
-                    required: true
-                }]
-            }
+                    required: true,
+                }],
+            },
         });
     }
 
@@ -47,7 +47,7 @@ module.exports = class InfractionsCommand extends Command {
         const mods = await db.fetchMany({ userId: user.id });
         if (mods.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'That user has no infractions.'
+                color: 'BLUE', emoji: 'info', description: 'That user has no infractions.',
             }));
         }
 
@@ -76,7 +76,7 @@ module.exports = class InfractionsCommand extends Command {
             keyTitle: { prefix: 'type' },
             keysExclude: ['__v', 'updatedAt', 'guild', '_id', 'userId', 'userTag'],
             useDocId: true,
-            components: [filterMenu]
+            components: [filterMenu],
         });
     }
 };

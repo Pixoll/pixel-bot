@@ -22,7 +22,7 @@ module.exports = class SlowmodeCommand extends Command {
             format: 'slowmode [channel] [time]',
             examples: [
                 'slowmode #main-chat 3s',
-                'slowmode commands off'
+                'slowmode commands off',
             ],
             clientPermissions: ['MANAGE_CHANNELS'],
             userPermissions: ['MANAGE_CHANNELS'],
@@ -31,14 +31,14 @@ module.exports = class SlowmodeCommand extends Command {
                 {
                     key: 'channel',
                     prompt: 'In what channel do you want to change the rate limit?',
-                    type: ['text-channel', 'thread-channel']
+                    type: ['text-channel', 'thread-channel'],
                 },
                 {
                     key: 'rateLimit',
                     prompt: 'What will be the channel\'s new rate limit?',
                     type: ['duration', 'string'],
-                    oneOf: ['off']
-                }
+                    oneOf: ['off'],
+                },
             ],
             slash: {
                 options: [
@@ -46,16 +46,16 @@ module.exports = class SlowmodeCommand extends Command {
                         type: 'integer',
                         name: 'rate-limit',
                         description: 'The new channel\'s rate limit, in seconds.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'channel',
                         channelTypes: ['guild-text'],
                         name: 'channel',
-                        description: 'The channel to change its rate limit.'
-                    }
-                ]
-            }
+                        description: 'The channel to change its rate limit.',
+                    },
+                ],
+            },
         });
     }
 
@@ -76,7 +76,7 @@ module.exports = class SlowmodeCommand extends Command {
 
         if (channel.rateLimitPerUser === rateLimit) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'The slowmode is already set to that value.'
+                color: 'RED', emoji: 'cross', description: 'The slowmode is already set to that value.',
             }));
         }
 
@@ -84,7 +84,7 @@ module.exports = class SlowmodeCommand extends Command {
 
         if (rateLimit === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'GREEN', emoji: 'check', description: `Disabled slowmode in ${channel.toString()}`
+                color: 'GREEN', emoji: 'check', description: `Disabled slowmode in ${channel.toString()}`,
             }));
         }
 
@@ -92,7 +92,7 @@ module.exports = class SlowmodeCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Changed slowmode in #${channel.name}`,
-            fieldValue: `**New rate limit:** ${myMs(rateLimit * 1000, { long: true, showAnd: true })}`
+            fieldValue: `**New rate limit:** ${myMs(rateLimit * 1000, { long: true, showAnd: true })}`,
         }));
     }
 };

@@ -19,7 +19,7 @@ module.exports = class UnmuteCommand extends Command {
             format: 'unmute [member] <reason>',
             examples: [
                 'unmute Pixoll',
-                'unmute Pixoll Appealed'
+                'unmute Pixoll Appealed',
             ],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
@@ -28,15 +28,15 @@ module.exports = class UnmuteCommand extends Command {
                 {
                     key: 'member',
                     prompt: 'What member do you want to unmute?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the unmute?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -44,15 +44,15 @@ module.exports = class UnmuteCommand extends Command {
                         type: 'user',
                         name: 'member',
                         description: 'The member to unmute.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the unmute.'
-                    }
-                ]
-            }
+                        description: 'The reason of the unmute.',
+                    },
+                ],
+            },
         });
     }
 
@@ -67,13 +67,13 @@ module.exports = class UnmuteCommand extends Command {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -88,7 +88,7 @@ module.exports = class UnmuteCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: 'No mute role found in this server, please use the `setup` command before using this.'
+                description: 'No mute role found in this server, please use the `setup` command before using this.',
             }));
         }
 
@@ -96,7 +96,7 @@ module.exports = class UnmuteCommand extends Command {
 
         if (!roles.cache.has(role.id)) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is not muted.'
+                color: 'RED', emoji: 'cross', description: 'That user is not muted.',
             }));
         }
 
@@ -113,7 +113,7 @@ module.exports = class UnmuteCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been unmuted`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

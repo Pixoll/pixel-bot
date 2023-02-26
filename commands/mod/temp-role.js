@@ -2,7 +2,7 @@
 const { Command, CommandInstances } = require('pixoll-commando');
 const { Role, GuildMember } = require('discord.js');
 const {
-    timestamp, isValidRole, getArgument, replyAll, basicEmbed, docId
+    timestamp, isValidRole, getArgument, replyAll, basicEmbed, docId,
 } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
@@ -30,25 +30,25 @@ module.exports = class TempRoleCommand extends Command {
                 {
                     key: 'role',
                     prompt: 'What role would you want to give then?',
-                    type: 'role'
+                    type: 'role',
                 },
                 {
                     key: 'member',
                     prompt: 'What member do you want to give the role?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'duration',
                     prompt: 'How long should this role last?',
-                    type: ['date', 'duration']
+                    type: ['date', 'duration'],
                 },
                 {
                     key: 'reason',
                     prompt: 'Why are you\'re giving them the role?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -56,27 +56,27 @@ module.exports = class TempRoleCommand extends Command {
                         type: 'role',
                         name: 'role',
                         description: 'The role to give.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'user',
                         name: 'member',
                         description: 'The member to give the role.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'duration',
                         description: 'For how long they should have the role.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'Why are you giving them the role.'
-                    }
-                ]
-            }
+                        description: 'Why are you giving them the role.',
+                    },
+                ],
+            },
         });
     }
 
@@ -93,25 +93,25 @@ module.exports = class TempRoleCommand extends Command {
         if (interaction) {
             if (!isValidRole(await interaction.fetchReply(), role)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid role to use.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid role to use.',
                 }));
             }
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             const arg = this.argsCollector.args[1];
             duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.',
                 }));
             }
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -133,7 +133,7 @@ module.exports = class TempRoleCommand extends Command {
 
         if (roles.cache.has(role.id)) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That member already has that role.'
+                color: 'RED', emoji: 'cross', description: 'That member already has that role.',
             }));
         }
 
@@ -148,8 +148,8 @@ module.exports = class TempRoleCommand extends Command {
                         **Expires:** ${timestamp(duration, 'R')}
                         **Reason:** ${reason}
                         **Moderator:** ${author.toString()} ${author.tag}
-                    `
-                })]
+                    `,
+                })],
             }).catch(() => null);
         }
 
@@ -160,7 +160,7 @@ module.exports = class TempRoleCommand extends Command {
             userId: user.id,
             userTag: user.tag,
             role: role.id,
-            duration
+            duration,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -170,7 +170,7 @@ module.exports = class TempRoleCommand extends Command {
             fieldValue: stripIndent`
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
-            `
+            `,
         }));
     }
 };

@@ -35,7 +35,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Kicked user', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Kicked user', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
@@ -75,7 +75,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor({
-                name: 'Banned user', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Banned user', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
@@ -117,7 +117,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor({
-                name: 'Unbanned user', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Unbanned user', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
@@ -139,7 +139,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor({
-                name: 'Muted member', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Muted member', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
@@ -162,7 +162,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor({
-                name: 'Timed-out member', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Timed-out member', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
@@ -187,7 +187,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor({
-                name: 'Unmuted member', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Unmuted member', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`
@@ -209,7 +209,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GOLD')
             .setAuthor({
-                name: 'Warned member', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'Warned member', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(stripIndent`

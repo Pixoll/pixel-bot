@@ -21,7 +21,7 @@ module.exports = class NickCommand extends Command {
             format: 'nick [member] [nick]',
             examples: [
                 'nick Pixoll Cool coder',
-                'nick Pixoll remove'
+                'nick Pixoll remove',
             ],
             clientPermissions: ['MANAGE_NICKNAMES'],
             userPermissions: ['MANAGE_NICKNAMES'],
@@ -30,14 +30,14 @@ module.exports = class NickCommand extends Command {
                 {
                     key: 'member',
                     prompt: 'What member do you want to change/remove the nick?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'nickname',
                     prompt: 'What will be their new nickname? Type `remove` to remove their current nickname.',
                     type: 'string',
-                    max: 32
-                }
+                    max: 32,
+                },
             ],
             slash: {
                 options: [
@@ -45,16 +45,16 @@ module.exports = class NickCommand extends Command {
                         type: 'user',
                         name: 'member',
                         description: 'The member to change or remove their nick.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'nickname',
                         description: 'Their new nickname.',
-                        required: true
-                    }
-                ]
-            }
+                        required: true,
+                    },
+                ],
+            },
         });
     }
 
@@ -69,14 +69,14 @@ module.exports = class NickCommand extends Command {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             if (nickname.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'Please keep the nickname below or exactly 32 characters.'
+                    description: 'Please keep the nickname below or exactly 32 characters.',
                 }));
             }
         }
@@ -88,7 +88,7 @@ module.exports = class NickCommand extends Command {
                 color: 'RED',
                 emoji: 'cross',
                 fieldName: `Unable to change ${tag}'s nickname`,
-                fieldValue: 'Please check the role hierarchy or server ownership.'
+                fieldValue: 'Please check the role hierarchy or server ownership.',
             }));
         }
 
@@ -100,15 +100,15 @@ module.exports = class NickCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: 'An error occurred when trying to change that member\'s nickname. Please try again.'
+                description: 'An error occurred when trying to change that member\'s nickname. Please try again.',
             }));
         }
 
-        const description = isRemove ? `Removed \`${tag}\`'s nickname.` :
-            `Changed \`${tag}\`'s nickname to \`${nickname}\``;
+        const description = isRemove ? `Removed \`${tag}\`'s nickname.`
+            : `Changed \`${tag}\`'s nickname to \`${nickname}\``;
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description
+            color: 'GREEN', emoji: 'check', description,
         }));
     }
 };

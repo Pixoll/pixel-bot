@@ -13,7 +13,7 @@ module.exports = class PingCommand extends Command {
             group: 'info',
             description: 'Pong! 🏓',
             guarded: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -24,7 +24,7 @@ module.exports = class PingCommand extends Command {
     async run({ message, interaction }) {
         const now = Date.now();
         const pingMsg = await message?.replyEmbed(basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Pinging...'
+            color: 'GOLD', emoji: 'loading', description: 'Pinging...',
         }));
 
         const roundtrip = Math.abs(

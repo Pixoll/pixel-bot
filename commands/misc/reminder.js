@@ -28,15 +28,15 @@ module.exports = class ReminderCommand extends Command {
                 {
                     key: 'time',
                     prompt: 'When would you like to be reminded?',
-                    type: ['duration', 'date']
+                    type: ['duration', 'date'],
                 },
                 {
                     key: 'reminder',
                     prompt: 'What do you want to be reminded about?',
                     type: 'string',
                     max: 512,
-                    default: '`Not specified`'
-                }
+                    default: '`Not specified`',
+                },
             ],
             slash: {
                 options: [
@@ -44,15 +44,15 @@ module.exports = class ReminderCommand extends Command {
                         type: 'string',
                         name: 'time',
                         description: 'When to get reminded at.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reminder',
-                        description: 'What to get reminded about.'
-                    }
-                ]
-            }
+                        description: 'What to get reminded about.',
+                    },
+                ],
+            },
         });
 
         this.db = this.client.database.reminders;
@@ -71,7 +71,7 @@ module.exports = class ReminderCommand extends Command {
             time = await arg.parse(time).catch(() => null);
             if (!time) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The time you specified is invalid.',
                 }));
             }
             reminder ??= '`Not specified`';
@@ -101,7 +101,7 @@ module.exports = class ReminderCommand extends Command {
             emoji: 'check',
             fieldName: `I'll remind you ${stamp} for:`,
             fieldValue: reminder,
-            footer: 'React with ❌ to cancel the reminder.'
+            footer: 'React with ❌ to cancel the reminder.',
         }));
     }
 };

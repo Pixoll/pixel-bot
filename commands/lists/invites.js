@@ -13,7 +13,7 @@ module.exports = class InvitesCommand extends Command {
             description: 'Displays a list of all the invites of this server, ordered by most to least used.',
             clientPermissions: ['MANAGE_GUILD'],
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -28,7 +28,7 @@ module.exports = class InvitesCommand extends Command {
         const invites = await guild.invites.fetch().catch(() => null);
         if (!invites || invites.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There are no invites in this server.'
+                color: 'BLUE', emoji: 'info', description: 'There are no invites in this server.',
             }));
         }
 
@@ -37,13 +37,13 @@ module.exports = class InvitesCommand extends Command {
             inviter: inv.inviter.tag,
             channel: inv.channel.toString(),
             link: inv.url,
-            code: inv.code
+            code: inv.code,
         })).sort((a, b) => b.uses - a.uses);
 
         await generateEmbed({ message, interaction }, invitesList, {
             authorName: `There's ${pluralize('invite', invitesList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            keyTitle: { suffix: 'link' }
+            keyTitle: { suffix: 'link' },
         });
     }
 };

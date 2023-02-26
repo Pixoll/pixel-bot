@@ -14,7 +14,7 @@ module.exports = async (client, forceCleanup = false) => {
 
         const {
             active, afk, disabled, mcIps, moderations, modules, polls, prefixes, reactionRoles, rules, setup, stickyRoles,
-            welcome
+            welcome,
         } = guild.database;
 
         // Fetches multiple documents at once

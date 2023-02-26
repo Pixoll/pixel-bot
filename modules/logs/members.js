@@ -32,7 +32,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: 'User joined', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'User joined', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
@@ -72,7 +72,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'User left', iconURL: user.displayAvatarURL({ dynamic: true })
+                name: 'User left', iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
@@ -100,7 +100,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated member', iconURL: newMember.displayAvatarURL({ dynamic: true })
+                name: 'Updated member', iconURL: newMember.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(`${user.toString()} ${user.tag}`)
             .setFooter({ text: `User ID: ${id}` })

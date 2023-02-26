@@ -38,7 +38,7 @@ module.exports = class StatsCommand extends Command {
             group: 'info',
             description: 'Displays some statistics of the bot.',
             guarded: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -61,7 +61,7 @@ module.exports = class StatsCommand extends Command {
         const stats = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${user.username}'s stats`, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: `${user.username}'s stats`, iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .addField('Servers', guilds.size.toLocaleString(), true)
             .addField('Users', users, true)

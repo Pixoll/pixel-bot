@@ -30,7 +30,7 @@ module.exports = async (client) => {
         const info = new MessageEmbed()
             .setColor(color)
             .setAuthor({
-                name: message, iconURL: guild.iconURL({ dynamic: true })
+                name: message, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setThumbnail(guild.iconURL({ dynamic: true, size: 2048 }))
             .setDescription(stripIndent`

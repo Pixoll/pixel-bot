@@ -26,21 +26,21 @@ module.exports = class GuildCommand extends Command {
                     key: 'subCommand',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['info', 'invite', 'remove']
+                    oneOf: ['info', 'invite', 'remove'],
                 },
                 {
                     key: 'guildId',
                     label: 'guild ID or name',
                     prompt: 'What is the ID or name of the guild?',
-                    type: 'string'
+                    type: 'string',
                 },
                 {
                     key: 'reason',
                     prompt: 'Why is the bot leaving that guild?',
                     type: 'string',
-                    required: false
-                }
-            ]
+                    required: false,
+                },
+            ],
         });
     }
 
@@ -103,7 +103,7 @@ module.exports = class GuildCommand extends Command {
 
         await message.reply({
             content: `Click the button bellow to join **${guild.name}**`,
-            components: [inviteButton(invite, 'Join')]
+            components: [inviteButton(invite, 'Join')],
         });
     }
 
@@ -132,13 +132,13 @@ module.exports = class GuildCommand extends Command {
                     + 'If you want to know more information please contact him.'}
 
                     **The bot will be removed from your server in 30 seconds.**
-                `
-            })]
+                `,
+            })],
         });
 
         await guild.leave();
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `The bot has been removed from **${guild.name}.**`
+            color: 'GREEN', emoji: 'check', description: `The bot has been removed from **${guild.name}.**`,
         }));
     }
 };

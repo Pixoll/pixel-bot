@@ -22,16 +22,16 @@ module.exports = class RoleInfoCommand extends Command {
             args: [{
                 key: 'role',
                 prompt: 'What role do you want to get information from?',
-                type: 'role'
+                type: 'role',
             }],
             slash: {
                 options: [{
                     type: 'role',
                     name: 'role',
                     description: 'The role to get info from.',
-                    required: true
-                }]
-            }
+                    required: true,
+                }],
+            },
         });
     }
 

@@ -24,7 +24,7 @@ module.exports = class McStatusCommand extends Command {
             examples: [
                 'mcstatus java play.hypixel.net',
                 'mcstatus bedrock play.hyperlandsmc.net',
-                'mcstatus save-java play.hypixel.net'
+                'mcstatus save-java play.hypixel.net',
             ],
             args: [
                 {
@@ -33,13 +33,13 @@ module.exports = class McStatusCommand extends Command {
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: ['check', 'java', 'bedrock', 'save-java', 'save-bedrock'],
-                    default: 'check'
+                    default: 'check',
                 },
                 {
                     key: 'ip',
                     prompt: 'What is the IP of the server you want to save/look for?',
                     type: 'string',
-                    required: false
+                    required: false,
                 },
                 {
                     key: 'port',
@@ -47,15 +47,15 @@ module.exports = class McStatusCommand extends Command {
                     type: 'integer',
                     min: 1,
                     max: 65535,
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'check',
-                        description: 'Status of the saved server.'
+                        description: 'Status of the saved server.',
                     },
                     {
                         type: 'subcommand',
@@ -66,16 +66,16 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'string',
                                 name: 'ip',
                                 description: 'The IP of the server to look for.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to look for.',
                                 minValue: 1,
-                                maxValue: 65535
-                            }
-                        ]
+                                maxValue: 65535,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -86,16 +86,16 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'string',
                                 name: 'ip',
                                 description: 'The IP of the server to look for.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to look for.',
                                 minValue: 1,
-                                maxValue: 65535
-                            }
-                        ]
+                                maxValue: 65535,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -106,16 +106,16 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'string',
                                 name: 'ip',
                                 description: 'The IP of the server to save.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to save.',
                                 minValue: 1,
-                                maxValue: 65535
-                            }
-                        ]
+                                maxValue: 65535,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -126,19 +126,19 @@ module.exports = class McStatusCommand extends Command {
                                 type: 'string',
                                 name: 'ip',
                                 description: 'The IP of the server to save.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
                                 name: 'port',
                                 description: 'The port of the server to save.',
                                 minValue: 1,
-                                maxValue: 65535
-                            }
-                        ]
-                    }
-                ]
-            }
+                                maxValue: 65535,
+                            },
+                        ],
+                    },
+                ],
+            },
         });
     }
 
@@ -184,15 +184,15 @@ module.exports = class McStatusCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: 'Please run the `save:java` or `save:bedrock` sub-commands before using this.'
+                description: 'Please run the `save:java` or `save:bedrock` sub-commands before using this.',
             }));
         }
 
         const { type, ip, port } = savedServer;
 
-        const response = type === 'java' ?
-            await this.getJavaStatus(ip, port) :
-            await this.getBedrockStatus(ip, port);
+        const response = type === 'java'
+            ? await this.getJavaStatus(ip, port)
+            : await this.getBedrockStatus(ip, port);
 
         await replyAll({ message, interaction }, response);
     }
@@ -259,7 +259,7 @@ module.exports = class McStatusCommand extends Command {
             guild: guildId,
             type: 'java',
             ip: ip,
-            port: port
+            port: port,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -269,7 +269,7 @@ module.exports = class McStatusCommand extends Command {
             fieldValue: stripIndent`
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
-            `
+            `,
         }));
     }
 
@@ -301,7 +301,7 @@ module.exports = class McStatusCommand extends Command {
             guild: guildId,
             type: 'bedrock',
             ip: ip,
-            port: port
+            port: port,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
@@ -311,7 +311,7 @@ module.exports = class McStatusCommand extends Command {
             fieldValue: stripIndent`
                 **IP:** \`${ip}\`
                 **Port:** \`${port}\`
-            `
+            `,
         }));
     }
 
@@ -349,7 +349,7 @@ module.exports = class McStatusCommand extends Command {
         const serverInfo = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `Server IP: ${ip}`, iconURL: 'attachment://icon.png'
+                name: `Server IP: ${ip}`, iconURL: 'attachment://icon.png',
             })
             .addField('MOTD', Util.escapeMarkdown(motd.clean.trimStart()))
             .setThumbnail('attachment://icon.png')
@@ -370,7 +370,7 @@ module.exports = class McStatusCommand extends Command {
 
         return {
             embeds: [serverInfo],
-            files: [icon].filter(a => a)
+            files: [icon].filter(a => a),
         };
     }
 
@@ -392,7 +392,7 @@ module.exports = class McStatusCommand extends Command {
                 fieldValue: stripIndent`
                     **IP:** \`${ip}\`
                     **Port:** \`${port}\`
-                `
+                `,
             });
         }
 

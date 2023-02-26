@@ -50,8 +50,8 @@ function patchData(data) {
             stickers: _patch(data?.auditLogs?.stickers),
             threads: _patch(data?.auditLogs?.threads),
             users: _patch(data?.auditLogs?.users),
-            voice: _patch(data?.auditLogs?.voice)
-        }
+            voice: _patch(data?.auditLogs?.voice),
+        },
     };
 
     return patch;
@@ -79,7 +79,7 @@ module.exports = class ModuleCommand extends Command {
             `,
             examples: [
                 'module diagnose welcome',
-                'module toggle audit-logs channels'
+                'module toggle audit-logs channels',
             ],
             userPermissions: ['ADMINISTRATOR'],
             guarded: true,
@@ -90,13 +90,13 @@ module.exports = class ModuleCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['diagnose', 'toggle']
+                    oneOf: ['diagnose', 'toggle'],
                 },
                 {
                     key: 'module',
                     prompt: 'What module do you want to toggle/diagnose?',
                     type: 'string',
-                    oneOf: modules
+                    oneOf: modules,
                 },
                 {
                     key: 'subModule',
@@ -104,8 +104,8 @@ module.exports = class ModuleCommand extends Command {
                     prompt: 'What sub-module of the audit logs do you want to toggle/diagnose?',
                     type: 'string',
                     oneOf: auditLogs,
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
@@ -119,15 +119,15 @@ module.exports = class ModuleCommand extends Command {
                                 name: 'module',
                                 description: 'The module to diagnose.',
                                 required: true,
-                                choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m }))
+                                choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m })),
                             },
                             {
                                 type: 'string',
                                 name: 'sub-module',
                                 description: 'The sub-module to diagnose. Only usable if "module" is "Audit Logs".',
-                                choices: auditLogs.map(m => ({ name: capitalize(m), value: m }))
-                            }
-                        ]
+                                choices: auditLogs.map(m => ({ name: capitalize(m), value: m })),
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -139,18 +139,18 @@ module.exports = class ModuleCommand extends Command {
                                 name: 'module',
                                 description: 'The module to toggle.',
                                 required: true,
-                                choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m }))
+                                choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m })),
                             },
                             {
                                 type: 'string',
                                 name: 'sub-module',
                                 description: 'The sub-module to toggle. Only usable if "module" is "Audit Logs".',
-                                choices: auditLogs.map(m => ({ name: capitalize(m), value: m }))
-                            }
-                        ]
-                    }
-                ]
-            }
+                                choices: auditLogs.map(m => ({ name: capitalize(m), value: m })),
+                            },
+                        ],
+                    },
+                ],
+            },
         });
     }
 
@@ -207,7 +207,7 @@ module.exports = class ModuleCommand extends Command {
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `Status of ${type}: ${subModule || module}`, iconURL: guild.iconURL({ dynamic: true })
+                name: `Status of ${type}: ${subModule || module}`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Status:** ${isEnabled ? 'Enabled' : 'Disabled'}
@@ -252,7 +252,7 @@ module.exports = class ModuleCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the ${type} \`${target}\``,
-            fieldValue: `**New status:** ${status ? 'Enabled' : 'Disabled'}`
+            fieldValue: `**New status:** ${status ? 'Enabled' : 'Disabled'}`,
         }));
     }
 };

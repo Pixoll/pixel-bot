@@ -21,7 +21,7 @@ module.exports = class TodoCommand extends Command {
             `,
             examples: [
                 'todo add Make awesome commands',
-                'todo remove 2'
+                'todo remove 2',
             ],
             args: [
                 {
@@ -30,7 +30,7 @@ module.exports = class TodoCommand extends Command {
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: ['view', 'add', 'remove', 'clear'],
-                    default: 'view'
+                    default: 'view',
                 },
                 {
                     key: 'item',
@@ -38,15 +38,15 @@ module.exports = class TodoCommand extends Command {
                     type: 'string',
                     min: 1,
                     max: 512,
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'view',
-                        description: 'Display your to-do list.'
+                        description: 'Display your to-do list.',
                     },
                     {
                         type: 'subcommand',
@@ -56,8 +56,8 @@ module.exports = class TodoCommand extends Command {
                             type: 'string',
                             name: 'item',
                             description: 'The item to add to your to-do list.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -68,16 +68,16 @@ module.exports = class TodoCommand extends Command {
                             name: 'item',
                             description: 'The item to remove from your to-do list.',
                             required: true,
-                            minValue: 1
-                        }]
+                            minValue: 1,
+                        }],
                     },
                     {
                         type: 'subcommand',
                         name: 'clear',
-                        description: 'Remove all of the items in your to-do list.'
-                    }
-                ]
-            }
+                        description: 'Remove all of the items in your to-do list.',
+                    },
+                ],
+            },
         });
 
         this.db = this.client.database.todo;
@@ -116,7 +116,7 @@ module.exports = class TodoCommand extends Command {
     async view({ message, interaction }, todoData) {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
+                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.',
             }));
         }
 
@@ -129,7 +129,7 @@ module.exports = class TodoCommand extends Command {
             title: 'Item',
             hasObjects: false,
             toUser: true,
-            dmMsg: 'Check your DMs for your to-do list.'
+            dmMsg: 'Check your DMs for your to-do list.',
         });
     }
 
@@ -154,7 +154,7 @@ module.exports = class TodoCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Added item \`${(todoData?.list.length ?? 0) + 1}\` to your to-do list:`,
-            fieldValue: item
+            fieldValue: item,
         }));
     }
 
@@ -173,19 +173,19 @@ module.exports = class TodoCommand extends Command {
 
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
+                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.',
             }));
         }
 
         if (!todoData.list[--item]) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside your to-do list.'
+                color: 'RED', emoji: 'cross', description: 'That\'s not a valid item number inside your to-do list.',
             }));
         }
         await this.db.update(todoData, { $pull: { list: todoData.list[item++] } });
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Removed item \`${item}\` from your to-do list.`
+            color: 'GREEN', emoji: 'check', description: `Removed item \`${item}\` from your to-do list.`,
         }));
     }
 
@@ -197,7 +197,7 @@ module.exports = class TodoCommand extends Command {
     async clear({ message, interaction }, todoData) {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.'
+                color: 'BLUE', emoji: 'info', description: 'Your to-do list is empty.',
             }));
         }
 
@@ -207,7 +207,7 @@ module.exports = class TodoCommand extends Command {
         await this.db.delete(todoData);
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'Your to-do list has been cleared.'
+            color: 'GREEN', emoji: 'check', description: 'Your to-do list has been cleared.',
         }));
     }
 };

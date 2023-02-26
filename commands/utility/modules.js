@@ -32,8 +32,8 @@ function patchData(data) {
             stickers: _patch(data?.auditLogs?.stickers),
             threads: _patch(data?.auditLogs?.threads),
             users: _patch(data?.auditLogs?.users),
-            voice: _patch(data?.auditLogs?.voice)
-        }
+            voice: _patch(data?.auditLogs?.voice),
+        },
     };
 
     return patch;
@@ -49,7 +49,7 @@ module.exports = class ModulesCommand extends Command {
             modPermissions: true,
             guarded: true,
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -65,7 +65,7 @@ module.exports = class ModulesCommand extends Command {
         const { auditLogs, /* chatFilter, */ welcome, stickyRoles } = patch;
         const {
             boosts, channels, commands, emojis, events, invites, members, messages, moderation, modules, roles, server,
-            stickers, threads, users, voice
+            stickers, threads, users, voice,
         } = auditLogs;
 
         // **Chat filter:** ${chatFilter}
@@ -73,7 +73,7 @@ module.exports = class ModulesCommand extends Command {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${guild.name}'s modules and sub-modules`, iconURL: guild.iconURL({ dynamic: true })
+                name: `${guild.name}'s modules and sub-modules`, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Sticky roles:** ${stickyRoles}

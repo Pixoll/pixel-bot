@@ -20,7 +20,7 @@ module.exports = (client) => {
         await db.delete(status);
 
         const toDelete = await message.replyEmbed(basicEmbed({
-            color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`
+            color: 'GREEN', description: `Welcome back ${author.toString()}, I removed your AFK status.`,
         }));
 
         await sleep(10);
@@ -41,7 +41,7 @@ module.exports = (client) => {
             const embed = new MessageEmbed()
                 .setColor('GOLD')
                 .setAuthor({
-                    name: `${user.username} is AFK`, iconURL: user.displayAvatarURL({ dynamic: true })
+                    name: `${user.username} is AFK`, iconURL: user.displayAvatarURL({ dynamic: true }),
                 })
                 .setDescription(`${data.status}\n${timestamp(data.updatedAt, 'R')}`)
                 .setTimestamp(data.updatedAt);

@@ -14,7 +14,7 @@ module.exports = class BansCommand extends Command {
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -29,7 +29,7 @@ module.exports = class BansCommand extends Command {
         const bans = await guild.bans.fetch().catch(() => null);
         if (!bans || bans.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There are no bans in this server.'
+                color: 'BLUE', emoji: 'info', description: 'There are no bans in this server.',
             }));
         }
 
@@ -38,7 +38,7 @@ module.exports = class BansCommand extends Command {
             bansList.push({
                 tag: user.tag,
                 id: user.id,
-                reason: reason?.replace(/%20/g, ' ') || 'No reason given.'
+                reason: reason?.replace(/%20/g, ' ') || 'No reason given.',
             });
         }
 
@@ -47,7 +47,7 @@ module.exports = class BansCommand extends Command {
         await generateEmbed({ message, interaction }, sorted, {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            keyTitle: { suffix: 'tag' }
+            keyTitle: { suffix: 'tag' },
         });
     }
 };

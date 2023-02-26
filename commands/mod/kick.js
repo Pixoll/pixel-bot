@@ -2,7 +2,7 @@
 const { Command, CommandInstances } = require('pixoll-commando');
 const { GuildMember, TextChannel } = require('discord.js');
 const {
-    docId, basicEmbed, memberException, userException, inviteButton, confirmButtons, replyAll
+    docId, basicEmbed, memberException, userException, inviteButton, confirmButtons, replyAll,
 } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
@@ -21,7 +21,7 @@ module.exports = class KickCommand extends Command {
             format: 'kick [member] <reason>',
             examples: [
                 'kick Pixoll',
-                'kick Pixoll Get out!'
+                'kick Pixoll Get out!',
             ],
             clientPermissions: ['KICK_MEMBERS'],
             userPermissions: ['KICK_MEMBERS'],
@@ -30,15 +30,15 @@ module.exports = class KickCommand extends Command {
                 {
                     key: 'member',
                     prompt: 'What member do you want to kick?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the kick?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -46,15 +46,15 @@ module.exports = class KickCommand extends Command {
                         type: 'user',
                         name: 'member',
                         description: 'The member to kick.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the kick.'
-                    }
-                ]
-            }
+                        description: 'The reason of the kick.',
+                    },
+                ],
+            },
         });
     }
 
@@ -69,13 +69,13 @@ module.exports = class KickCommand extends Command {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -102,7 +102,7 @@ module.exports = class KickCommand extends Command {
                     **Moderator:** ${author.toString()} ${author.tag}
 
                     *The invite will expire in 1 week.*
-                `
+                `,
             });
 
             /** @type {TextChannel} */
@@ -124,14 +124,14 @@ module.exports = class KickCommand extends Command {
             userTag: user.tag,
             modId: author.id,
             modTag: author.tag,
-            reason
+            reason,
         });
 
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been kicked`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

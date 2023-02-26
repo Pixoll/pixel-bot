@@ -12,7 +12,7 @@ module.exports = class BoostersCommand extends Command {
             group: 'lists',
             description: 'Displays a list of the members that have boosted the server.',
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -28,14 +28,14 @@ module.exports = class BoostersCommand extends Command {
 
         if (boosters.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There are no boosters in this server.'
+                color: 'BLUE', emoji: 'info', description: 'There are no boosters in this server.',
             }));
         }
 
         await generateEmbed({ message, interaction }, boosters, {
             number: 20,
             authorName: `There's ${pluralize('booster', boosters.length)}`,
-            useDescription: true
+            useDescription: true,
         });
     }
 };

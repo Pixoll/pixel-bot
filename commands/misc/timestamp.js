@@ -17,22 +17,22 @@ module.exports = class TimestampCommand extends Command {
                 'timestamp 3pm',
                 'timestamp 22/10/2021',
                 'timestamp 24/12/2022 23:59',
-                'timestamp 2/2 10pm -3'
+                'timestamp 2/2 10pm -3',
             ],
             args: [{
                 key: 'date',
                 prompt: 'What date should the timestamp have?',
                 type: ['date', 'duration'],
                 skipValidation: true,
-                default: 0
+                default: 0,
             }],
             slash: {
                 options: [{
                     type: 'string',
                     name: 'date',
-                    description: 'The date for the timestamp.'
-                }]
-            }
+                    description: 'The date for the timestamp.',
+                }],
+            },
         });
     }
 
@@ -48,7 +48,7 @@ module.exports = class TimestampCommand extends Command {
             date = await arg.parse(date ?? 'now').catch(() => null) || null;
             if (!date) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The date you specified is invalid.',
                 }));
             }
         }

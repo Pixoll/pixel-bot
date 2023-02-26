@@ -72,7 +72,7 @@ module.exports = (client) => {
             userTag: author.tag,
             modId: mod.id,
             modTag: mod.tag,
-            reason
+            reason,
         });
         client.emit('guildMemberWarn', guild, mod, author, reason);
 
@@ -82,7 +82,7 @@ module.exports = (client) => {
             fieldValue: stripIndent`
                 **Reason:** ${reason}
                 **Moderator:** ${mod.toString()} ${mod.tag} [Chat filtering system]
-            `
+            `,
         })).catch(() => null);
     });
 
@@ -128,7 +128,7 @@ module.exports = (client) => {
             modId: mod.id,
             modTag: mod.tag,
             reason,
-            duration: '1 minute'
+            duration: '1 minute',
         });
         await active.add({
             _id: id,
@@ -136,7 +136,7 @@ module.exports = (client) => {
             guild: guildId,
             userId: author.id,
             userTag: author.tag,
-            duration
+            duration,
         });
 
         await author.send(basicEmbed({
@@ -146,7 +146,7 @@ module.exports = (client) => {
                 **Expires:** ${timestamp(duration, 'R')}
                 **Reason:** ${reason}
                 **Moderator:** ${mod.toString()} ${mod.tag} [Chat filtering system]
-            `
+            `,
         })).catch(() => null);
     });
 
@@ -184,7 +184,7 @@ module.exports = (client) => {
                 userTag: author.tag,
                 modId: mod.id,
                 modTag: mod.tag,
-                reason
+                reason,
             });
             client.emit('guildMemberWarn', guild, mod, author, reason);
 
@@ -194,7 +194,7 @@ module.exports = (client) => {
                 fieldValue: stripIndent`
                     **Reason:** ${reason}
                     **Moderator:** ${mod.toString()} ${mod.tag} [Chat filtering system]
-                `
+                `,
             })).catch(() => null);
         }
     });

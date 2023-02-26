@@ -36,7 +36,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setFooter({ text: `User ID: ${id}` })
             .setTimestamp();

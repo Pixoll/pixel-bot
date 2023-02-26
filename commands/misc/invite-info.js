@@ -17,21 +17,21 @@ module.exports = class InviteInfoCommand extends Command {
             format: 'inviteinfo [invite]',
             examples: [
                 'inviteinfo minecraft',
-                'inviteinfo https://discord.gg/Pc9pAHf3GU'
+                'inviteinfo https://discord.gg/Pc9pAHf3GU',
             ],
             args: [{
                 key: 'invite',
                 prompt: 'What invite do you want to get information from?',
-                type: 'invite'
+                type: 'invite',
             }],
             slash: {
                 options: [{
                     type: 'string',
                     name: 'invite',
                     description: 'The invite to get info from.',
-                    required: true
-                }]
-            }
+                    required: true,
+                }],
+            },
         });
     }
 
@@ -46,7 +46,7 @@ module.exports = class InviteInfoCommand extends Command {
             invite = await this.client.fetchInvite(invite).catch(() => null);
             if (!invite) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That invite is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'That invite is invalid.',
                 }));
             }
         }
@@ -65,7 +65,7 @@ module.exports = class InviteInfoCommand extends Command {
             .setAuthor({
                 name: channel.type !== 'GROUP_DM' ? guild.name : channel.name,
                 iconURL: channel.type !== 'GROUP_DM' ? guild.iconURL({ dynamic: true }) : channel.iconURL(),
-                url
+                url,
             })
             .setDescription(stripIndent`
                 **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
@@ -75,9 +75,9 @@ module.exports = class InviteInfoCommand extends Command {
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
             .setFooter({
-                text: guild ?
-                    `Server ID: ${guild.id}` :
-                    `Group DM ID: ${channel.id}`
+                text: guild
+                    ? `Server ID: ${guild.id}`
+                    : `Group DM ID: ${channel.id}`,
             });
 
         await replyAll({ message, interaction }, embed);

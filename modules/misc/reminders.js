@@ -41,7 +41,7 @@ module.exports = async (client) => {
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')
                 .setAuthor({
-                    name: member?.displayName || user.username, iconURL: user.displayAvatarURL({ dynamic: true })
+                    name: member?.displayName || user.username, iconURL: user.displayAvatarURL({ dynamic: true }),
                 })
                 .setDescription(reminder.reminder)
                 .setFooter({ text: `Set about ${time} ago` })
@@ -92,8 +92,8 @@ module.exports = async (client) => {
                 color: 'GREEN',
                 emoji: 'check',
                 fieldName: 'Your reminder has been cancelled',
-                fieldValue: data.reminder
-            })]
+                fieldValue: data.reminder,
+            })],
         });
 
         await db.delete(data);

@@ -25,7 +25,7 @@ module.exports = class ButtonRoleCommand extends Command {
                 {
                     key: 'channel',
                     prompt: 'On what channel do you want to create the button roles?',
-                    type: 'text-channel'
+                    type: 'text-channel',
                 },
                 {
                     key: 'roles',
@@ -57,8 +57,8 @@ module.exports = class ButtonRoleCommand extends Command {
                         }
                         return [...new Set(valid)];
                     },
-                    error: 'None of the roles you specified were valid. Please try again.'
-                }
+                    error: 'None of the roles you specified were valid. Please try again.',
+                },
             ],
             slash: {
                 options: [
@@ -67,22 +67,22 @@ module.exports = class ButtonRoleCommand extends Command {
                         channelTypes: ['guild-text', 'guild-news'],
                         name: 'channel',
                         description: 'The channel where to create the button roles.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'message',
                         description: 'The message for these button roles.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'roles',
                         description: 'The roles for the button roles, separated by commas.',
-                        required: true
-                    }
-                ]
-            }
+                        required: true,
+                    },
+                ],
+            },
         });
     }
 
@@ -101,7 +101,7 @@ module.exports = class ButtonRoleCommand extends Command {
             const isValid = await arg.validate(roles, intMsg, arg);
             if (isValid !== true) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: arg.error
+                    color: 'RED', emoji: 'cross', description: arg.error,
                 }));
             }
             roles = await arg.parse(roles, intMsg, arg);
@@ -111,7 +111,7 @@ module.exports = class ButtonRoleCommand extends Command {
 
         if (message) {
             const msg = await basicCollector({ message }, {
-                fieldName: 'What message should I send with the buttons?'
+                fieldName: 'What message should I send with the buttons?',
             }, { time: 2 * 60_000 });
             if (!msg) return;
             content = msg.content;
@@ -133,8 +133,8 @@ module.exports = class ButtonRoleCommand extends Command {
 
         const rows = [];
         while (buttons.length > 0) {
-            const toAdd = rows.length === 1 ? buttons.splice(0, buttons.length).map(b => b.setStyle('SECONDARY')) :
-                buttons.splice(0, buttons.length <= 4 ? 4 : Math.round(buttons.length / 2 + 0.1))
+            const toAdd = rows.length === 1 ? buttons.splice(0, buttons.length).map(b => b.setStyle('SECONDARY'))
+                : buttons.splice(0, buttons.length <= 4 ? 4 : Math.round(buttons.length / 2 + 0.1))
                     .map(b => b.setStyle('PRIMARY'));
 
             const row = new MessageActionRow().addComponents(...toAdd);
@@ -146,7 +146,7 @@ module.exports = class ButtonRoleCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `The buttons roles were successfully created [here](${url}).`
+            description: `The buttons roles were successfully created [here](${url}).`,
         }));
     }
 };

@@ -25,7 +25,7 @@ module.exports = class ReactionRoleCommand extends Command {
             `,
             examples: [
                 'reactrole create #reaction-roles 826935004936142918',
-                'reactrole remove #self-roles 826935004936142918'
+                'reactrole remove #self-roles 826935004936142918',
             ],
             clientPermissions: ['ADD_REACTIONS'],
             userPermissions: ['MANAGE_ROLES'],
@@ -38,20 +38,20 @@ module.exports = class ReactionRoleCommand extends Command {
                     label: 'sub-command',
                     prompt: 'Do you want to create or remove the reaction roles?',
                     type: 'string',
-                    oneOf: ['create', 'remove']
+                    oneOf: ['create', 'remove'],
                 },
                 {
                     key: 'channel',
                     prompt: 'On what channel do you want to create or remove the reaction roles?',
-                    type: 'text-channel'
+                    type: 'text-channel',
                 },
                 {
                     key: 'msgId',
                     label: 'message ID',
                     prompt: 'On what message do you want to create or remove the reaction roles?',
-                    type: 'string'
-                }
-            ]
+                    type: 'string',
+                },
+            ],
         });
     }
 
@@ -102,7 +102,7 @@ module.exports = class ReactionRoleCommand extends Command {
                 fieldName: oneLine`
                     What are the roles that you want to assign?
                     Please send them separated by commas (max. 10 at once).
-                `
+                `,
             }, { time: 2 * 60_000 });
             if (!rolesMsg) return;
 
@@ -124,7 +124,7 @@ module.exports = class ReactionRoleCommand extends Command {
                 fieldName: oneLine`
                     Now, what emojis should the bot react with in the message?
                     These will be applied to the roles you specified in the same exact order.
-                `
+                `,
             }, { time: 2 * 60_000 });
             if (!emojisMsg) return;
 
@@ -145,13 +145,13 @@ module.exports = class ReactionRoleCommand extends Command {
             channel: channel.id,
             message: msg.id,
             roles: roles.map(r => r.id),
-            emojis: emojis
+            emojis: emojis,
         });
 
         await message.replyEmbed(basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `The reaction roles were successfully created at [this message](${msg.url}).`
+            description: `The reaction roles were successfully created at [this message](${msg.url}).`,
         }));
     }
 
@@ -164,7 +164,7 @@ module.exports = class ReactionRoleCommand extends Command {
     async remove(message, { url }, data) {
         if (!data) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the reaction roles you were looking for.'
+                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the reaction roles you were looking for.',
             }));
         }
 
@@ -173,7 +173,7 @@ module.exports = class ReactionRoleCommand extends Command {
         await message.replyEmbed(basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `The reaction roles of [this message](${url}) were successfully removed.`
+            description: `The reaction roles of [this message](${url}) were successfully removed.`,
         }));
     }
 };

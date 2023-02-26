@@ -39,15 +39,15 @@ module.exports = class ModStatsCommand extends Command {
                 key: 'user',
                 prompt: 'What moderator do you want to get the statistics from?',
                 type: 'user',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
-                    description: 'The moderator to check their stats.'
-                }]
-            }
+                    description: 'The moderator to check their stats.',
+                }],
+            },
         });
     }
 
@@ -81,7 +81,7 @@ module.exports = class ModStatsCommand extends Command {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${user.username}'s moderation statistics`, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: `${user.username}'s moderation statistics`, iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(table)
             .setFooter({ text: `User ID: ${user.id}` })

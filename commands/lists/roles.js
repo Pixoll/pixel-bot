@@ -19,15 +19,15 @@ module.exports = class RolesCommand extends Command {
                 key: 'member',
                 prompt: 'What member do you want to get the roles from?',
                 type: 'member',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'member',
-                    description: 'The member to get the roles from.'
-                }]
-            }
+                    description: 'The member to get the roles from.',
+                }],
+            },
         });
     }
 
@@ -46,7 +46,7 @@ module.exports = class RolesCommand extends Command {
         const rolesCache = memberRoles || guildRoles.filter(role => role.id !== guildId);
         if (!rolesCache) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'I couldn\'t find any roles..'
+                color: 'BLUE', emoji: 'info', description: 'I couldn\'t find any roles..',
             }));
         }
 
@@ -57,7 +57,7 @@ module.exports = class RolesCommand extends Command {
 
         if (!roles) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'This member has no roles.'
+                color: 'BLUE', emoji: 'info', description: 'This member has no roles.',
             }));
         }
 
@@ -65,7 +65,7 @@ module.exports = class RolesCommand extends Command {
             number: 20,
             authorName: `${name} has ${pluralize('role', roles.length)}`,
             authorIconURL: avatar,
-            useDescription: true
+            useDescription: true,
         });
     }
 };

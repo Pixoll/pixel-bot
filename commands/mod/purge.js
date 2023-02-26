@@ -13,7 +13,7 @@ const { stripIndent, oneLine } = require('common-tags');
 async function bulkDelete({ message, interaction }, messages) {
     if (messages.length === 0) {
         return await replyAll({ message, interaction }, basicEmbed({
-            color: 'RED', emoji: 'cross', description: 'I couldn\'t find any messages.'
+            color: 'RED', emoji: 'cross', description: 'I couldn\'t find any messages.',
         }));
     }
 
@@ -22,7 +22,7 @@ async function bulkDelete({ message, interaction }, messages) {
     const bulk = await channel.bulkDelete(messages);
 
     const embed = basicEmbed({
-        color: 'GREEN', emoji: 'check', description: `Deleted ${bulk.size} messages.`
+        color: 'GREEN', emoji: 'check', description: `Deleted ${bulk.size} messages.`,
     });
 
     const toDelete = await replyAll({ message, interaction }, embed);
@@ -81,7 +81,7 @@ module.exports = class PurgeCommand extends Command {
                 'purge 69 bots',
                 'purge 100 user Pixoll',
                 'purge 20 before 889929422294102026',
-                'purge 50 match @everyone'
+                'purge 50 match @everyone',
             ],
             clientPermissions: ['MANAGE_MESSAGES'],
             userPermissions: ['MANAGE_MESSAGES'],
@@ -93,18 +93,28 @@ module.exports = class PurgeCommand extends Command {
                     prompt: 'How many messages do you want to delete?',
                     type: 'integer',
                     min: 1,
-                    max: 100
+                    max: 100,
                 },
                 {
                     key: 'subCommand',
                     label: 'sub-command',
                     prompt: 'What sub-command would like to use?',
                     oneOf: [
-                        'all', 'links', 'files', 'embeds', 'users', 'bots', 'user',
-                        'before', 'after', 'match', 'starts-with', 'ends-with'
+                        'all',
+                        'links',
+                        'files',
+                        'embeds',
+                        'users',
+                        'bots',
+                        'user',
+                        'before',
+                        'after',
+                        'match',
+                        'starts-with',
+                        'ends-with',
                     ],
                     type: 'string',
-                    default: 'all'
+                    default: 'all',
                 },
                 {
                     key: 'filter',
@@ -113,8 +123,8 @@ module.exports = class PurgeCommand extends Command {
                         \`msg ID\` or just \`text\` depending on the sub-command used.
                     `,
                     type: ['user', 'message', 'string'],
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
@@ -128,8 +138,8 @@ module.exports = class PurgeCommand extends Command {
                             description: 'The amount of messages to delete.',
                             required: true,
                             minValue: 1,
-                            maxValue: 100
-                        }]
+                            maxValue: 100,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -141,8 +151,8 @@ module.exports = class PurgeCommand extends Command {
                             description: 'The amount of messages to delete.',
                             required: true,
                             minValue: 1,
-                            maxValue: 100
-                        }]
+                            maxValue: 100,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -154,8 +164,8 @@ module.exports = class PurgeCommand extends Command {
                             description: 'The amount of messages to delete.',
                             required: true,
                             minValue: 1,
-                            maxValue: 100
-                        }]
+                            maxValue: 100,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -167,8 +177,8 @@ module.exports = class PurgeCommand extends Command {
                             description: 'The amount of messages to delete.',
                             required: true,
                             minValue: 1,
-                            maxValue: 100
-                        }]
+                            maxValue: 100,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -180,8 +190,8 @@ module.exports = class PurgeCommand extends Command {
                             description: 'The amount of messages to delete.',
                             required: true,
                             minValue: 1,
-                            maxValue: 100
-                        }]
+                            maxValue: 100,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -193,8 +203,8 @@ module.exports = class PurgeCommand extends Command {
                             description: 'The amount of messages to delete.',
                             required: true,
                             minValue: 1,
-                            maxValue: 100
-                        }]
+                            maxValue: 100,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -205,7 +215,7 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'user',
                                 name: 'user',
                                 description: 'The user who sent the messages.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
@@ -213,9 +223,9 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The amount of messages to delete.',
                                 required: true,
                                 minValue: 1,
-                                maxValue: 100
-                            }
-                        ]
+                                maxValue: 100,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -226,7 +236,7 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'string',
                                 name: 'message-id',
                                 description: 'The ID of the message.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
@@ -234,9 +244,9 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The amount of messages to delete.',
                                 required: true,
                                 minValue: 1,
-                                maxValue: 100
-                            }
-                        ]
+                                maxValue: 100,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -247,7 +257,7 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'string',
                                 name: 'message-id',
                                 description: 'The ID of the message.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
@@ -255,9 +265,9 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The amount of messages to delete.',
                                 required: true,
                                 minValue: 1,
-                                maxValue: 100
-                            }
-                        ]
+                                maxValue: 100,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -268,7 +278,7 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'string',
                                 name: 'text',
                                 description: 'The text to match.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
@@ -276,9 +286,9 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The amount of messages to delete.',
                                 required: true,
                                 minValue: 1,
-                                maxValue: 100
-                            }
-                        ]
+                                maxValue: 100,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -289,7 +299,7 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'string',
                                 name: 'text',
                                 description: 'The text to match.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
@@ -297,9 +307,9 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The amount of messages to delete.',
                                 required: true,
                                 minValue: 1,
-                                maxValue: 100
-                            }
-                        ]
+                                maxValue: 100,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -310,7 +320,7 @@ module.exports = class PurgeCommand extends Command {
                                 type: 'string',
                                 name: 'text',
                                 description: 'The text to match.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'integer',
@@ -318,12 +328,12 @@ module.exports = class PurgeCommand extends Command {
                                 description: 'The amount of messages to delete.',
                                 required: true,
                                 minValue: 1,
-                                maxValue: 100
-                            }
-                        ]
-                    }
-                ]
-            }
+                                maxValue: 100,
+                            },
+                        ],
+                    },
+                ],
+            },
         });
     }
 
@@ -354,7 +364,7 @@ module.exports = class PurgeCommand extends Command {
                     filter = await interaction.channel.messages.fetch(messageId).catch(() => null);
                     if (!filter) {
                         return await replyAll({ interaction }, basicEmbed({
-                            color: 'RED', emoji: 'cross', description: 'The message ID is invalid.'
+                            color: 'RED', emoji: 'cross', description: 'The message ID is invalid.',
                         }));
                     }
                     break;

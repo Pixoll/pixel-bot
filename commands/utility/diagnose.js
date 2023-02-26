@@ -20,7 +20,7 @@ module.exports = class DiagnoseCommand extends Command {
             `,
             examples: [
                 'diagnose command ban',
-                'diagnose group moderation'
+                'diagnose group moderation',
             ],
             userPermissions: ['ADMINISTRATOR'],
             guarded: true,
@@ -31,22 +31,22 @@ module.exports = class DiagnoseCommand extends Command {
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: ['all', 'command', 'group'],
-                    default: 'all'
+                    default: 'all',
                 },
                 {
                     key: 'cmdOrGroup',
                     label: 'command or group',
                     prompt: 'What command or group would you like to diagnose?',
                     type: ['command', 'group'],
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'all',
-                        description: 'Check the status of all commands and groups.'
+                        description: 'Check the status of all commands and groups.',
                     },
                     {
                         type: 'subcommand',
@@ -56,8 +56,8 @@ module.exports = class DiagnoseCommand extends Command {
                             type: 'string',
                             name: 'command',
                             description: 'The command to diagnose.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -76,11 +76,11 @@ module.exports = class DiagnoseCommand extends Command {
                                 { name: '🛡️ Moderation', value: 'mod' },
                                 { name: '🗃 Moderation logs', value: 'mod-logs' },
                                 { name: '🛠 Utility', value: 'utility' },
-                            ]
-                        }]
-                    }
-                ]
-            }
+                            ],
+                        }],
+                    },
+                ],
+            },
         });
     }
 
@@ -137,7 +137,7 @@ module.exports = class DiagnoseCommand extends Command {
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${name}'s disabled commands and groups`, iconURL: avatar
+                name: `${name}'s disabled commands and groups`, iconURL: avatar,
             })
             .addField('Commands', commandsList)
             .addField('Groups', groupsList)
@@ -160,7 +160,7 @@ module.exports = class DiagnoseCommand extends Command {
             }
         } else if (!command) {
             return await replyAll({ interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.'
+                color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.',
             }));
         }
 
@@ -173,7 +173,7 @@ module.exports = class DiagnoseCommand extends Command {
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${global} of command: ${command.name}`, iconURL: avatar
+                name: `${global} of command: ${command.name}`, iconURL: avatar,
             })
             .addField('Status', isEnabled ? 'Enabled' : 'Disabled', true)
             .addField('Guarded', command.guarded ? 'Yes' : 'No', true)
@@ -215,7 +215,7 @@ module.exports = class DiagnoseCommand extends Command {
         const diagnose = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${global} of group: ${group.name}`, iconURL: avatar
+                name: `${global} of group: ${group.name}`, iconURL: avatar,
             })
             .addField('Status', isEnabled ? 'Enabled' : 'Disabled', true)
             .addField('Guarded', group.guarded ? 'Yes' : 'No', true)

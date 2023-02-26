@@ -42,7 +42,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: 'Created role', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Created role', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Role:** ${role.toString()}
@@ -84,7 +84,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted role', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Deleted role', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Name:** ${name}
@@ -120,11 +120,11 @@ module.exports = (client) => {
 
         const {
             name: name1, hexColor: color1, hoist: hoist1, mentionable: mention1,
-            permissions: perms1, unicodeEmoji: emoji1, icon: icon1
+            permissions: perms1, unicodeEmoji: emoji1, icon: icon1,
         } = oldRole;
         const {
             name: name2, hexColor: color2, hoist: hoist2, mentionable: mention2,
-            permissions: perms2, unicodeEmoji: emoji2, icon: icon2
+            permissions: perms2, unicodeEmoji: emoji2, icon: icon2,
         } = newRole;
 
         const [added, removed] = compareArrays(format(perms1), format(perms2));
@@ -135,7 +135,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated role', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Updated role', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(oldRole.toString())
             .setFooter({ text: `Role ID: ${id}` })

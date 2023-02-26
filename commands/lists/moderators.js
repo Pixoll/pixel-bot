@@ -17,8 +17,8 @@ module.exports = class ModeratorsCommand extends Command {
             `,
             guildOnly: true,
             slash: {
-                description: 'Displays a list of all moderators of this server with their mod roles.'
-            }
+                description: 'Displays a list of all moderators of this server with their mod roles.',
+            },
         });
     }
 
@@ -35,7 +35,7 @@ module.exports = class ModeratorsCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'BLUE',
                 emoji: 'info',
-                description: 'There are no moderators, try running the `admins` command instead.'
+                description: 'There are no moderators, try running the `admins` command instead.',
             }));
         }
 
@@ -43,13 +43,13 @@ module.exports = class ModeratorsCommand extends Command {
             .map(mbr => ({
                 tag: mbr.user.tag,
                 list: mbr.roles.cache.filter(m => isMod(m, true)).sort((a, b) => b.position - a.position)
-                    .map(r => r.name).join(', ') || 'None'
+                    .map(r => r.name).join(', ') || 'None',
             }));
 
         await generateEmbed({ message, interaction }, modsList, {
             authorName: `There's ${pluralize('moderator', modsList.length)}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            keyTitle: { suffix: 'tag' }
+            keyTitle: { suffix: 'tag' },
         });
     }
 };

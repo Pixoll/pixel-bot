@@ -14,18 +14,49 @@ const client = new CommandoClient({
     inviteOptions: {
         scopes: ['applications.commands', 'bot'],
         permissions: [
-            'ADD_REACTIONS', 'ADMINISTRATOR', 'ATTACH_FILES', 'BAN_MEMBERS', 'CHANGE_NICKNAME', 'CREATE_INSTANT_INVITE',
-            'EMBED_LINKS', 'KICK_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_EMOJIS_AND_STICKERS', 'MANAGE_GUILD',
-            'MANAGE_MESSAGES', 'MANAGE_NICKNAMES', 'MANAGE_ROLES', 'MANAGE_THREADS', 'SEND_MESSAGES',
-            'SEND_MESSAGES_IN_THREADS', 'USE_APPLICATION_COMMANDS', 'USE_EXTERNAL_EMOJIS', 'VIEW_AUDIT_LOG', 'VIEW_CHANNEL',
-            'READ_MESSAGE_HISTORY', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MANAGE_EVENTS', 'CREATE_PRIVATE_THREADS',
-            'CREATE_PRIVATE_THREADS', 'MODERATE_MEMBERS'
-        ]
+            'ADD_REACTIONS',
+            'ADMINISTRATOR',
+            'ATTACH_FILES',
+            'BAN_MEMBERS',
+            'CHANGE_NICKNAME',
+            'CREATE_INSTANT_INVITE',
+            'EMBED_LINKS',
+            'KICK_MEMBERS',
+            'MANAGE_CHANNELS',
+            'MANAGE_EMOJIS_AND_STICKERS',
+            'MANAGE_GUILD',
+            'MANAGE_MESSAGES',
+            'MANAGE_NICKNAMES',
+            'MANAGE_ROLES',
+            'MANAGE_THREADS',
+            'SEND_MESSAGES',
+            'SEND_MESSAGES_IN_THREADS',
+            'USE_APPLICATION_COMMANDS',
+            'USE_EXTERNAL_EMOJIS',
+            'VIEW_AUDIT_LOG',
+            'VIEW_CHANNEL',
+            'READ_MESSAGE_HISTORY',
+            'MUTE_MEMBERS',
+            'DEAFEN_MEMBERS',
+            'MANAGE_EVENTS',
+            'CREATE_PRIVATE_THREADS',
+            'CREATE_PRIVATE_THREADS',
+            'MODERATE_MEMBERS',
+        ],
     },
     intents: [
-        'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS', 'GUILDS', 'GUILD_BANS', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_INVITES',
-        'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES',
-        'GUILD_SCHEDULED_EVENTS'
+        'DIRECT_MESSAGES',
+        'DIRECT_MESSAGE_REACTIONS',
+        'GUILDS',
+        'GUILD_BANS',
+        'GUILD_EMOJIS_AND_STICKERS',
+        'GUILD_INVITES',
+        'GUILD_MEMBERS',
+        'GUILD_MESSAGES',
+        'GUILD_MESSAGE_REACTIONS',
+        'GUILD_PRESENCES',
+        'GUILD_VOICE_STATES',
+        'GUILD_SCHEDULED_EVENTS',
     ],
     partials: ['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     failIfNotExists: false,
@@ -65,7 +96,7 @@ client.emit('debug', `Loaded ${client.registry.commands.size} commands`);
 client.on('modulesReady', async () => {
     client.user.setActivity({
         name: `for ${client.prefix}help`,
-        type: 'WATCHING'
+        type: 'WATCHING',
     });
 
     await client.owners[0].send('**Debug message:** Bot is fully online!');

@@ -31,7 +31,7 @@ module.exports = class WelcomeCommand extends Command {
                     key: 'channel',
                     prompt: 'On what channel do you want the welcomes?',
                     type: 'text-channel',
-                    required: false
+                    required: false,
                 },
                 {
                     key: 'msg',
@@ -39,15 +39,15 @@ module.exports = class WelcomeCommand extends Command {
                     prompt: 'What message should the bot send?',
                     type: 'string',
                     max: 1024,
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'view',
-                        description: 'Display the current welcome message.'
+                        description: 'Display the current welcome message.',
                     },
                     {
                         type: 'subcommand',
@@ -59,18 +59,18 @@ module.exports = class WelcomeCommand extends Command {
                                 channelTypes: ['guild-text'],
                                 name: 'channel',
                                 description: 'The channel where the welcome messages should be sent.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'message',
                                 description: 'The message to send.',
-                                required: true
-                            }
-                        ]
-                    }
-                ]
-            }
+                                required: true,
+                            },
+                        ],
+                    },
+                ],
+            },
         });
     }
 
@@ -92,7 +92,7 @@ module.exports = class WelcomeCommand extends Command {
             const embed = new MessageEmbed()
                 .setColor('#4c9f4c')
                 .setAuthor({
-                    name: `${guild.name}'s welcome message`, iconURL: guild.iconURL({ dynamic: true })
+                    name: `${guild.name}'s welcome message`, iconURL: guild.iconURL({ dynamic: true }),
                 })
                 .setDescription(stripIndent`
                     **Channel:** ${data?.channel ? `<#${data?.channel}>` : '`No saved channel found.`'}
@@ -105,7 +105,7 @@ module.exports = class WelcomeCommand extends Command {
 
         if (message && !msg) {
             const welcomeMsg = await basicCollector({ message }, {
-                fieldName: `What message would you like me to send in #${channel.name}?`
+                fieldName: `What message would you like me to send in #${channel.name}?`,
             }, { time: 2 * 60_000 });
             if (!welcomeMsg) return;
             msg = welcomeMsg.content;
@@ -114,18 +114,18 @@ module.exports = class WelcomeCommand extends Command {
         if (data) {
             await this.db.update(data, {
                 channel: channel.id,
-                message: msg
+                message: msg,
             });
         } else {
             await this.db.add({
                 guild: guildId,
                 channel: channel.id,
-                message: msg
+                message: msg,
             });
         }
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.'
+            color: 'GREEN', emoji: 'check', description: 'The message has been successfully saved.',
         }));
     }
 };

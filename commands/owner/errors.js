@@ -20,16 +20,16 @@ module.exports = class ErrorsCommand extends Command {
                     prompt: 'Do you want to filter or remove an error/bug?',
                     type: 'string',
                     oneOf: ['view', 'remove'],
-                    default: 'view'
+                    default: 'view',
                 },
                 {
                     key: 'errorId',
                     label: 'error ID',
                     prompt: 'What specific error do you want to remove?',
                     type: 'string',
-                    required: false
-                }
-            ]
+                    required: false,
+                },
+            ],
         });
 
         this.db = this.client.database.errors;
@@ -47,7 +47,7 @@ module.exports = class ErrorsCommand extends Command {
         const errors = await this.db.fetchMany();
         if (errors.size === 0) {
             return await message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'There have been no errors or bugs lately.'
+                color: 'BLUE', emoji: 'info', description: 'There have been no errors or bugs lately.',
             }));
         }
 
@@ -73,7 +73,7 @@ module.exports = class ErrorsCommand extends Command {
                 type: val.type,
                 message: val.name + whatCommand + (val.message ? (': ' + '``' + val.message + '``') : ''),
                 createdAt: val.createdAt,
-                files: val.files
+                files: val.files,
             };
         });
 
@@ -101,7 +101,7 @@ module.exports = class ErrorsCommand extends Command {
             keyTitle: { prefix: 'type' },
             keysExclude: ['type', '_id'],
             useDocId: true,
-            components: [filterMenu]
+            components: [filterMenu],
         });
     }
 
@@ -120,13 +120,13 @@ module.exports = class ErrorsCommand extends Command {
         const doc = await this.db.fetch(errorId);
         if (!doc) {
             return await message.replyEmbed(basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the error you were looking for.'
+                color: 'RED', emoji: 'cross', description: 'I couldn\'t find the error you were looking for.',
             }));
         }
         await this.db.delete(doc);
 
         await message.replyEmbed(basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Error with ID \`${doc._id}\` has been successfully removed.`
+            color: 'GREEN', emoji: 'check', description: `Error with ID \`${doc._id}\` has been successfully removed.`,
         }));
     }
 };

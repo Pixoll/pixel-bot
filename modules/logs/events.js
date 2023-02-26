@@ -26,7 +26,7 @@ function eventStatus(status) {
 module.exports = (client) => {
     client.on('guildScheduledEventCreate', async (event) => {
         const {
-            guild, id, name, channel, creator, description, scheduledEndAt, scheduledStartAt, url, entityMetadata
+            guild, id, name, channel, creator, description, scheduledEndAt, scheduledStartAt, url, entityMetadata,
         } = event;
 
         const isEnabled = await isModuleEnabled(guild, 'audit-logs', 'events');
@@ -37,18 +37,18 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: 'Created event', iconURL: guild.iconURL({ dynamic: true }), url
+                name: 'Created event', iconURL: guild.iconURL({ dynamic: true }), url,
             })
             .setDescription(/* eslint-disable indent */ stripIndent`
                 **Name:** ${name}
-                ${channel ?
-                    `**Channel:** ${channel.toString()}` :
-                    `**Location:** ${entityMetadata.location}`
+                ${channel
+                    ? `**Channel:** ${channel.toString()}`
+                    : `**Location:** ${entityMetadata.location}`
                 }
                 **Creator:** ${creator.toString()} ${creator.tag}
                 **Starting:** ${timestamp(scheduledStartAt)} (${timestamp(scheduledStartAt, 'R')})
-                ${scheduledEndAt ?
-                    `**Ending:** ${timestamp(scheduledEndAt)} (${timestamp(scheduledEndAt, 'R')})` : ''
+                ${scheduledEndAt
+                    ? `**Ending:** ${timestamp(scheduledEndAt)} (${timestamp(scheduledEndAt, 'R')})` : ''
                 }
             ` /* eslint-enable indent */)
             .setFooter({ text: `Event ID: ${id}` })
@@ -70,18 +70,18 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted event', iconURL: guild.iconURL({ dynamic: true }), url
+                name: 'Deleted event', iconURL: guild.iconURL({ dynamic: true }), url,
             })
             .setDescription(/* eslint-disable indent */ stripIndent`
                 **Name:** ${name}
-                ${channel ?
-                    `**Channel:** ${channel.toString()}` :
-                    `**Location:** ${entityMetadata.location}`
+                ${channel
+                    ? `**Channel:** ${channel.toString()}`
+                    : `**Location:** ${entityMetadata.location}`
                 }
                 **Creator:** ${creator.toString()} ${creator.tag}
                 **Starting:** ${timestamp(scheduledStartAt)} (${timestamp(scheduledStartAt, 'R')})
-                ${scheduledEndAt ?
-                    `**Ending:** ${timestamp(scheduledEndAt)} (${timestamp(scheduledEndAt, 'R')})` : ''
+                ${scheduledEndAt
+                    ? `**Ending:** ${timestamp(scheduledEndAt)} (${timestamp(scheduledEndAt, 'R')})` : ''
                 }
             ` /* eslint-enable indent */)
             .setFooter({ text: `Event ID: ${id}` })
@@ -100,17 +100,17 @@ module.exports = (client) => {
 
         const {
             name: name1, description: description1, channel: channel1, entityMetadata: metadata1, scheduledStartAt: startAt1,
-            scheduledEndAt: endAt1, status: status1
+            scheduledEndAt: endAt1, status: status1,
         } = oldEvent;
         const {
             name: name2, description: description2, channel: channel2, entityMetadata: metadata2, scheduledStartAt: startAt2,
-            scheduledEndAt: endAt2, status: status2
+            scheduledEndAt: endAt2, status: status2,
         } = newEvent;
 
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated event', iconURL: guild.iconURL({ dynamic: true }), url
+                name: 'Updated event', iconURL: guild.iconURL({ dynamic: true }), url,
             })
             .setFooter({ text: `Event ID: ${id}` })
             .setTimestamp();

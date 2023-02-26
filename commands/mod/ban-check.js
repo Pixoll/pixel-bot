@@ -21,16 +21,16 @@ module.exports = class BanCheckCommand extends Command {
             args: [{
                 key: 'user',
                 prompt: 'What user do you want to check their ban?',
-                type: 'user'
+                type: 'user',
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
                     description: 'The user to check their ban.',
-                    required: true
-                }]
-            }
+                    required: true,
+                }],
+            },
         });
     }
 
@@ -48,14 +48,14 @@ module.exports = class BanCheckCommand extends Command {
         const ban = await guild.bans.fetch(user).catch(() => null);
         if (!ban) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: `${user.toString()} is not banned.`
+                color: 'BLUE', emoji: 'info', description: `${user.toString()} is not banned.`,
             }));
         }
 
         const reason = ban.reason?.replace(/%20/g, ' ') || 'No reason given.';
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'BLUE', fieldName: `${user.tag} is banned`, fieldValue: `**Reason:** ${reason}`
+            color: 'BLUE', fieldName: `${user.tag} is banned`, fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

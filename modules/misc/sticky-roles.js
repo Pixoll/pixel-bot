@@ -52,7 +52,7 @@ module.exports = (client) => {
         await stickyRoles.add({
             guild: guild.id,
             user: id,
-            roles: rolesArray.map(r => r.id)
+            roles: rolesArray.map(r => r.id),
         });
     });
 };

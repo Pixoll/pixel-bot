@@ -18,7 +18,7 @@ module.exports = class ToggleCommand extends Command {
             `,
             examples: [
                 'toggle command ban',
-                'toggle group moderation'
+                'toggle group moderation',
             ],
             userPermissions: ['ADMINISTRATOR'],
             guarded: true,
@@ -28,15 +28,15 @@ module.exports = class ToggleCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['command', 'group']
+                    oneOf: ['command', 'group'],
                 },
                 {
                     key: 'cmdOrGroup',
                     label: 'command or group',
                     prompt: 'What command or group would you like to toggle?',
                     type: ['command', 'group'],
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
@@ -48,8 +48,8 @@ module.exports = class ToggleCommand extends Command {
                             type: 'string',
                             name: 'command',
                             description: 'The command to toggle.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -68,11 +68,11 @@ module.exports = class ToggleCommand extends Command {
                                 { name: '🛡️ Moderation', value: 'mod' },
                                 { name: '🗃 Moderation logs', value: 'mod-logs' },
                                 { name: '🛠 Utility', value: 'utility' },
-                            ]
-                        }]
-                    }
-                ]
-            }
+                            ],
+                        }],
+                    },
+                ],
+            },
         });
     }
 
@@ -122,7 +122,7 @@ module.exports = class ToggleCommand extends Command {
             }
         } else if (!command) {
             return await replyAll({ interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.'
+                color: 'RED', emoji: 'cross', description: 'That command doesn\'t exist.',
             }));
         }
 
@@ -130,7 +130,7 @@ module.exports = class ToggleCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: `The \`${command.name}\` command is guarded, and thus it cannot be disabled.`
+                description: `The \`${command.name}\` command is guarded, and thus it cannot be disabled.`,
             }));
         }
 
@@ -142,16 +142,16 @@ module.exports = class ToggleCommand extends Command {
         command.setEnabledIn(guildId, !isEnabled);
 
         if (data) {
-            await this.db.update(data, isEnabled ?
-                { $push: { commands: command.name } } :
-                { $pull: { commands: command.name } }
+            await this.db.update(data, isEnabled
+                ? { $push: { commands: command.name } }
+                : { $pull: { commands: command.name } }
             );
         } else {
             await this.db.add({
                 guild: guildId,
                 global: !guildId,
                 commands: isEnabled ? [command.name] : [],
-                groups: []
+                groups: [],
             });
         }
 
@@ -159,7 +159,7 @@ module.exports = class ToggleCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the \`${command.name}\` command${global}`,
-            fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`
+            fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`,
         }));
     }
 
@@ -182,7 +182,7 @@ module.exports = class ToggleCommand extends Command {
             return await replyAll({ message, interaction }, basicEmbed({
                 color: 'RED',
                 emoji: 'cross',
-                description: `The \`${group.name}\` group is guarded, and thus it cannot be disabled.`
+                description: `The \`${group.name}\` group is guarded, and thus it cannot be disabled.`,
             }));
         }
 
@@ -195,16 +195,16 @@ module.exports = class ToggleCommand extends Command {
         else group._globalEnabled = !isEnabled;
 
         if (data) {
-            await this.db.update(data, isEnabled ?
-                { $push: { groups: group.name } } :
-                { $pull: { groups: group.name } }
+            await this.db.update(data, isEnabled
+                ? { $push: { groups: group.name } }
+                : { $pull: { groups: group.name } }
             );
         } else {
             await this.db.add({
                 guild: guildId,
                 global: !guildId,
                 commands: [],
-                groups: !isEnabled ? [group.name] : []
+                groups: !isEnabled ? [group.name] : [],
             });
         }
 
@@ -212,7 +212,7 @@ module.exports = class ToggleCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Toggled the \`${group.name}\` group${global}`,
-            fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`
+            fieldValue: `**New status:** ${!isEnabled ? 'Enabled' : 'Disabled'}`,
         }));
     }
 };

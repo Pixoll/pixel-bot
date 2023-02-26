@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { stripIndent } = require('common-tags');
 const {
-    MessageEmbed, User, GuildFeatures, VerificationLevel, ExplicitContentFilterLevel, SystemChannelFlagsString
+    MessageEmbed, User, GuildFeatures, VerificationLevel, ExplicitContentFilterLevel, SystemChannelFlagsString,
 } = require('discord.js');
 const { capitalize } = require('lodash');
 const { CommandoClient } = require('pixoll-commando');
@@ -158,7 +158,7 @@ module.exports = (client) => {
             mfaLevel: mfa1, widgetChannel: widgetChan1, widgetEnabled: widgetOn1, discoverySplash: discSplash1,
             publicUpdatesChannel: updateChan1, rulesChannel: rulesChan1, preferredLocale: lang1, nsfwLevel: nsfw1,
             partnered: partner1, premiumTier: boostLvl1, systemChannelFlags: sysChanFlags1, verified: verified1,
-            maximumBitrate: maxBitrate1, premiumProgressBarEnabled: boostProgressBar1
+            maximumBitrate: maxBitrate1, premiumProgressBarEnabled: boostProgressBar1,
         } = oldGuild;
         const {
             name: name2, systemChannel: sysChan2, afkChannel: afkChan2, afkTimeout: afkTo2, ownerId: ownerId2,
@@ -167,7 +167,7 @@ module.exports = (client) => {
             mfaLevel: mfa2, widgetChannel: widgetChan2, widgetEnabled: widgetOn2, discoverySplash: discSplash2,
             publicUpdatesChannel: updateChan2, rulesChannel: rulesChan2, preferredLocale: lang2, nsfwLevel: nsfw2,
             partnered: partner2, premiumTier: boostLvl2, systemChannelFlags: sysChanFlags2, verified: verified2,
-            maximumBitrate: maxBitrate2, premiumProgressBarEnabled: boostProgressBar2
+            maximumBitrate: maxBitrate2, premiumProgressBarEnabled: boostProgressBar2,
         } = newGuild;
 
         const imgOptions = { dynamic: true, size: 1024 };
@@ -175,7 +175,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated server', iconURL: newGuild.iconURL(imgOptions)
+                name: 'Updated server', iconURL: newGuild.iconURL(imgOptions),
             })
             .setTimestamp();
 
@@ -249,8 +249,8 @@ module.exports = (client) => {
         if (notif1 !== notif2) {
             embed.addField(
                 'Default notification settings',
-                notif1 === 'ALL_MESSAGES' || notif1 === 0 ?
-                    'All messages ➜ Only @mentions' : 'Only @mentions ➜ All messages'
+                notif1 === 'ALL_MESSAGES' || notif1 === 0
+                    ? 'All messages ➜ Only @mentions' : 'Only @mentions ➜ All messages'
             );
         }
 
@@ -260,7 +260,7 @@ module.exports = (client) => {
                 value: stripIndent`
                     **Before:** ${imageLink(oldGuild.bannerURL(imgOptions), true)}
                     **After:** ${imageLink(newGuild.bannerURL(imgOptions))}
-                `
+                `,
             }]).setThumbnail(newGuild.bannerURL(imgOptions));
 
             newGuild.queuedLogs.push(imagesEmbed);
@@ -272,7 +272,7 @@ module.exports = (client) => {
                 value: stripIndent`
                     **Before:** ${imageLink(oldGuild.splashURL(imgOptions), true)}
                     **After:** ${imageLink(newGuild.splashURL(imgOptions))}
-                `
+                `,
             }]).setThumbnail(newGuild.splashURL(imgOptions));
 
             newGuild.queuedLogs.push(imagesEmbed);
@@ -343,7 +343,7 @@ module.exports = (client) => {
                 value: stripIndent`
                     **Before:** ${imageLink(oldGuild.discoverySplashURL(imgOptions), true)}
                     **After:** ${imageLink(newGuild.discoverySplashURL(imgOptions))}
-                `
+                `,
             }]).setThumbnail(newGuild.discoverySplashURL(imgOptions));
 
             newGuild.queuedLogs.push(imagesEmbed);

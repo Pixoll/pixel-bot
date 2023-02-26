@@ -8,12 +8,16 @@
     "parserOptions": {
         "ecmaVersion": "latest"
     },
-    "ignorePatterns": [
-        "*.d.ts"
-    ],
     "rules": {
         "comma-dangle": [
-            "off"
+            "error",
+            {
+                "arrays": "always-multiline",
+                "objects": "always-multiline",
+                "imports": "always-multiline",
+                "exports": "always-multiline",
+                "functions": "never"
+            }
         ],
         "eol-last": [
             "warn"
@@ -42,13 +46,7 @@
         ],
         "operator-linebreak": [
             "error",
-            "before",
-            {
-                "overrides": {
-                    "?": "after",
-                    ":": "after"
-                }
-            }
+            "before"
         ],
         "semi": [
             "error"
@@ -78,11 +76,18 @@
         "camelcase": [
             "warn"
         ],
-        "no-use-before-define": [
+        "object-property-newline": [
             "error",
             {
-                "functions": false
+                "allowAllPropertiesOnSameLine": true
             }
+        ],
+        "array-element-newline": [
+            "error",
+            "consistent"
+        ],
+        "no-duplicate-imports": [
+            "error"
         ]
     },
     "overrides": [
@@ -104,7 +109,6 @@
                 "@typescript-eslint"
             ],
             "rules": {
-                "@typescript-eslint/no-non-null-assertion": "off",
                 "@typescript-eslint/array-type": [
                     "error",
                     {
@@ -122,7 +126,13 @@
                 "@typescript-eslint/no-redundant-type-constituents": "error",
                 "@typescript-eslint/prefer-reduce-type-parameter": "error",
                 "@typescript-eslint/prefer-return-this-type": "error",
-                "@typescript-eslint/sort-type-union-intersection-members": "warn"
+                "@typescript-eslint/sort-type-union-intersection-members": "warn",
+                "@typescript-eslint/member-delimiter-style": "error",
+                "semi": [
+                    "off"
+                ],
+                "@typescript-eslint/semi": "error",
+                "@typescript-eslint/explicit-member-accessibility": "error"
             }
         }
     ]

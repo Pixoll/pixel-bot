@@ -30,9 +30,9 @@ module.exports = class DatabaseCommand extends Command {
                 {
                     key: 'collection',
                     prompt: 'What collection do you want to manage?',
-                    type: 'string'
-                }
-            ]
+                    type: 'string',
+                },
+            ],
         });
 
         this.argsCollector.args[0].oneOf = Object.keys(this.client.databaseSchemas).map(addDashes);
@@ -58,7 +58,7 @@ module.exports = class DatabaseCommand extends Command {
 
         if (array.length === 0) {
             return message.replyEmbed(basicEmbed({
-                color: 'BLUE', emoji: 'info', description: `The ${DBname} collection is empty.`
+                color: 'BLUE', emoji: 'info', description: `The ${DBname} collection is empty.`,
             }));
         }
 
@@ -66,7 +66,7 @@ module.exports = class DatabaseCommand extends Command {
             authorName: `Database: ${DBname}`,
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             title: 'Document',
-            keysExclude: ['updatedAt']
+            keysExclude: ['updatedAt'],
         });
     }
 };

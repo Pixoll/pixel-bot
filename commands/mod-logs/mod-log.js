@@ -31,15 +31,15 @@ module.exports = class ModLogCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['view', 'delete']
+                    oneOf: ['view', 'delete'],
                 },
                 {
                     key: 'modlogId',
                     label: 'modlog ID',
                     prompt: 'What is the ID of the mod log you want to view?',
                     type: 'string',
-                    max: 12
-                }
+                    max: 12,
+                },
             ],
             slash: {
                 options: [
@@ -51,8 +51,8 @@ module.exports = class ModLogCommand extends Command {
                             type: 'string',
                             name: 'modlog-id',
                             description: 'The ID of the mod log to display.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -62,11 +62,11 @@ module.exports = class ModLogCommand extends Command {
                             type: 'string',
                             name: 'modlog-id',
                             description: 'The ID of the mod log to delete.',
-                            required: true
-                        }]
-                    }
-                ]
-            }
+                            required: true,
+                        }],
+                    },
+                ],
+            },
         });
     }
 
@@ -85,7 +85,7 @@ module.exports = class ModLogCommand extends Command {
         const modLog = await this.db.fetch(modlogId);
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
+                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.',
             }));
         }
 
@@ -114,7 +114,7 @@ module.exports = class ModLogCommand extends Command {
         const modlogInfo = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `Mod log ${modlog._id}`, iconURL: user?.displayAvatarURL({ dynamic: true })
+                name: `Mod log ${modlog._id}`, iconURL: user?.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(stripIndent`
                 **Type:** ${capitalize(modlog.type)}
@@ -151,7 +151,7 @@ module.exports = class ModLogCommand extends Command {
         await this.db.delete(modlog);
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Deleted mod log with ID \`${modlog._id}\``
+            color: 'GREEN', emoji: 'check', description: `Deleted mod log with ID \`${modlog._id}\``,
         }));
     }
 };

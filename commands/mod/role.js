@@ -2,7 +2,7 @@
 const { Command, CommandInstances } = require('pixoll-commando');
 const { Role, GuildMember, Collection } = require('discord.js');
 const {
-    basicEmbed, isValidRole, getArgument, replyAll, confirmButtons
+    basicEmbed, isValidRole, getArgument, replyAll, confirmButtons,
 } = require('../../utils/functions');
 const { stripIndent } = require('common-tags');
 /* eslint-enable no-unused-vars */
@@ -31,7 +31,7 @@ module.exports = class RoleCommand extends Command {
                 'role remove-all Pixoll',
                 'role all Member',
                 'role bots Bots',
-                'role users Ping Role'
+                'role users Ping Role',
             ],
             clientPermissions: ['MANAGE_ROLES'],
             userPermissions: ['MANAGE_ROLES'],
@@ -42,13 +42,13 @@ module.exports = class RoleCommand extends Command {
                     label: 'sub-command',
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
-                    oneOf: ['toggle', 'remove-all', 'all', 'bots', 'users']
+                    oneOf: ['toggle', 'remove-all', 'all', 'bots', 'users'],
                 },
                 {
                     key: 'memberOrRole',
                     label: 'member or role',
                     prompt: 'What role do you want to toggle? or what member are you looking for?',
-                    type: ['member', 'role']
+                    type: ['member', 'role'],
                 },
                 {
                     key: 'roles',
@@ -89,8 +89,8 @@ module.exports = class RoleCommand extends Command {
                         return [...new Set(valid)];
                     },
                     required: false,
-                    error: 'None of the roles you specified were valid. Please try again.'
-                }
+                    error: 'None of the roles you specified were valid. Please try again.',
+                },
             ],
             slash: {
                 options: [
@@ -103,15 +103,15 @@ module.exports = class RoleCommand extends Command {
                                 type: 'user',
                                 name: 'member',
                                 description: 'The targeted member.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'roles',
                                 description: 'The roles to toggle, separated by commas (max. 10 at once).',
-                                required: true
-                            }
-                        ]
+                                required: true,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -121,8 +121,8 @@ module.exports = class RoleCommand extends Command {
                             type: 'user',
                             name: 'member',
                             description: 'The targeted member.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -132,8 +132,8 @@ module.exports = class RoleCommand extends Command {
                             type: 'role',
                             name: 'role',
                             description: 'The role to toggle.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -143,8 +143,8 @@ module.exports = class RoleCommand extends Command {
                             type: 'role',
                             name: 'role',
                             description: 'The role to toggle.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
                     {
                         type: 'subcommand',
@@ -154,11 +154,11 @@ module.exports = class RoleCommand extends Command {
                             type: 'role',
                             name: 'role',
                             description: 'The role to toggle.',
-                            required: true
-                        }]
+                            required: true,
+                        }],
                     },
-                ]
-            }
+                ],
+            },
         });
     }
 
@@ -176,7 +176,7 @@ module.exports = class RoleCommand extends Command {
         if (interaction) {
             if (member && !(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             memberOrRole = member ?? role;
@@ -186,7 +186,7 @@ module.exports = class RoleCommand extends Command {
                 const isValid = await arg.validate(roles, msg);
                 if (isValid !== true) {
                     return await replyAll({ interaction }, basicEmbed({
-                        color: 'RED', emoji: 'cross', description: arg.error
+                        color: 'RED', emoji: 'cross', description: arg.error,
                     }));
                 }
                 roles = await arg.parse(roles, msg);
@@ -225,7 +225,7 @@ module.exports = class RoleCommand extends Command {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'The chosen role is invalid. Please check the role hierarchy.'
+                    description: 'The chosen role is invalid. Please check the role hierarchy.',
                 }));
             }
         }
@@ -239,7 +239,7 @@ module.exports = class RoleCommand extends Command {
         const members = await (message || interaction).guild.members.fetch().catch(() => null);
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members and bots... Please be patient.'
+            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members and bots... Please be patient.',
         });
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
@@ -250,7 +250,7 @@ module.exports = class RoleCommand extends Command {
 
         await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members and bots.`
+            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members and bots.`,
         }));
     }
 
@@ -272,7 +272,7 @@ module.exports = class RoleCommand extends Command {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'The chosen role is invalid. Please check the role hierarchy.'
+                    description: 'The chosen role is invalid. Please check the role hierarchy.',
                 }));
             }
         }
@@ -285,7 +285,7 @@ module.exports = class RoleCommand extends Command {
         const bots = members.filter(m => m.user.bot);
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all bots... Please be patient.'
+            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all bots... Please be patient.',
         });
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
@@ -296,7 +296,7 @@ module.exports = class RoleCommand extends Command {
 
         await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all bots.`
+            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all bots.`,
         }));
     }
 
@@ -318,7 +318,7 @@ module.exports = class RoleCommand extends Command {
                 return await replyAll({ interaction }, basicEmbed({
                     color: 'RED',
                     emoji: 'cross',
-                    description: 'The chosen role is invalid. Please check the role hierarchy.'
+                    description: 'The chosen role is invalid. Please check the role hierarchy.',
                 }));
             }
         }
@@ -331,7 +331,7 @@ module.exports = class RoleCommand extends Command {
         const users = members.filter(m => !m.user.bot);
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members... Please be patient.'
+            color: 'GOLD', emoji: 'loading', description: 'Toggling role in all members... Please be patient.',
         });
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
@@ -342,7 +342,7 @@ module.exports = class RoleCommand extends Command {
 
         await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members.`
+            color: 'GREEN', emoji: 'check', description: `Toggled the \`${role.name}\` role for all members.`,
         }));
     }
 
@@ -363,7 +363,7 @@ module.exports = class RoleCommand extends Command {
         const { roles, user } = member;
         if (roles.cache.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That member has no roles.'
+                color: 'RED', emoji: 'cross', description: 'That member has no roles.',
             }));
         }
 
@@ -371,7 +371,7 @@ module.exports = class RoleCommand extends Command {
         if (!confirmed) return;
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Removing all roles... Please be patient.'
+            color: 'GOLD', emoji: 'loading', description: 'Removing all roles... Please be patient.',
         });
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
@@ -381,7 +381,7 @@ module.exports = class RoleCommand extends Command {
 
         await toDelete?.delete().catch(() => null);
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Removed every role from ${user.toString()} (${user.tag}).`
+            color: 'GREEN', emoji: 'check', description: `Removed every role from ${user.toString()} (${user.tag}).`,
         }));
     }
 
@@ -411,7 +411,7 @@ module.exports = class RoleCommand extends Command {
         const doesNotHave = roles.filter(r => !memberRoles.cache.has(r.id));
 
         const embed = basicEmbed({
-            color: 'GOLD', emoji: 'loading', description: 'Toggling the roles... Please be patient.'
+            color: 'GOLD', emoji: 'loading', description: 'Toggling the roles... Please be patient.',
         });
         const toDelete = await message?.replyEmbed(embed) || await interaction.channel.send({ embeds: [embed] });
 
@@ -430,7 +430,7 @@ module.exports = class RoleCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldValue: rolesStr,
-            fieldName: `Toggled the following roles for ${member.user.tag}:`
+            fieldName: `Toggled the following roles for ${member.user.tag}:`,
         }));
     }
 };

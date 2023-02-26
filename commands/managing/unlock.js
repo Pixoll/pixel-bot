@@ -25,15 +25,15 @@ module.exports = class UnlockCommand extends Command {
                 {
                     key: 'channel',
                     prompt: 'What channel do you want to unlock?',
-                    type: 'text-channel'
+                    type: 'text-channel',
                 },
                 {
                     key: 'reason',
                     prompt: 'What message do you want to send when the channel get\'s unlocked?',
                     type: 'string',
                     max: 512,
-                    default: 'Thanks for waiting.'
-                }
+                    default: 'Thanks for waiting.',
+                },
             ],
             slash: {
                 options: [
@@ -41,15 +41,15 @@ module.exports = class UnlockCommand extends Command {
                         type: 'channel',
                         channelTypes: ['guild-text'],
                         name: 'channel',
-                        description: 'The channel to unlock.'
+                        description: 'The channel to unlock.',
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'Why are you unlocking the channel.'
-                    }
-                ]
-            }
+                        description: 'Why are you unlocking the channel.',
+                    },
+                ],
+            },
         });
     }
 
@@ -66,7 +66,7 @@ module.exports = class UnlockCommand extends Command {
             reason ??= 'We\'ll be back shortly.';
             if (reason.length > 512) {
                 return replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -78,19 +78,19 @@ module.exports = class UnlockCommand extends Command {
         const perms = permissions.cache.find(p => p.id === guildId);
         if (!perms.deny.has('SEND_MESSAGES')) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`
+                color: 'RED', emoji: 'cross', description: `${channel} is already unlocked.`,
             }));
         }
 
         await permissions.edit(everyone, { SEND_MESSAGES: null }, { reason, type: 0 });
         await channel.send({
             embeds: [basicEmbed({
-                emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason
-            })]
+                emoji: '\\🔓', fieldName: 'This channel has been unlocked', fieldValue: reason,
+            })],
         });
 
         const embed = basicEmbed({
-            color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`
+            color: 'GREEN', emoji: 'check', description: `Unlocked ${channel}.`,
         });
         await replyAll({ interaction }, embed);
         if (channelId !== channel.id) {

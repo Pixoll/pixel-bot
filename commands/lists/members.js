@@ -18,16 +18,16 @@ module.exports = class MembersCommand extends Command {
             args: [{
                 key: 'role',
                 prompt: 'What role do you want to get the members from?',
-                type: 'role'
+                type: 'role',
             }],
             slash: {
                 options: [{
                     type: 'role',
                     name: 'role',
                     description: 'The role to get the members from.',
-                    required: true
-                }]
-            }
+                    required: true,
+                }],
+            },
         });
     }
 
@@ -43,7 +43,7 @@ module.exports = class MembersCommand extends Command {
 
         if (members.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: `The \`${role.name}\` role has no members.`
+                color: 'BLUE', emoji: 'info', description: `The \`${role.name}\` role has no members.`,
             }));
         }
 
@@ -52,7 +52,7 @@ module.exports = class MembersCommand extends Command {
             number: 20,
             authorName: `There's ${pluralize('member', members.length)} in ${role.name}`,
             authorIconURL: guild.iconURL({ dynamic: true }),
-            useDescription: true
+            useDescription: true,
         });
     }
 };

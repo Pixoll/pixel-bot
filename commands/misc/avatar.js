@@ -19,15 +19,15 @@ module.exports = class AvatarCommand extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get their avatar from?',
                 type: 'user',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
-                    description: 'The user to get the avatar from.'
-                }]
-            }
+                    description: 'The user to get the avatar from.',
+                }],
+            },
         });
     }
 
@@ -49,7 +49,7 @@ module.exports = class AvatarCommand extends Command {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setImage(avatarUrl)
             .setTimestamp();

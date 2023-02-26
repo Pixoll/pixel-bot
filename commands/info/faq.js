@@ -3,7 +3,7 @@ const { Collection } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const { Command, CommandInstances, FaqSchema } = require('pixoll-commando');
 const {
-    generateEmbed, basicEmbed, basicCollector, getArgument, confirmButtons, replyAll
+    generateEmbed, basicEmbed, basicCollector, getArgument, confirmButtons, replyAll,
 } = require('../../utils/functions');
 /* eslint-enable no-unused-vars */
 
@@ -28,22 +28,22 @@ module.exports = class FaqCommand extends Command {
                     prompt: 'What sub-command do you want to use?',
                     type: 'string',
                     oneOf: ['view', 'add', 'remove', 'clear'],
-                    default: 'view'
+                    default: 'view',
                 },
                 {
                     key: 'items',
                     prompt: 'What items do you want to remove from the FAQ list?',
                     type: 'integer',
                     min: 1,
-                    required: false
-                }
+                    required: false,
+                },
             ],
             slash: {
                 options: [
                     {
                         type: 'subcommand',
                         name: 'view',
-                        description: 'Display the FAQ list.'
+                        description: 'Display the FAQ list.',
                     },
                     {
                         type: 'subcommand',
@@ -54,15 +54,15 @@ module.exports = class FaqCommand extends Command {
                                 type: 'string',
                                 name: 'question',
                                 description: 'The question to add to the FAQ list.',
-                                required: true
+                                required: true,
                             },
                             {
                                 type: 'string',
                                 name: 'answer',
                                 description: 'The question\'s answer.',
-                                required: true
-                            }
-                        ]
+                                required: true,
+                            },
+                        ],
                     },
                     {
                         type: 'subcommand',
@@ -73,16 +73,16 @@ module.exports = class FaqCommand extends Command {
                             name: 'item',
                             description: 'The item to remove from the FAQ list.',
                             required: true,
-                            minValue: 1
-                        }]
+                            minValue: 1,
+                        }],
                     },
                     {
                         type: 'subcommand',
                         name: 'clear',
-                        description: 'Remove every entry in the FAQ list (bot\'s owner only).'
+                        description: 'Remove every entry in the FAQ list (bot\'s owner only).',
                     },
-                ]
-            }
+                ],
+            },
         });
 
         this.db = this.client.database.faq;
@@ -120,7 +120,7 @@ module.exports = class FaqCommand extends Command {
     async view({ message, interaction }, faqData) {
         if (faqData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
+                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.',
             }));
         }
 
@@ -130,7 +130,7 @@ module.exports = class FaqCommand extends Command {
             authorIconURL: this.client.user.displayAvatarURL({ dynamic: true }),
             keys: ['answer'],
             keyTitle: { suffix: 'question' },
-            numbered: true
+            numbered: true,
         });
     }
 
@@ -147,7 +147,7 @@ module.exports = class FaqCommand extends Command {
 
         if (!question) {
             const questionMsg = await basicCollector({ message, interaction }, {
-                fieldName: 'What question do you want to answer?'
+                fieldName: 'What question do you want to answer?',
             }, { time: 2 * 60_000 });
             if (!questionMsg) return;
             question = questionMsg.content;
@@ -155,7 +155,7 @@ module.exports = class FaqCommand extends Command {
 
         if (!answer) {
             const answerMsg = await basicCollector({ message, interaction }, {
-                fieldName: 'Now, what would be it\'s answer?'
+                fieldName: 'Now, what would be it\'s answer?',
             }, { time: 2 * 60_000 });
             if (!answerMsg) return;
             answer = answerMsg.content;
@@ -164,7 +164,7 @@ module.exports = class FaqCommand extends Command {
         await this.db.add({ question, answer });
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'The new entry has been added to the FAQ list.'
+            color: 'GREEN', emoji: 'check', description: 'The new entry has been added to the FAQ list.',
         }));
     }
 
@@ -187,14 +187,14 @@ module.exports = class FaqCommand extends Command {
 
         if (faqData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
+                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.',
             }));
         }
 
         const doc = faqData.first(item).pop();
         if (!doc) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That item is invalid inside the FAQ list.'
+                color: 'RED', emoji: 'cross', description: 'That item is invalid inside the FAQ list.',
             }));
         }
 
@@ -203,7 +203,7 @@ module.exports = class FaqCommand extends Command {
         await replyAll({ message, interaction }, basicEmbed({
             color: 'GREEN',
             emoji: 'check',
-            description: `Removed entry ${item} from the FAQ list.`
+            description: `Removed entry ${item} from the FAQ list.`,
         }));
     }
 
@@ -219,7 +219,7 @@ module.exports = class FaqCommand extends Command {
 
         if (faqData.size === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.'
+                color: 'BLUE', emoji: 'info', description: 'The FAQ list is empty.',
             }));
         }
 
@@ -231,7 +231,7 @@ module.exports = class FaqCommand extends Command {
         }
 
         await replyAll({ message, interaction }, basicEmbed({
-            color: 'GREEN', emoji: 'check', description: 'The FAQ list has been cleared.'
+            color: 'GREEN', emoji: 'check', description: 'The FAQ list has been cleared.',
         }));
     }
 };

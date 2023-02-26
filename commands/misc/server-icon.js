@@ -13,7 +13,7 @@ module.exports = class ServerIconCommand extends Command {
             group: 'misc',
             description: 'Displays the server\'s icon.',
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -32,7 +32,7 @@ module.exports = class ServerIconCommand extends Command {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: guild.name, iconURL: guild.iconURL({ dynamic: true })
+                name: guild.name, iconURL: guild.iconURL({ dynamic: true }),
             })
             .setImage(iconUrl)
             .setTimestamp();

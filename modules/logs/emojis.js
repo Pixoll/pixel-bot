@@ -23,11 +23,11 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('GREEN')
             .setAuthor({
-                name: 'Created emoji', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Created emoji', iconURL: guild.iconURL({ dynamic: true }),
             })
-            .setDescription(author ?
-                `**${author.toString()} added an emoji:** ${name}` :
-                `**Added emoji:** ${name}`
+            .setDescription(author
+                ? `**${author.toString()} added an emoji:** ${name}`
+                : `**Added emoji:** ${name}`
             )
             .setThumbnail(url)
             .setFooter({ text: `Emoji ID: ${id}` })
@@ -47,7 +47,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('ORANGE')
             .setAuthor({
-                name: 'Deleted emoji', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Deleted emoji', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`**Name:** ${name}`)
             .setThumbnail(url)
@@ -68,7 +68,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated emoji', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Updated emoji', iconURL: guild.iconURL({ dynamic: true }),
             })
             .addField('Name', `${oldEmoji.name} ➜ ${newEmoji.name}`)
             .setThumbnail(url)

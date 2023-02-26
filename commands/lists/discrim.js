@@ -22,7 +22,7 @@ module.exports = class DiscriminatorCommand extends Command {
                 /** @param {string} discrim */
                 parse: discrim => discrim.padStart(4, '0').slice(-4),
                 min: 1,
-                max: 9999
+                max: 9999,
             }],
             slash: {
                 options: [{
@@ -31,9 +31,9 @@ module.exports = class DiscriminatorCommand extends Command {
                     description: 'The discriminator to look for.',
                     required: true,
                     minValue: 1,
-                    maxValue: 9999
-                }]
-            }
+                    maxValue: 9999,
+                }],
+            },
         });
     }
 
@@ -57,14 +57,14 @@ module.exports = class DiscriminatorCommand extends Command {
 
         if (!match || match.length === 0) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'I couldn\'t find any members.'
+                color: 'RED', emoji: 'cross', description: 'I couldn\'t find any members.',
             }));
         }
 
         await generateEmbed({ message, interaction }, match, {
             number: 20,
             authorName: `Found ${pluralize('member', match.length)}`,
-            useDescription: true
+            useDescription: true,
         });
     }
 };

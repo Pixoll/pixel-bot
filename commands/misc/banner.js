@@ -18,15 +18,15 @@ module.exports = class BannerCommand extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get their banner from?',
                 type: 'user',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
-                    description: 'The user to get the banner from.'
-                }]
-            }
+                    description: 'The user to get the banner from.',
+                }],
+            },
         });
     }
 
@@ -44,7 +44,7 @@ module.exports = class BannerCommand extends Command {
         let bannerUrl = user.bannerURL({ dynamic: true, size: 2048 });
         if (!bannerUrl) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'BLUE', emoji: 'info', description: 'That user has no banner on their profile.'
+                color: 'BLUE', emoji: 'info', description: 'That user has no banner on their profile.',
             }));
         }
         if (/\.webp/.test(bannerUrl)) {
@@ -54,7 +54,7 @@ module.exports = class BannerCommand extends Command {
         const embed = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true })
+                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setImage(bannerUrl)
             .setTimestamp();

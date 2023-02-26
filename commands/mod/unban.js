@@ -19,7 +19,7 @@ module.exports = class UnbanCommand extends Command {
             format: 'unban [user] <reason>',
             examples: [
                 'unban @Pixoll',
-                'unban 802267523058761759 Appealed'
+                'unban 802267523058761759 Appealed',
             ],
             clientPermissions: ['BAN_MEMBERS'],
             userPermissions: ['BAN_MEMBERS'],
@@ -28,15 +28,15 @@ module.exports = class UnbanCommand extends Command {
                 {
                     key: 'user',
                     prompt: 'What user do you want to unban?',
-                    type: 'user'
+                    type: 'user',
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the ban?',
                     type: 'string',
                     max: 512,
-                    default: 'No reason given.'
-                }
+                    default: 'No reason given.',
+                },
             ],
             slash: {
                 options: [
@@ -44,15 +44,15 @@ module.exports = class UnbanCommand extends Command {
                         type: 'user',
                         name: 'user',
                         description: 'The user to unban.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
-                        description: 'The reason of the unban.'
-                    }
-                ]
-            }
+                        description: 'The reason of the unban.',
+                    },
+                ],
+            },
         });
     }
 
@@ -69,7 +69,7 @@ module.exports = class UnbanCommand extends Command {
             reason ??= 'No reason given.';
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -80,7 +80,7 @@ module.exports = class UnbanCommand extends Command {
         const isBanned = await bans.fetch(user).catch(() => null);
         if (!isBanned) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That user is not banned.'
+                color: 'RED', emoji: 'cross', description: 'That user is not banned.',
             }));
         }
 
@@ -96,7 +96,7 @@ module.exports = class UnbanCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been unbanned`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

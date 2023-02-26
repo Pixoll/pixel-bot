@@ -40,19 +40,19 @@ module.exports = async (client) => {
 
                 const winners = results.sort((a, b) => b.votes - a.votes).filter((d, i, arr) => arr[0].votes === d.votes);
 
-                const winner = winners.length === 1 ?
-                    `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null;
+                const winner = winners.length === 1
+                    ? `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null;
 
-                const draw = winners.length > 1 ?
-                    `It seems like there was a draw between these choices: ${winners.map(d => d.emoji).join(', ')}` : null;
+                const draw = winners.length > 1
+                    ? `It seems like there was a draw between these choices: ${winners.map(d => d.emoji).join(', ')}` : null;
 
-                const noVotes = results.filter(d => d.votes === 0).length === results.length ?
-                    'It seems like no one voted on this poll...' : null;
+                const noVotes = results.filter(d => d.votes === 0).length === results.length
+                    ? 'It seems like no one voted on this poll...' : null;
 
                 const pollEmbed = new MessageEmbed()
                     .setColor('#4c9f4c')
                     .setAuthor({
-                        name: 'The poll has ended!', iconURL: guild.iconURL({ dynamic: true }), url: message.url
+                        name: 'The poll has ended!', iconURL: guild.iconURL({ dynamic: true }), url: message.url,
                     })
                     .setDescription(winner || noVotes || draw)
                     .setTimestamp();

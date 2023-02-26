@@ -52,7 +52,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: `Used ${command.name} command`, iconURL: author.displayAvatarURL({ dynamic: true })
+                name: `Used ${command.name} command`, iconURL: author.displayAvatarURL({ dynamic: true }),
             })
             .setDescription(oneLine`
                 ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
@@ -76,7 +76,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated command prefix', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Updated command prefix', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`**New prefix:** ${prefix}`)
             .setTimestamp();
@@ -95,7 +95,7 @@ module.exports = (client) => {
         const embed = new MessageEmbed()
             .setColor('BLUE')
             .setAuthor({
-                name: 'Updated command status', iconURL: guild.iconURL({ dynamic: true })
+                name: 'Updated command status', iconURL: guild.iconURL({ dynamic: true }),
             })
             .setDescription(`The \`${command.name}\` command has been \`${enabled ? 'enabled' : 'disabled'}\`.`)
             .setTimestamp();

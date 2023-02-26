@@ -25,7 +25,7 @@ module.exports = class ServerInfoCommand extends Command {
             group: 'misc',
             description: 'Displays some information and statistics of the server, such as owner, boosts and member count.',
             guildOnly: true,
-            slash: true
+            slash: true,
         });
     }
 
@@ -49,7 +49,7 @@ module.exports = class ServerInfoCommand extends Command {
         const serverInfo = new MessageEmbed()
             .setColor('RANDOM')
             .setAuthor({
-                name: name, iconURL: server.iconURL({ dynamic: true })
+                name: name, iconURL: server.iconURL({ dynamic: true }),
             })
             .setThumbnail(server.iconURL({ dynamic: true, size: 2048 }))
             .addField('Information', stripIndent`

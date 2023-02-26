@@ -22,7 +22,7 @@ module.exports = class DurationCommand extends Command {
             format: 'duration [modlog ID] [new duration]',
             examples: [
                 `duration ${docId()} 12/30/2022`,
-                `duration ${docId()} 30d`
+                `duration ${docId()} 30d`,
             ],
             userPermissions: ['ADMINISTRATOR'],
             guildOnly: true,
@@ -32,13 +32,13 @@ module.exports = class DurationCommand extends Command {
                     label: 'modlog ID',
                     prompt: 'What is the ID of the mod log you want to change the duration?',
                     type: 'string',
-                    max: 12
+                    max: 12,
                 },
                 {
                     key: 'duration',
                     prompt: 'What will be the new duration of the mod log?',
-                    type: ['date', 'duration']
-                }
+                    type: ['date', 'duration'],
+                },
             ],
             slash: {
                 options: [
@@ -46,16 +46,16 @@ module.exports = class DurationCommand extends Command {
                         type: 'string',
                         name: 'modlog-id',
                         description: 'The ID of the mod log to update.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'duration',
                         description: 'The new duration or expire date of the mod log.',
-                        required: true
-                    }
-                ]
-            }
+                        required: true,
+                    },
+                ],
+            },
         });
     }
 
@@ -72,7 +72,7 @@ module.exports = class DurationCommand extends Command {
             duration = await arg.parse(duration).catch(() => null) || null;
             if (!duration) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.'
+                    color: 'RED', emoji: 'cross', description: 'The duration you specified is invalid.',
                 }));
             }
         }
@@ -83,14 +83,14 @@ module.exports = class DurationCommand extends Command {
         const modLog = await moderations.fetch(modlogId);
         if (!modLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.'
+                color: 'RED', emoji: 'cross', description: 'That ID is either invalid or it does not exist.',
             }));
         }
 
         const activeLog = await active.fetch(modlogId);
         if (!activeLog) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'That punishment has expired.'
+                color: 'RED', emoji: 'cross', description: 'That punishment has expired.',
             }));
         }
 
@@ -112,7 +112,7 @@ module.exports = class DurationCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `Updated duration for mod log \`${modlogId}\``,
-            fieldValue: `**New duration:** ${longTime}`
+            fieldValue: `**New duration:** ${longTime}`,
         }));
     }
 };

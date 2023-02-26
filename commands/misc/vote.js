@@ -11,7 +11,7 @@ module.exports = class VoteCommand extends Command {
             name: 'vote',
             group: 'misc',
             description: 'Vote for the bot and make it grow!',
-            slash: true
+            slash: true,
         });
     }
 
@@ -31,7 +31,7 @@ module.exports = class VoteCommand extends Command {
 
         await replyAll({ message, interaction }, {
             content: 'Vote for the bot with the button below!',
-            components: [row]
+            components: [row],
         });
     }
 };

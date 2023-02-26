@@ -43,15 +43,15 @@ module.exports = class WhoIsCommand extends Command {
                 key: 'user',
                 prompt: 'What user do you want to get information from?',
                 type: 'user',
-                required: false
+                required: false,
             }],
             slash: {
                 options: [{
                     type: 'user',
                     name: 'user',
-                    description: 'The user to get info from.'
-                }]
-            }
+                    description: 'The user to get info from.',
+                }],
+            },
         });
     }
 
@@ -88,7 +88,7 @@ module.exports = class WhoIsCommand extends Command {
         const userInfo = new MessageEmbed()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true }), url: avatar
+                name: user.tag, iconURL: user.displayAvatarURL({ dynamic: true }), url: avatar,
             })
             .setThumbnail(avatar)
             .setDescription(description.join(' '))
@@ -127,8 +127,8 @@ module.exports = class WhoIsCommand extends Command {
         userInfo.addField('Registered', timestamp(user.createdAt, 'R'), true);
 
         if (member) {
-            const acknowledgement = guild.ownerId === member.id ?
-                'Server owner' : permissions === 'Administrator' ? permissions : null;
+            const acknowledgement = guild.ownerId === member.id
+                ? 'Server owner' : permissions === 'Administrator' ? permissions : null;
             if (acknowledgement) userInfo.addField('Acknowledgement', acknowledgement, true);
         }
 

@@ -21,14 +21,14 @@ module.exports = class warnCommand extends Command {
                 {
                     key: 'member',
                     prompt: 'What member do you want to warn?',
-                    type: 'member'
+                    type: 'member',
                 },
                 {
                     key: 'reason',
                     prompt: 'What is the reason of the warn?',
                     type: 'string',
-                    max: 512
-                }
+                    max: 512,
+                },
             ],
             slash: {
                 options: [
@@ -36,16 +36,16 @@ module.exports = class warnCommand extends Command {
                         type: 'user',
                         name: 'member',
                         description: 'The member to warn.',
-                        required: true
+                        required: true,
                     },
                     {
                         type: 'string',
                         name: 'reason',
                         description: 'The reason of the warn.',
-                        required: true
-                    }
-                ]
-            }
+                        required: true,
+                    },
+                ],
+            },
         });
     }
 
@@ -60,12 +60,12 @@ module.exports = class warnCommand extends Command {
         if (interaction) {
             if (!(member instanceof GuildMember)) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.'
+                    color: 'RED', emoji: 'cross', description: 'That is not a valid member in this server.',
                 }));
             }
             if (reason.length > 512) {
                 return await replyAll({ interaction }, basicEmbed({
-                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.'
+                    color: 'RED', emoji: 'cross', description: 'Please keep the reason below or exactly 512 characters.',
                 }));
             }
         }
@@ -79,7 +79,7 @@ module.exports = class warnCommand extends Command {
 
         if (user.bot) {
             return await replyAll({ message, interaction }, basicEmbed({
-                color: 'RED', emoji: 'cross', description: 'You can\'t warn a bot.'
+                color: 'RED', emoji: 'cross', description: 'You can\'t warn a bot.',
             }));
         }
 
@@ -92,7 +92,7 @@ module.exports = class warnCommand extends Command {
             fieldValue: stripIndent`
                 **Reason:** ${reason}
                 **Moderator:** ${author.toString()} ${author.tag}
-            `
+            `,
         })).catch(() => null);
 
         await guild.database.moderations.add({
@@ -103,7 +103,7 @@ module.exports = class warnCommand extends Command {
             userTag: user.tag,
             modId: author.id,
             modTag: author.tag,
-            reason
+            reason,
         });
         this.client.emit('guildMemberWarn', guild, author, user, reason);
 
@@ -111,7 +111,7 @@ module.exports = class warnCommand extends Command {
             color: 'GREEN',
             emoji: 'check',
             fieldName: `${user.tag} has been warned`,
-            fieldValue: `**Reason:** ${reason}`
+            fieldValue: `**Reason:** ${reason}`,
         }));
     }
 };

@@ -26,13 +26,34 @@ module.exports = (client) => {
         const antiScamRegex = new RegExp(
             'https?://((?:www\\.)?' // url prefix
             + `(?:${[
-                'discordgifts?', 'discordn', 'discordi', 'dlscord-app', 'dlscord', 'discordd', 'dlscorcl', 'discordsnitro',
-                'discordnitro', 'steamcommunityx', 'discord-nitro', 'steamcommuniuty', 'discrod-gifte', 'discocrd',
-                'discorid', 'steam-dlscord', 'steam-discord', 'discord-nltro', 'dlscordapp', 'discrod', 'discrodsteam',
-                'discordc', 'discocrd-gift', 'disccord', 'discord-app'
+                'discordgifts?',
+                'discordn',
+                'discordi',
+                'dlscord-app',
+                'dlscord',
+                'discordd',
+                'dlscorcl',
+                'discordsnitro',
+                'discordnitro',
+                'steamcommunityx',
+                'discord-nitro',
+                'steamcommuniuty',
+                'discrod-gifte',
+                'discocrd',
+                'discorid',
+                'steam-dlscord',
+                'steam-discord',
+                'discord-nltro',
+                'dlscordapp',
+                'discrod',
+                'discrodsteam',
+                'discordc',
+                'discocrd-gift',
+                'disccord',
+                'discord-app',
             ].join('|')})\\.` // site name
             + `(?:${[
-                'com', 'gg', 'gifts?', 'info', 'birth', 'co\\.uk', 'help', 'l?ink', 'pro', 'click', 'ru\\.com', 'ru', 'org'
+                'com', 'gg', 'gifts?', 'info', 'birth', 'co\\.uk', 'help', 'l?ink', 'pro', 'click', 'ru\\.com', 'ru', 'org',
             ].join('|')}))/?`, // url suffix
             'mi'
         );
@@ -58,7 +79,7 @@ module.exports = (client) => {
                 fieldValue: stripIndent`
                 **Reason:** ${reason}
                 **Moderator:** ${mod.toString()} ${mod.tag} [Scam detection system]
-            `
+            `,
             })).catch(() => null);
         }
 
@@ -73,7 +94,7 @@ module.exports = (client) => {
             userTag: author.tag,
             modId: mod.id,
             modTag: mod.tag,
-            reason
+            reason,
         });
     });
 };
