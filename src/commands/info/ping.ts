@@ -10,7 +10,8 @@ export default class PingCommand extends Command {
             group: 'info',
             description: 'Pong! 🏓',
             guarded: true,
-        }, {});
+            autogenerateSlashCommand: true,
+        });
     }
 
     public async run(context: CommandContext): Promise<void> {

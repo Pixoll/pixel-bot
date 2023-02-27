@@ -1,6 +1,6 @@
 import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
-import { EmbedBuilder, version as djsVersion } from 'discord.js';
+import { EmbedBuilder, hyperlink, version as djsVersion } from 'discord.js';
 import { Command, CommandContext, CommandoClient, version as pixComVersion } from 'pixoll-commando';
 import { replyAll } from '../../utils/functions';
 
@@ -15,7 +15,8 @@ export default class InfoCommand extends Command {
             group: 'info',
             description: 'Displays some information about the bot.',
             guarded: true,
-        }, {});
+            autogenerateSlashCommand: true,
+        });
     }
 
     public async run(context: CommandContext): Promise<void> {
@@ -38,18 +39,18 @@ export default class InfoCommand extends Command {
                 name: 'Information',
                 value: stripIndent`
                 **Version:** ${version}
-                **Library:** [discord.js v${djsVersion}](https://discord.js.org/#/)
-                **Framework:** [pixoll-commando v${pixComVersion}](https://github.com/Pixoll/pixoll-commando)
+                **Library:** ${hyperlink('discord.js v' + djsVersion, 'https://discord.js.org/#/')}
+                **Framework:** ${hyperlink('pixoll-commando v' + pixComVersion, 'https://github.com/Pixoll/pixoll-commando')}
                 **Developer:** ${owners?.[0].toString()} (${owners?.[0].tag})
                 `,
                 inline: true,
             }, {
                 name: 'Links',
                 value: stripIndent`
-                • [Top.gg page](${topgg})
-                • [Support server](${options.serverInvite})
-                • [Invite the bot](${topgg}/invite)
-                • [Vote here](${topgg}/vote)
+                • ${hyperlink('Top.gg page', topgg)}
+                • ${hyperlink('Support server', options.serverInvite ?? '')}
+                • ${hyperlink('Invite the bot', topgg + '/invite')}
+                • ${hyperlink('Vote here', topgg + '/vote')}
                 `,
                 inline: true,
             })

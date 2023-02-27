@@ -34,7 +34,8 @@ export default class ChangelogCommand extends Command {
             group: 'info',
             description: 'Displays the changelog history of the bot.',
             guarded: true,
-        }, {});
+            autogenerateSlashCommand: true,
+        });
     }
 
     public async run(context: CommandContext): Promise<void> {

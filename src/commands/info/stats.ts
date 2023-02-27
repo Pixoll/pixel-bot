@@ -30,7 +30,8 @@ export default class StatsCommand extends Command {
             group: 'info',
             description: 'Displays some statistics of the bot.',
             guarded: true,
-        }, {});
+            autogenerateSlashCommand: true,
+        });
     }
 
     public async run(context: CommandContext): Promise<void> {

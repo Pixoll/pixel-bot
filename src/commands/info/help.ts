@@ -1,6 +1,15 @@
 import { prettyMs } from 'better-ms';
 import { stripIndent, oneLine } from 'common-tags';
-import { APIEmbed, ApplicationCommandOptionType, Collection, EmbedBuilder } from 'discord.js';
+import {
+    APIEmbed,
+    APIEmbedField,
+    ApplicationCommandOptionChoiceData as ChoiceData,
+    ApplicationCommandOptionType,
+    Collection,
+    EmbedBuilder,
+    hyperlink,
+} from 'discord.js';
+import { capitalize } from 'lodash';
 import {
     Argument,
     Command,
@@ -11,7 +20,9 @@ import {
     Util,
     CommandoMessage,
     CommandoGuild,
+    CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
+import { moderatorPermissions } from '../../utils';
 import { pagedEmbed, getArgument, replyAll, pluralize, TemplateEmbedResult } from '../../utils/functions';
 
 declare function require<T>(id: string): T;
@@ -44,13 +55,13 @@ const staticEmbedPages: APIEmbed[] = [{
         🔹 **Reminders system:** with both relative time and a specific date.
         🔹 **Reaction/Button roles:** up to 10 roles per message.
         `,
-    }, {
-        name: 'Upcoming features',
-        value: stripIndent`
-        🔹 **Tickets system:** ETA 2-3 months.
-        🔹 **Giveaways system:** ETA 2-3 months.
-        🔹 **Chat filtering:** ETA 4-5 months.
-        `,
+        // }, {
+        //     name: 'Upcoming features',
+        //     value: stripIndent`
+        //     🔹 **Tickets system:** ETA 2-3 months.
+        //     🔹 **Giveaways system:** ETA 2-3 months.
+        //     🔹 **Chat filtering:** ETA 4-5 months.
+        //     `,
     }, {
         name: '\u200B',
         value: oneLine`
@@ -79,10 +90,7 @@ const staticEmbedPages: APIEmbed[] = [{
         value: stripIndent`
         ${oneLine`
         Some commands require you to be a "moderator", which means that you **must have
-        at least one** of the following permissions: \`Ban members\`, \`Deafen members\`,
-        \`Kick members\`, \`Manage channels\`, \`Manage emojis and stickers\`, \`Manage guild\`,
-        \`Manage messages\`, \`Manage nicknames\`, \`Manage roles\`, \`Manage threads\`,
-        \`Manage webhooks\`, \`Move members\`, \`Mute members\`.
+        at least one** of the following permissions: ${moderatorPermissions.map(perm => `${Util.permissions[perm]}`)}
         `}
         `,
     }],
@@ -144,13 +152,14 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
                 type: ApplicationCommandOptionType.String,
                 name: 'command',
                 description: 'The command to get info from.',
+                autocomplete: true,
             }],
         });
     }
 
     public async run(context: CommandContext, { command }: ParsedArgs): Promise<void> {
         const { guild, client, author } = context;
-        const { registry, user, owners } = client;
+        const { registry, user, owners, options } = client;
         const { groups } = registry;
         const owner = owners?.[0];
         const prefix = guild?.prefix || client.prefix;
@@ -185,7 +194,15 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
                 Type \`/help <command>\` for detailed information of a command.
 
                 ${page1String ? `Commands ${page1String}.` : ''}
-                `).addFields(commandList),
+                `).addFields(...commandList, {
+                    name: '🔗 Useful links',
+                    value: oneLine`
+                    ${hyperlink('Top.gg page', topgg)} -
+                    ${hyperlink('Support server', options.serverInvite ?? '')} -
+                    ${hyperlink('Invite the bot', topgg + '/invite')} -
+                    ${hyperlink('Vote here', topgg + '/vote')} -
+                    `,
+                }),
                 new EmbedBuilder({ ...base, ...staticEmbedPages[0] }).setTitle(`About ${user.username}`),
                 new EmbedBuilder({ ...base, ...staticEmbedPages[1] }),
                 new EmbedBuilder({ ...base, ...staticEmbedPages[2] }).addFields({
@@ -241,17 +258,29 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
 
         await replyAll(context, commandInfo(client, command, guild));
     }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { client, options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const matches = client.registry.commands
+            .filter(command =>
+                command.name.includes(query) || command.aliases.some(alias => alias.includes(query))
+            )
+            .map(command => command.name)
+            .slice(0, 25)
+            .sort()
+            .map<ChoiceData<string>>(command => ({
+                name: capitalize(command),
+                value: command,
+            }));
+
+        await interaction.respond(matches);
+    }
 }
 
-interface CommandList {
-    name: string;
-    value: string;
-}
-
-function getCommandsList(context: CommandContext, groups: Collection<string, CommandGroup>): CommandList[] {
+function getCommandsList(context: CommandContext, groups: Collection<string, CommandGroup>): APIEmbedField[] {
     const { guild, author, client } = context;
-    const { options, owners } = client;
-    const owner = owners?.[0];
+    const owner = client.owners?.[0];
 
     const commands = groups.map(g => g.commands.filter(cmd => {
         const hasPermission = cmd.hasPermission(context) === true;
@@ -262,7 +291,7 @@ function getCommandsList(context: CommandContext, groups: Collection<string, Com
         return !shouldHide && hasPermission && guildOnly && dmOnly;
     })).filter(g => g.size > 0);
 
-    const commandList: CommandList[] = [];
+    const commandList: APIEmbedField[] = [];
     for (const group of commands) {
         const { name } = group.toJSON()[0].group;
         const list = group.map(command => {
@@ -275,16 +304,6 @@ function getCommandsList(context: CommandContext, groups: Collection<string, Com
         }).sort().join(', ');
         commandList.push({ name, value: list });
     }
-
-    commandList.push({
-        name: '🔗 Useful links',
-        value: oneLine`
-        [Top.gg page](${topgg}) -
-        [Support server](${options.serverInvite}) -
-        [Invite the bot](${topgg}/invite) -
-        [Vote here](${topgg}/vote)
-        `,
-    });
 
     return commandList;
 }

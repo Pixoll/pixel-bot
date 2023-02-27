@@ -10,7 +10,8 @@ export default class InviteCommand extends Command {
             group: 'info',
             description: 'Invite this bot to your server.',
             guarded: true,
-        }, {});
+            autogenerateSlashCommand: true,
+        });
     }
 
     public async run(context: CommandContext): Promise<void> {
