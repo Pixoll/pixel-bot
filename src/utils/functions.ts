@@ -1014,7 +1014,7 @@ export async function generateEmbed<T extends object | string>(
         for (const item of current) {
             const isObject = typeof item === 'object';
             const objKeys = hasObjects
-                ? Object.keys(isObject ? item._doc as object : item).filter(objFilter)
+                ? Object.keys(isObject && '_doc' in item ? item._doc as object : item).filter(objFilter)
                 : [];
 
             const docId = useDocId && isObject

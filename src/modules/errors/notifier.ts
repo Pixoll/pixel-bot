@@ -138,12 +138,13 @@ async function errorHandler(
 
     if (!files) return;
 
-    await client.database.errors.add({
-        _id: id,
-        type: type,
-        name: error.name,
-        message: error.message,
-        command: command?.name,
-        files: code(files),
-    });
+    // TODO: Do not send data to DB until production-ready
+    // await client.database.errors.add({
+    //     _id: id,
+    //     type: type,
+    //     name: error.name,
+    //     message: error.message,
+    //     command: command?.name,
+    //     files: code(files),
+    // });
 }
