@@ -9,7 +9,6 @@ dotenvConfig();
 
 const client = new CommandoClient({
     prefix: '!!',
-    owners: ['667937325002784768'],
     testGuild: '790051159099703316',
     serverInvite: 'https://discord.gg/Pc9pAHf3GU',
     inviteOptions: {

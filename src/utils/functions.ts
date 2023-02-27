@@ -20,12 +20,14 @@ import {
 import {
     Argument,
     ArgumentResult,
+    ArgumentTypeString,
+    ArgumentTypeStringMap,
     Command,
-    CommandInstances,
+    CommandContext,
+    CommandContextChannel,
     CommandoGuild,
     CommandoGuildMember,
     CommandoifiedMessage,
-    CommandoInstanceChannel,
     CommandoInteraction,
     CommandoMessage,
     CommandoRole,
@@ -73,7 +75,7 @@ export interface BasicEmbedOptions {
     footer?: string;
 }
 
-export type TemplateEmbedFunction = (start: number, filter?: string) => Promise<TemplateEmbedResult>;
+export type TemplateEmbedFunction = (start: number, filter?: string) => Awaitable<TemplateEmbedResult>;
 
 export interface TemplateEmbedResult {
     embed: EmbedBuilder;
@@ -104,7 +106,7 @@ export interface PagedEmbedOptions {
      * Whether to skip the page start and page end buttons
      * @default false
      */
-    skipMaxButtons: boolean;
+    skipMaxButtons?: boolean;
 }
 
 export interface GenerateEmbedOptions {
@@ -213,6 +215,10 @@ export interface AnyPartial {
     partial: boolean;
     fetch(): Promise<AnyPartial>;
 }
+
+export type GetArgumentResult<T extends ArgumentTypeString> = Omit<ArgumentResult<ArgumentTypeStringMap[T]>, 'value'> & {
+    value: NonNullable<ArgumentResult<ArgumentTypeStringMap[T]>['value']>;
+};
 
 //#endregion
 
@@ -382,43 +388,38 @@ export function timestamp<F extends TimestampType>(time: Date | number, format?:
 }
 
 /**
- * Replies to the corresponding instances
- * @param instances The instances to reply
+ * Replies to the corresponding context
+ * @param context The command context to reply
  * @param options The options of the message
  */
 export async function replyAll(
-    instances: CommandInstances, options: EmbedBuilder | Omit<MessageCreateOptions, 'flags'> | string
+    context: CommandContext, options: EmbedBuilder | Omit<MessageCreateOptions, 'flags'> | string
 ): Promise<Message | null> {
-    const instance = Util.getInstanceFrom(instances);
     if (options instanceof EmbedBuilder) options = { embeds: [options] };
     if (typeof options === 'string') options = { content: options };
-    if (instance instanceof CommandoInteraction) {
-        if (instance.deferred || instance.replied) {
-            return await instance.editReply(options).catch(() => null) as Message | null;
+    if (context instanceof CommandoInteraction) {
+        if (context.isEditable()) {
+            return await context.editReply(options).catch(() => null) as Message | null;
         }
-        return await instance.reply(options).catch(() => null) as Message | null;
+        return await context.reply(options).catch(() => null) as Message | null;
     }
-    if (instance) {
-        return await instance.reply({ ...options, ...Util.noReplyPingInDMs(instance) }).catch(() => null);
-    }
-    return null;
+    return await context.reply({ ...options, ...Util.noReplyPingInDMs(context) }).catch(() => null);
 }
 
 /**
  * Creates a basic collector with the given parameters.
- * @param instances The instances the command is being run for
+ * @param context The command context
  * @param embedOptions The options for the response messages.
  * @param collectorOptions The collector's options.
  * @param shouldDelete Whether the prompt should be deleted after it gets a value or not.
  */
 export async function basicCollector(
-    instances: CommandInstances,
+    context: CommandContext,
     embedOptions: BasicEmbedOptions,
     collectorOptions: AwaitMessagesOptions = {},
     shouldDelete?: boolean
 ): Promise<Message | null> {
-    const instance = Util.getInstanceFrom(instances);
-    const { author, channelId, client } = instance;
+    const { author, channelId, client } = context;
 
     collectorOptions.time ??= 30 * 1000;
     collectorOptions.max ??= 1;
@@ -431,21 +432,21 @@ export async function basicCollector(
         unitCount: 1,
     })}`;
 
-    const toDelete = await replyAll(instances, basicEmbed(embedOptions));
-    const channel = await client.channels.fetch(channelId).catch(() => null) as CommandoInstanceChannel<true>;
+    const toDelete = await replyAll(context, basicEmbed(embedOptions));
+    const channel = await client.channels.fetch(channelId).catch(() => null) as CommandContextChannel<true>;
     if (!channel) {
         throw new Error(`Unknown channel ${channelId}`);
     }
 
     const messages = await channel.awaitMessages(collectorOptions);
-    if (instance instanceof CommandoMessage && shouldDelete) await toDelete?.delete().catch(() => null);
+    if (context instanceof CommandoMessage && shouldDelete) await toDelete?.delete().catch(() => null);
 
     if (messages.size === 0) {
-        await replyAll(instances, { content: 'You didn\'t answer in time.', embeds: [] });
+        await replyAll(context, { content: 'You didn\'t answer in time.', embeds: [] });
         return null;
     }
     if (messages.first()?.content.toLowerCase() === 'cancel') {
-        await replyAll(instances, { content: 'Cancelled command.', embeds: [] });
+        await replyAll(context, { content: 'Cancelled command.', embeds: [] });
         return null;
     }
 
@@ -457,12 +458,18 @@ export async function basicCollector(
  * @param message The message to get the argument from
  * @param arg The argument to get
  */
-export async function getArgument(message: CommandoMessage, arg: Argument): Promise<ArgumentResult> {
+export async function getArgument<T extends ArgumentTypeString = ArgumentTypeString>(
+    message: CommandoMessage, arg?: Argument<T>
+): Promise<GetArgumentResult<T> | null> {
+    if (!arg) return null;
     const initialValue = arg.required;
     arg.required = true;
-    const response = await arg.obtain(message, '');
+    const response = await arg.obtain(message, '') as GetArgumentResult<T>;
     arg.required = initialValue;
-    if (response.cancelled) await message.reply({ content: 'Cancelled command.', ...Util.noReplyPingInDMs(message) });
+    if (response.cancelled) await message.reply({
+        content: 'Cancelled command.',
+        ...Util.noReplyPingInDMs(message),
+    });
     return response;
 }
 
@@ -728,13 +735,13 @@ export function validateURL(str: string): boolean {
 
 /**
  * Validates a {@link Role} to be used in commands
- * @param msg The message instance
+ * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(msg: AnyMessage<true>, role: Role): boolean {
+export function isValidRole(message: AnyMessage<true>, role: Role): boolean {
     if (!(role instanceof Role) || !role || role.managed) return false;
 
-    const { member, client, author, guild } = msg;
+    const { member, client, author, guild } = message;
     const botId = client.user.id;
 
     const botManageable = guild.members.me?.roles.highest.comparePositionTo(role);
@@ -760,16 +767,15 @@ export function docId(): string {
 
 /**
  * Creates a basic paged embed with the template provided.
- * @param instances The instances for this embed
+ * @param context The command context
  * @param options Options for the paged embed.
  * @param template The embed template to use.
  */
 export async function pagedEmbed(
-    instances: CommandInstances, options: PagedEmbedOptions, template: TemplateEmbedFunction
+    context: CommandContext, options: PagedEmbedOptions, template: TemplateEmbedFunction
 ): Promise<void> {
-    const instance = Util.getInstanceFrom(instances);
-    const { channelId, id, author, client } = instance;
-    const channel = await client.channels.fetch(channelId).catch(() => null) as CommandoInstanceChannel<true>;
+    const { channelId, id, author, client } = context;
+    const channel = await client.channels.fetch(channelId).catch(() => null) as CommandContextChannel<true>;
     if (!channel) {
         throw new Error(`Unknown channel ${channelId}`);
     }
@@ -811,13 +817,13 @@ export async function pagedEmbed(
         );
 
     if (options.toUser && !isDMs) {
-        await replyAll(instances, stripIndent`
+        await replyAll(context, stripIndent`
             ${options.dmMsg || ''}
             **Didn\'t get the DM?** Then please allow DMs from server members.
         `);
     }
 
-    if (instance instanceof CommandoMessage) {
+    if (context instanceof CommandoMessage) {
         await targetChannel.sendTyping().catch(() => null);
     }
 
@@ -829,7 +835,7 @@ export async function pagedEmbed(
 
     const msg = options.toUser && !isDMs
         ? await targetChannel.send(msgOptions).catch(() => null)
-        : await replyAll(instances, msgOptions);
+        : await replyAll(context, msgOptions);
 
     if (!msg || (options.total <= options.number && !options.components[0])) return;
 
@@ -931,21 +937,20 @@ export async function pagedEmbed(
 
     collector.on('end', async () => {
         if (msg) await msg.edit({ components: [] }).catch(() => null);
-        else replyAll(instances, { components: [] }).catch(() => null);
+        else replyAll(context, { components: [] }).catch(() => null);
     });
 }
 
 /**
  * Generates a paged embed based off the `array` and `embedOptions`
- * @param instances The instances for this embed
+ * @param context The command context
  * @param array The array that contains the data to be displayed
  * @param options Some extra data for the embed
  */
-export async function generateEmbed<T extends Record<string, unknown> | string>(
-    instances: CommandInstances, array: T[], options: GenerateEmbedOptions
+export async function generateEmbed<T extends object | string>(
+    context: CommandContext, array: T[], options: GenerateEmbedOptions
 ): Promise<void> {
-    const instance = Util.getInstanceFrom(instances);
-    const { channels } = instance.client;
+    const { channels } = context.client;
     const {
         number, color, authorName, authorIconURL, useDescription, title, inline, toUser, dmMsg, hasObjects, keyTitle,
         keys, keysExclude, useDocId, components, embedTitle, skipMaxButtons, numbered,
@@ -960,7 +965,7 @@ export async function generateEmbed<T extends Record<string, unknown> | string>(
         return (keys ? keys.includes(key) : !!key) && !keysExclude.includes(key);
     };
 
-    await pagedEmbed(instances, {
+    await pagedEmbed(context, {
         number,
         total: array.length,
         toUser,
@@ -968,8 +973,10 @@ export async function generateEmbed<T extends Record<string, unknown> | string>(
         components,
         skipMaxButtons,
     }, async (start, filter) => {
-        const data: T[] = (!filter || filter === 'all') ? array
-            : array.filter(doc => typeof doc === 'object' && doc.type === filter);
+        const data = ((!filter || filter === 'all')
+            ? array
+            : array.filter(doc => typeof doc === 'object' && 'type' in doc && doc.type === filter)
+        ) as Array<Record<string, unknown>>;
 
         const pages = Math.trunc(data.length / number) + ((data.length / number) % 1 === 0 ? 0 : 1);
         const current = data.slice(start, start + number);
@@ -1075,12 +1082,11 @@ export async function generateEmbed<T extends Record<string, unknown> | string>(
 
 /**
  * Creates and manages confirmation buttons (y/n) for moderation actions
- * @param instances The instances for these buttons
+ * @param context The command context
  * @param options The button options
  */
-export async function confirmButtons(instances: CommandInstances, options: ConfirmButtonsOptions): Promise<boolean> {
-    const instance = Util.getInstanceFrom(instances);
-    const { id, author } = instance;
+export async function confirmButtons(context: CommandContext, options: ConfirmButtonsOptions): Promise<boolean> {
+    const { id, author } = context;
     const { action, target, reason, duration, sendCancelled = true } = options;
 
     const ids = {
@@ -1122,7 +1128,7 @@ export async function confirmButtons(instances: CommandInstances, options: Confi
         .setCustomId(ids.no)
         .setEmoji(customEmoji('cross'));
 
-    const msg = await replyAll(instances, {
+    const msg = await replyAll(context, {
         embeds: [confirmEmbed],
         components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(yesButton, noButton)],
     });
@@ -1142,21 +1148,21 @@ export async function confirmButtons(instances: CommandInstances, options: Confi
         componentType: ComponentType.Button,
     }).catch(() => null);
 
-    if (instance instanceof CommandoMessage) await msg?.delete();
+    if (context instanceof CommandoMessage) await msg?.delete();
 
-    await replyAll(instances, { components: [] });
+    await replyAll(context, { components: [] });
 
     if (!pushed || pushed.customId === ids.no) {
         if (sendCancelled) {
-            await replyAll(instances, {
+            await replyAll(context, {
                 content: 'Cancelled command.', embeds: [],
             });
         }
         return false;
     }
 
-    if (instance instanceof CommandoMessage) {
-        await instance.channel.sendTyping().catch(() => null);
+    if (context instanceof CommandoMessage) {
+        await context.channel.sendTyping().catch(() => null);
     }
     return true;
 }

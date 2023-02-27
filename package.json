@@ -22,7 +22,7 @@
     "lodash": "^4.17.21",
     "minecraft-server-util": "^5.2.10",
     "mongoose": "^6.4.4",
-    "pixoll-commando": "^1.0.0-dev.23",
+    "pixoll-commando": "^1.0.0-dev.26",
     "require-all": "^3.0.0"
   },
   "devDependencies": {

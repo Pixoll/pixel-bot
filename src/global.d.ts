@@ -373,8 +373,6 @@ type Dictionary<T> = Record<string, T | undefined>;
 
 type Awaitable<T> = PromiseLike<T> | T;
 
-type Mutable<T> = { -readonly [P in keyof T]: T[P] };
-
 type IfElse<T extends boolean, A, B = null> = T extends true ? A : B;
 
 type AnyFunction = () => unknown;

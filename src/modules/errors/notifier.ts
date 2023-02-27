@@ -1,4 +1,4 @@
-import { CommandoClient, CommandInstances, Command, Util, CommandoMessage } from 'pixoll-commando';
+import { CommandoClient, CommandContext, Command, CommandoMessage } from 'pixoll-commando';
 import { EmbedBuilder, TextChannel, escapeMarkdown } from 'discord.js';
 import { customEmoji, docId, code, replyAll, sliceDots } from '../../utils/functions';
 import { stripIndent } from 'common-tags';
@@ -49,7 +49,7 @@ export default function (client: CommandoClient<true>): void {
  * sends the error message to the bot owner
  * @param error the error
  * @param type the type of error
- * @param instances the command instances
+ * @param context the command instances
  * @param command the command
  * @param id the error ID to use
  */
@@ -57,7 +57,7 @@ async function errorHandler(
     client: CommandoClient<true>,
     error: Error | string,
     type: string,
-    instances?: CommandInstances,
+    context?: CommandContext,
     command?: Command,
     id?: string
 ): Promise<void> {
@@ -95,11 +95,10 @@ async function errorHandler(
         )
         .join('\n');
 
-    const instance = instances && Util.getInstanceFrom(instances);
-    const { guild = null, channel = null, author = null } = instance ?? {};
-    const url = instance instanceof CommandoMessage ? instance.url : null;
+    const { guild = null, channel = null, author = null } = context ?? {};
+    const url = context instanceof CommandoMessage ? context.url : null;
 
-    const where = instance ? (guild
+    const where = context ? (guild
         ? stripIndent`
         At guild **${guild.name}** (${guild.id}), channel ${channel?.toString()}.
         ${url ? `Please go to [this message](${url}) for more information.` : ''}
@@ -119,10 +118,10 @@ async function errorHandler(
             ${where}
         `);
 
-    if (command && instance) {
+    if (command && context) {
         embed.addFields({
             name: 'Command input',
-            value: code(escapeMarkdown(instance.toString()).substring(0, 1016), 'js'),
+            value: code(escapeMarkdown(context.toString()).substring(0, 1016), 'js'),
         });
     }
 

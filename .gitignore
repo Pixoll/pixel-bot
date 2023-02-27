@@ -6,3 +6,5 @@
 /documents/privacy-policy.json
 /documents/terms-of-service.json
 /.tsbuildinfo
+/src/commands/info/legal.ts
+/build/commands/info/legal.js
