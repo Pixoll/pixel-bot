@@ -21,7 +21,6 @@ import {
     Argument,
     ArgumentResult,
     ArgumentTypeString,
-    ArgumentTypeStringMap,
     Command,
     CommandContext,
     CommandContextChannel,
@@ -125,7 +124,7 @@ export interface GenerateEmbedOptions {
     /** The name of the author */
     authorName?: string;
     /** The icon URL of the author */
-    authorIconURL?: string;
+    authorIconURL?: string | null;
     /**
      * The title of each section in the embed
      * @default ''
@@ -216,8 +215,8 @@ export interface AnyPartial {
     fetch(): Promise<AnyPartial>;
 }
 
-export type GetArgumentResult<T extends ArgumentTypeString> = Omit<ArgumentResult<ArgumentTypeStringMap[T]>, 'value'> & {
-    value: NonNullable<ArgumentResult<ArgumentTypeStringMap[T]>['value']>;
+export type GetArgumentResult<T extends ArgumentTypeString> = Omit<ArgumentResult<T>, 'value'> & {
+    value: NonNullable<ArgumentResult<T>['value']>;
 };
 
 //#endregion
@@ -989,7 +988,7 @@ export async function generateEmbed<T extends object | string>(
         if (authorName) {
             embed.setAuthor({
                 name: authorName,
-                iconURL: authorIconURL,
+                iconURL: authorIconURL ?? undefined,
             });
         }
         if (pages > 1) embed.setFooter({ text: `Page ${Math.round(start / number + 1)} of ${pages}` });
@@ -1175,14 +1174,6 @@ export function deepCopy<T>(value: T): T {
     return JSON.parse(JSON.stringify(value));
 }
 
-export function pick<T extends object, K extends keyof T>(object: T, keys: K[]): Pick<T, K> {
-    return omitOrPick('pick', object, keys);
-}
-
-export function omit<T extends object, K extends keyof T>(object: T, keys: K[]): Omit<T, K> {
-    return omitOrPick('omit', object, keys);
-}
-
 export function enumToObject<T extends Record<string, unknown>>(o: T): Readonly<T> {
     return Object.keys(o)
         .filter((k) => typeof k !== 'number')
@@ -1213,16 +1204,9 @@ export function parseMessageToCommando<InGuild extends boolean = boolean>(
     return parsedMessage as CommandoMessage<InGuild> | null;
 }
 
-function omitOrPick<Kind extends 'omit' | 'pick', T extends object, K extends keyof T>(
-    kind: Kind, object: T, keys: K[]
-): Kind extends 'omit' ? Omit<T, K> : Pick<T, K> {
-    const finalObject: Record<string, unknown> = {};
-    const validEntires = Object.entries(object as Record<string, unknown>)
-        .filter(([k]) =>
-            kind === 'omit' ? !keys.includes(k as K) : keys.includes(k as K)
-        );
-    for (const [key, value] of validEntires) {
-        finalObject[key] = value;
-    }
-    return finalObject as Kind extends 'omit' ? Omit<T, K> : Pick<T, K>;
+export function getSubCommand<T>(message: CommandoMessage, defaultSubCommand?: T): T {
+    return (
+        CommandoMessage.parseArgs(message.content).map(s => s.toLowerCase())[1]
+        ?? defaultSubCommand
+    ) as T;
 }

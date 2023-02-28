@@ -23,7 +23,7 @@ import {
     CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
 import { moderatorPermissions } from '../../utils';
-import { pagedEmbed, getArgument, replyAll, pluralize, TemplateEmbedResult } from '../../utils/functions';
+import { pagedEmbed, replyAll, pluralize, TemplateEmbedResult } from '../../utils/functions';
 
 declare function require<T>(id: string): T;
 const { version } = require<{ version: string }>('../../../package.json');
@@ -100,13 +100,13 @@ const staticEmbedPages: APIEmbed[] = [{
         name: 'Relative time',
         value: stripIndent`
         ${oneLine`
-            Just specify the relative time with a number followed by a letter, like this:
-            \`1d\`, \`1.5d\` or \`1d12h\`.
+        Just specify the relative time with a number followed by a letter, like this:
+        \`1d\`, \`1.5d\` or \`1d12h\`.
         `}
 
         ${oneLine`
-            *Note: The greater the relative time you specify, the less accurate it'll be.
-            If you need something for a specific time, it's recommended to set a date instead.*
+        *Note: The greater the relative time you specify, the less accurate it'll be.
+        If you need something for a specific time, it's recommended to set a date instead.*
         `}
         `,
         inline: true,
@@ -131,6 +131,15 @@ const args = [{
     prompt: 'What command do you want to get information about?',
     type: 'command',
     required: false,
+    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+        const arg = argument as Argument<'command'>;
+        if (!arg.type) return true;
+        const isValid = await arg.type.validate(value, message, arg);
+        if (isValid !== true) return isValid;
+        const command = await arg.type.parse(value, message, arg);
+        if (!command || command.hidden) return false;
+        return true;
+    },
 }] as const;
 
 type RawArgs = typeof args;
@@ -146,6 +155,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
             details: '`command` can be either a command\'s name or alias.',
             examples: ['help ban'],
             guarded: true,
+            hidden: true,
             args,
         }, {
             options: [{
@@ -158,105 +168,92 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { command }: ParsedArgs): Promise<void> {
-        const { guild, client, author } = context;
+        const { guild, client } = context;
         const { registry, user, owners, options } = client;
         const { groups } = registry;
         const owner = owners?.[0];
         const prefix = guild?.prefix || client.prefix;
 
-        try {
+        if (command) {
             command &&= registry.resolveCommand(command);
-        } catch {
-            command = null;
+            const hasPermission = command.hasPermission(context);
+            if (hasPermission !== true) {
+                if (typeof hasPermission === 'string') {
+                    await command.onBlock(context, hasPermission);
+                    return;
+                }
+                await command.onBlock(context, 'userPermissions', { missing: hasPermission });
+                return;
+            }
+
+            await replyAll(context, commandInfo(client, command, guild));
+            return;
         }
 
-        if (!command) {
-            const commandList = getCommandsList(context, groups);
+        const commandList = getCommandsList(context, groups);
 
-            const base = new EmbedBuilder()
-                .setColor('#4c9f4c')
-                .setAuthor({
-                    name: `${user.username}'s help`,
-                    iconURL: user.displayAvatarURL({ forceStatic: false }),
-                })
-                .toJSON();
+        const base = new EmbedBuilder()
+            .setColor('#4c9f4c')
+            .setAuthor({
+                name: `${user.username}'s help`,
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
+            })
+            .toJSON();
 
-            const hasDeprecated = commandList.some(val => val.value.includes('~~'));
-            const hasDash = commandList.some(val => val.value.includes('—'));
-            const page1 = [];
-            if (hasDeprecated) page1.push(hasDeprecatedMessage);
-            if (hasDash) page1.push(hasDisabledMessage);
-            const page1String = page1.join('; those with ');
+        const hasDeprecated = commandList.some(val => val.value.includes('~~'));
+        const hasDash = commandList.some(val => val.value.includes('—'));
+        const page1 = [];
+        if (hasDeprecated) page1.push(hasDeprecatedMessage);
+        if (hasDash) page1.push(hasDisabledMessage);
+        const page1String = page1.join('; those with ');
 
-            const pages = [
-                new EmbedBuilder(base).setTitle('Commands list').setDescription(stripIndent`
+        const pages = [
+            new EmbedBuilder(base).setTitle('Commands list').setDescription(stripIndent`
                 To use a command type \`${prefix}<command>\`, \`/<command>\` or \`@${user.tag} <command>\`.
                 Type \`/help <command>\` for detailed information of a command.
 
                 ${page1String ? `Commands ${page1String}.` : ''}
                 `).addFields(...commandList, {
-                    name: '🔗 Useful links',
-                    value: oneLine`
-                    ${hyperlink('Top.gg page', topgg)} -
-                    ${hyperlink('Support server', options.serverInvite ?? '')} -
-                    ${hyperlink('Invite the bot', topgg + '/invite')} -
-                    ${hyperlink('Vote here', topgg + '/vote')} -
-                    `,
-                }),
-                new EmbedBuilder({ ...base, ...staticEmbedPages[0] }).setTitle(`About ${user.username}`),
-                new EmbedBuilder({ ...base, ...staticEmbedPages[1] }),
-                new EmbedBuilder({ ...base, ...staticEmbedPages[2] }).addFields({
-                    name: 'Specific date',
-                    value: stripIndent`
-                    ${oneLine`
-                    ${user.username} uses the **British English date format**, and supports both
-                    24-hour and 12-hour formats. E.g. this is right: \`21/10/2021\`, while this
-                    isn't: \`10/21/2021\`, while both of these cases work: \`11:30pm\`, \`23:30\`.
-                    `}
+                name: '🔗 Useful links',
+                value: oneLine`
+                ${hyperlink('Top.gg page', topgg)} -
+                ${hyperlink('Support server', options.serverInvite ?? '')} -
+                ${hyperlink('Invite the bot', topgg + '/invite')} -
+                ${hyperlink('Vote here', topgg + '/vote')} -
+                `,
+            }),
+            new EmbedBuilder({ ...base, ...staticEmbedPages[0] }).setTitle(`About ${user.username}`),
+            new EmbedBuilder({ ...base, ...staticEmbedPages[1] }),
+            new EmbedBuilder({ ...base, ...staticEmbedPages[2] }).addFields({
+                name: 'Specific date',
+                value: stripIndent`
+                ${oneLine`
+                ${user.username} uses the **British English date format**, and supports both
+                24-hour and 12-hour formats. E.g. this is right: \`21/10/2021\`, while this
+                isn't: \`10/21/2021\`, while both of these cases work: \`11:30pm\`, \`23:30\`.
+                `}
 
-                    ${oneLine`
-                    You can also specify the time zone offset by adding a \`+\` or \`-\` sign followed
-                    by a number, like this: \`1pm -4\`. This means that time will be used as if it's
-                    from UTC-4.
-                    `}
-                    `,
-                }),
-            ];
+                ${oneLine`
+                You can also specify the time zone offset by adding a \`+\` or \`-\` sign followed
+                by a number, like this: \`1pm -4\`. This means that time will be used as if it's
+                from UTC-4.
+                `}
+                `,
+            }),
+        ];
 
-            await pagedEmbed(context, {
-                number: 1,
-                total: pages.length,
-                toUser: true,
-                dmMsg: 'Check your DMs for a list of the commands and information about the bot.',
-            }, (page: number): TemplateEmbedResult => ({
-                embed: pages[page].setFooter({
-                    text: `Page ${page + 1} of ${pages.length} • Version: ${version} • Developer: ${owner?.tag}`,
-                    iconURL: user.displayAvatarURL({ forceStatic: false }),
-                }),
-                total: pages.length,
-            }));
-            return;
-        }
-
-        if (context instanceof CommandoMessage && author.id !== owner?.id) {
-            while (command.hidden) {
-                const result = await getArgument<'command'>(context, this.argsCollector?.args[0] as Argument<'command'>);
-                if (!result || result.cancelled) return;
-                command = result.value;
-            }
-        }
-
-        const hasPermission = command.hasPermission(context);
-        if (hasPermission !== true) {
-            if (typeof hasPermission === 'string') {
-                await command.onBlock(context, hasPermission);
-                return;
-            }
-            await command.onBlock(context, 'userPermissions', { missing: hasPermission });
-            return;
-        }
-
-        await replyAll(context, commandInfo(client, command, guild));
+        await pagedEmbed(context, {
+            number: 1,
+            total: pages.length,
+            toUser: true,
+            dmMsg: 'Check your DMs for a list of the commands and information about the bot.',
+        }, (page: number): TemplateEmbedResult => ({
+            embed: pages[page].setFooter({
+                text: `Page ${page + 1} of ${pages.length} • Version: ${version} • Developer: ${owner?.tag}`,
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
+            }),
+            total: pages.length,
+        }));
     }
 
     public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {

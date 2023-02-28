@@ -3,8 +3,8 @@ console.log('Starting bot...');
 import { ActivityType, GatewayIntentBits, OAuth2Scopes, Partials, PermissionFlagsBits } from 'discord.js';
 import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
-import { CommandoClient } from 'pixoll-commando';
-import { enumToObject, omit } from './utils/functions';
+import { CommandoClient, Util } from 'pixoll-commando';
+import { enumToObject } from './utils/functions';
 dotenvConfig();
 
 const client = new CommandoClient({
@@ -13,7 +13,7 @@ const client = new CommandoClient({
     serverInvite: 'https://discord.gg/Pc9pAHf3GU',
     inviteOptions: {
         scopes: [OAuth2Scopes.ApplicationsCommands, OAuth2Scopes.Bot],
-        permissions: Object.keys(omit(PermissionFlagsBits, [
+        permissions: Object.keys(Util.omit(PermissionFlagsBits, [
             'Connect',
             'ManageWebhooks',
             'MoveMembers',
@@ -25,12 +25,12 @@ const client = new CommandoClient({
             'ViewGuildInsights',
         ])),
     },
-    intents: Object.keys(omit(enumToObject(GatewayIntentBits), [
+    intents: Object.keys(Util.omit(enumToObject(GatewayIntentBits), [
         'AutoModerationConfiguration',
         'AutoModerationExecution',
         'GuildWebhooks',
     ])),
-    partials: Object.values(omit(enumToObject(Partials), [
+    partials: Object.values(Util.omit(enumToObject(Partials), [
         'GuildScheduledEvent',
     ])),
     failIfNotExists: false,
@@ -42,7 +42,7 @@ const excludeDebugEvents = new RegExp([
     'Heartbeat',
     'Registered',
     'WS',
-    'Loaded feature',
+    'Loaded module',
     'finished for guild',
     'Garbage collection',
     'executing a request',

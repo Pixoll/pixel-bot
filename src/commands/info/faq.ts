@@ -14,9 +14,9 @@ import {
     generateEmbed,
     basicEmbed,
     basicCollector,
-    getArgument,
     confirmButtons,
     replyAll,
+    getSubCommand,
 } from '../../utils';
 
 const args = [{
@@ -32,19 +32,27 @@ const args = [{
     type: 'integer',
     min: 1,
     required: false,
+    isEmpty(_: string, message: CommandoMessage): boolean {
+        const subCommand = getSubCommand<SubCommand>(message, args[0].default);
+        return subCommand !== 'remove';
+    },
+    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+        const subCommand = getSubCommand<SubCommand>(message, args[0].default);
+        if (subCommand !== 'remove') return true;
+        const isValid = await argument.type?.validate(value, message, argument) ?? true;
+        return isValid;
+    },
 }] as const;
 
-type Args = typeof args;
-// ParseRawArguments<Args> is not "any", not sure why this happens
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type ParsedArgs = ParseRawArguments<Args> & {
-    item: string;
+type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
+type RawArgs = typeof args;
+type ParsedArgs = ParseRawArguments<RawArgs> & {
     question?: string;
     answer?: string;
 };
 
-export default class FaqCommand extends Command<boolean, Args> {
-    protected db: DatabaseManager<FaqSchema>;
+export default class FaqCommand extends Command<boolean, RawArgs> {
+    protected readonly db: DatabaseManager<FaqSchema>;
 
     public constructor(client: CommandoClient) {
         super(client, {
@@ -58,7 +66,7 @@ export default class FaqCommand extends Command<boolean, Args> {
                 faq clear - Remove every entry in the FAQ list (bot's owner only).
             `,
             guarded: true,
-            args: args as unknown as Args,
+            args: args as unknown as RawArgs,
         }, {
             options: [{
                 type: ApplicationCommandOptionType.Subcommand,
@@ -101,22 +109,18 @@ export default class FaqCommand extends Command<boolean, Args> {
     }
 
     public async run(context: CommandContext, { item, subCommand, question, answer }: ParsedArgs): Promise<void> {
-        const parsedSubCommand = subCommand.toLowerCase() as Lowercase<ParsedArgs['subCommand']>;
+        const lcSubCommand = subCommand.toLowerCase() as Lowercase<ParsedArgs['subCommand']>;
         const faqData = await this.db.fetchMany();
 
-        switch (parsedSubCommand) {
+        switch (lcSubCommand) {
             case 'view':
-                await this.view(context, faqData);
-                return;
+                return await this.view(context, faqData);
             case 'add':
-                await this.add(context, question, answer);
-                return;
+                return await this.add(context, question, answer);
             case 'remove':
-                await this.remove(context, item, faqData);
-                return;
+                return await this.remove(context, item as number, faqData);
             case 'clear':
-                await this.clear(context, faqData);
-                return;
+                return await this.clear(context, faqData);
         }
     }
 
@@ -180,16 +184,12 @@ export default class FaqCommand extends Command<boolean, Args> {
     /**
      * The `remove` sub-command
      */
-    public async remove(context: CommandContext, item: number, faqData: Collection<string, FaqSchema>): Promise<void> {
+    public async remove(
+        context: CommandContext, item: number, faqData: Collection<string, FaqSchema>
+    ): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
             return;
-        }
-
-        if (context instanceof CommandoMessage && !item) {
-            const result = await getArgument<'integer'>(context, this.argsCollector?.args[0] as Argument<'integer'>);
-            if (!result || result.cancelled) return;
-            item = result.value;
         }
 
         if (faqData.size === 0) {
