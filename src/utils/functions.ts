@@ -27,7 +27,6 @@ import {
     CommandoGuild,
     CommandoGuildMember,
     CommandoifiedMessage,
-    CommandoInteraction,
     CommandoMessage,
     CommandoRole,
     GuildAuditLog,
@@ -396,7 +395,7 @@ export async function replyAll(
 ): Promise<Message | null> {
     if (options instanceof EmbedBuilder) options = { embeds: [options] };
     if (typeof options === 'string') options = { content: options };
-    if (context instanceof CommandoInteraction) {
+    if (context.isInteraction()) {
         if (context.isEditable()) {
             return await context.editReply(options).catch(() => null) as Message | null;
         }
@@ -438,7 +437,7 @@ export async function basicCollector(
     }
 
     const messages = await channel.awaitMessages(collectorOptions);
-    if (context instanceof CommandoMessage && shouldDelete) await toDelete?.delete().catch(() => null);
+    if (context.isMessage() && shouldDelete) await toDelete?.delete().catch(() => null);
 
     if (messages.size === 0) {
         await replyAll(context, { content: 'You didn\'t answer in time.', embeds: [] });
@@ -822,7 +821,7 @@ export async function pagedEmbed(
         `);
     }
 
-    if (context instanceof CommandoMessage) {
+    if (context.isMessage()) {
         await targetChannel.sendTyping().catch(() => null);
     }
 
@@ -1147,7 +1146,7 @@ export async function confirmButtons(context: CommandContext, options: ConfirmBu
         componentType: ComponentType.Button,
     }).catch(() => null);
 
-    if (context instanceof CommandoMessage) await msg?.delete();
+    if (context.isMessage()) await msg?.delete();
 
     await replyAll(context, { components: [] });
 
@@ -1160,7 +1159,7 @@ export async function confirmButtons(context: CommandContext, options: ConfirmBu
         return false;
     }
 
-    if (context instanceof CommandoMessage) {
+    if (context.isMessage()) {
         await context.channel.sendTyping().catch(() => null);
     }
     return true;

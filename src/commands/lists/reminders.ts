@@ -51,7 +51,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { subCommand }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase() as Lowercase<ParsedArgs['subCommand']>;
+        const lcSubCommand = subCommand.toLowerCase();
         const { author } = context;
 
         const data = await this.db.fetchMany({ user: author.id });
@@ -75,7 +75,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     /**
      * The `view` sub-command
      */
-    public async view(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
+    protected async view(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
         const list = reminders.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
             reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`,
@@ -96,7 +96,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    public async clear(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
+    protected async clear(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
         const confirmed = await confirmButtons(context, {
             action: 'delete all of your reminders',
         });

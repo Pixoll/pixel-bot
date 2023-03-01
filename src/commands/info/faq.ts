@@ -66,7 +66,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
                 faq clear - Remove every entry in the FAQ list (bot's owner only).
             `,
             guarded: true,
-            args: args as unknown as RawArgs,
+            args,
         }, {
             options: [{
                 type: ApplicationCommandOptionType.Subcommand,
@@ -109,7 +109,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { item, subCommand, question, answer }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase() as Lowercase<ParsedArgs['subCommand']>;
+        const lcSubCommand = subCommand.toLowerCase();
         const faqData = await this.db.fetchMany();
 
         switch (lcSubCommand) {
@@ -127,7 +127,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `view` sub-command
      */
-    public async view(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
+    protected async view(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
         if (faqData.size === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -150,7 +150,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `add` sub-command
      */
-    public async add(context: CommandContext, question?: string, answer?: string): Promise<void> {
+    protected async add(context: CommandContext, question?: string, answer?: string): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
             return;
@@ -184,7 +184,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    public async remove(
+    protected async remove(
         context: CommandContext, item: number, faqData: Collection<string, FaqSchema>
     ): Promise<void> {
         if (!this.client.isOwner(context.author)) {
@@ -223,7 +223,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    public async clear(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
+    protected async clear(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
             return;

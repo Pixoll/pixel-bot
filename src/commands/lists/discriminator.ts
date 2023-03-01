@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord.js';
-import { Command, CommandContext, CommandoClient, CommandoInteraction, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
 import { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } from '../../utils/functions';
 
 const args = [{
@@ -43,7 +43,7 @@ export default class DiscriminatorCommand extends Command<true, RawArgs> {
         const { guild } = context;
         const members = guild.members.cache;
 
-        if (context instanceof CommandoInteraction) {
+        if (context.isInteraction()) {
             number = +number.toString().padStart(4, '0').slice(-4);
         }
 

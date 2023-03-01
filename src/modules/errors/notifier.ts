@@ -1,4 +1,4 @@
-import { CommandoClient, CommandContext, Command, CommandoMessage } from 'pixoll-commando';
+import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
 import { EmbedBuilder, TextChannel, escapeMarkdown } from 'discord.js';
 import { customEmoji, docId, code, replyAll, sliceDots } from '../../utils/functions';
 import { stripIndent } from 'common-tags';
@@ -96,7 +96,7 @@ async function errorHandler(
         .join('\n');
 
     const { guild = null, channel = null, author = null } = context ?? {};
-    const url = context instanceof CommandoMessage ? context.url : null;
+    const url = context?.isMessage() ? context.url : null;
 
     const where = context ? (guild
         ? stripIndent`

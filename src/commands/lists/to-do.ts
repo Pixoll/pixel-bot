@@ -60,7 +60,7 @@ type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
 
-export default class TodoCommand extends Command<boolean, RawArgs> {
+export default class ToDoCommand extends Command<boolean, RawArgs> {
     protected readonly db: DatabaseManager<TodoSchema>;
 
     public constructor(client: CommandoClient) {
@@ -119,7 +119,7 @@ export default class TodoCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { subCommand, item }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase() as Lowercase<ParsedArgs['subCommand']>;
+        const lcSubCommand = subCommand.toLowerCase();
         const { author } = context;
 
         const todoDocument = await this.db.fetch({ user: author.id });
@@ -139,7 +139,7 @@ export default class TodoCommand extends Command<boolean, RawArgs> {
     /**
      * The `view` sub-command
      */
-    public async view(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
+    protected async view(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -165,7 +165,7 @@ export default class TodoCommand extends Command<boolean, RawArgs> {
     /**
      * The `add` sub-command
      */
-    public async add(context: CommandContext, item: string, todoData: TodoSchema | null): Promise<void> {
+    protected async add(context: CommandContext, item: string, todoData: TodoSchema | null): Promise<void> {
         const { author } = context;
         if (!todoData) await this.db.add({ user: author.id, list: [item] });
         else await this.db.update(todoData, { $push: { list: item } });
@@ -181,7 +181,7 @@ export default class TodoCommand extends Command<boolean, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    public async remove(context: CommandContext, item: number, todoData: TodoSchema | null): Promise<void> {
+    protected async remove(context: CommandContext, item: number, todoData: TodoSchema | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -211,7 +211,7 @@ export default class TodoCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    public async clear(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
+    protected async clear(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',

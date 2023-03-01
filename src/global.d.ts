@@ -193,6 +193,11 @@ interface Date {
     toLocaleString(locales?: Locale, options?: Intl.DateTimeFormatOptions): string;
 }
 
+interface String {
+    /** Converts all the alphabetic characters in a string to lowercase. */
+    toLowerCase<T>(this: T): Lowercase<T>;
+}
+
 type Locale =
     | 'af'
     | 'am'

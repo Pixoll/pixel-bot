@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, Message } from 'discord.js';
-import { Command, CommandContext, CommandoClient, CommandoMessage } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
 import { basicEmbed, replyAll } from '../../utils/functions';
 
 export default class PingCommand extends Command {
@@ -16,7 +16,7 @@ export default class PingCommand extends Command {
 
     public async run(context: CommandContext): Promise<void> {
         const now = Date.now();
-        const isMessage = context instanceof CommandoMessage;
+        const isMessage = context.isMessage();
         const pingMsg = isMessage ? await context.replyEmbed(basicEmbed({
             color: 'Gold',
             emoji: 'loading',

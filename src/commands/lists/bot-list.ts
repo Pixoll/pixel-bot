@@ -4,8 +4,8 @@ import { generateEmbed, pluralize, abcOrder } from '../../utils/functions';
 export default class BotListCommand extends Command<true> {
     public constructor(client: CommandoClient) {
         super(client, {
-            name: 'botlist',
-            aliases: ['bots'],
+            name: 'bot-list',
+            aliases: ['bots', 'botlist'],
             group: 'lists',
             description: 'Displays the bot list of the server.',
             guildOnly: true,

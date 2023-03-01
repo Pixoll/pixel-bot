@@ -1,6 +1,6 @@
 import { oneLine } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
-import { CommandoClient, CommandoMessage } from 'pixoll-commando';
+import { CommandoClient } from 'pixoll-commando';
 import { isGuildModuleEnabled, sliceDots, code } from '../../utils/functions';
 
 /** Handles all of the command logs. */
@@ -25,7 +25,7 @@ export default function (client: CommandoClient<true>): void {
         const commandContent = context.toString();
         const trimmedContent = sliceDots(commandContent, 1016);
 
-        const url = context instanceof CommandoMessage ? context.url
+        const url = context.isMessage() ? context.url
             : await context.fetchReply().catch(() => null).then(m => m?.url);
 
         const embed = new EmbedBuilder()

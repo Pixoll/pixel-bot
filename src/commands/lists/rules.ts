@@ -41,7 +41,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
     }
 
     public async run(context: CommandContext<true>, { subCommand }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase() as Lowercase<ParsedArgs['subCommand']>;
+        const lcSubCommand = subCommand.toLowerCase();
         const { guild } = context;
         const db = guild.database.rules;
 
@@ -67,7 +67,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
     /**
      * The `view` sub-command
      */
-    public async view(context: CommandContext<true>, rulesList: string[]): Promise<void> {
+    protected async view(context: CommandContext<true>, rulesList: string[]): Promise<void> {
         const { guild } = context;
 
         await generateEmbed(context, rulesList, {
@@ -82,7 +82,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    public async clear(context: CommandContext<true>, data: RuleSchema, db: DatabaseManager<RuleSchema>): Promise<void> {
+    protected async clear(context: CommandContext<true>, data: RuleSchema, db: DatabaseManager<RuleSchema>): Promise<void> {
         const { client, guild, author } = context;
 
         if (!client.isOwner(author) && guild.ownerId !== author.id) {
