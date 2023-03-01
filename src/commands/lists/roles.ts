@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, Collection, Role } from 'discord.js';
+import { Collection, Role } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils/functions';
 
@@ -23,12 +23,7 @@ export default class RolesCommand extends Command<true, RawArgs> {
             examples: ['roles Pixoll'],
             guildOnly: true,
             args,
-        }, {
-            options: [{
-                type: ApplicationCommandOptionType.User,
-                name: 'member',
-                description: 'The member to get the roles from.',
-            }],
+            autogenerateSlashCommand: true,
         });
     }
 

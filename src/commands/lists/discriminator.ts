@@ -1,4 +1,3 @@
-import { ApplicationCommandOptionType } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
 import { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } from '../../utils/functions';
 
@@ -6,8 +5,6 @@ const args = [{
     key: 'number',
     prompt: 'What discriminator do you want to look for?',
     type: 'integer',
-    parse: (value: string[] | string): number =>
-        +(Array.isArray(value) ? value[0] : value).padStart(4, '0').slice(-4),
     min: 1,
     max: 9999,
 }] as const;
@@ -27,27 +24,16 @@ export default class DiscriminatorCommand extends Command<true, RawArgs> {
             examples: ['discriminator 1234'],
             guildOnly: true,
             args,
-        }, {
-            options: [{
-                type: ApplicationCommandOptionType.Integer,
-                name: 'number',
-                description: 'The discriminator to look for.',
-                required: true,
-                minValue: 1,
-                maxValue: 9999,
-            }],
+            autogenerateSlashCommand: true,
         });
     }
 
     public async run(context: CommandContext<true>, { number }: ParsedArgs): Promise<void> {
         const { guild } = context;
         const members = guild.members.cache;
+        const discriminator = number.toString().padStart(4, '0').slice(-4);
 
-        if (context.isInteraction()) {
-            number = +number.toString().padStart(4, '0').slice(-4);
-        }
-
-        const match = members.filter(member => member.user.discriminator === number.toString())
+        const match = members.filter(member => member.user.discriminator === discriminator)
             .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
             .map(m => `${m.toString()} ${m.user.tag}`);
 
@@ -62,7 +48,7 @@ export default class DiscriminatorCommand extends Command<true, RawArgs> {
 
         await generateEmbed(context, match, {
             number: 20,
-            authorName: `Found ${pluralize('member', match.length)}`,
+            authorName: `Found ${pluralize('member', match.length)} with discriminator #${discriminator}`,
             useDescription: true,
         });
     }
