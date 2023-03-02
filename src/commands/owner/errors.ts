@@ -72,16 +72,16 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
 
         switch (lcSubCommand) {
             case 'view':
-                return await this.view(context, errors);
+                return await this.runView(context, errors);
             case 'remove':
-                return await this.remove(context, errorId as string);
+                return await this.runRemove(context, errorId as string);
         }
     }
 
     /**
      * The `view` sub-command
      */
-    protected async view(context: CommandoMessage<false>, errors: Collection<string, ErrorSchema>): Promise<void> {
+    protected async runView(context: CommandoMessage<false>, errors: Collection<string, ErrorSchema>): Promise<void> {
         const errorsList = errors.map(doc => {
             const whatCommand = doc.command ? ` at '${doc.command}' command` : '';
 
@@ -125,7 +125,7 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    protected async remove(context: CommandoMessage<false>, errorId: string): Promise<void> {
+    protected async runRemove(context: CommandoMessage<false>, errorId: string): Promise<void> {
         const doc = await this.db.fetch(errorId);
         if (!doc) {
             await context.replyEmbed(basicEmbed({

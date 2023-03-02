@@ -196,6 +196,8 @@ interface Date {
 interface String {
     /** Converts all the alphabetic characters in a string to lowercase. */
     toLowerCase<T>(this: T): Lowercase<T>;
+    /** Converts all the alphabetic characters in a string to uppercase. */
+    toUpperCase<T>(this: T): Uppercase<T>;
 }
 
 type Locale =

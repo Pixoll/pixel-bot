@@ -114,20 +114,20 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
 
         switch (lcSubCommand) {
             case 'view':
-                return await this.view(context, faqData);
+                return await this.runView(context, faqData);
             case 'add':
-                return await this.add(context, question, answer);
+                return await this.runAdd(context, question, answer);
             case 'remove':
-                return await this.remove(context, item as number, faqData);
+                return await this.runRemove(context, item as number, faqData);
             case 'clear':
-                return await this.clear(context, faqData);
+                return await this.runClear(context, faqData);
         }
     }
 
     /**
      * The `view` sub-command
      */
-    protected async view(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
+    protected async runView(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
         if (faqData.size === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -150,7 +150,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `add` sub-command
      */
-    protected async add(context: CommandContext, question?: string, answer?: string): Promise<void> {
+    protected async runAdd(context: CommandContext, question?: string, answer?: string): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
             return;
@@ -184,7 +184,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    protected async remove(
+    protected async runRemove(
         context: CommandContext, item: number, faqData: Collection<string, FaqSchema>
     ): Promise<void> {
         if (!this.client.isOwner(context.author)) {
@@ -223,7 +223,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async clear(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
+    protected async runClear(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
             return;

@@ -36,7 +36,7 @@ import {
 import { transform, isEqual, isObject, capitalize } from 'lodash';
 import { stripIndent } from 'common-tags';
 import { prettyMs } from 'better-ms';
-import { AnyMessage, ParsedModuleName } from '../types';
+import { AnyMessage, RawModuleName } from '../types';
 import { defaultGenerateEmbedOptions, moderatorPermissions, validateUrlPattern } from './constants';
 
 //#region Types
@@ -218,6 +218,11 @@ export type GetArgumentResult<T extends ArgumentTypeString> = Omit<ArgumentResul
     value: NonNullable<ArgumentResult<T>['value']>;
 };
 
+export type ReplyAllOptions =
+    | EmbedBuilder
+    | string
+    | Omit<MessageCreateOptions, 'flags'> & { editReply?: boolean };
+
 //#endregion
 
 /**
@@ -284,7 +289,7 @@ export async function isGuildModuleEnabled<
 ): Promise<boolean> {
     const data = await guild.database.modules.fetch();
     if (!data) return false;
-    const moduleName = removeDashes<ParsedModuleName>(module);
+    const moduleName = removeDashes<RawModuleName>(module);
     const subModuleName = subModule ? removeDashes<GuildAuditLog>(subModule) : null;
 
     const toCheck = moduleName === 'auditLogs' && subModuleName
@@ -350,7 +355,7 @@ export function basicEmbed(options: BasicEmbedOptions): EmbedBuilder {
     if (fieldName) {
         if (!fieldValue) throw new Error('The argument fieldValue must be specified');
         embed.addFields({
-            name: `${emojiString} ${fieldName}`,
+            name: description ? fieldName : `${emojiString} ${fieldName}`,
             value: fieldValue,
         });
     }
@@ -390,9 +395,7 @@ export function timestamp<F extends TimestampType>(time: Date | number, format?:
  * @param context The command context to reply
  * @param options The options of the message
  */
-export async function replyAll(
-    context: CommandContext, options: EmbedBuilder | Omit<MessageCreateOptions, 'flags'> | string
-): Promise<Message | null> {
+export async function replyAll(context: CommandContext, options: ReplyAllOptions): Promise<Message | null> {
     if (options instanceof EmbedBuilder) options = { embeds: [options] };
     if (typeof options === 'string') options = { content: options };
     if (context.isInteraction()) {
@@ -401,7 +404,12 @@ export async function replyAll(
         }
         return await context.reply(options).catch(() => null) as Message | null;
     }
-    return await context.reply({ ...options, ...Util.noReplyPingInDMs(context) }).catch(() => null);
+    const messageOptions = {
+        ...options,
+        ...Util.noReplyPingInDMs(context),
+    };
+    if (options.editReply) return await context.edit(messageOptions).catch(() => null);
+    return await context.reply(messageOptions).catch(() => null);
 }
 
 /**
@@ -414,11 +422,12 @@ export async function replyAll(
 export async function basicCollector(
     context: CommandContext,
     embedOptions: BasicEmbedOptions,
-    collectorOptions: AwaitMessagesOptions = {},
+    collectorOptions: AwaitMessagesOptions | null = {},
     shouldDelete?: boolean
 ): Promise<Message | null> {
     const { author, channelId, client } = context;
 
+    collectorOptions ??= {};
     collectorOptions.time ??= 30 * 1000;
     collectorOptions.max ??= 1;
     collectorOptions.filter ??= (m): boolean => m.author.id === author.id;
@@ -554,7 +563,8 @@ export function inviteButton(
  * @param roleOrMember A role or member.
  * @param noAdmin Whether to skip the `ADMINISTRATOR` permission or not.
  */
-export function isModerator(roleOrMember: GuildMember | Role, noAdmin?: boolean): boolean {
+export function isModerator(roleOrMember?: GuildMember | Role | null, noAdmin?: boolean): boolean {
+    if (!roleOrMember) return false;
     const { permissions } = roleOrMember;
 
     const values: boolean[] = [];
@@ -736,7 +746,7 @@ export function validateURL(str: string): boolean {
  * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(message: AnyMessage<true>, role: Role): boolean {
+export function isValidRole(message: AnyMessage<true>, role?: Role | null): boolean {
     if (!(role instanceof Role) || !role || role.managed) return false;
 
     const { member, client, author, guild } = message;
@@ -1208,4 +1218,12 @@ export function getSubCommand<T>(message: CommandoMessage, defaultSubCommand?: T
         CommandoMessage.parseArgs(message.content).map(s => s.toLowerCase())[1]
         ?? defaultSubCommand
     ) as T;
+}
+
+export function isTrue(b?: boolean): b is true {
+    return b === true;
+}
+
+export function removeRepeated<T>(array: T[]): T[] {
+    return Array.from(new Set(array));
 }

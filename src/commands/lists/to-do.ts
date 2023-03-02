@@ -126,20 +126,20 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
 
         switch (lcSubCommand) {
             case 'view':
-                return await this.view(context, todoDocument);
+                return await this.runView(context, todoDocument);
             case 'add':
-                return await this.add(context, item as string, todoDocument);
+                return await this.runAdd(context, item as string, todoDocument);
             case 'remove':
-                return await this.remove(context, item as unknown as number, todoDocument);
+                return await this.runRemove(context, item as unknown as number, todoDocument);
             case 'clear':
-                return await this.clear(context, todoDocument);
+                return await this.runClear(context, todoDocument);
         }
     }
 
     /**
      * The `view` sub-command
      */
-    protected async view(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
+    protected async runView(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -165,7 +165,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `add` sub-command
      */
-    protected async add(context: CommandContext, item: string, todoData: TodoSchema | null): Promise<void> {
+    protected async runAdd(context: CommandContext, item: string, todoData: TodoSchema | null): Promise<void> {
         const { author } = context;
         if (!todoData) await this.db.add({ user: author.id, list: [item] });
         else await this.db.update(todoData, { $push: { list: item } });
@@ -181,7 +181,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    protected async remove(context: CommandContext, item: number, todoData: TodoSchema | null): Promise<void> {
+    protected async runRemove(context: CommandContext, item: number, todoData: TodoSchema | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -211,7 +211,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async clear(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
+    protected async runClear(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',

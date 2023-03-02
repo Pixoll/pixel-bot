@@ -14,9 +14,7 @@ export default class PollsCommand extends Command<true> {
 
     public async run(context: CommandContext<true>): Promise<void> {
         const { guild } = context;
-        const db = guild.database.polls;
-
-        const pollsData = await db.fetchMany();
+        const pollsData = await guild.database.polls.fetchMany();
         if (pollsData.size === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',

@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType } from 'discord.js';
-import { Command, CommandContext, CommandoClient, DatabaseManager, ParseRawArguments, RuleSchema } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, RuleSchema } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, confirmButtons, replyAll } from '../../utils/functions';
 
 const args = [{
@@ -43,9 +43,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext<true>, { subCommand }: ParsedArgs): Promise<void> {
         const lcSubCommand = subCommand.toLowerCase();
         const { guild } = context;
-        const db = guild.database.rules;
-
-        const data = await db.fetch();
+        const data = await guild.database.rules.fetch();
 
         if (!data || data.rules.length === 0) {
             await replyAll(context, basicEmbed({
@@ -58,16 +56,16 @@ export default class RulesCommand extends Command<true, RawArgs> {
 
         switch (lcSubCommand) {
             case 'view':
-                return await this.view(context, data.rules);
+                return await this.runView(context, data.rules);
             case 'clear':
-                return await this.clear(context, data, db);
+                return await this.runClear(context, data);
         }
     }
 
     /**
      * The `view` sub-command
      */
-    protected async view(context: CommandContext<true>, rulesList: string[]): Promise<void> {
+    protected async runView(context: CommandContext<true>, rulesList: string[]): Promise<void> {
         const { guild } = context;
 
         await generateEmbed(context, rulesList, {
@@ -82,7 +80,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async clear(context: CommandContext<true>, data: RuleSchema, db: DatabaseManager<RuleSchema>): Promise<void> {
+    protected async runClear(context: CommandContext<true>, data: RuleSchema): Promise<void> {
         const { client, guild, author } = context;
 
         if (!client.isOwner(author) && guild.ownerId !== author.id) {
@@ -95,7 +93,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
         });
         if (!confirmed) return;
 
-        await db.delete(data);
+        await guild.database.rules.delete(data);
 
         await replyAll(context, basicEmbed({
             color: 'Green',

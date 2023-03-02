@@ -137,7 +137,7 @@ const args = [{
         const isValid = await arg.type.validate(value, message, arg);
         if (isValid !== true) return isValid;
         const command = await arg.type.parse(value, message, arg);
-        if (!command || command.hidden) return false;
+        if (!command || command.hidden || command.ownerOnly) return false;
         return true;
     },
 }] as const;
@@ -260,9 +260,11 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
         const { client, options } = interaction;
         const query = options.getFocused().toLowerCase();
         const matches = client.registry.commands
-            .filter(command =>
-                command.name.includes(query) || command.aliases.some(alias => alias.includes(query))
-            )
+            .filter(command => {
+                if (command.hidden || command.ownerOnly) return false;
+                return command.name.includes(query)
+                    || command.aliases.some(alias => alias.includes(query));
+            })
             .map(command => command.name)
             .slice(0, 25)
             .sort()

@@ -1,14 +1,16 @@
+import { Model } from 'mongoose';
 import {
+    BaseSchema,
     Command,
     CommandContext,
     CommandoClient,
     ParseRawArguments,
-    SimplifiedSchemas,
     Util,
 } from 'pixoll-commando';
+import type Schemas from 'pixoll-commando/types/database/Schemas';
 import { generateEmbed, basicEmbed } from '../../utils/functions';
 
-type CollectionName = keyof SimplifiedSchemas;
+type CollectionName = keyof typeof Schemas;
 const args = (options: CollectionName[]) => [{
     key: 'collection',
     prompt: 'What collection do you want to manage?',
@@ -38,7 +40,8 @@ export default class DatabaseCommand extends Command<false, RawArgs> {
         if (context.isInteraction()) return;
         const { client } = context;
 
-        const rawData = await client.databaseSchemas[collection].find({});
+        const database = client.databaseSchemas[collection] as unknown as Model<BaseSchema>;
+        const rawData = await database.find({});
         const dataArray = rawData.map((doc) => {
             type Doc = { _doc: typeof doc & { __v: unknown } } | typeof doc & { __v: unknown };
             const rawDocument = doc as Doc;
@@ -46,19 +49,19 @@ export default class DatabaseCommand extends Command<false, RawArgs> {
             return Util.omit(parsedDocument, ['_id', 'updatedAt', '__v']);
         });
 
-        const DBname = collection.replace('Model', ' ');
+        const dbName = collection.replace('Model', ' ');
 
         if (dataArray.length === 0) {
             await context.replyEmbed(basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
-                description: `The ${DBname} collection is empty.`,
+                description: `The ${dbName} collection is empty.`,
             }));
             return;
         }
 
         await generateEmbed(context, dataArray, {
-            authorName: `Database: ${DBname}`,
+            authorName: `Database: ${dbName}`,
             authorIconURL: client.user.displayAvatarURL({ forceStatic: false }),
             title: 'Document',
             keysExclude: ['updatedAt'],

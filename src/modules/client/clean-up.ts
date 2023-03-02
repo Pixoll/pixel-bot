@@ -80,15 +80,15 @@ export default async function (client: CommandoClient<true>, forceCleanup = fals
         const StickyRoles = await StickyRolesModel.find({});
 
         await Promise.all([
-            ...Active.filter(getRemovedGuilds).map(doc => ActiveModel.deleteOne(doc)),
-            ...Afk.filter(getRemovedGuilds).map(doc => AfkModel.deleteOne(doc)),
-            ...McIp.filter(getRemovedGuilds).map(doc => McIpsModel.deleteOne(doc)),
-            ...Modules.filter(getRemovedGuilds).map(doc => ModulesModel.deleteOne(doc)),
-            ...Moderations.filter(getRemovedGuilds).map(doc => ModerationsModel.deleteOne(doc)),
-            ...Polls.filter(getRemovedGuilds).map(doc => PollsModel.deleteOne(doc)),
-            ...ReactionRoles.filter(getRemovedGuilds).map(doc => ReactionRolesModel.deleteOne(doc)),
-            ...Rules.filter(getRemovedGuilds).map(doc => RulesModel.deleteOne(doc)),
-            ...StickyRoles.filter(getRemovedGuilds).map(doc => StickyRolesModel.deleteOne(doc)),
+            ...Active.filter(getRemovedGuilds).map(doc => ActiveModel.deleteOne(getDocId(doc))),
+            ...Afk.filter(getRemovedGuilds).map(doc => AfkModel.deleteOne(getDocId(doc))),
+            ...McIp.filter(getRemovedGuilds).map(doc => McIpsModel.deleteOne(getDocId(doc))),
+            ...Modules.filter(getRemovedGuilds).map(doc => ModulesModel.deleteOne(getDocId(doc))),
+            ...Moderations.filter(getRemovedGuilds).map(doc => ModerationsModel.deleteOne(getDocId(doc))),
+            ...Polls.filter(getRemovedGuilds).map(doc => PollsModel.deleteOne(getDocId(doc))),
+            ...ReactionRoles.filter(getRemovedGuilds).map(doc => ReactionRolesModel.deleteOne(getDocId(doc))),
+            ...Rules.filter(getRemovedGuilds).map(doc => RulesModel.deleteOne(getDocId(doc))),
+            ...StickyRoles.filter(getRemovedGuilds).map(doc => StickyRolesModel.deleteOne(getDocId(doc))),
         ]);
 
         for (const guildId of removedGuilds) {
@@ -98,4 +98,8 @@ export default async function (client: CommandoClient<true>, forceCleanup = fals
 
         client.emit('debug', 'Cleaned up database');
     }
+}
+
+function getDocId<Id, T extends { _id: Id }>(doc: T): { _id: Id } {
+    return { _id: doc._id };
 }

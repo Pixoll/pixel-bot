@@ -1,5 +1,10 @@
 import { Message } from 'discord.js';
-import { CommandoMessage, ModuleSchema } from 'pixoll-commando';
+import { BaseSchema, CommandoMessage, ModuleSchema } from 'pixoll-commando';
 
-export type ParsedModuleName = keyof Pick<ModuleSchema, 'auditLogs' |'stickyRoles' | 'welcome'>;
+export type RawModuleName = keyof Omit<ModuleSchema, keyof BaseSchema | 'guild'>;
+
+export type RawAuditLogName = keyof ModuleSchema['auditLogs'];
+
 export type AnyMessage<InGuild extends boolean = boolean> = CommandoMessage<InGuild> | Message<InGuild>;
+
+export type ParsedModuleData = Omit<ModuleSchema, keyof BaseSchema | 'guild'>;

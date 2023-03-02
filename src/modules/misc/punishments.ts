@@ -42,7 +42,7 @@ async function handlePunishment(doc: ActiveSchema, client: CommandoClient<true>,
     const data = await database.setup.fetch();
 
     if (doc.type === 'mute') {
-        if (!data) return;
+        if (!data || !data.mutedRole) return;
         if (member.roles.cache.has(data.mutedRole)) {
             await member.roles.remove(data.mutedRole);
             client.emit('guildMemberUnmute', guild, client.user, user, 'Mute has expired.');

@@ -66,16 +66,16 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
 
         switch (lcSubCommand) {
             case 'view':
-                return await this.view(context, data);
+                return await this.runView(context, data);
             case 'clear':
-                return await this.clear(context, data);
+                return await this.runClear(context, data);
         }
     }
 
     /**
      * The `view` sub-command
      */
-    protected async view(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
+    protected async runView(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
         const list = reminders.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
             reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`,
@@ -96,7 +96,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async clear(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
+    protected async runClear(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
         const confirmed = await confirmButtons(context, {
             action: 'delete all of your reminders',
         });

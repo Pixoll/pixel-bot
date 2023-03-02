@@ -59,13 +59,13 @@ client.emit('debug', 'Created client');
 client.registry
     .registerDefaultTypes()
     .registerGroups([
-        { id: 'info', name: '\u2139 Information', guarded: true },
+        { id: 'info', name: 'ℹ️ Information', guarded: true },
         // { id: 'fun', name: 'Fun commands' },
         { id: 'lists', name: '📋 Listing' },
         { id: 'managing', name: '💼 Managing', guarded: true },
         // { id: 'minecraft', name: '<:minecraft:897178717925834773> Minecraft' },
         { id: 'misc', name: '🎲 Miscellaneous' },
-        { id: 'mod', name: ':shield: Moderation' },
+        { id: 'mod', name: '🛡️ Moderation' },
         { id: 'mod-logs', name: '🗃 Moderation logs' },
         { id: 'owner', name: '<a:owner_crown:806558872440930425> Owner only', guarded: true },
         { id: 'utility', name: '🛠 Utility', guarded: true },
