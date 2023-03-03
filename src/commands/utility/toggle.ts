@@ -27,6 +27,9 @@ const args = [{
     prompt: 'What sub-command do you want to use?',
     type: 'string',
     oneOf: ['command', 'group'],
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'commandOrGroup',
     label: 'command or group',
@@ -101,15 +104,13 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
 
     public async run(context: CommandContext, { subCommand, commandOrGroup, command, group }: ParsedArgs): Promise<void> {
         const { client, guildId, guild } = context;
-        const lcSubCommand = subCommand.toLowerCase();
-
         const resolvedCommand = resolveCommand(client, command ?? commandOrGroup);
         const resolvedGroup = resolveGroup(client, group ?? commandOrGroup);
 
         const db = guild?.database.disabled || this.client.database.disabled;
         const data = await db.fetch(guildId ? {} : { global: true });
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'command':
                 return await this.runCommand(context, resolvedCommand, db, data);
             case 'group':

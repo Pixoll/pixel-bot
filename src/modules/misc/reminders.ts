@@ -2,6 +2,7 @@ import { EmbedBuilder, TextBasedChannel, ChannelType, MessageCreateOptions } fro
 import { CommandoClient, DatabaseManager, ReminderSchema, Util } from 'pixoll-commando';
 import { basicEmbed, fetchPartial } from '../../utils/functions';
 import { prettyMs } from 'better-ms';
+import { stripIndent } from 'common-tags';
 
 /** This module manages reminders. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -14,7 +15,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         const reaction = await fetchPartial(partialReaction);
         if (!reaction) return;
         const user = await fetchPartial(partialUser);
-        if (!user?.bot) return;
+        if (!user || user.bot) return;
 
         const { message, emoji } = reaction;
         if (user.bot || emoji.id !== '802617654442852394') return;
@@ -29,7 +30,10 @@ export default async function (client: CommandoClient<true>): Promise<void> {
                 color: 'Green',
                 emoji: 'check',
                 fieldName: 'Your reminder has been cancelled',
-                fieldValue: data.reminder,
+                fieldValue: stripIndent`
+                    ${data.reminder}
+                    [Jump to message](${data.msgURL})
+                `,
             })],
         });
 

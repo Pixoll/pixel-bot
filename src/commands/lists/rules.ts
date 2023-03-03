@@ -10,6 +10,9 @@ const args = [{
     type: 'string',
     oneOf: ['view', 'clear'],
     default: 'view',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }] as const;
 
 type RawArgs = typeof args;
@@ -41,7 +44,6 @@ export default class RulesCommand extends Command<true, RawArgs> {
     }
 
     public async run(context: CommandContext<true>, { subCommand }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase();
         const { guild } = context;
         const data = await guild.database.rules.fetch();
 
@@ -54,7 +56,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
             return;
         }
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'view':
                 return await this.runView(context, data.rules);
             case 'clear':

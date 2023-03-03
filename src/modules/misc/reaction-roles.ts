@@ -12,7 +12,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         const message = await fetchPartial(reaction.message);
         if (!message?.inGuild()) return;
         const user = await fetchPartial(partialUser);
-        if (!user?.bot) return;
+        if (!user || user.bot) return;
 
         client.emit('debug', 'Running event "modules/reaction-roles#messageReactionAdd".');
 
@@ -39,7 +39,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         const message = await fetchPartial(reaction.message);
         if (!message?.inGuild()) return;
         const user = await fetchPartial(partialUser);
-        if (!user?.bot) return;
+        if (!user || user.bot) return;
 
         client.emit('debug', 'Running event "modules/reaction-roles#messageReactionRemove".');
 

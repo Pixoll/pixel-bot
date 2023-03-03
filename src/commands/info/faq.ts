@@ -26,6 +26,9 @@ const args = [{
     type: 'string',
     oneOf: ['view', 'add', 'remove', 'clear'],
     default: 'view',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'item',
     prompt: 'What item do you want to remove from the FAQ list?',
@@ -109,10 +112,9 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { item, subCommand, question, answer }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase();
         const faqData = await this.db.fetchMany();
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'view':
                 return await this.runView(context, faqData);
             case 'add':

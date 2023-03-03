@@ -21,6 +21,9 @@ const args = [{
     type: 'string',
     oneOf: ['view', 'add', 'remove', 'clear'],
     default: 'view',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'item',
     prompt: 'What item do you want to add/remove?',
@@ -119,12 +122,10 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { subCommand, item }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase();
         const { author } = context;
-
         const todoDocument = await this.db.fetch({ user: author.id });
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'view':
                 return await this.runView(context, todoDocument);
             case 'add':

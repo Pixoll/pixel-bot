@@ -26,6 +26,9 @@ const args = [{
     prompt: 'What sub-command do you want to use?',
     type: 'string',
     oneOf: ['diagnose', 'toggle'],
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'module',
     prompt: 'What module do you want to toggle/diagnose?',
@@ -147,7 +150,6 @@ export default class ModuleCommand extends Command<true, RawArgs> {
     public async run(
         context: CommandContext<true>, { subCommand, module: moduleName, subModule }: ParsedArgs
     ): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase();
         const lcModule = moduleName.toLowerCase();
         const lcSubModule = moduleName === 'audit-logs' ? subModule?.toLowerCase() ?? null : null;
 
@@ -163,7 +165,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             return;
         }
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'diagnose':
                 return await this.runDiagnose(context, data, lcModule, lcSubModule);
             case 'toggle':

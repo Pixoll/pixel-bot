@@ -28,6 +28,9 @@ const args = [{
     type: 'string',
     oneOf: ['all', 'command', 'group'],
     default: 'all',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'commandOrGroup',
     label: 'command or group',
@@ -113,12 +116,10 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
 
     public async run(context: CommandContext, { subCommand, commandOrGroup, command, group }: ParsedArgs): Promise<void> {
         const { client } = this;
-        const lcSubCommand = subCommand.toLowerCase();
-
         const resolvedCommand = resolveCommand(client, commandOrGroup ?? command);
         const resolvedGroup = resolveGroup(client, commandOrGroup ?? group);
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'all':
                 return await this.runAll(context);
             case 'command':

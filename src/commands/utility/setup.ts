@@ -44,6 +44,9 @@ const args = [{
         'lockdown-channels',
     ],
     default: 'full',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'value',
     prompt: 'Please specify the value to set for that sub-command.',
@@ -221,7 +224,6 @@ export default class SetupCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext<true>, {
         subCommand, value, auditLogsChannel, mutedRole, memberRole, botRole, lockdownChannels, channel, role, channels,
     }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase();
         const { guild } = context;
         const db = guild.database.setup;
 
@@ -234,7 +236,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             lockdownChannels,
         };
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'full':
                 return await this.runFull(context, data, context.isInteraction() ? setupData as FullSetupData : null);
             case 'view':

@@ -17,6 +17,9 @@ const args = [{
     type: 'string',
     oneOf: ['view', 'remove'],
     default: 'view',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }, {
     key: 'errorId',
     label: 'error ID',
@@ -59,7 +62,6 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
     public async run(context: CommandContext<false>, { subCommand, errorId }: ParsedArgs): Promise<void> {
         if (context.isInteraction()) return;
 
-        const lcSubCommand = subCommand.toLowerCase();
         const errors = await this.db.fetchMany();
         if (errors.size === 0) {
             await context.replyEmbed(basicEmbed({
@@ -70,7 +72,7 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
             return;
         }
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'view':
                 return await this.runView(context, errors);
             case 'remove':

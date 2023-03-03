@@ -17,6 +17,9 @@ const args = [{
     type: 'string',
     oneOf: ['view', 'clear'],
     default: 'view',
+    parse(value: string): string {
+        return value.toLowerCase();
+    },
 }] as const;
 
 type RawArgs = typeof args;
@@ -51,7 +54,6 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { subCommand }: ParsedArgs): Promise<void> {
-        const lcSubCommand = subCommand.toLowerCase();
         const { author } = context;
 
         const data = await this.db.fetchMany({ user: author.id });
@@ -64,7 +66,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
             return;
         }
 
-        switch (lcSubCommand) {
+        switch (subCommand) {
             case 'view':
                 return await this.runView(context, data);
             case 'clear':

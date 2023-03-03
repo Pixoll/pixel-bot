@@ -20,9 +20,9 @@
     "dotenv": "^16.0.1",
     "emoji-regex": "^10.1.0",
     "lodash": "^4.17.21",
-    "minecraft-server-util": "^5.2.10",
+    "minecraft-server-util": "^5.4.0",
     "mongoose": "^6.4.4",
-    "pixoll-commando": "^1.0.0-dev.34",
+    "pixoll-commando": "^1.0.0-dev.35",
     "require-all": "^3.0.0"
   },
   "devDependencies": {
