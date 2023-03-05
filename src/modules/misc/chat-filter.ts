@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ChannelType } from 'discord.js';
 import { CommandoClient, GuildModule } from 'pixoll-commando';
-import { isGuildModuleEnabled, basicEmbed, docId, timestamp, parseMessageToCommando } from '../../utils';
+import { isGuildModuleEnabled, basicEmbed, generateDocId, timestamp, parseMessageToCommando } from '../../utils';
 
 function percentage(number: number, total: number): number {
     const chance = (number * 100) / total;
@@ -61,7 +61,7 @@ export default function (client: CommandoClient<true>): void {
 
         await message.delete().catch(() => null);
         await guild.database.moderations.add({
-            _id: docId(),
+            _id: generateDocId(),
             type: 'warn',
             guild: guildId,
             userId: author.id,
@@ -119,7 +119,7 @@ export default function (client: CommandoClient<true>): void {
         const reason = 'Spam detection';
         const mod = client.user;
         const duration = now + 60_000;
-        const id = docId();
+        const id = generateDocId();
 
         await moderations.add({
             _id: id,
@@ -184,7 +184,7 @@ export default function (client: CommandoClient<true>): void {
             await message.delete().catch(() => null);
             deleted = true;
             await guild.database.moderations.add({
-                _id: docId(),
+                _id: generateDocId(),
                 type: 'warn',
                 guild: guildId,
                 userId: author.id,

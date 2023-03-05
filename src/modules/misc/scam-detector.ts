@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { CommandoClient, GuildModule } from 'pixoll-commando';
-import { isGuildModuleEnabled, basicEmbed, docId } from '../../utils';
+import { isGuildModuleEnabled, basicEmbed, generateDocId } from '../../utils';
 
 const antiScamRegex = new RegExp(
     'https?://((?:www\\.)?' // url prefix
@@ -85,7 +85,7 @@ export default function (client: CommandoClient<true>): void {
         await member.ban({ reason });
 
         await guild.database.moderations.add({
-            _id: docId(),
+            _id: generateDocId(),
             type: 'ban',
             guild: guildId,
             userId: author.id,

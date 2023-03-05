@@ -1,7 +1,7 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { EmbedBuilder, TextChannel, escapeMarkdown } from 'discord.js';
 import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
-import { customEmoji, docId, code, replyAll, sliceDots, hyperlink } from '../../utils';
+import { customEmoji, generateDocId, code, replyAll, sliceDots, hyperlink } from '../../utils';
 
 const fileTree = __dirname.split(/[\\/]+/g);
 const root = fileTree[fileTree.length - 2];
@@ -13,7 +13,7 @@ export default function (client: CommandoClient<true>): void {
     client.on('commandError', async (command, error, instances) => {
         const owner = client.owners?.[0];
         const { serverInvite } = client.options;
-        const id = docId();
+        const id = generateDocId();
 
         const reply = new EmbedBuilder()
             .setColor('Red')
@@ -111,7 +111,7 @@ async function errorHandler(
 
     const whatCommand = command ? ` at '${command.name}' command` : '';
 
-    id ??= docId();
+    id ??= generateDocId();
 
     const embed = new EmbedBuilder()
         .setColor('Red')

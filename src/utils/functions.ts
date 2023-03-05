@@ -182,12 +182,12 @@ export interface GenerateEmbedOptions {
         suffix?: string;
     };
     /** The properties to display in the embed. If empty I will use every property */
-    keys?: string[];
+    keys?: Array<string | null>;
     /**
      * The properties to exclude on the embed. If empty I will use `data.keys` or every property
      * @default []
      */
-    keysExclude?: string[];
+    keysExclude?: Array<string | null>;
     /**
      * Whether to use the document's ID on each data chunk
      * @default false
@@ -767,12 +767,17 @@ export function isValidRole(message: AnyMessage, role?: Role | null): boolean {
     return true;
 }
 
+const generator = (function* (n: number): Generator<number, never, number> {
+    while (true) yield n++;
+})(0);
+
 /**
- * Creates a random Mongo document ID.
+ * 16 characters-long hex id
  */
-export function docId(): string {
-    const int = Math.floor(Math.random() * (2 ** 48));
-    return int.toString(16);
+export function generateDocId(): string {
+    const iteration = generator.next().value.toString(16).padStart(5, '0');
+    const timestamp = BigInt(Date.now()).toString(16);
+    return timestamp + iteration;
 }
 
 /**
