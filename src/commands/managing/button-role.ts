@@ -1,0 +1,163 @@
+import { stripIndent } from 'common-tags';
+import {
+    ButtonBuilder,
+    ActionRowBuilder,
+    EmbedBuilder,
+    ApplicationCommandOptionType,
+    ChannelType,
+    ButtonStyle,
+    ApplicationCommandOptionData,
+} from 'discord.js';
+import {
+    Argument,
+    ArgumentType,
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoMessage,
+    CommandoRole,
+    ParseRawArguments,
+    Util,
+} from 'pixoll-commando';
+import {
+    basicCollector,
+    isValidRole,
+    basicEmbed,
+    replyAll,
+    arrayWithLength,
+    addOrdinalSuffix,
+    parseArgInput,
+    hyperlink,
+} from '../../utils';
+
+const rolesAmount = 10;
+const args = [{
+    key: 'channel',
+    prompt: 'On what channel do you want to create the button roles?',
+    type: 'text-channel',
+}, {
+    key: 'roles',
+    prompt: 'What roles do you want to set for the button roles?',
+    type: 'string',
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+        const type = message.client.registry.types.get('role') as ArgumentType<'role'>;
+        const queries = value?.split(/\s*,\s*/).slice(0, rolesAmount) ?? [];
+        const valid: boolean[] = [];
+        for (const query of queries) {
+            const isValid1 = await type.validate(query, message, argument as Argument<'role'>);
+            if (!isValid1) valid.push(false);
+            const isValid2 = isValidRole(message, await type.parse(query, message, argument as Argument<'role'>));
+            valid.push(isValid2);
+        }
+        return valid.filter(b => b !== true).length !== queries.length;
+    },
+    error: 'None of the roles you specified were valid. Please try again.',
+}] as const;
+
+type RawArgs = typeof args;
+type ParsedArgs = ParseRawArguments<RawArgs> & {
+    [K in SlashRoleKey]?: CommandoRole;
+} & {
+    message?: string;
+};
+
+type SlashRoleKey = NumberedStringUnion<'role-', 10>;
+
+export default class ButtonRoleCommand extends Command<true, RawArgs> {
+    public constructor(client: CommandoClient) {
+        super(client, {
+            name: 'button-role',
+            aliases: ['brole', 'buttonrole'],
+            group: 'managing',
+            description: 'Create or remove button roles.',
+            details: stripIndent`
+                \`channel\` can be either a channel's name, mention or ID.
+                \`roles\` to be all the roles' names, mentions or ids, separated by commas (max. 10 at once).
+            `,
+            format: 'buttonrole [channel] [roles]',
+            examples: ['buttonrole #roles Giveaways, Polls'],
+            userPermissions: ['ManageRoles'],
+            guildOnly: true,
+            args,
+        }, {
+            options: [{
+                type: ApplicationCommandOptionType.Channel,
+                channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement],
+                name: 'channel',
+                description: 'On what channel do you want to create the button roles?',
+                required: true,
+            }, {
+                type: ApplicationCommandOptionType.String,
+                name: 'message',
+                description: 'What message should I send with the buttons?',
+                required: true,
+            }, ...arrayWithLength<ApplicationCommandOptionData>(rolesAmount, (n) => ({
+                type: ApplicationCommandOptionType.Role,
+                name: `role-${n + 1}`,
+                description: `The ${addOrdinalSuffix(n)} role.`,
+                required: n === 0,
+            }))],
+        });
+    }
+
+    public async run(context: CommandContext, args: ParsedArgs): Promise<void> {
+        const { channel } = args;
+        let content = args.message || '';
+        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const roles = await parseRoles(context, args, message, this);
+
+        const { id } = message;
+
+        if (context.isMessage()) {
+            const msg = await basicCollector(context, {
+                fieldName: 'What message should I send with the buttons?',
+            }, { time: 2 * 60_000 });
+            if (!msg) return;
+            content = msg.content;
+        }
+
+        const embed = new EmbedBuilder()
+            .setColor('#4c9f4c')
+            .setDescription(content);
+
+        const buttons = [];
+        for (const role of roles) {
+            const style = buttons.length >= 5 ? ButtonStyle.Primary : ButtonStyle.Secondary;
+            const button = new ButtonBuilder()
+                .setCustomId(`button-role:${id}:${role.id}`)
+                .setLabel(role.name)
+                .setStyle(style);
+            buttons.push(button);
+        }
+
+        const rows = [];
+        while (buttons.length > 0) {
+            const toAdd = rows.length === 1 ? buttons.splice(0, buttons.length).map(b => b.setStyle(ButtonStyle.Secondary))
+                : buttons.splice(0, buttons.length <= 4 ? 4 : Math.round(buttons.length / 2 + 0.1))
+                    .map(b => b.setStyle(ButtonStyle.Primary));
+
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...toAdd);
+            rows.push(row);
+        }
+
+        const { url } = await channel.send({ embeds: [embed], components: rows });
+
+        await replyAll(context, basicEmbed({
+            color: 'Green',
+            emoji: 'check',
+            description: `The buttons roles were successfully created ${hyperlink('here', url)}.`,
+        }));
+    }
+}
+
+async function parseRoles(
+    context: CommandContext, args: ParsedArgs, message: CommandoMessage, command: ButtonRoleCommand
+): Promise<CommandoRole[]> {
+    if (context.isInteraction()) return Object.entries(args)
+        .filter((entry): entry is [SlashRoleKey, CommandoRole] => entry[0].startsWith('role-'))
+        .map(([, role]) => role);
+    const results = await Promise.all(args.roles.split(/ +/).map(query =>
+        parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'role')
+    ));
+    return Util.filterNullishItems(results);
+}
