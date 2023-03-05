@@ -223,7 +223,7 @@ export type GetArgumentResult<T extends ArgumentTypeString> = Omit<ArgumentResul
 export type ReplyAllOptions =
     | EmbedBuilder
     | string
-    | Omit<MessageCreateOptions, 'flags'> & { editReply?: boolean };
+    | Omit<MessageCreateOptions, 'flags'> & { replyToEdit?: AnyMessage | null };
 
 //#endregion
 
@@ -410,7 +410,7 @@ export async function replyAll(context: CommandContext, options: ReplyAllOptions
         ...options,
         ...Util.noReplyPingInDMs(context),
     };
-    if (options.editReply) return await context.edit(messageOptions).catch(() => null);
+    if (options.replyToEdit) return await options.replyToEdit.edit(messageOptions).catch(() => null);
     return await context.reply(messageOptions).catch(() => null);
 }
 
@@ -508,9 +508,9 @@ export function userException(user: User, author: User, command: Command): Basic
  * @param command The command that's being ran
  */
 export function memberException(
-    member: Nullable<GuildMember>, moderator: GuildMember, command: Command
+    member: Nullable<GuildMember>, moderator: Nullable<GuildMember>, command: Command
 ): BasicEmbedOptions | null {
-    if (!member) return null;
+    if (!member || !moderator) return null;
     const { client, name } = command;
 
     const options: BasicEmbedOptions = {
@@ -518,7 +518,7 @@ export function memberException(
         emoji: 'cross',
         description: '',
     };
-    if (!member.bannable) {
+    if (!member.bannable || !member.kickable) {
         options.fieldName = `Unable to ${name} ${member.user.tag}`;
         options.fieldValue = 'Please check the role hierarchy or server ownership.';
         return options;
@@ -748,7 +748,7 @@ export function validateURL(str: string): boolean {
  * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(message: AnyMessage, role?: Role | null): boolean {
+export function isValidRole(message: AnyMessage | CommandContext, role?: Role | null): boolean {
     if (!message.inGuild() || !(role instanceof Role) || !role || role.managed) return false;
 
     const { member, client, author, guild } = message;

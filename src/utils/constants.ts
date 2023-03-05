@@ -47,3 +47,5 @@ export const defaultGenerateEmbedOptions: Required<Omit<
 };
 
 export const emojiRegex = new RegExp(`${importedEmojiRegex().source}|\\d{17,20}`, 'g');
+
+export const sevenDays = 604_800;

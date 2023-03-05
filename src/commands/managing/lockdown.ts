@@ -195,14 +195,11 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         const { guild, guildId } = context;
         const { everyone } = guild.roles;
 
-        await replyAll(context, {
-            embeds: [basicEmbed({
-                color: 'Gold',
-                emoji: 'loading',
-                description: 'Locking all lockdown channels, please wait...',
-            })],
-            editReply: true,
-        });
+        const replyToEdit = await replyAll(context, basicEmbed({
+            color: 'Gold',
+            emoji: 'loading',
+            description: 'Locking all lockdown channels, please wait...',
+        }));
 
         let changesAmount = 0;
         for (const channel of savedChannels) {
@@ -227,7 +224,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
                     color: 'Gold',
                     description: 'No changes were made.',
                 })],
-                editReply: true,
+                replyToEdit,
             });
             return;
         }
@@ -238,7 +235,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
                 emoji: 'check',
                 description: `Locked ${changesAmount}/${savedChannels.length} lockdown channels.`,
             })],
-            editReply: true,
+            replyToEdit,
         });
     }
 
@@ -265,14 +262,11 @@ export default class LockdownCommand extends Command<true, RawArgs> {
 
         const { guild, guildId } = context;
         const { everyone } = guild.roles;
-        await replyAll(context, {
-            embeds: [basicEmbed({
-                color: 'Gold',
-                emoji: 'loading',
-                description: 'Unlocking all lockdown channels, please wait...',
-            })],
-            editReply: true,
-        });
+        const replyToEdit = await replyAll(context, basicEmbed({
+            color: 'Gold',
+            emoji: 'loading',
+            description: 'Unlocking all lockdown channels, please wait...',
+        }));
 
         let changesAmount = 0;
         for (const channel of savedChannels) {
@@ -297,7 +291,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
                     color: 'Gold',
                     description: 'No changes were made.',
                 })],
-                editReply: true,
+                replyToEdit,
             });
             return;
         }
@@ -308,7 +302,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
                 emoji: 'check',
                 description: `Unlocked ${changesAmount}/${savedChannels.length} lockdown channels.`,
             })],
-            editReply: true,
+            replyToEdit,
         });
     }
 

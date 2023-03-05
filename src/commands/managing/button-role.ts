@@ -46,10 +46,11 @@ const args = [{
         for (const query of queries) {
             const isValid1 = await type.validate(query, message, argument as Argument<'role'>);
             if (!isValid1) valid.push(false);
-            const isValid2 = isValidRole(message, await type.parse(query, message, argument as Argument<'role'>));
+            const role = await type.parse(query, message, argument as Argument<'role'>);
+            const isValid2 = isValidRole(message, role);
             valid.push(isValid2);
         }
-        return valid.filter(b => b !== true).length !== queries.length;
+        return valid.filter(b => b === true).length === 0;
     },
     error: 'None of the roles you specified were valid. Please try again.',
 }] as const;
@@ -61,7 +62,7 @@ type ParsedArgs = ParseRawArguments<RawArgs> & {
     message?: string;
 };
 
-type SlashRoleKey = NumberedStringUnion<'role-', 10>;
+type SlashRoleKey = NumberedStringUnion<'role-', typeof rolesAmount>;
 
 export default class ButtonRoleCommand extends Command<true, RawArgs> {
     public constructor(client: CommandoClient) {
@@ -94,7 +95,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
             }, ...arrayWithLength<ApplicationCommandOptionData>(rolesAmount, (n) => ({
                 type: ApplicationCommandOptionType.Role,
                 name: `role-${n + 1}`,
-                description: `The ${addOrdinalSuffix(n)} role.`,
+                description: `The ${addOrdinalSuffix(n + 1)} role.`,
                 required: n === 0,
             }))],
         });
