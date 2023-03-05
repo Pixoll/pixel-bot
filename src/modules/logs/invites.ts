@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient, CommandoGuild } from 'pixoll-commando';
-import { isGuildModuleEnabled, parseMessageToCommando, timestamp } from '../../utils/functions';
+import { isGuildModuleEnabled, parseMessageToCommando, timestamp, hyperlink } from '../../utils';
 
 /** Handles all of the invite logs. */
 export default function (client: CommandoClient<true>): void {
@@ -94,7 +94,7 @@ export default function (client: CommandoClient<true>): void {
                     name: `${author.tag} posted an invite`, iconURL: author.displayAvatarURL({ forceStatic: false }),
                 })
                 .setDescription(stripIndent`
-                    ${author.toString()} posted an invite in ${channel.toString()} [Jump to message](${url})
+                    ${author.toString()} posted an invite in ${channel.toString()} ${hyperlink('Jump to message', url)}
                     **Invite:** ${invite.toString()}
                 `)
                 .addFields({

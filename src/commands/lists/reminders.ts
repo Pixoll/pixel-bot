@@ -8,7 +8,7 @@ import {
     ParseRawArguments,
     ReminderSchema,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll } from '../../utils/functions';
+import { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll, hyperlink } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -80,7 +80,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     protected async runView(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
         const list = reminders.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
-            reminder: `${r.reminder}\n[Jump to message](${r.msgURL})`,
+            reminder: r.reminder + '\n' + hyperlink('Jump to message', r.msgURL),
         }));
 
         await generateEmbed(context, list, {

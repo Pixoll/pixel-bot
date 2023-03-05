@@ -1,14 +1,14 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, timestamp, customEmoji, fetchPartial } from '../../utils/functions';
+import { isGuildModuleEnabled, timestamp, customEmoji, fetchPartial, hyperlink } from '../../utils';
 
 /**
  * Returns a clickable link to the image. `None` if the link is invalid
  * @param The link of the image
  */
 function imageLink(link: string): string {
-    if (link) return `[Click here](${link})`;
+    if (link) return hyperlink('Click here', link);
     return 'None';
 }
 

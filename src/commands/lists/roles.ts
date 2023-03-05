@@ -1,6 +1,6 @@
 import { Collection, Role } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils/functions';
+import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
 
 const args = [{
     key: 'member',

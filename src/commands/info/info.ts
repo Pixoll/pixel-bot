@@ -1,8 +1,8 @@
 import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
-import { EmbedBuilder, hyperlink, version as djsVersion } from 'discord.js';
+import { EmbedBuilder, version as djsVersion } from 'discord.js';
 import { Command, CommandContext, CommandoClient, version as pixComVersion } from 'pixoll-commando';
-import { replyAll } from '../../utils/functions';
+import { replyAll, hyperlink } from '../../utils';
 
 declare function require<T>(id: string): T;
 const { version, description } = require<{ version: string; description: string }>('../../../package.json');

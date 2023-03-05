@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ActivityType } from 'discord.js';
 import { Command, CommandContext, CommandoClient, DatabaseManager, ParseRawArguments, PrefixSchema } from 'pixoll-commando';
-import { basicEmbed } from '../../utils/functions';
+import { basicEmbed } from '../../utils';
 
 const args = [{
     key: 'newPrefix',

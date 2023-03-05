@@ -1,8 +1,8 @@
-import { EmbedBuilder, TextBasedChannel, ChannelType, MessageCreateOptions } from 'discord.js';
-import { CommandoClient, DatabaseManager, ReminderSchema, Util } from 'pixoll-commando';
-import { basicEmbed, fetchPartial } from '../../utils/functions';
 import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
+import { EmbedBuilder, TextBasedChannel, ChannelType, MessageCreateOptions } from 'discord.js';
+import { CommandoClient, DatabaseManager, ReminderSchema, Util } from 'pixoll-commando';
+import { basicEmbed, fetchPartial, hyperlink } from '../../utils';
 
 /** This module manages reminders. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -32,7 +32,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
                 fieldName: 'Your reminder has been cancelled',
                 fieldValue: stripIndent`
                     ${data.reminder}
-                    [Jump to message](${data.msgURL})
+                    ${hyperlink('Jump to message', data.msgURL)}
                 `,
             })],
         });

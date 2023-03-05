@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, timestamp, customEmoji } from '../../utils/functions';
+import { isGuildModuleEnabled, timestamp, customEmoji } from '../../utils';
 
 /** Handles all of the member logs. */
 export default function (client: CommandoClient<true>): void {

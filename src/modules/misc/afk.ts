@@ -1,5 +1,5 @@
 import { EmbedBuilder, Message } from 'discord.js';
-import { basicEmbed, parseMessageToCommando, sleep, timestamp } from '../../utils/functions';
+import { basicEmbed, parseMessageToCommando, sleep, timestamp } from '../../utils';
 import { CommandoClient } from 'pixoll-commando';
 
 /** This module manages `!afk`'s timeouts and mentions. */

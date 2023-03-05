@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { CommandoClient, GuildModule } from 'pixoll-commando';
-import { isGuildModuleEnabled, basicEmbed, docId } from '../../utils/functions';
+import { isGuildModuleEnabled, basicEmbed, docId } from '../../utils';
 
 const antiScamRegex = new RegExp(
     'https?://((?:www\\.)?' // url prefix

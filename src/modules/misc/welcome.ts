@@ -1,6 +1,6 @@
 import { ChannelType, EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled } from '../../utils/functions';
+import { isGuildModuleEnabled } from '../../utils';
 
 /** This module manages welcome messages. */
 export default function (client: CommandoClient<true>): void {

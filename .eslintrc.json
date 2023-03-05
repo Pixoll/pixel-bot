@@ -132,7 +132,8 @@
                     "off"
                 ],
                 "@typescript-eslint/semi": "error",
-                "@typescript-eslint/explicit-member-accessibility": "error"
+                "@typescript-eslint/explicit-member-accessibility": "error",
+                "@typescript-eslint/no-explicit-any": "error"
             }
         }
     ]

@@ -1,6 +1,6 @@
 import { ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
 import { Command, CommandContext, CommandoClient, Util } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils/functions';
+import { basicEmbed, replyAll } from '../../utils';
 
 export default class InviteCommand extends Command {
     public constructor(client: CommandoClient) {
@@ -36,7 +36,7 @@ export default class InviteCommand extends Command {
                 invite,
                 support,
             ]));
-            
+
         if (row.components.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Red',

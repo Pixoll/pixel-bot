@@ -1,7 +1,7 @@
-import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
+import { oneLine, stripIndent } from 'common-tags';
 import { EmbedBuilder, TextChannel, escapeMarkdown } from 'discord.js';
-import { customEmoji, docId, code, replyAll, sliceDots } from '../../utils/functions';
-import { stripIndent } from 'common-tags';
+import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
+import { customEmoji, docId, code, replyAll, sliceDots, hyperlink } from '../../utils';
 
 const fileTree = __dirname.split(/[\\/]+/g);
 const root = fileTree[fileTree.length - 2];
@@ -19,7 +19,10 @@ export default function (client: CommandoClient<true>): void {
             .setColor('Red')
             .setDescription(stripIndent`
 				${customEmoji('cross')} **An unexpected error happened**
-				Please contact ${owner?.toString()} (${owner?.tag}) by joining the [support server](${serverInvite}).
+                ${oneLine`
+                Please contact ${owner?.toString()} (${owner?.tag})
+                by joining the ${hyperlink('support server', serverInvite)}.
+                `}
 			`)
             .addFields({
                 name: 'Please send this information as well',
@@ -101,7 +104,7 @@ async function errorHandler(
     const where = context ? (guild
         ? stripIndent`
         At guild **${guild.name}** (${guild.id}), channel ${channel?.toString()}.
-        ${url ? `Please go to [this message](${url}) for more information.` : ''}
+        ${url ? `Please go to ${hyperlink('this message', url)} for more information.` : ''}
         `
         : `In DMs with ${author?.toString()} (${author?.tag}).`
     ) : '';

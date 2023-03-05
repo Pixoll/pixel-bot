@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled } from '../../utils/functions';
+import { isGuildModuleEnabled } from '../../utils';
 
 /** Handles all of the sticker logs. */
 export default function (client: CommandoClient<true>): void {

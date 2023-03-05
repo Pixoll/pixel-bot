@@ -8,7 +8,7 @@ import {
     Util,
 } from 'pixoll-commando';
 import type Schemas from 'pixoll-commando/types/database/Schemas';
-import { generateEmbed, basicEmbed } from '../../utils/functions';
+import { generateEmbed, basicEmbed } from '../../utils';
 
 type CollectionName = keyof typeof Schemas;
 const args = (options: CollectionName[]) => [{

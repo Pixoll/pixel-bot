@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils/functions';
+import { basicEmbed, replyAll } from '../../utils';
 
 const args = [{
     key: 'status',

@@ -1,7 +1,7 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { ChannelType, EmbedBuilder, ThreadAutoArchiveDuration, ThreadChannel } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, timestamp, yesOrNo } from '../../utils/functions';
+import { isGuildModuleEnabled, timestamp, yesOrNo } from '../../utils';
 import { ms } from 'better-ms';
 
 type RelevantChannelTypes = NonNullable<ThreadChannel['parent']>['type'] | ThreadChannel['type'];

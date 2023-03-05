@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { generateEmbed, pluralize, abcOrder } from '../../utils/functions';
+import { generateEmbed, pluralize, abcOrder } from '../../utils';
 
 export default class BotListCommand extends Command<true> {
     public constructor(client: CommandoClient) {

@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { isModerator, generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils/functions';
+import { isModerator, generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
 
 export default class ModeratorsCommand extends Command<true> {
     public constructor(client: CommandoClient) {

@@ -1,5 +1,5 @@
 import { CommandoClient } from 'pixoll-commando';
-import { fetchPartial, isGuildModuleEnabled } from '../../utils/functions';
+import { fetchPartial, isGuildModuleEnabled } from '../../utils';
 
 /** Handles sticky roles for joining/leaving members. */
 export default function (client: CommandoClient<true>): void {

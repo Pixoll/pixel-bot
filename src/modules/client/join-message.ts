@@ -1,7 +1,7 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { CommandoClient, CommandoTextChannel } from 'pixoll-commando';
-import { customEmoji } from '../../utils/functions';
+import { customEmoji, hyperlink } from '../../utils';
 
 /** Sends a message when the bot joins a guild. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -77,10 +77,10 @@ export default async function (client: CommandoClient<true>): Promise<void> {
             }, {
                 name: '🔗 Useful links',
                 value: oneLine`
-                [Top.gg page](${topgg}) -
-                [Support server](${options.serverInvite}) -
-                [Invite the bot](${topgg}/invite) -
-                [Vote here](${topgg}/vote)
+                ${hyperlink('Top.gg page', topgg)} -
+                ${hyperlink('Support server', options.serverInvite)} -
+                ${hyperlink('Invite the bot', topgg + '/invite')} -
+                ${hyperlink('Vote here', topgg + '/vote')} -
                 `,
             })
             .setFooter({

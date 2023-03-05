@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
 import { Command, CommandContext, CommandoClient, ModuleSchema, Util } from 'pixoll-commando';
-import { replyAll, customEmoji, basicEmbed, addDashes, abcOrder } from '../../utils/functions';
+import { replyAll, customEmoji, basicEmbed, addDashes, abcOrder } from '../../utils';
 
 function getStatusString(isOn?: boolean): string {
     if (isOn === true) return `Enabled ${customEmoji('online')}`;

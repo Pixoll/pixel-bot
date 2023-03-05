@@ -1,4 +1,5 @@
 import { PermissionsString } from 'discord.js';
+import { default as importedEmojiRegex } from 'emoji-regex';
 import { GenerateEmbedOptions } from './functions';
 
 export const moderatorPermissions: readonly PermissionsString[] = [
@@ -44,3 +45,5 @@ export const defaultGenerateEmbedOptions: Required<Omit<
     components: [],
     skipMaxButtons: false,
 };
+
+export const emojiRegex = new RegExp(`${importedEmojiRegex().source}|\\d{17,20}`, 'g');

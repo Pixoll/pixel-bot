@@ -9,7 +9,7 @@ import {
     OverwriteType,
 } from 'discord.js';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { compareArrays, sliceDots, customEmoji, isGuildModuleEnabled, yesOrNo } from '../../utils/functions';
+import { compareArrays, sliceDots, customEmoji, isGuildModuleEnabled, yesOrNo } from '../../utils';
 import { capitalize } from 'lodash';
 import { ms } from 'better-ms';
 

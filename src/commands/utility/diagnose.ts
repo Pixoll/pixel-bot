@@ -19,7 +19,7 @@ import {
     Util,
     CommandResolvable,
 } from 'pixoll-commando';
-import { replyAll, getSubCommand } from '../../utils/functions';
+import { replyAll, getSubCommand } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -37,13 +37,14 @@ const args = [{
     prompt: 'What command or group would you like to diagnose?',
     type: ['command', 'group'],
     required: false,
-    isEmpty(_: string, message: CommandoMessage): boolean {
+    isEmpty(_: unknown, message: CommandoMessage): boolean {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         return subCommand === 'all';
     },
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         if (subCommand === 'all') return true;
+        if (typeof value === 'undefined') return false;
         const isValid = await argument.type?.validate(value, message, argument) ?? true;
         if (isValid !== true) return isValid;
         if (subCommand === 'command') {
@@ -57,12 +58,12 @@ const args = [{
     },
 }] as const;
 
-type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
     command?: string;
     group?: string;
 };
+type SubCommand = ParsedArgs['subCommand'];
 
 export default class DiagnoseCommand extends Command<boolean, RawArgs> {
     public constructor(client: CommandoClient) {

@@ -12,8 +12,9 @@ import {
     ParseRawArguments,
     CommandoMessage,
     CommandoAutocompleteInteraction,
+    Util,
 } from 'pixoll-commando';
-import { abcOrder, pagedEmbed, basicEmbed, replyAll } from '../../utils/functions';
+import { abcOrder, pagedEmbed, replyAll, parseArgDate } from '../../utils';
 
 const timeZones = new Collection([
     ['Pacific/Apia', 'Samoa'],
@@ -110,34 +111,14 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { hour, place }: ParsedArgs): Promise<void> {
-        if (context.isInteraction()) {
-            const message = await context.fetchReply() as CommandoMessage;
-            const arg = this.argsCollector?.args[0];
-            const resultHour = await arg?.parse(hour?.toString() ?? 'now', message).catch(() => null) as Date | null || null;
-            if (!resultHour) {
-                await replyAll(context, basicEmbed({
-                    color: 'Red',
-                    emoji: 'cross',
-                    description: 'The date you specified is invalid.',
-                }));
-                return;
-            }
-            hour = resultHour;
-            if (place && !cities.some(c => c.toLowerCase() === place.toLowerCase())) {
-                await replyAll(context, basicEmbed({
-                    color: 'Red',
-                    emoji: 'cross',
-                    description: 'The place you specified is invalid.',
-                }));
-                return;
-            }
-        }
+        const passedHour = await parseArgDate(context, this as Command, 0, hour, 'now');
+        if (context.isInteraction() && Util.isNullish(passedHour)) return;
 
-        const date = hour || new Date();
+        const date = passedHour ?? new Date();
         const toMatch = context.isMessage()
             ? CommandoMessage.parseArgs(context.content)[1]
             : context.options.getString('hour');
-        const is12Hour = !!toMatch?.match(/[aApP]\.?[mM]\.?/)?.map(m => m)[0];
+        const is12Hour = !!toMatch?.match(/[ap]\.?m\.?/i)?.map(m => m)[0];
 
         const times = [];
 

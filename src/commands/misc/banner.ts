@@ -1,6 +1,6 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
 import { User, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } from 'discord.js';
-import { basicEmbed, replyAll } from '../../utils/functions';
+import { basicEmbed, replyAll } from '../../utils';
 
 const args = [{
     key: 'user',

@@ -13,7 +13,7 @@ import {
     Locale,
 } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { arrayEquals, isGuildModuleEnabled, compareArrays, customEmoji, yesOrNo } from '../../utils/functions';
+import { arrayEquals, isGuildModuleEnabled, compareArrays, customEmoji, yesOrNo, hyperlink } from '../../utils';
 import { ms } from 'better-ms';
 
 const boostLevelMap: Record<GuildPremiumTier, string> = {
@@ -102,7 +102,7 @@ const imgOptions: ImageURLOptions = {
  * @param link The link of the image
  */
 function imageLink(link: string | null): string {
-    if (link) return `[Click here](${link})`;
+    if (link) return hyperlink('Click here', link);
     return 'None';
 }
 

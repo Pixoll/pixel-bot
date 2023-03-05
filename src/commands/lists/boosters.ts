@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { generateEmbed, pluralize, abcOrder, basicEmbed, replyAll } from '../../utils/functions';
+import { generateEmbed, pluralize, abcOrder, basicEmbed, replyAll } from '../../utils';
 
 export default class BoostersCommand extends Command<true> {
     public constructor(client: CommandoClient) {

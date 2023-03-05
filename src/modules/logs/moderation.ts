@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { AuditLogEvent, EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { fetchPartial, isGuildModuleEnabled, timestamp } from '../../utils/functions';
+import { fetchPartial, isGuildModuleEnabled, timestamp } from '../../utils';
 
 /** Handles all of the moderation logs. */
 export default function (client: CommandoClient<true>): void {

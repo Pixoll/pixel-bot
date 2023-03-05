@@ -19,7 +19,7 @@ import {
     DisabledSchema,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, replyAll } from '../../utils/functions';
+import { basicEmbed, getSubCommand, replyAll } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -35,7 +35,8 @@ const args = [{
     label: 'command or group',
     prompt: 'What command or group would you like to toggle?',
     type: ['command', 'group'],
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+        if (typeof value === 'undefined') return false;
         const subCommand = getSubCommand<SubCommand>(message);
         const isValid = await argument.type?.validate(value, message, argument) ?? true;
         if (isValid !== true) return isValid;
@@ -50,12 +51,12 @@ const args = [{
     },
 }] as const;
 
-type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
     command?: string;
     group?: string;
 };
+type SubCommand = ParsedArgs['subCommand'];
 
 export default class ToggleCommand extends Command<boolean, RawArgs> {
     public constructor(client: CommandoClient) {

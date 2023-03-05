@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments, RuleSchema } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, confirmButtons, replyAll } from '../../utils/functions';
+import { generateEmbed, basicEmbed, confirmButtons, replyAll } from '../../utils';
 
 const args = [{
     key: 'subCommand',

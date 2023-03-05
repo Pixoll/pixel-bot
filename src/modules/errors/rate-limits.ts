@@ -1,7 +1,7 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { TextChannel, EmbedBuilder, RateLimitData } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { timestamp } from '../../utils/functions';
+import { timestamp } from '../../utils';
 
 const errorLogsChannelId = '906740370304540702';
 

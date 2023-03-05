@@ -1,6 +1,6 @@
 import { ChannelType, EmbedBuilder, VoiceBasedChannelTypes } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled } from '../../utils/functions';
+import { isGuildModuleEnabled } from '../../utils';
 
 const channelTypeMap: Record<VoiceBasedChannelTypes, string> = {
     [ChannelType.GuildStageVoice]: 'Stage',

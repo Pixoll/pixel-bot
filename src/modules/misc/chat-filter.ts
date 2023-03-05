@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ChannelType } from 'discord.js';
 import { CommandoClient, GuildModule } from 'pixoll-commando';
-import { isGuildModuleEnabled, basicEmbed, docId, timestamp, parseMessageToCommando } from '../../utils/functions';
+import { isGuildModuleEnabled, basicEmbed, docId, timestamp, parseMessageToCommando } from '../../utils';
 
 function percentage(number: number, total: number): number {
     const chance = (number * 100) / total;

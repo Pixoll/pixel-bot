@@ -12,10 +12,9 @@ import {
     ParseRawArguments,
     QuerySchema,
     CommandoMessage,
-    Argument,
 } from 'pixoll-commando';
 import { ParsedModuleData, RawAuditLogName, RawModuleName } from '../../types';
-import { basicEmbed, addDashes, replyAll, removeDashes, isTrue } from '../../utils/functions';
+import { basicEmbed, addDashes, replyAll, removeDashes, isTrue } from '../../utils';
 
 const modules: GuildModule[] = [];
 const auditLogs: GuildAuditLog[] = [];
@@ -41,15 +40,9 @@ const args = [{
     type: 'string',
     oneOf: auditLogs,
     required: false,
-    isEmpty(_: string, message: CommandoMessage): boolean {
+    isEmpty(_: unknown, message: CommandoMessage): boolean {
         const moduleName = getModuleName(message);
         return moduleName !== 'audit-logs';
-    },
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
-        const moduleName = getModuleName(message);
-        if (moduleName !== 'audit-logs') return true;
-        const isValid = await argument.type?.validate(value, message, argument) ?? true;
-        return isValid;
     },
 }] as const;
 
@@ -57,7 +50,7 @@ type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
 
 function getModuleName(message: CommandoMessage): GuildModule {
-    return CommandoMessage.parseArgs(message.content)[1] as GuildModule;
+    return CommandoMessage.parseArgs(message.content)[2] as GuildModule;
 }
 
 function parseModuleData(data: Partial<ModuleSchema>): ParsedModuleData {

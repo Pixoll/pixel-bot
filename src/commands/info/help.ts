@@ -7,7 +7,6 @@ import {
     ApplicationCommandOptionType,
     Collection,
     EmbedBuilder,
-    hyperlink,
 } from 'discord.js';
 import { capitalize } from 'lodash';
 import {
@@ -22,8 +21,7 @@ import {
     CommandoGuild,
     CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
-import { moderatorPermissions } from '../../utils';
-import { pagedEmbed, replyAll, pluralize, TemplateEmbedResult } from '../../utils/functions';
+import { moderatorPermissions, pagedEmbed, replyAll, pluralize, TemplateEmbedResult, hyperlink } from '../../utils';
 
 declare function require<T>(id: string): T;
 const { version } = require<{ version: string }>('../../../package.json');
@@ -131,9 +129,10 @@ const args = [{
     prompt: 'What command do you want to get information about?',
     type: 'command',
     required: false,
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
         const arg = argument as Argument<'command'>;
         if (!arg.type) return true;
+        if (typeof value === 'undefined') return false;
         const isValid = await arg.type.validate(value, message, arg);
         if (isValid !== true) return isValid;
         const command = await arg.type.parse(value, message, arg);

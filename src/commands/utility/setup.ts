@@ -26,7 +26,9 @@ import {
     getSubCommand,
     BasicEmbedOptions,
     removeRepeated,
-} from '../../utils/functions';
+    parseArgInput,
+    validateArgInput,
+} from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -52,11 +54,11 @@ const args = [{
     prompt: 'Please specify the value to set for that sub-command.',
     type: ['text-channel', 'role', 'string'],
     required: false,
-    isEmpty(_: string, message: CommandoMessage): boolean {
+    isEmpty(_: unknown, message: CommandoMessage): boolean {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         return Util.equals(subCommand, ['full', 'reload', 'view']);
     },
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         if (Util.equals(subCommand, ['full', 'reload', 'view'])) return true;
         if (subCommand === 'audit-logs') {
@@ -65,7 +67,7 @@ const args = [{
         if (Util.equals(subCommand, ['bot-role', 'member-role', 'muted-role'])) {
             return await validateArgInput(value, message, argument, 'role');
         }
-        const results = await Promise.all(value.split(/ +/).map(query =>
+        const results = await Promise.all((value ?? '').split(/ +/).map(query =>
             validateArgInput(query, message, argument, 'text-channel')
         ));
         return results.find(result => result !== true) ?? true;
@@ -81,13 +83,13 @@ const args = [{
     },
 }] as const;
 
-type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & Partial<FullSetupData> & {
     channel?: CommandoTextChannel;
     role?: CommandoRole;
     channels?: string;
 };
+type SubCommand = ParsedArgs['subCommand'];
 
 interface FullSetupData {
     auditLogsChannel: CommandoTextChannel;
@@ -625,21 +627,6 @@ function defaultDocument<K extends DefaultDocumentKey>(
     };
     doc[key] = value;
     return doc;
-}
-
-async function validateArgInput<T extends ArgumentTypeString = ArgumentTypeString>(
-    value: string, message: CommandoMessage, argument: Argument, type?: T
-): Promise<boolean | string> {
-    const argumentType = type ? message.client.registry.types.get(type) : argument.type;
-    return argumentType?.validate(value, message, argument) ?? true;
-}
-
-async function parseArgInput<T extends ArgumentTypeString = ArgumentTypeString>(
-    value: string, message: CommandoMessage, argument: Argument, type?: T
-): Promise<ArgumentTypeStringMap[T] | null> {
-    const argumentType = type ? message.client.registry.types.get(type) : argument.type;
-    const result = argumentType?.parse(value, message, argument) ?? null;
-    return result as ArgumentTypeStringMap[T];
 }
 
 async function parseCollectorInput<T extends ArgumentTypeString = ArgumentTypeString>(

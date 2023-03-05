@@ -21,6 +21,7 @@ import {
     Argument,
     ArgumentResult,
     ArgumentTypeString,
+    ArgumentTypeStringMap,
     Command,
     CommandContext,
     CommandContextChannel,
@@ -53,7 +54,8 @@ export type CustomEmoji =
     | 'invis'
     | 'loading'
     | 'neutral'
-    | 'online';
+    | 'online'
+    | `\\${string}`;
 
 export interface BasicEmbedOptions {
     /** The description of the embed. */
@@ -746,8 +748,8 @@ export function validateURL(str: string): boolean {
  * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(message: AnyMessage<true>, role?: Role | null): boolean {
-    if (!(role instanceof Role) || !role || role.managed) return false;
+export function isValidRole(message: AnyMessage, role?: Role | null): boolean {
+    if (!message.inGuild() || !(role instanceof Role) || !role || role.managed) return false;
 
     const { member, client, author, guild } = message;
     const botId = client.user.id;
@@ -1226,4 +1228,64 @@ export function isTrue(b?: boolean): b is true {
 
 export function removeRepeated<T>(array: T[]): T[] {
     return Array.from(new Set(array));
+}
+
+export function arrayWithLength<T = number>(length: number, mapCallback?: (n: number) => T): T[] {
+    const array = Array.from(Array(length).keys()).map(n => n + 1);
+    if (!mapCallback) return array as T[];
+    return array.map(mapCallback);
+}
+
+export function addOrdinalSuffix(n: number): string {
+    if (Util.equals(n % 100, [11, 12, 13])) return `${n}th`;
+    const lastDigit = n % 10;
+    if (lastDigit === 1) return `${n}st`;
+    if (lastDigit === 2) return `${n}nd`;
+    if (lastDigit === 3) return `${n}rd`;
+    return `${n}th`;
+}
+
+export async function validateArgInput<T extends ArgumentTypeString = ArgumentTypeString>(
+    value: string | undefined, message: CommandoMessage, argument: Argument, type?: T
+): Promise<boolean | string> {
+    const argumentType = type ? message.client.registry.types.get(type) : argument.type;
+    return argumentType?.validate(value, message, argument) ?? true;
+}
+
+export async function parseArgInput<T extends ArgumentTypeString = ArgumentTypeString>(
+    value: string, message: CommandoMessage, argument: Argument, type?: T
+): Promise<ArgumentTypeStringMap[T] | null> {
+    const argumentType = type ? message.client.registry.types.get(type) : argument.type;
+    const result = argumentType?.parse(value, message, argument) ?? null;
+    return result as ArgumentTypeStringMap[T];
+}
+
+export function hyperlink<C extends string, L extends Nullable<string>>(
+    content: C, url: L
+): L extends undefined ? C : `[${C}](${L})` {
+    if (url) return `[${content}](${url})` as L extends undefined ? C : `[${C}](${L})`;
+    return content as L extends undefined ? C : `[${C}](${L})`;
+}
+
+export async function parseArgDate<T extends Date | number>(
+    context: CommandContext,
+    command: Command,
+    argumentIndex: number,
+    value: Nullable<T> | string,
+    defaultValue?: string
+): Promise<Nullable<T>> {
+    if (context.isMessage() || Util.isNullish(value)) return value as Nullable<T>;
+    const message = await context.fetchReply() as CommandoMessage;
+    const argument = command.argsCollector?.args[argumentIndex];
+    const type = argument?.type?.id.split('|')[0];
+    const resultDate = await argument?.parse(value?.toString() ?? defaultValue ?? '', message).catch(() => null);
+    if (Util.isNullish(resultDate)) {
+        await replyAll(context, basicEmbed({
+            color: 'Red',
+            emoji: 'cross',
+            description: `The ${type} you specified is invalid.`,
+        }));
+        return null;
+    }
+    return resultDate as T;
 }

@@ -8,7 +8,7 @@ import {
     DatabaseManager,
     CommandoMessage,
 } from 'pixoll-commando';
-import { basicEmbed, customEmoji, timestamp, replyAll } from '../../utils/functions';
+import { basicEmbed, customEmoji, timestamp, replyAll } from '../../utils';
 
 const args = [{
     key: 'time',

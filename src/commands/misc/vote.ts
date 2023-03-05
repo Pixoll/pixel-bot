@@ -1,6 +1,6 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { replyAll } from '../../utils/functions';
+import { replyAll } from '../../utils';
 
 export default class VoteCommand extends Command {
     public constructor(client: CommandoClient) {

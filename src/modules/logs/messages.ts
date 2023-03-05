@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { sliceDots, isGuildModuleEnabled, pluralize, fetchPartial } from '../../utils/functions';
+import { sliceDots, isGuildModuleEnabled, pluralize, fetchPartial, hyperlink } from '../../utils';
 
 /**
  * Formats the bytes to its most divisible point
@@ -59,8 +59,8 @@ export default function (client: CommandoClient<true>): void {
         if (attachments.size !== 0) {
             const atts = attachments.map(({ name, proxyURL, size, height, url }) => {
                 const bytes = formatBytes(size);
-                const download = !height ? `- Download [here](${url})` : '';
-                return `**>** [${name}](${proxyURL}) - ${bytes} ${download}`;
+                const download = !height ? `- Download ${hyperlink('here', url)}` : '';
+                return `**>** ${hyperlink(name ?? 'UNNAMED', proxyURL)} - ${bytes} ${download}`;
             });
 
             embed.addFields({
@@ -70,7 +70,7 @@ export default function (client: CommandoClient<true>): void {
         }
 
         if (stickers.size !== 0) {
-            const sticks = stickers.map(({ name, url }) => `**>** [${name}](${url})`);
+            const sticks = stickers.map(({ name, url }) => `**>** ${hyperlink(name, url)}`);
 
             embed.addFields({
                 name: 'Stickers',
@@ -126,7 +126,7 @@ export default function (client: CommandoClient<true>): void {
             .setAuthor({
                 name: 'Edited message', iconURL: author.displayAvatarURL({ forceStatic: false }),
             })
-            .setDescription(`Sent by ${author.toString()} in ${channel.toString()} [Jump to message](${url})`)
+            .setDescription(`Sent by ${author.toString()} in ${channel.toString()} ${hyperlink('Jump to message', url)}`)
             .addFields({
                 name: 'Before',
                 value: oldContent,

@@ -1,6 +1,6 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { replyAll } from '../../utils/functions';
+import { replyAll } from '../../utils';
 
 function sliceEmojis(arr: string[]): string[][] {
     const dummy = [];

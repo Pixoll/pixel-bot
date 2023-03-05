@@ -8,7 +8,6 @@ import {
     FaqSchema,
     ParseRawArguments,
     CommandoMessage,
-    Argument,
 } from 'pixoll-commando';
 import {
     generateEmbed,
@@ -35,24 +34,18 @@ const args = [{
     type: 'integer',
     min: 1,
     required: false,
-    isEmpty(_: string, message: CommandoMessage): boolean {
+    isEmpty(_: unknown, message: CommandoMessage): boolean {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         return subCommand !== 'remove';
     },
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
-        const subCommand = getSubCommand<SubCommand>(message, args[0].default);
-        if (subCommand !== 'remove') return true;
-        const isValid = await argument.type?.validate(value, message, argument) ?? true;
-        return isValid;
-    },
 }] as const;
 
-type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
     question?: string;
     answer?: string;
 };
+type SubCommand = ParsedArgs['subCommand'];
 
 export default class FaqCommand extends Command<boolean, RawArgs> {
     protected readonly db: DatabaseManager<FaqSchema>;

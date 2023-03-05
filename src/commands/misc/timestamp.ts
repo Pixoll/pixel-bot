@@ -1,5 +1,5 @@
-import { Command, CommandContext, CommandoClient, CommandoMessage, ParseRawArguments } from 'pixoll-commando';
-import { timestamp, basicEmbed, replyAll } from '../../utils/functions';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, Util } from 'pixoll-commando';
+import { timestamp, replyAll, parseArgDate } from '../../utils';
 
 const timestampLetters: TimestampType[] = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
 
@@ -35,20 +35,9 @@ export default class TimestampCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { date }: ParsedArgs): Promise<void> {
-        if (context.isInteraction()) {
-            const message = await context.fetchReply() as CommandoMessage;
-            const arg = this.argsCollector?.args[0];
-            const resultDate = await arg?.parse(date?.toString() ?? 'now', message).catch(() => null) || null;
-            if (!resultDate) {
-                await replyAll(context, basicEmbed({
-                    color: 'Red',
-                    emoji: 'cross',
-                    description: 'The date you specified is invalid.',
-                }));
-                return;
-            }
-            date = resultDate;
-        }
+        const parsedDate = await parseArgDate(context, this as Command, 0, date, 'now');
+        if (context.isInteraction() && Util.isNullish(parsedDate)) return;
+        date = parsedDate ?? 0;
 
         if (typeof date === 'number') date += Date.now();
         if (date instanceof Date) date = date.getTime();

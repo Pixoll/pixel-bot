@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { timestamp, basicEmbed, replyAll } from '../../utils/functions';
+import { timestamp, basicEmbed, replyAll } from '../../utils';
 
 const args = [{
     key: 'invite',

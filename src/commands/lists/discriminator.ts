@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } from '../../utils/functions';
+import { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } from '../../utils';
 
 const args = [{
     key: 'number',

@@ -1,7 +1,7 @@
 import { oneLine } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, sliceDots, code } from '../../utils/functions';
+import { isGuildModuleEnabled, sliceDots, code, hyperlink } from '../../utils';
 
 /** Handles all of the command logs. */
 export default function (client: CommandoClient<true>): void {
@@ -36,7 +36,7 @@ export default function (client: CommandoClient<true>): void {
             })
             .setDescription(oneLine`
                 ${author.toString()} used the \`${command.name}\` command in ${channel.toString()}
-                ${url ? `[Jump to message](${url})` : ''}
+                ${url ? hyperlink('Jump to message', url) : ''}
             `)
             .addFields({
                 name: 'Message',

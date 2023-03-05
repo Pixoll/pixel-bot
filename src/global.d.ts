@@ -364,6 +364,10 @@ type DataType = NodeJS.ArrayBufferView | string;
 
 type Tuple<T, N extends number, R extends T[] = []> = R['length'] extends N ? R : Tuple<T, N, [T, ...R]>;
 
+type NumberedStringUnion<S extends string, N extends number> = `${S}${PropertiesOf<{
+    [P in keyof Tuple<null, N> as P extends keyof [] | '0' ? never : P]: N | P;
+}>}`;
+
 type Partialize<T extends object, K extends keyof T = keyof T, D extends boolean = true> =
     D extends true ? Destructure<Omit<T, K> & Partial<Pick<T, K>>> : Omit<T, K> & Partial<Pick<T, K>>;
 

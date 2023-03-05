@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils/functions';
+import { basicEmbed, replyAll } from '../../utils';
 
 const args = [{
     key: 'member',

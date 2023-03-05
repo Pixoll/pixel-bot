@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, Message } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils/functions';
+import { basicEmbed, replyAll } from '../../utils';
 
 export default class PingCommand extends Command {
     public constructor(client: CommandoClient) {

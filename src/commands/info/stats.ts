@@ -1,7 +1,7 @@
 import { prettyMs } from 'better-ms';
 import { EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { replyAll } from '../../utils/functions';
+import { replyAll } from '../../utils';
 
 /**
  * Formats the bytes to its most divisible point

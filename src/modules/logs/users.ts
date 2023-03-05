@@ -2,7 +2,7 @@ import { stripIndent } from 'common-tags';
 import { EmbedBuilder, UserFlagsString } from 'discord.js';
 import { capitalize } from 'lodash';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { isGuildModuleEnabled, compareArrays, customEmoji } from '../../utils/functions';
+import { isGuildModuleEnabled, compareArrays, customEmoji, hyperlink } from '../../utils';
 
 const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
     ActiveDeveloper: null,
@@ -29,7 +29,7 @@ const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
  * @param link The link of the image
  */
 function imageLink(link: string | null): string {
-    if (link) return `[Click here](${link})`;
+    if (link) return hyperlink('Click here', link);
     return 'None';
 }
 

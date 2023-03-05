@@ -12,7 +12,7 @@ import {
     Util,
     ArgumentType,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, confirmButtons, replyAll, getSubCommand } from '../../utils/functions';
+import { generateEmbed, basicEmbed, confirmButtons, replyAll, getSubCommand } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -31,12 +31,12 @@ const args = [{
     min: 1,
     max: 512,
     required: false,
-    isEmpty(value: string, message: CommandoMessage): boolean {
+    isEmpty(value: string[] | string | undefined, message: CommandoMessage): boolean {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         if (Util.equals(subCommand, ['clear', 'view'])) return true;
         return value?.length === 0;
     },
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         if (Util.equals(subCommand, ['clear', 'view'])) return true;
         if (subCommand === 'add') {
@@ -59,9 +59,9 @@ const args = [{
     },
 }] as const;
 
-type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
+type SubCommand = ParsedArgs['subCommand'];
 
 export default class ToDoCommand extends Command<boolean, RawArgs> {
     protected readonly db: DatabaseManager<TodoSchema>;

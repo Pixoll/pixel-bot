@@ -1,7 +1,7 @@
 import { prettyMs } from 'better-ms';
 import { ActivityType, EmbedBuilder, UserFlagsString } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments, Util } from 'pixoll-commando';
-import { getKeyPerms, timestamp, customEmoji, replyAll } from '../../utils/functions';
+import { getKeyPerms, timestamp, customEmoji, replyAll } from '../../utils';
 
 const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
     ActiveDeveloper: null,

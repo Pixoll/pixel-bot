@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils/functions';
+import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
 
 export default class PollsCommand extends Command<true> {
     public constructor(client: CommandoClient) {

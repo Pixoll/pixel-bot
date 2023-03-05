@@ -4,7 +4,7 @@ import { ActivityType, GatewayIntentBits, OAuth2Scopes, Partials, PermissionFlag
 import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { enumToObject } from './utils/functions';
+import { enumToObject } from './utils';
 dotenvConfig();
 
 const client = new CommandoClient({

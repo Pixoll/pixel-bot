@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, GuildScheduledEventStatus } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, timestamp } from '../../utils/functions';
+import { isGuildModuleEnabled, timestamp } from '../../utils';
 
 const eventStatusMap: Record<GuildScheduledEventStatus, string> = {
     [GuildScheduledEventStatus.Scheduled]: 'Scheduled',

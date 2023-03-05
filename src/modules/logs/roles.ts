@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, PermissionsBitField } from 'discord.js';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { customEmoji, isGuildModuleEnabled, getKeyPerms, compareArrays, yesOrNo } from '../../utils/functions';
+import { customEmoji, isGuildModuleEnabled, getKeyPerms, compareArrays, yesOrNo, hyperlink } from '../../utils';
 
 /**
  * Formats the {@link PermissionsBitField} into an array of string
@@ -16,7 +16,7 @@ function format(perms?: Readonly<PermissionsBitField>): string[] {
  * @param link The link of the image
  */
 function imageLink(link: string | null): string {
-    if (link) return `[Click here](${link})`;
+    if (link) return hyperlink('Click here', link);
     return 'None';
 }
 
@@ -41,7 +41,7 @@ export default function (client: CommandoClient<true>): void {
             })
             .setDescription(stripIndent`
                 **Role:** ${role.toString()}
-                **Color:** ${color ? `[${color}](${colorURL})` : 'None'}
+                **Color:** ${color && colorURL ? hyperlink(color, colorURL) : 'No color'}
                 **Emoji:** ${unicodeEmoji || 'None'}
                 **Hoisted:** ${hoist ? 'Yes' : 'No'}
                 **Mentionable:** ${mentionable ? 'Yes' : 'No'}
@@ -87,7 +87,7 @@ export default function (client: CommandoClient<true>): void {
             })
             .setDescription(stripIndent`
                 **Name:** ${name}
-                **Color:** ${color ? `[${color}](${colorURL})` : 'No color'}
+                **Color:** ${color && colorURL ? hyperlink(color, colorURL) : 'No color'}
                 **Emoji:** ${unicodeEmoji || 'None'}
                 **Hoisted:** ${hoist ? 'Yes' : 'No'}
                 **Mentionable:** ${mentionable ? 'Yes' : 'No'}
@@ -150,7 +150,7 @@ export default function (client: CommandoClient<true>): void {
 
         if (color1 !== color2) embed.addFields({
             name: 'Color',
-            value: `[${color1}](${color1link}) ➜ [${color2}](${color2link})`,
+            value: `${hyperlink(color1, color1link)} ➜ ${hyperlink(color2, color2link)}`,
         });
 
         if (emoji1 !== emoji2) embed.addFields({

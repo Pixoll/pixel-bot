@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { replyAll } from '../../utils/functions';
+import { replyAll } from '../../utils';
 
 export default class ServerIconCommand extends Command<true> {
     public constructor(client: CommandoClient) {

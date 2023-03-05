@@ -17,7 +17,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, replyAll } from '../../utils/functions';
+import { basicEmbed, getSubCommand, replyAll } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -34,11 +34,11 @@ const args = [{
     prompt: 'What is the IP of the server you want to save/look for?',
     type: 'string',
     required: false,
-    isEmpty(_: string, message: CommandoMessage): boolean {
+    isEmpty(_: unknown, message: CommandoMessage): boolean {
         const subCommand = getSubCommand<SubCommand>(message);
-        return subCommand !== 'check';
+        return subCommand === 'check';
     },
-    async validate(value: string, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
         const subCommand = getSubCommand<SubCommand>(message);
         if (subCommand !== 'check') return true;
         const isValid = await argument.type?.validate(value, message, argument) ?? true;
@@ -53,9 +53,9 @@ const args = [{
     required: false,
 }] as const;
 
-type SubCommand = Lowercase<typeof args[0]['oneOf'][number]>;
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
+type SubCommand = ParsedArgs['subCommand'];
 
 type SlashSubCommandOptions = NonNullable<ApplicationCommandSubCommandData['options']>;
 
