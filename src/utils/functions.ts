@@ -748,8 +748,8 @@ export function validateURL(str: string): boolean {
  * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(message: AnyMessage | CommandContext, role?: Role | null): boolean {
-    if (!message.inGuild() || !(role instanceof Role) || !role || role.managed) return false;
+export function isValidRole(message: AnyMessage | CommandContext | null, role?: Role | null): boolean {
+    if (!message || !message.inGuild() || !(role instanceof Role) || !role || role.managed) return false;
 
     const { member, client, author, guild } = message;
     const botId = client.user.id;
