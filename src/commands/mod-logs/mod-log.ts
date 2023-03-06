@@ -113,7 +113,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
                 **Moderator:** ${`${moderator?.toString()} ${moderator?.tag}` || 'Unable to fetch user.'}
                 **Reason:** ${modLog.reason}
                 **Duration:** ${modLog.duration ?? 'Permanent'}
-                **Date:** ${timestamp(modLog.createdAt)}
+                **Date:** ${timestamp(modLog.createdAt, 'f', true)}
             `)
             .setTimestamp();
 

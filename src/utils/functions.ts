@@ -379,17 +379,21 @@ export function basicEmbed(options: BasicEmbedOptions): EmbedBuilder {
  * - `R`: Relative time ➜ `2 months ago`
  * @param exact Whether the timestamp should be exact and not rounded
  */
-export function timestamp<F extends TimestampType>(time: Date | number, format?: F, exact = false): `<t:${number}:${F}>` {
-    if (time instanceof Date) time = time.getTime();
+export function timestamp<T extends Date | number | null, F extends TimestampType = 'f'>(
+    time: T, format?: F, exact = false
+): T extends null ? null : `<t:${number}:${F}>` {
+    if (Util.isNullish(time)) return null as T extends null ? null : `<t:${number}:${F}>`;
+    let parsedTime = time as Date | number;
+    if (parsedTime instanceof Date) parsedTime = parsedTime.getTime();
 
     const chosenFormat = format ?? 'f';
-    const trunc = Math.trunc(time / 1000);
-    if (exact) return `<t:${trunc}:${chosenFormat}>` as `<t:${number}:${F}>`;
+    const trunc = Math.trunc(parsedTime / 1000);
+    if (exact) return `<t:${trunc}:${chosenFormat}>` as T extends null ? null : `<t:${number}:${F}>`;
 
     const rem = trunc % 60;
     const epoch = trunc - rem;
 
-    return `<t:${epoch}:${chosenFormat}>` as `<t:${number}:${F}>`;
+    return `<t:${epoch}:${chosenFormat}>` as T extends null ? null : `<t:${number}:${F}>`;
 }
 
 /**
@@ -1235,6 +1239,9 @@ export function removeRepeated<T>(array: T[]): T[] {
     return Array.from(new Set(array));
 }
 
+/**
+ * Array with items from `1` ➜ `length`
+ */
 export function arrayWithLength<T = number>(length: number, mapCallback?: (n: number) => T): T[] {
     const array = Array.from(Array(length).keys()).map(n => n + 1);
     if (!mapCallback) return array as T[];

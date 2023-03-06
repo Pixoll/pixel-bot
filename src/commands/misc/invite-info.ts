@@ -54,12 +54,12 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
 
         const { guild, channel, url, inviter, presenceCount, memberCount, maxUses, expiresAt, temporary } = invite;
 
-        const info = guild ? stripIndent`
+        const info = guild
+            ? stripIndent`
             **Channel:** ${channel?.toString()} ${channel?.name}
             **Online members:** ${presenceCount}/${memberCount}
-        ` : stripIndent`
-            **Members:** ${memberCount}
-        `;
+            `
+            : `**Members:** ${memberCount}`;
 
         const embed = new EmbedBuilder()
             .setColor('#4c9f4c')
@@ -75,7 +75,7 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
                 **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
                 ${info}
                 **Max uses:** ${maxUses || 'No limit'}
-                **Expires:** ${expiresAt ? timestamp(expiresAt) : 'Never'}
+                **Expires:** ${expiresAt ? timestamp(expiresAt, 'R', true) : 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
             .setFooter({

@@ -65,10 +65,6 @@ export default class TempBanCommand extends Command<true, RawArgs> {
         duration = parsedDuration;
         reason ??= 'No reason given.';
 
-        const now = Date.now();
-        if (typeof duration === 'number') duration = duration + now;
-        if (duration instanceof Date) duration = duration.getTime();
-
         const { guild, guildId, member: mod, author } = context;
         const { members, bans, database } = guild;
         const { moderations, active } = database;
@@ -103,12 +99,16 @@ export default class TempBanCommand extends Command<true, RawArgs> {
         });
         if (!confirmed) return;
 
+        const now = Date.now();
+        if (typeof duration === 'number') duration = duration + now;
+        if (duration instanceof Date) duration = duration.getTime();
+
         if (!user.bot && member) {
             const embed = basicEmbed({
                 color: 'Gold',
                 fieldName: `You have been temp-banned from ${guild.name}`,
                 fieldValue: stripIndent`
-                **Expires:** ${timestamp(duration, 'R')}
+                **Expires:** ${timestamp(duration, 'R', true)}
                 **Reason:** ${reason}
                 **Moderator:** ${author.toString()} ${author.tag}
 
@@ -157,7 +157,7 @@ export default class TempBanCommand extends Command<true, RawArgs> {
             emoji: 'check',
             fieldName: `${user.tag} has been banned`,
             fieldValue: stripIndent`
-            **Expires:** ${timestamp(duration, 'R')}
+            **Expires:** ${timestamp(duration, 'R', true)}
             **Reason:** ${reason}
             `,
         }));

@@ -1,13 +1,13 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { replyAll } from '../../utils';
+import { deepCopy, replyAll } from '../../utils';
 
-function sliceEmojis(arr: string[]): string[][] {
-    const dummy = [];
-    const normal = [];
-    for (const emoji of arr) {
+function sliceEmojis(emojis: string[]): string[][] {
+    const dummy: string[] = [];
+    const normal: string[][] = [];
+    for (const emoji of emojis) {
         if (dummy.join(' ').length + emoji.length + 1 > 1024) {
-            normal.push(dummy);
+            normal.push(deepCopy(dummy));
             dummy.splice(0, dummy.length);
         }
         dummy.push(emoji);
@@ -37,46 +37,42 @@ export default class EmojisCommand extends Command<true> {
 
     public async run(context: CommandContext<true>): Promise<void> {
         const { guild } = context;
-        const rawEmojis = await guild.emojis.fetch();
+        const emojis = await guild.emojis.fetch();
         const maxEmojis = maxEmojiAmountMap[guild.premiumTier];
-
-        const emojis = rawEmojis.map(emoji => ({
-            animated: emoji.animated,
-            string: emoji.toString(),
-        }));
 
         const embed = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
                 name: `${guild.name}'s emojis`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,
-            });
+            })
+            .setDescription(`**Total emojis:** ${emojis.size}/${maxEmojis}`);
 
-        const notAnimated = emojis.filter(e => !e.animated).map(e => e.string);
-        const isAnimated = emojis.filter(e => e.animated).map(e => e.string);
+        const normal = emojis.filter(e => !e.animated).map(e => e.toString());
+        const animated = emojis.filter(e => e.animated).map(e => e.toString());
 
-        const normal = sliceEmojis(notAnimated);
-        const animated = sliceEmojis(isAnimated);
+        const normalChunks = sliceEmojis(normal);
+        const animatedChunks = sliceEmojis(animated);
 
         embed.addFields({
-            name: `Normal emojis: ${notAnimated.length}/${maxEmojis}`,
-            value: normal.shift()?.join(' ') || 'No emojis found.',
+            name: `Normal emojis: ${normal.length}/${maxEmojis}`,
+            value: normalChunks.shift()?.join(' ') || 'No emojis found.',
         });
-        while (normal.length !== 0) {
+        while (normalChunks.length !== 0) {
             embed.addFields({
                 name: '\u2800',
-                value: normal.shift()?.join(' ') ?? '',
+                value: normalChunks.shift()?.join(' ') ?? '',
             });
         }
 
         embed.addFields({
-            name: `Animated emojis: ${isAnimated.length}/${maxEmojis}`,
-            value: animated.shift()?.join(' ') || 'No emojis found.',
+            name: `Animated emojis: ${animated.length}/${maxEmojis}`,
+            value: animatedChunks.shift()?.join(' ') || 'No emojis found.',
         });
-        while (animated.length !== 0) {
+        while (animatedChunks.length !== 0) {
             embed.addFields({
                 name: '\u2800',
-                value: animated.shift()?.join(' ') ?? '',
+                value: animatedChunks.shift()?.join(' ') ?? '',
             });
         }
 

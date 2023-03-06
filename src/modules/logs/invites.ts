@@ -23,7 +23,7 @@ export default function (client: CommandoClient<true>): void {
             .setDescription(stripIndent`
                 **Link:** ${invite.toString()}
                 **Channel:** ${channel?.toString()}
-                **Inviter:** ${inviter?.toString()} ${inviter?.tag}
+                **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
                 **Max. uses:** ${maxUses || 'No limit'}
                 **Expires at:** ${timestamp(expiresAt ?? 0, 'R') || 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}

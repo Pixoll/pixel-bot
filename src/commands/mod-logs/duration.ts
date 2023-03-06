@@ -70,10 +70,11 @@ export default class DurationCommand extends Command<true, RawArgs> {
             return;
         }
 
-        if (typeof duration === 'number') duration = duration + Date.now();
+        const now = Date.now();
+        if (typeof duration === 'number') duration = duration + now;
         if (duration instanceof Date) duration = duration.getTime();
 
-        const longTime = ms(duration - Date.now(), { long: true });
+        const longTime = ms(duration - now, { long: true });
 
         const confirmed = await confirmButtons(context, {
             action: 'update mod log duration',
@@ -83,7 +84,9 @@ export default class DurationCommand extends Command<true, RawArgs> {
         if (!confirmed) return;
 
         await moderations.update(modLog, { duration: longTime });
-        await active.update(activeLog, { duration });
+        await active.update(activeLog, {
+            duration: duration - now + Date.now(),
+        });
 
         await replyAll(context, basicEmbed({
             color: 'Green',

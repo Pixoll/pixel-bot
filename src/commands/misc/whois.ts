@@ -87,7 +87,7 @@ export default class WhoIsCommand extends Command<boolean, RawArgs> {
             for (const { type, name, state, details, url, timestamps } of (member.presence?.activities ?? [])) {
                 const status = details && state ? `${details}\n${state}` : details;
                 const times = timestamps?.start ? !timestamps.end
-                    ? `Started ${timestamp(timestamps.start, 'R')}`
+                    ? `Started ${timestamp(timestamps.start, 'R', true)}`
                     : `${prettyMs(
                         timestamps.end.getTime() - timestamps.start.getTime(),
                         { verbose: true }
@@ -112,14 +112,14 @@ export default class WhoIsCommand extends Command<boolean, RawArgs> {
 
             if (member.joinedTimestamp) userInfo.addFields({
                 name: 'Joined',
-                value: timestamp(member.joinedTimestamp, 'R'),
+                value: timestamp(member.joinedTimestamp, 'R', true),
                 inline: true,
             });
         }
 
         userInfo.addFields({
             name: 'Registered',
-            value: timestamp(user.createdTimestamp, 'R'),
+            value: timestamp(user.createdTimestamp, 'R', true),
             inline: true,
         });
 

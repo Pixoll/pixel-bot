@@ -108,7 +108,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
                 color: 'Gold',
                 fieldName: `You have been given the \`${role.name}\` role on ${guild.name}`,
                 fieldValue: stripIndent`
-                **Expires:** ${timestamp(duration, 'R')}
+                **Expires:** ${timestamp(duration, 'R', true)}
                 **Reason:** ${reason}
                 **Moderator:** ${author.toString()} ${author.tag}
                 `,
@@ -130,7 +130,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             emoji: 'check',
             fieldName: `Added role \`${role.name}\` to ${user.tag}`,
             fieldValue: stripIndent`
-            **Expires:** ${timestamp(duration, 'R')}
+            **Expires:** ${timestamp(duration, 'R', true)}
             **Reason:** ${reason}
             `,
         }));

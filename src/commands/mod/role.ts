@@ -147,9 +147,9 @@ export default class RoleCommand extends Command<true, RawArgs> {
                     type: ApplicationCommandOptionType.Role;
                 }>>(rolesAmount, (n) => ({
                     type: ApplicationCommandOptionType.Role,
-                    name: `role-${n + 1}`,
-                    description: `The ${addOrdinalSuffix(n + 1)} role.`,
-                    required: n === 0,
+                    name: `role-${n}`,
+                    description: `The ${addOrdinalSuffix(n)} role.`,
+                    required: n === 1,
                 }))],
             }, {
                 type: ApplicationCommandOptionType.Subcommand,
@@ -371,11 +371,12 @@ async function toggleRolesFor(
 async function parseRoles(
     context: CommandContext, args: ParsedArgs, message: CommandoMessage, command: RoleCommand
 ): Promise<CommandoRole[]> {
-    if (context.isInteraction()) return Object.entries(args)
-        .filter((entry): entry is [SlashRoleKey, CommandoRole] => entry[0].startsWith('role-'))
-        .map(([, role]) => role);
-    const results = await Promise.all((args.roles ?? '').split(/ +/).map(query =>
-        parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'role')
-    ));
+    const results = context.isInteraction()
+        ? Object.entries(args)
+            .filter((entry): entry is [SlashRoleKey, CommandoRole] => /^role\d+$/.test(entry[0]))
+            .map(([, role]) => role)
+        : await Promise.all((args.roles ?? '').split(/ +/).map(query =>
+            parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'role')
+        ));
     return Util.filterNullishItems(results);
 }

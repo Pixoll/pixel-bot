@@ -84,9 +84,9 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
                 required: true,
             }, ...arrayWithLength<ApplicationCommandOptionData>(usersAmount, (n) => ({
                 type: ApplicationCommandOptionType.User,
-                name: `user-${n + 1}`,
-                description: `The ${addOrdinalSuffix(n + 1)} user.`,
-                required: n === 0,
+                name: `user-${n}`,
+                description: `The ${addOrdinalSuffix(n)} user.`,
+                required: n === 1,
             }))],
         });
     }
@@ -186,11 +186,12 @@ async function isValidMember(message: CommandoMessage, user: User | null): Promi
 async function parseUsers(
     context: CommandContext, args: ParsedArgs, message: CommandoMessage, command: MultiBanCommand
 ): Promise<CommandoUser[]> {
-    if (context.isInteraction()) return Object.entries(args)
-        .filter((entry): entry is [SlashUserKey, CommandoUser] => entry[0].startsWith('user-'))
-        .map(([, user]) => user);
-    const results = await Promise.all(args.users.split(/ +/).map(query =>
-        parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'user')
-    ));
+    const results = context.isInteraction()
+        ? Object.entries(args)
+            .filter((entry): entry is [SlashUserKey, CommandoUser] => /^user\d+$/.test(entry[0]))
+            .map(([, role]) => role)
+        : await Promise.all(args.users.split(/ +/).map(query =>
+            parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'user')
+        ));
     return Util.filterNullishItems(results);
 }

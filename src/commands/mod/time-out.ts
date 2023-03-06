@@ -66,10 +66,6 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
         duration = parsedDuration;
         reason ??= 'No reason given.';
 
-        const now = Date.now();
-        if (typeof duration === 'number') duration = duration + now;
-        if (duration instanceof Date) duration = duration.getTime();
-
         const { guild, guildId, member: mod, author } = context;
         const { moderations } = guild.database;
         const member = await guild.members.fetch(user).catch(() => null);
@@ -117,6 +113,10 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             reason,
         });
         if (!confirmed) return;
+
+        const now = Date.now();
+        if (typeof duration === 'number') duration = duration + now;
+        if (duration instanceof Date) duration = duration.getTime();
 
         await member.disableCommunicationUntil(isTimedOut ? null : duration, reason);
         if (!isTimedOut) {

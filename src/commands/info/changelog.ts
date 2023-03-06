@@ -19,7 +19,9 @@ const changelog = Util.filterNullishItems(require<ChangeLog[]>('../../../documen
             ? log.changes[0]
             : log.changes.map((change, i) => `**${i + 1}.** ${change}`).join('\n');
 
-        const title = `Version ${log.version} - ${log.timestamp ? timestamp(log.timestamp, 'F') : 'No date specified'}`;
+        const title = `Version ${log.version} - ${log.timestamp
+            ? timestamp(log.timestamp, 'F', true)
+            : 'No date specified'}`;
 
         return {
             title,

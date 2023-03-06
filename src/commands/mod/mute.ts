@@ -58,10 +58,6 @@ export default class MuteCommand extends Command<true, RawArgs> {
         duration = parsedDuration;
         reason ??= 'No reason given.';
 
-        const now = Date.now();
-        if (typeof duration === 'number') duration = duration + now;
-        if (duration instanceof Date) duration = duration.getTime();
-
         const { guild, guildId, member: mod, author } = context;
         const { moderations, active, setup } = guild.database;
         const member = await guild.members.fetch(user).catch(() => null);
@@ -98,13 +94,6 @@ export default class MuteCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const confirmed = await confirmButtons(context, {
-            action: 'mute',
-            target: user,
-            reason,
-        });
-        if (!confirmed) return;
-
         const role = await guild.roles.fetch(data.mutedRole);
         if (!role) {
             await replyAll(context, basicEmbed({
@@ -123,6 +112,17 @@ export default class MuteCommand extends Command<true, RawArgs> {
             }));
             return;
         }
+
+        const confirmed = await confirmButtons(context, {
+            action: 'mute',
+            target: user,
+            reason,
+        });
+        if (!confirmed) return;
+
+        const now = Date.now();
+        if (typeof duration === 'number') duration = duration + now;
+        if (duration instanceof Date) duration = duration.getTime();
 
         await roles.add(role);
         this.client.emit('guildMemberMute', guild, author, user, reason, duration);
