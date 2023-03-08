@@ -54,9 +54,7 @@ export default class InfoCommand extends Command {
                 `,
                 inline: true,
             })
-            .setFooter({
-                text: `Uptime: ${uptimeStr}`,
-            })
+            .setFooter({ text: `Uptime: ${uptimeStr}` })
             .setTimestamp();
 
         await replyAll(context, info);

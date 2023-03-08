@@ -17,14 +17,14 @@ export default class PingCommand extends Command {
     public async run(context: CommandContext): Promise<void> {
         const now = Date.now();
         const isMessage = context.isMessage();
-        const pingMsg = isMessage ? await context.replyEmbed(basicEmbed({
+        const replyToEdit = isMessage ? await context.replyEmbed(basicEmbed({
             color: 'Gold',
             emoji: 'loading',
             description: 'Pinging...',
         })) as Message | null : null;
 
-        const roundtrip = Math.abs(pingMsg
-            ? (pingMsg.createdTimestamp - context.createdTimestamp)
+        const roundtrip = Math.abs(replyToEdit
+            ? (replyToEdit.createdTimestamp - context.createdTimestamp)
             : (context.createdTimestamp - now)
         );
         const heartbeat = Math.round(this.client.ws.ping || 0);
@@ -38,7 +38,9 @@ export default class PingCommand extends Command {
                 **API ping:** ${heartbeat}ms
             `);
 
-        if (!isMessage) await replyAll(context, embed);
-        await pingMsg?.edit({ embeds: [embed] }).catch(() => null);
+        await replyAll(context, {
+            embeds: [embed],
+            replyToEdit,
+        });
     }
 }

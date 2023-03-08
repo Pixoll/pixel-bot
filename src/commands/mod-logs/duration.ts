@@ -1,6 +1,14 @@
 import { ms } from 'better-ms';
 import { stripIndent, oneLine } from 'common-tags';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
+import { capitalize } from 'lodash';
+import {
+    Command,
+    CommandContext,
+    CommandoAutocompleteInteraction,
+    CommandoClient,
+    ParseRawArguments,
+} from 'pixoll-commando';
 import { basicEmbed, confirmButtons, parseArgDate, replyAll } from '../../utils';
 
 const args = [{
@@ -9,6 +17,7 @@ const args = [{
     prompt: 'What is the ID of the mod log you want to change the duration?',
     type: 'string',
     max: 16,
+    autocomplete: true,
 }, {
     key: 'duration',
     prompt: 'What will be the new duration of the mod log?',
@@ -46,6 +55,7 @@ export default class DurationCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext<true>, { modLogId, duration }: ParsedArgs): Promise<void> {
         const parsedDuration = await parseArgDate(context, this as Command, 1, duration);
         if (!parsedDuration) return;
+        duration = parsedDuration;
 
         const { guild } = context;
         const { moderations, active } = guild.database;
@@ -94,5 +104,19 @@ export default class DurationCommand extends Command<true, RawArgs> {
             fieldName: `Updated duration for mod log \`${modLogId}\``,
             fieldValue: `**New duration:** ${longTime}`,
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { guild, options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const documents = await guild?.database.active.fetchMany();
+        const choices = documents?.toJSON()
+            ?.map<ChoiceData<string>>(doc => ({
+                name: `[${capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
+                value: doc._id,
+            }))
+            .filter(doc => doc.name.toLowerCase().includes(query))
+            .slice(0, 25) ?? [];
+        await interaction.respond(choices);
     }
 }

@@ -9,7 +9,7 @@ import {
     OverwriteType,
 } from 'discord.js';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { compareArrays, sliceDots, customEmoji, isGuildModuleEnabled, yesOrNo } from '../../utils';
+import { compareArrays, limitStringLength, customEmoji, isGuildModuleEnabled, yesOrNo } from '../../utils';
 import { capitalize } from 'lodash';
 import { ms } from 'better-ms';
 
@@ -285,8 +285,8 @@ export default function (client: CommandoClient<true>): void {
                 value: yesOrNo(nsfw1),
             });
             if (topic1 && topic2 && topic1 !== topic2) {
-                const slice1 = sliceDots(topic1, 500) || 'None';
-                const slice2 = sliceDots(topic2, 500) || 'None';
+                const slice1 = limitStringLength(topic1, 475) || 'None';
+                const slice2 = limitStringLength(topic2, 475) || 'None';
 
                 embed.addFields({
                     name: 'Topic',

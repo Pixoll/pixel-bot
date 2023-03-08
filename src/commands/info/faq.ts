@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, Collection } from 'discord.js';
+import { ApplicationCommandOptionType, Collection, ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import {
     Command,
@@ -8,6 +8,7 @@ import {
     FaqSchema,
     ParseRawArguments,
     CommandoMessage,
+    CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
 import {
     generateEmbed,
@@ -92,7 +93,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
                     name: 'item',
                     description: 'The item to remove from the FAQ list.',
                     required: true,
-                    minValue: 1,
+                    autocomplete: true,
                 }],
             }, {
                 type: ApplicationCommandOptionType.Subcommand,
@@ -247,5 +248,19 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
             emoji: 'check',
             description: 'The FAQ list has been cleared.',
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { client, options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const faqData = await client.database.faq.fetchMany();
+        const possibleItems = faqData.toJSON()
+            .filter(faq => faq.question.toLowerCase().includes(query))
+            .slice(0, 25)
+            .map<ChoiceData<number>>((faq, i) => ({
+                name: `${i}. ${faq.question}`,
+                value: i + 1,
+            }));
+        await interaction.respond(possibleItems);
     }
 }

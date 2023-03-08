@@ -1,12 +1,11 @@
 import { oneLine, stripIndent } from 'common-tags';
-import { EmbedBuilder, TextChannel, escapeMarkdown } from 'discord.js';
+import { EmbedBuilder, TextChannel } from 'discord.js';
 import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
-import { customEmoji, generateDocId, code, replyAll, sliceDots, hyperlink } from '../../utils';
+import { customEmoji, generateDocId, code, replyAll, limitStringLength, hyperlink } from '../../utils';
 
-const fileTree = __dirname.split(/[\\/]+/g);
-const root = fileTree[fileTree.length - 2];
 const errorLogsChannelId = '906740370304540702';
-const stackFilter = /node:events|node_modules(\/|\\+)(?!pixoll-commando)|\(internal|\(<anonymous>\)/;
+const excludeStack = /node:(?:events|internal)/;
+const includeStack = /pixoll-commando/;
 
 /** A manager for all errors of the process and client */
 export default function (client: CommandoClient<true>): void {
@@ -54,7 +53,7 @@ export default function (client: CommandoClient<true>): void {
  * @param type the type of error
  * @param context the command instances
  * @param command the command
- * @param id the error ID to use
+ * @param errorId the error ID to use
  */
 async function errorHandler(
     client: CommandoClient<true>,
@@ -62,7 +61,7 @@ async function errorHandler(
     type: string,
     context?: CommandContext,
     command?: Command,
-    id?: string
+    errorId?: string
 ): Promise<void> {
     const errorsChannel = await client.channels.fetch(errorLogsChannelId) as TextChannel;
 
@@ -85,16 +84,14 @@ async function errorHandler(
     const stack = error.stack?.substring(length, error.stack?.length).replace(/ +/g, ' ').split('\n');
 
     const files = stack
-        ?.filter(str => {
-            const match = stackFilter.test(str);
-            if (match) return false;
-            return str.includes(root);
-        })
-        .map((str) => '> ' + str
-            .replace('at ', '')
-            .replace(__dirname, root)
-            .replace(/([\\]+)/g, '/')
+        ?.filter(string =>
+            excludeStack.test(string) ? includeStack.test(string) : true
+        )
+        .map((string) => '> ' + string
             .trim()
+            .replace('at ', '')
+            .replace(process.cwd(), '')
+            .replace(/([\\]+)/g, '/')
         )
         .join('\n');
 
@@ -111,27 +108,25 @@ async function errorHandler(
 
     const whatCommand = command ? ` at '${command.name}' command` : '';
 
-    id ??= generateDocId();
+    errorId ??= generateDocId();
 
     const embed = new EmbedBuilder()
         .setColor('Red')
-        .setTitle(`${type}: \`${id}\``)
+        .setTitle(`${type}: \`${errorId}\``)
         .setDescription(stripIndent`
             ${customEmoji('cross')} **An unexpected error happened**
             ${where}
         `);
 
-    if (command && context) {
-        embed.addFields({
-            name: 'Command input',
-            value: code(escapeMarkdown(context.toString()).substring(0, 1016), 'js'),
-        });
-    }
+    if (command && context) embed.addFields({
+        name: 'Command input',
+        value: limitStringLength(code(context.toString(), 'js'), 1024),
+    });
 
     const stackMessage = error.name + whatCommand + ': ' + error.message.split('Require stack:').shift();
     embed.addFields({
         name: stackMessage,
-        value: code(sliceDots(files || 'No files.', 1016)),
+        value: limitStringLength(code(files || 'No files.', 'js'), 1024),
     });
 
     await errorsChannel.send({
@@ -143,7 +138,7 @@ async function errorHandler(
 
     // TODO: Do not send data to DB until production-ready
     // await client.database.errors.add({
-    //     _id: id,
+    //     _id: errorId,
     //     type: type,
     //     name: error.name,
     //     message: error.message,

@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { sliceDots, isGuildModuleEnabled, pluralize, fetchPartial, hyperlink } from '../../utils';
+import { limitStringLength, isGuildModuleEnabled, pluralize, fetchPartial, hyperlink } from '../../utils';
 
 /**
  * Formats the bytes to its most divisible point
@@ -40,8 +40,6 @@ export default function (client: CommandoClient<true>): void {
 
         client.emit('debug', 'Running event "logs/messages#delete".');
 
-        const deleted = sliceDots(content, 1024);
-
         const embed = new EmbedBuilder()
             .setColor('Orange')
             .setAuthor({
@@ -51,9 +49,9 @@ export default function (client: CommandoClient<true>): void {
             .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp();
 
-        if (deleted) embed.addFields({
+        if (content) embed.addFields({
             name: 'Message',
-            value: deleted,
+            value: limitStringLength(content, 1024),
         });
 
         if (attachments.size !== 0) {
@@ -117,9 +115,8 @@ export default function (client: CommandoClient<true>): void {
         client.emit('debug', 'Running event "logs/messages#update".');
 
         const oldContent = content1 !== null
-            ? sliceDots(content1, 1024) || '`Empty`'
+            ? limitStringLength(content1, 1024) || '`Empty`'
             : '`Couldn\'t get old message content.`';
-        const newContent = sliceDots(content2, 1024);
 
         const embed = new EmbedBuilder()
             .setColor('Blue')
@@ -132,7 +129,7 @@ export default function (client: CommandoClient<true>): void {
                 value: oldContent,
             }, {
                 name: 'After',
-                value: newContent,
+                value: limitStringLength(content2, 1024),
             })
             .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp();

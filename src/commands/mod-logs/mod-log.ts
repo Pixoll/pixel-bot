@@ -1,7 +1,14 @@
 import { stripIndent, oneLine } from 'common-tags';
-import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionType, EmbedBuilder, ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
 import { capitalize } from 'lodash';
-import { Command, CommandContext, CommandoClient, ModerationSchema, ParseRawArguments } from 'pixoll-commando';
+import {
+    Command,
+    CommandContext,
+    CommandoAutocompleteInteraction,
+    CommandoClient,
+    ModerationSchema,
+    ParseRawArguments,
+} from 'pixoll-commando';
 import { basicEmbed, confirmButtons, timestamp, replyAll } from '../../utils';
 
 const args = [{
@@ -56,7 +63,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
                     name: 'mod-log-id',
                     description: 'The ID of the mod log to display.',
                     required: true,
-                    maxLength: 16,
+                    autocomplete: true,
                 }],
             }, {
                 type: ApplicationCommandOptionType.Subcommand,
@@ -67,7 +74,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
                     name: 'mod-log-id',
                     description: 'The ID of the mod log to delete.',
                     required: true,
-                    maxLength: 16,
+                    autocomplete: true,
                 }],
             }],
         });
@@ -148,5 +155,19 @@ export default class ModLogCommand extends Command<true, RawArgs> {
             emoji: 'check',
             description: `Deleted mod log with ID \`${modLog._id}\``,
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { guild, options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const documents = await guild?.database.moderations.fetchMany();
+        const choices = documents
+            ?.map<ChoiceData<string>>(doc => ({
+                name: `[${capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
+                value: doc._id,
+            }))
+            .filter(doc => doc.name.toLowerCase().includes(query))
+            .slice(0, 25) ?? [];
+        await interaction.respond(choices);
     }
 }

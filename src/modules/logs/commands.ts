@@ -1,7 +1,7 @@
 import { oneLine } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, sliceDots, code, hyperlink } from '../../utils';
+import { isGuildModuleEnabled, limitStringLength, code, hyperlink } from '../../utils';
 
 /** Handles all of the command logs. */
 export default function (client: CommandoClient<true>): void {
@@ -22,9 +22,6 @@ export default function (client: CommandoClient<true>): void {
 
         client.emit('debug', 'Running event "logs/commands#run".');
 
-        const commandContent = context.toString();
-        const trimmedContent = sliceDots(commandContent, 1016);
-
         const url = context.isMessage() ? context.url
             : await context.fetchReply().catch(() => null).then(m => m?.url);
 
@@ -40,7 +37,7 @@ export default function (client: CommandoClient<true>): void {
             `)
             .addFields({
                 name: 'Message',
-                value: code(trimmedContent),
+                value: limitStringLength(code(context.toString()), 1024),
             })
             .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp();

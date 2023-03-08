@@ -11,7 +11,7 @@ import {
     StringSelectMenuBuilder,
     Role,
     User,
-    escapeMarkdown,
+    escapeCodeBlock,
     ButtonStyle,
     MessageActionRowComponentBuilder,
     ComponentType,
@@ -19,7 +19,6 @@ import {
 } from 'discord.js';
 import {
     Argument,
-    ArgumentResult,
     ArgumentTypeString,
     ArgumentTypeStringMap,
     Command,
@@ -216,10 +215,6 @@ export interface AnyPartial {
     fetch(): Promise<AnyPartial>;
 }
 
-export type GetArgumentResult<T extends ArgumentTypeString> = Omit<ArgumentResult<T>, 'value'> & {
-    value: NonNullable<ArgumentResult<T>['value']>;
-};
-
 export type ReplyAllOptions =
     | EmbedBuilder
     | string
@@ -252,7 +247,7 @@ export function abcOrder(a: string, b: string): number {
  * @param lang The language to use for this block
  */
 export function code(text: string, lang = ''): string {
-    return `\`\`\`${lang}\n${escapeMarkdown(text)}\n\`\`\``;
+    return `\`\`\`${lang}\n${escapeCodeBlock(text)}\n\`\`\``;
 }
 
 /**
@@ -406,9 +401,10 @@ export async function replyAll(context: CommandContext, options: ReplyAllOptions
     if (typeof options === 'string') options = { content: options };
     if (context.isInteraction()) {
         if (context.isEditable()) {
-            return await context.editReply(options).catch(() => null) as Message | null;
+            return await context.editReply(options).catch(() => null);
         }
-        return await context.reply(options).catch(() => null) as Message | null;
+        await context.reply(options).catch(() => null);
+        return await context.fetchReply().catch(() => null);
     }
     const messageOptions = {
         ...options,
@@ -464,26 +460,6 @@ export async function basicCollector(
     }
 
     return messages.first() ?? null;
-}
-
-/**
- * Get's a single argument
- * @param message The message to get the argument from
- * @param arg The argument to get
- */
-export async function getArgument<T extends ArgumentTypeString = ArgumentTypeString>(
-    message: CommandoMessage, arg?: Argument<T>
-): Promise<GetArgumentResult<T> | null> {
-    if (!arg) return null;
-    const initialValue = arg.required;
-    arg.required = true;
-    const response = await arg.obtain(message, '') as GetArgumentResult<T>;
-    arg.required = initialValue;
-    if (response.cancelled) await message.reply({
-        content: 'Cancelled command.',
-        ...Util.noReplyPingInDMs(message),
-    });
-    return response;
 }
 
 /**
@@ -628,18 +604,18 @@ export function pluralize(string: string, number: number, showNum = true): strin
 }
 
 /**
- * Slices the string at the specified length, and adds `...` if the length of the original is greater than the modified
- * @param string The string to slice
- * @param length The length of the sliced string
+ * Adds three dots `...` if the length of the string is greater than `maxLength`, setting the string's length to that
+ * @param string The string to limit
+ * @param maxLength The max- length of the string
  */
-export function sliceDots(string: string, length: number): string {
-    if (string.length === 0) return '';
-
-    const og = string;
-    const sliced = string.slice(0, length - 3);
-    const dots = og.length > sliced.length ? '...' : '';
-
-    return sliced + dots;
+export function limitStringLength(string: string, maxLength: number): string {
+    if (string.length <= maxLength) return string;
+    if (!string.startsWith('```') || !string.endsWith('```')) return string.substring(0, maxLength - 3) + '...';
+    const lang = string.match(/\n?```(\w+)?\n?/)?.[1] ?? '';
+    const codeString = string.replace(/\n?```(\w+)?\n?/g, '');
+    const extraLength = string.length - codeString.length;
+    const with3dots = codeString.substring(0, maxLength - 3 - extraLength) + '...';
+    return code(with3dots, lang);
 }
 
 // /**
@@ -955,8 +931,10 @@ export async function pagedEmbed(
     });
 
     collector.on('end', async () => {
-        if (msg) await msg.edit({ components: [] }).catch(() => null);
-        else replyAll(context, { components: [] }).catch(() => null);
+        await replyAll(context, {
+            components: [],
+            replyToEdit: msg,
+        });
     });
 }
 

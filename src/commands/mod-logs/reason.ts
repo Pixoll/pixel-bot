@@ -1,5 +1,13 @@
 import { stripIndent, oneLine } from 'common-tags';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
+import { capitalize } from 'lodash';
+import {
+    Command,
+    CommandContext,
+    CommandoAutocompleteInteraction,
+    CommandoClient,
+    ParseRawArguments,
+} from 'pixoll-commando';
 import { basicEmbed, confirmButtons, replyAll } from '../../utils';
 
 const args = [{
@@ -72,5 +80,19 @@ export default class ReasonCommand extends Command<true, RawArgs> {
             fieldName: `Updated reason for mod log \`${modLogId}\``,
             fieldValue: `**New reason:** ${reason}`,
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { guild, options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const documents = await guild?.database.moderations.fetchMany();
+        const choices = documents
+            ?.map<ChoiceData<string>>(doc => ({
+                name: `[${capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
+                value: doc._id,
+            }))
+            .filter(doc => doc.name.toLowerCase().includes(query))
+            .slice(0, 25) ?? [];
+        await interaction.respond(choices);
     }
 }
