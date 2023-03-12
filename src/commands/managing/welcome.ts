@@ -6,6 +6,7 @@ import {
     CommandoClient,
     CommandoMessage,
     CommandoTextChannel,
+    JSONIfySchema,
     ParseRawArguments,
     WelcomeSchema,
 } from 'pixoll-commando';
@@ -104,7 +105,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
         }
     }
 
-    protected async runView(context: CommandContext<true>, data: WelcomeSchema | null): Promise<void> {
+    protected async runView(context: CommandContext<true>, data: JSONIfySchema<WelcomeSchema> | null): Promise<void> {
         if (!data) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -132,7 +133,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
 
     protected async runSet(
         context: CommandContext<true>,
-        data: WelcomeSchema | null,
+        data: JSONIfySchema<WelcomeSchema> | null,
         channel: CommandoTextChannel | null,
         message: string | null
     ): Promise<void> {

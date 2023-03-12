@@ -17,6 +17,7 @@ import {
     CommandResolvable,
     DatabaseManager,
     DisabledSchema,
+    JSONIfySchema,
     ParseRawArguments,
 } from 'pixoll-commando';
 import { basicEmbed, getSubCommand, replyAll } from '../../utils';
@@ -126,7 +127,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
         context: CommandContext,
         command: Command | null,
         db: DatabaseManager<DisabledSchema, boolean>,
-        data: DisabledSchema | null
+        data: JSONIfySchema<DisabledSchema> | null
     ): Promise<void> {
         if (!command) return;
 
@@ -175,7 +176,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
         context: CommandContext,
         group: CommandGroup | null,
         db: DatabaseManager<DisabledSchema, boolean>,
-        data: DisabledSchema | null
+        data: JSONIfySchema<DisabledSchema> | null
     ): Promise<void> {
         if (!group) return;
 

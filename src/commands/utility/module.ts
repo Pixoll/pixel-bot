@@ -12,6 +12,7 @@ import {
     ParseRawArguments,
     QuerySchema,
     CommandoMessage,
+    JSONIfySchema,
 } from 'pixoll-commando';
 import { ParsedModuleData, RawAuditLogName, RawModuleName } from '../../types';
 import { basicEmbed, addDashes, replyAll, removeDashes, isTrue } from '../../utils';
@@ -53,9 +54,9 @@ function getModuleName(message: CommandoMessage): GuildModule {
     return CommandoMessage.parseArgs(message.content)[2] as GuildModule;
 }
 
-function parseModuleData(data: Partial<ModuleSchema>): ParsedModuleData {
+function parseModuleData(data: Partial<JSONIfySchema<ModuleSchema>>): ParsedModuleData {
     return Object.fromEntries(Object.entries(Util.omit(data, [
-        '__v', '_id', 'guild',
+        '_id', 'guild',
     ])).map(([key, value]) => {
         if (typeof value === 'boolean') return [key, isTrue(value)];
         return [key, Object.fromEntries(Object.entries(
@@ -170,7 +171,10 @@ export default class ModuleCommand extends Command<true, RawArgs> {
      * The `diagnose` sub-command
      */
     protected async runDiagnose(
-        context: CommandContext<true>, data: ModuleSchema, moduleName: GuildModule, subModule: GuildAuditLog | null
+        context: CommandContext<true>,
+        data: JSONIfySchema<ModuleSchema>,
+        moduleName: GuildModule,
+        subModule: GuildAuditLog | null
     ): Promise<void> {
         const parsedData = parseModuleData(data);
 
@@ -210,7 +214,10 @@ export default class ModuleCommand extends Command<true, RawArgs> {
      * The `toggle` sub-command
      */
     protected async runToggle(
-        context: CommandContext<true>, data: ModuleSchema, moduleName: GuildModule, subModule: GuildAuditLog | null
+        context: CommandContext<true>,
+        data: JSONIfySchema<ModuleSchema>,
+        moduleName: GuildModule,
+        subModule: GuildAuditLog | null
     ): Promise<void> {
         const { guildId, guild } = context;
 

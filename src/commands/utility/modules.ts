@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
-import { Command, CommandContext, CommandoClient, ModuleSchema, Util } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ModuleSchema, Util, JSONIfySchema } from 'pixoll-commando';
 import { replyAll, customEmoji, basicEmbed, addDashes, abcOrder } from '../../utils';
 
 function getStatusString(isOn?: boolean): string {
@@ -8,9 +8,9 @@ function getStatusString(isOn?: boolean): string {
     return `Disabled ${customEmoji('dnd')}`;
 }
 
-function mapModuleData(data: Partial<ModuleSchema>): string {
+function mapModuleData(data: Partial<JSONIfySchema<ModuleSchema>>): string {
     return Object.entries(Util.omit(data, [
-        '__v', '_id', 'guild',
+        '_id', 'guild',
     ])).sort(([key1], [key2, value]) =>
         typeof value === 'boolean' ? abcOrder(key1, key2) : -1
     ).map(([key, value]) => {

@@ -1,4 +1,4 @@
-import { ActiveSchema, CommandoClient, CommandoGuild } from 'pixoll-commando';
+import { ActiveSchema, CommandoClient, CommandoGuild, JSONIfySchema } from 'pixoll-commando';
 
 /** This module manages expired punishments. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -22,7 +22,9 @@ async function checkPunishments(client: CommandoClient<true>): Promise<void> {
     setTimeout(async () => await checkPunishments(client), 1000);
 }
 
-async function handlePunishment(doc: ActiveSchema, client: CommandoClient<true>, guild: CommandoGuild): Promise<void> {
+async function handlePunishment(
+    doc: JSONIfySchema<ActiveSchema>, client: CommandoClient<true>, guild: CommandoGuild
+): Promise<void> {
     const { users } = client;
     const { members, bans, database } = guild;
 

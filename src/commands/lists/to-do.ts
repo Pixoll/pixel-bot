@@ -11,6 +11,7 @@ import {
     Argument,
     Util,
     ArgumentType,
+    JSONIfySchema,
 } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, confirmButtons, replyAll, getSubCommand } from '../../utils';
 
@@ -140,7 +141,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
+    protected async runView(context: CommandContext, todoData: JSONIfySchema<TodoSchema> | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -166,7 +167,9 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `add` sub-command
      */
-    protected async runAdd(context: CommandContext, item: string, todoData: TodoSchema | null): Promise<void> {
+    protected async runAdd(
+        context: CommandContext, item: string, todoData: JSONIfySchema<TodoSchema> | null
+    ): Promise<void> {
         const { author } = context;
         if (!todoData) await this.db.add({ user: author.id, list: [item] });
         else await this.db.update(todoData, { $push: { list: item } });
@@ -182,7 +185,9 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    protected async runRemove(context: CommandContext, item: number, todoData: TodoSchema | null): Promise<void> {
+    protected async runRemove(
+        context: CommandContext, item: number, todoData: JSONIfySchema<TodoSchema> | null
+    ): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -212,7 +217,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async runClear(context: CommandContext, todoData: TodoSchema | null): Promise<void> {
+    protected async runClear(context: CommandContext, todoData: JSONIfySchema<TodoSchema> | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',

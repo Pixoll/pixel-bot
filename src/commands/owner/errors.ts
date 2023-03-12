@@ -7,6 +7,7 @@ import {
     CommandoMessage,
     DatabaseManager,
     ErrorSchema,
+    JSONIfySchema,
     ParseRawArguments,
 } from 'pixoll-commando';
 import { basicEmbed, generateEmbed, getSubCommand } from '../../utils';
@@ -83,7 +84,9 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandoMessage<false>, errors: Collection<string, ErrorSchema>): Promise<void> {
+    protected async runView(
+        context: CommandoMessage<false>, errors: Collection<string, JSONIfySchema<ErrorSchema>>
+    ): Promise<void> {
         const errorsList = errors.map(doc => {
             const whatCommand = doc.command ? ` at '${doc.command}' command` : '';
 

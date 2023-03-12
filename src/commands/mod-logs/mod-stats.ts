@@ -5,6 +5,7 @@ import {
     CommandContext,
     CommandoClient,
     CommandoUser,
+    JSONIfySchema,
     ModerationSchema,
     ModerationType,
     ParseRawArguments,
@@ -93,7 +94,10 @@ export default class ModStatsCommand extends Command<true, RawArgs> {
  * @param pad The padding for the content
  */
 function getStats(
-    stats: Collection<string, ModerationSchema>, filter: ModerationType | ModerationType[], rowName: string, pad: number
+    stats: Collection<string, JSONIfySchema<ModerationSchema>>,
+    filter: ModerationType | ModerationType[],
+    rowName: string,
+    pad: number
 ): string {
     if (typeof filter === 'string') filter = [filter];
 

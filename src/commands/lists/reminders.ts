@@ -5,6 +5,7 @@ import {
     CommandContext,
     CommandoClient,
     DatabaseManager,
+    JSONIfySchema,
     ParseRawArguments,
     ReminderSchema,
 } from 'pixoll-commando';
@@ -77,7 +78,9 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
+    protected async runView(
+        context: CommandContext, reminders: Collection<string, JSONIfySchema<ReminderSchema>>
+    ): Promise<void> {
         const list = reminders.sort((a, b) => a.remindAt - b.remindAt).map(r => ({
             remindAt: r.remindAt,
             reminder: r.reminder + '\n' + hyperlink('Jump to message', r.msgURL),
@@ -98,7 +101,9 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async runClear(context: CommandContext, reminders: Collection<string, ReminderSchema>): Promise<void> {
+    protected async runClear(
+        context: CommandContext, reminders: Collection<string, JSONIfySchema<ReminderSchema>>
+    ): Promise<void> {
         const confirmed = await confirmButtons(context, {
             action: 'delete all of your reminders',
         });

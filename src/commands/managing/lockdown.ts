@@ -7,6 +7,7 @@ import {
     CommandoClient,
     CommandoMessage,
     CommandoTextChannel,
+    JSONIfySchema,
     ParseRawArguments,
     SetupSchema,
     Util,
@@ -332,7 +333,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
      */
     protected async runChannelsAdd(
         context: CommandContext<true>,
-        data: SetupSchema | null,
+        data: JSONIfySchema<SetupSchema> | null,
         savedChannels: string[],
         channels: string[]
     ): Promise<void> {
@@ -370,7 +371,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
      */
     protected async runChannelsRemove(
         context: CommandContext<true>,
-        data: SetupSchema | null,
+        data: JSONIfySchema<SetupSchema> | null,
         savedChannels: string[],
         channels: string[]
     ): Promise<void> {

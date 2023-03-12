@@ -6,6 +6,7 @@ import {
     CommandoClient,
     DatabaseManager,
     FaqSchema,
+    JSONIfySchema,
     ParseRawArguments,
     CommandoMessage,
     CommandoAutocompleteInteraction,
@@ -123,7 +124,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
+    protected async runView(context: CommandContext, faqData: Collection<string, JSONIfySchema<FaqSchema>>): Promise<void> {
         if (faqData.size === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -181,7 +182,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
      * The `remove` sub-command
      */
     protected async runRemove(
-        context: CommandContext, item: number, faqData: Collection<string, FaqSchema>
+        context: CommandContext, item: number, faqData: Collection<string, JSONIfySchema<FaqSchema>>
     ): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
@@ -219,7 +220,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async runClear(context: CommandContext, faqData: Collection<string, FaqSchema>): Promise<void> {
+    protected async runClear(context: CommandContext, faqData: Collection<string, JSONIfySchema<FaqSchema>>): Promise<void> {
         if (!this.client.isOwner(context.author)) {
             await this.onBlock(context, 'ownerOnly');
             return;

@@ -6,6 +6,7 @@ import {
     CommandContext,
     CommandoClient,
     CommandoMessage,
+    JSONIfySchema,
     ParseRawArguments,
     RuleSchema,
     Util,
@@ -114,7 +115,9 @@ export default class RuleCommand extends Command<true, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandContext<true>, rulesData: RuleSchema | null, rule: number): Promise<void> {
+    protected async runView(
+        context: CommandContext<true>, rulesData: JSONIfySchema<RuleSchema> | null, rule: number
+    ): Promise<void> {
         if (!rulesData || rulesData.rules.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
@@ -144,7 +147,9 @@ export default class RuleCommand extends Command<true, RawArgs> {
     /**
      * The `add` sub-command
      */
-    protected async runAdd(context: CommandContext<true>, rulesData: RuleSchema | null, rule: string): Promise<void> {
+    protected async runAdd(
+        context: CommandContext<true>, rulesData: JSONIfySchema<RuleSchema> | null, rule: string
+    ): Promise<void> {
         const { guildId, guild, client, author } = context;
 
         if (!client.isOwner(author) && guild.ownerId !== author.id) {
@@ -168,7 +173,9 @@ export default class RuleCommand extends Command<true, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    protected async runRemove(context: CommandContext<true>, rulesData: RuleSchema | null, rule: number): Promise<void> {
+    protected async runRemove(
+        context: CommandContext<true>, rulesData: JSONIfySchema<RuleSchema> | null, rule: number
+    ): Promise<void> {
         if (!rulesData || rulesData.rules.length === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',

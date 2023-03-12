@@ -1,5 +1,5 @@
 import { EmbedBuilder, ChannelType, GuildTextBasedChannel } from 'discord.js';
-import { CommandoClient, CommandoGuild, PollSchema } from 'pixoll-commando';
+import { CommandoClient, CommandoGuild, JSONIfySchema, PollSchema } from 'pixoll-commando';
 
 /** This module manages polls. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -23,7 +23,9 @@ async function endPolls(client: CommandoClient<true>): Promise<void> {
     setTimeout(async () => await endPolls(client), 1000);
 }
 
-async function handlePoll(poll: PollSchema, client: CommandoClient<true>, guild: CommandoGuild): Promise<void> {
+async function handlePoll(
+    poll: JSONIfySchema<PollSchema>, client: CommandoClient<true>, guild: CommandoGuild
+): Promise<void> {
     const channel = client.channels.resolve(poll.channel) as GuildTextBasedChannel | null;
     if (!channel || channel.type === ChannelType.GuildStageVoice) return;
 

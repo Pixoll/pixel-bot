@@ -1,5 +1,5 @@
 import { GuildTextBasedChannel, ChannelType } from 'discord.js';
-import { CommandoClient, CommandoGuild, ReactionRoleSchema } from 'pixoll-commando';
+import { CommandoClient, CommandoGuild, JSONIfySchema, ReactionRoleSchema } from 'pixoll-commando';
 import { fetchPartial } from '../../utils';
 
 /** This module manages reaction roles. */
@@ -92,7 +92,7 @@ async function removeMissingData(client: CommandoClient<true>): Promise<void> {
 }
 
 async function handleMissingData(
-    doc: ReactionRoleSchema, client: CommandoClient<true>, guild: CommandoGuild
+    doc: JSONIfySchema<ReactionRoleSchema>, client: CommandoClient<true>, guild: CommandoGuild
 ): Promise<void> {
     const db = guild.database.reactionRoles;
     const channel = client.channels.resolve(doc.channel) as GuildTextBasedChannel | null;

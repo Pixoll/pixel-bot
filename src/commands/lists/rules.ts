@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments, RuleSchema } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, JSONIfySchema, ParseRawArguments, RuleSchema } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, confirmButtons, replyAll } from '../../utils';
 
 const args = [{
@@ -82,7 +82,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
     /**
      * The `clear` sub-command
      */
-    protected async runClear(context: CommandContext<true>, data: RuleSchema): Promise<void> {
+    protected async runClear(context: CommandContext<true>, data: JSONIfySchema<RuleSchema>): Promise<void> {
         const { client, guild, author } = context;
 
         if (!client.isOwner(author) && guild.ownerId !== author.id) {

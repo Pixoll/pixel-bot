@@ -12,6 +12,7 @@ import {
     CommandoMessage,
     CommandoRole,
     CommandoTextChannel,
+    JSONIfySchema,
     ParseRawArguments,
     QuerySchema,
     SetupSchema,
@@ -262,7 +263,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `full` sub-command
      */
     protected async runFull(
-        context: CommandContext<true>, data: SetupSchema | null, fullData: FullSetupData | null
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, fullData: FullSetupData | null
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
@@ -385,9 +386,9 @@ export default class SetupCommand extends Command<true, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandContext<true>, data: SetupSchema | null): Promise<void> {
+    protected async runView(context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null): Promise<void> {
         const hasNoData = !data
-            || Util.filterNullishItems(Object.values(Util.omit(data, ['__v', '_id', 'guild']))).length === 0;
+            || Util.filterNullishItems(Object.values(Util.omit(data, ['_id', 'guild']))).length === 0;
         if (hasNoData) {
             await replyAll(context, basicEmbed({
                 color: 'Red',
@@ -438,7 +439,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
     /**
      * The `reload` sub-command
      */
-    protected async runReload(context: CommandContext<true>, data: SetupSchema | null): Promise<void> {
+    protected async runReload(context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null): Promise<void> {
         if (!data) {
             await replyAll(context, basicEmbed({
                 color: 'Red',
@@ -508,7 +509,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `audit-logs` sub-command
      */
     protected async runAuditLogs(
-        context: CommandContext<true>, data: SetupSchema | null, channel: CommandoTextChannel
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, channel: CommandoTextChannel
     ): Promise<void> {
         const { guildId, guild } = context;
         const db = guild.database.setup;
@@ -530,7 +531,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `muted-role` sub-command
      */
     protected async runMutedRole(
-        context: CommandContext<true>, data: SetupSchema | null, role: CommandoRole
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: CommandoRole
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
@@ -552,7 +553,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `member-role` sub-command
      */
     protected async runMemberRole(
-        context: CommandContext<true>, data: SetupSchema | null, role: CommandoRole
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: CommandoRole
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
@@ -573,7 +574,9 @@ export default class SetupCommand extends Command<true, RawArgs> {
     /**
      * The `bot-role` sub-command
      */
-    protected async runBotRole(context: CommandContext<true>, data: SetupSchema | null, role: CommandoRole): Promise<void> {
+    protected async runBotRole(
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: CommandoRole
+    ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
 
@@ -594,7 +597,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `lockdown-channels` sub-command
      */
     protected async lockdownChannels(
-        context: CommandContext<true>, data: SetupSchema | null, channelsString: string
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, channelsString: string
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;

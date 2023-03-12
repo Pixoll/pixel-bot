@@ -6,6 +6,7 @@ import {
     CommandContext,
     CommandoAutocompleteInteraction,
     CommandoClient,
+    JSONIfySchema,
     ModerationSchema,
     ParseRawArguments,
 } from 'pixoll-commando';
@@ -103,7 +104,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(context: CommandContext<true>, modLog: ModerationSchema): Promise<void> {
+    protected async runView(context: CommandContext<true>, modLog: JSONIfySchema<ModerationSchema>): Promise<void> {
         const { users } = this.client;
 
         const user = await users.fetch(modLog.userId).catch(() => null);
@@ -130,7 +131,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
     /**
      * The `delete` sub-command
      */
-    protected async runDelete(context: CommandContext<true>, modLog: ModerationSchema): Promise<void> {
+    protected async runDelete(context: CommandContext<true>, modLog: JSONIfySchema<ModerationSchema>): Promise<void> {
         const { client, member, author, guild } = context;
         if (!client.isOwner(author) || member?.permissions.has('Administrator')) {
             await this.onBlock(context, 'userPermissions', { missing: ['Administrator'] });
