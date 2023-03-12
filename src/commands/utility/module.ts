@@ -82,7 +82,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             name: 'module',
             group: 'utility',
             description: 'Diagnose the status of a module or sub-module, or toggle it on/off.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
             \`module\` can be either: ${modules.map(m => `\`${m}\``).join(', ').replace(/,(?=[^,]*$)/, ' or')}.
             \`sub-module\` can be either: ${auditLogs.map(sm => `\`${sm}\``).join(', ').replace(/,(?=[^,]*$)/, ' or')}.
             `,

@@ -29,7 +29,7 @@ export default class EmojisCommand extends Command<true> {
             name: 'emojis',
             group: 'lists',
             description: 'Displays a list of server emojis.',
-            details: 'If the amount of emojis is too big, I will only display the maximum amount I\'m able to.',
+            detailedDescription: 'If the amount of emojis is too big, I will only display the maximum amount I\'m able to.',
             guildOnly: true,
             autogenerateSlashCommand: true,
         });

@@ -25,7 +25,7 @@ export default class EvalCommand extends Command<boolean, RawArgs> {
             name: 'eval',
             group: 'owner',
             description: 'Executes JavaScript code.',
-            details: 'Only the bot owner(s) may use this command.',
+            detailedDescription: 'Only the bot owner(s) may use this command.',
             format: 'eval [script]',
             ownerOnly: true,
             hidden: true,

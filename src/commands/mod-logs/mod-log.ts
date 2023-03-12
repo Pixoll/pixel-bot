@@ -39,7 +39,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
             aliases: ['modlog'],
             group: 'mod-logs',
             description: 'Display or delete a single moderation log.',
-            details: oneLine`
+            detailedDescription: oneLine`
                 \`modlog ID\` has to be a valid mod log ID.
                 To see all the mod logs in this server use the \`mod-logs\` command.
             `,

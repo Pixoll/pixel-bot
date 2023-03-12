@@ -72,7 +72,7 @@ export default class PollCommand extends Command<true, RawArgs> {
             name: 'poll',
             group: 'managing',
             description: 'Create or end a poll.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`channel\` can be either a channel's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 \`msg ID\` has to be a message's ID that's in the **same channel** that you specified.

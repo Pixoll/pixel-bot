@@ -19,7 +19,7 @@ export default class DiscriminatorCommand extends Command<true, RawArgs> {
             aliases: ['discrim'],
             group: 'lists',
             description: 'Displays a list of users with a discriminator.',
-            details: '`number` has to be a number from 1 to 9999.',
+            detailedDescription: '`number` has to be a number from 1 to 9999.',
             format: 'discriminator [number]',
             examples: ['discriminator 1234'],
             guildOnly: true,

@@ -73,7 +73,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
             aliases: ['todo'],
             group: 'lists',
             description: 'View your to-do list, or add/remove an item.',
-            details: '`items` can be different **positive** numbers, separated by spaces.',
+            detailedDescription: '`items` can be different **positive** numbers, separated by spaces.',
             format: stripIndent`
                 todo <view> - Display your to-do list.
                 todo add [item] - Add an item to your to-do list.

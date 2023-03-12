@@ -16,7 +16,7 @@ export default class MembersCommand extends Command<true, RawArgs> {
             name: 'members',
             group: 'lists',
             description: 'Displays a list of members in a role.',
-            details: '`role` can be either a role\'s name, mention or ID.',
+            detailedDescription: '`role` can be either a role\'s name, mention or ID.',
             format: 'members [role]',
             examples: ['members Staff'],
             guildOnly: true,

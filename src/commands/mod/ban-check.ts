@@ -17,7 +17,7 @@ export default class BanCheckCommand extends Command<true, RawArgs> {
             aliases: ['bancheck', 'checkban'],
             group: 'mod',
             description: 'Check if a user is banned.',
-            details: '`user` has to be a user\'s username, ID or mention.',
+            detailedDescription: '`user` has to be a user\'s username, ID or mention.',
             format: 'ban-check [user]',
             examples: ['ban-check Pixoll'],
             clientPermissions: ['BanMembers'],

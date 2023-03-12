@@ -8,7 +8,7 @@ export default class ModeratorsCommand extends Command<true> {
             aliases: ['mods'],
             group: 'lists',
             description: 'Displays a list of all moderators of this server with their mod roles.',
-            details: 'Use the `admins` command for a list of the server\'s admins',
+            detailedDescription: 'Use the `admins` command for a list of the server\'s admins',
             guildOnly: true,
             autogenerateSlashCommand: true,
         });

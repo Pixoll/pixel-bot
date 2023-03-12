@@ -22,7 +22,7 @@ export default class PrefixCommand extends Command<boolean, RawArgs> {
             name: 'prefix',
             group: 'utility',
             description: 'Get or change the prefix of the bot.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
 				If \`new prefix\` is not defined, it will send the current prefix.
 				Otherwise, it will change the current prefix for \`new prefix\`.
 			`,

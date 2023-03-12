@@ -34,7 +34,7 @@ export default class SoftBanCommand extends Command<true, RawArgs> {
             aliases: ['softban'],
             group: 'mod',
             description: 'Soft-ban a user (Ban to delete their messages and then immediately unban).',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` has to be a user's username, ID or mention.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

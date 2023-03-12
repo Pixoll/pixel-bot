@@ -65,7 +65,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
             name: 'toggle',
             group: 'utility',
             description: 'Toggles a command or group on/off.',
-            details: '`name` can be either a command\'s name or alias, or a group\'s name.',
+            detailedDescription: '`name` can be either a command\'s name or alias, or a group\'s name.',
             format: stripIndent`
                 toggle command [name] - Toggle a command on/off.
                 toggle group [name] - Toggle a group on/off.

@@ -33,7 +33,7 @@ export default class SlowmodeCommand extends Command<true, RawArgs> {
             aliases: ['ratelimit'],
             group: 'managing',
             description: 'Enable, change or disable slowmode/rate limit on a channel.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`channel\` can be either a channel's name, mention or ID.
                 \`time\` uses the bot's time formatting, for more information use the \`help\` command.
                 Setting \`time\` as \`0\` or \`off\` will disable the slowmode on the specified channel.

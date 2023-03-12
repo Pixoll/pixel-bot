@@ -19,7 +19,7 @@ export default class RoleInfoCommand extends Command<true, RawArgs> {
             aliases: ['roleinfo'],
             group: 'misc',
             description: 'Displays multiple information about a role, such as color, position, members and mod permissions.',
-            details: '`role` can be either a role\'s name, mention or ID.',
+            detailedDescription: '`role` can be either a role\'s name, mention or ID.',
             format: 'role-info [role]',
             examples: ['role-info Staff'],
             guildOnly: true,

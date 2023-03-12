@@ -84,7 +84,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
             aliases: ['time'],
             group: 'misc',
             description: 'Displays the time in multiple timezones.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`hour\` uses the bot's time formatting, for more information use the \`help\` command.
                 Type \`now\` to get the current time.
                 \`place\` can be one of the following: ${cities.map(c => `"${c}"`).join(', ')}

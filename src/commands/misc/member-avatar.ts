@@ -20,7 +20,7 @@ export default class MemberAvatarCommand extends Command<true, RawArgs> {
             aliases: ['memberavatar', 'mavatar', 'mav'],
             group: 'misc',
             description: 'Displays a member\'s server avatar, or yours if you don\'t specify any.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`member\` can be either a member's name, mention or ID.
                 If no server avatar was found, it will display the user\'s avatar instead.
             `,

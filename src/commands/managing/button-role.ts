@@ -71,7 +71,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
             aliases: ['brole', 'buttonrole'],
             group: 'managing',
             description: 'Create or remove button roles.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`channel\` can be either a channel's name, mention or ID.
                 \`roles\` to be all the roles' names, mentions or ids, separated by commas (max. ${rolesAmount} at once).
             `,

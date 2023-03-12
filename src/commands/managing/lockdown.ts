@@ -64,7 +64,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             name: 'lockdown',
             group: 'managing',
             description: 'Lock every text channel that was specified when using the `setup` command',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 If \`reason\` is not specified, it will default as "We'll be back shortly" or "Thanks for waiting".
                 \`text-channels\` to be all the text channels' names, mentions or ids, separated by spaces (max. 30 at once).
             `,

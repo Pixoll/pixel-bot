@@ -42,7 +42,7 @@ export default class ModStatsCommand extends Command<true, RawArgs> {
             aliases: ['modstats'],
             group: 'mod-logs',
             description: 'Displays your moderation statistics or for a moderator or admin.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 If \`user\` is not specified, I will show your own moderation statistics.
                 \`user\` can be a user's username, ID or mention.
             `,

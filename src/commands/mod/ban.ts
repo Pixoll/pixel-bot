@@ -23,7 +23,7 @@ export default class BanCommand extends Command<true, RawArgs> {
             name: 'ban',
             group: 'mod',
             description: 'Ban a user permanently.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` has to be a user's username, ID or mention.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

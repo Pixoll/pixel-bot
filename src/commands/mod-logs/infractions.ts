@@ -17,7 +17,7 @@ export default class InfractionsCommand extends Command<true, RawArgs> {
             name: 'infractions',
             group: 'mod-logs',
             description: 'Displays a list of infractions of a user.',
-            details: '`user` has to be a user\'s username, ID or mention.',
+            detailedDescription: '`user` has to be a user\'s username, ID or mention.',
             format: 'infractions [user]',
             examples: ['infractions Pixoll'],
             modPermissions: true,

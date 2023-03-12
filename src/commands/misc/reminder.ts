@@ -34,7 +34,7 @@ export default class ReminderCommand extends Command<boolean, RawArgs> {
             aliases: ['remindme', 'remind'],
             group: 'misc',
             description: 'Set a reminder, and forget.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reminder\` is not specified, it will default to "Not specified".
             `,

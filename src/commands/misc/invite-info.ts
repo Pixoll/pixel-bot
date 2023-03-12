@@ -21,7 +21,7 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
             aliases: ['inviteinfo', 'invinfo'],
             group: 'misc',
             description: 'Displays information about an invite.',
-            details: '`invite` may be a link, an invite codes, or a vanity code.',
+            detailedDescription: '`invite` may be a link, an invite codes, or a vanity code.',
             format: 'invite-info [invite]',
             examples: [
                 'invite-info minecraft',

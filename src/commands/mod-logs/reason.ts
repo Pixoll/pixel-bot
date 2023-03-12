@@ -32,7 +32,7 @@ export default class ReasonCommand extends Command<true, RawArgs> {
             name: 'reason',
             group: 'mod-logs',
             description: 'Change the reason of a moderation log.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 ${oneLine`
                     \`mod-log ID\` has to be a valid mod log ID.
                     To see all the mod logs in this server use the \`mod-logs\` command.

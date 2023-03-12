@@ -33,7 +33,7 @@ export default class KickCommand extends Command<true, RawArgs> {
             name: 'kick',
             group: 'mod',
             description: 'Kick a user.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` can be either a user's name, mention or ID.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

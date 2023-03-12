@@ -25,7 +25,7 @@ export default class LockCommand extends Command<true, RawArgs> {
             name: 'lock',
             group: 'managing',
             description: 'Locks a channel, revoking the `Send Messages` permission from @everyone.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`channel\` can be either a channel's name, mention or ID.
                 If \`reason\` is not specified, it will default as "We\'ll be back shortly".
             `,

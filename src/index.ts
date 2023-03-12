@@ -9,7 +9,7 @@ dotenvConfig();
 
 const client = new CommandoClient({
     prefix: '!!',
-    testGuild: '790051159099703316',
+    testAppGuild: '790051159099703316',
     serverInvite: 'https://discord.gg/Pc9pAHf3GU',
     inviteOptions: {
         scopes: [OAuth2Scopes.ApplicationsCommands, OAuth2Scopes.Bot],

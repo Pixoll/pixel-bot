@@ -33,7 +33,7 @@ export default class DurationCommand extends Command<true, RawArgs> {
             name: 'duration',
             group: 'mod-logs',
             description: 'Change the duration of a punishment.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 ${oneLine`
                 \`mod-log ID ID\` has to be a valid mod log ID.
                 To see all the mod logs in this server use the \`mod-logs\` command.

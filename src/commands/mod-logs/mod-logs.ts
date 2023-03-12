@@ -20,7 +20,7 @@ export default class ModLogsCommand extends Command<true, RawArgs> {
             aliases: ['modlogs'],
             group: 'mod-logs',
             description: 'Displays all moderator logs of the server of a specific moderator, or all if none is specified',
-            details: '`user` has to be a user\'s username, ID or mention.',
+            detailedDescription: '`user` has to be a user\'s username, ID or mention.',
             format: 'mod-logs <user>',
             examples: ['mod-logs Pixoll'],
             modPermissions: true,

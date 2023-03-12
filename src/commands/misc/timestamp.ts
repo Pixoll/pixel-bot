@@ -21,7 +21,7 @@ export default class TimestampCommand extends Command<boolean, RawArgs> {
             aliases: ['tstamp'],
             group: 'misc',
             description: 'Get the Discord timestamp of any time you want.',
-            details: '`duration` uses the bot\'s time formatting, for more information use the `help` command.',
+            detailedDescription: '`duration` uses the bot\'s time formatting, for more information use the `help` command.',
             format: 'timestamp <date>',
             examples: [
                 'timestamp 3pm',

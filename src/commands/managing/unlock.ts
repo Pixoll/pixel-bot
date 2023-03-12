@@ -25,7 +25,7 @@ export default class UnlockCommand extends Command<true, RawArgs> {
             name: 'unlock',
             group: 'managing',
             description: 'Unlock a channel, granting the `Send Messages` permission from @everyone.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`channel\` can be either a channel's name, mention or ID.
                 If \`reason\` is not specified, it will default as "Thanks for waiting".
             `,

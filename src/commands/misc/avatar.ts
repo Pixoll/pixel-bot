@@ -19,7 +19,7 @@ export default class AvatarCommand extends Command<boolean, RawArgs> {
             aliases: ['av'],
             group: 'misc',
             description: 'Displays a user\'s avatar, or yours if you don\'t specify any.',
-            details: '`user` has to be a user\'s username, ID or mention.',
+            detailedDescription: '`user` has to be a user\'s username, ID or mention.',
             format: 'avatar <user>',
             examples: ['avatar Pixoll'],
             args,

@@ -23,7 +23,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
             name: 'unmute',
             group: 'mod',
             description: 'Unmute a user.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` can be either a user's name, mention or ID.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

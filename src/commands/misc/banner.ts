@@ -18,7 +18,7 @@ export default class BannerCommand extends Command<boolean, RawArgs> {
             name: 'banner',
             group: 'misc',
             description: 'Displays a user\'s banner, or yours if you don\'t specify any.',
-            details: '`user` has to be a user\'s username, ID or mention.',
+            detailedDescription: '`user` has to be a user\'s username, ID or mention.',
             format: 'banner <user>',
             examples: ['banner Pixoll'],
             args,

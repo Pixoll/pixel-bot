@@ -18,7 +18,7 @@ export default class AfkCommand extends Command<true, RawArgs> {
             name: 'afk',
             group: 'misc',
             description: 'Set an AFK status to display when you are mentioned.',
-            details: 'Set `status` as `off` to remove your AFK status.',
+            detailedDescription: 'Set `status` as `off` to remove your AFK status.',
             format: stripIndent`
                 afk [status] - Set your status.
                 afk off - Remove your status.

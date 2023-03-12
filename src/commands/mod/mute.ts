@@ -8,7 +8,7 @@ import {
     confirmButtons,
     replyAll,
     generateDocId,
-    basicEmbed, 
+    basicEmbed,
     parseArgDate,
 } from '../../utils';
 
@@ -37,7 +37,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
             name: 'mute',
             group: 'mod',
             description: 'Mute a user so they cannot send messages or speak.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` can be either a user's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reason\` is not specified, it will default as "No reason given".

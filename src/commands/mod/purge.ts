@@ -97,7 +97,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
             name: 'purge',
             group: 'mod',
             description: 'Delete a number of messages from a channel (limit of 100).',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`number\` has be a number from 1 to 100.
                 \`user\` has to be a user's username, ID or mention.
                 \`msg ID\` has to be a message's ID that's in the **same channel** as where you use this command.

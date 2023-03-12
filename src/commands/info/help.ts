@@ -151,7 +151,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
             aliases: ['commands'],
             group: 'info',
             description: 'Displays all the commands you have access to, or information about a single command.',
-            details: '`command` can be either a command\'s name or alias.',
+            detailedDescription: '`command` can be either a command\'s name or alias.',
             examples: ['help ban'],
             guarded: true,
             hidden: true,
@@ -315,7 +315,7 @@ function commandInfo(client: CommandoClient<true>, command: Command, guild: Comm
     const { prefix: _prefix, user, owners } = client;
     const {
         name, description, details, examples, aliases, group, guarded, throttling, ownerOnly, guildOnly,
-        dmOnly, deprecated, deprecatedReplacement, slashInfo,
+        dmOnly, deprecated, deprecatedReplacement, slashCommand, contextMenuCommands,
     } = command;
 
     const prefix = guild?.prefix || _prefix || '';
@@ -366,7 +366,8 @@ function commandInfo(client: CommandoClient<true>, command: Command, guild: Comm
     const information = {
         Category: group.name,
         Aliases: aliases.join(', ') || null,
-        Slash: slashInfo ? 'Yes' : 'No',
+        Slash: slashCommand ? 'Yes' : 'No',
+        'Context Menu': contextMenuCommands.length !== 0 ? 'Yes' : 'No',
         Cooldown: throttling
             ? `${pluralize('usage', throttling.usages)} per ${prettyMs(throttling.duration * 1000, { verbose: true })}`
             : null,

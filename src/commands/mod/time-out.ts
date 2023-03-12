@@ -38,7 +38,7 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             aliases: ['timeout'],
             group: 'mod',
             description: 'Set or remove time-out for user so they cannot send messages or join VCs.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` can be either a user's name, mention or ID.
                 ${oneLine`
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command (max. of 28 days).
@@ -55,7 +55,7 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             userPermissions: ['ModerateMembers'],
             guildOnly: true,
             args,
-            testEnv: true,
+            testAppCommand: true,
             autogenerateSlashCommand: true,
         });
     }

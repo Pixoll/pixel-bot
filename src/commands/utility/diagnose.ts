@@ -71,7 +71,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             name: 'diagnose',
             group: 'utility',
             description: 'Diagnose any command or group to determine if they are disabled or not.',
-            details: '`name` can be either a command\'s name or alias, or a group\'s name.',
+            detailedDescription: '`name` can be either a command\'s name or alias, or a group\'s name.',
             format: stripIndent`
                 diagnose <all> - Check the status of all commands and groups.
                 diagnose command [name] - Check the status of a single command.

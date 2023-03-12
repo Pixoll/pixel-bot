@@ -110,7 +110,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             name: 'setup',
             group: 'utility',
             description: 'Setup the bot to its core. Data collected will be deleted if the bot leaves the server.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`text-channel\` can be either a text channel's name, mention or ID.
                 \`role\` can be either a role's name, mention or ID.
                 \`text-channels\` to be all the text channels' names, mentions or ids, separated by spaces (max. 30 at once).

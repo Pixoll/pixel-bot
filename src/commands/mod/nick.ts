@@ -23,7 +23,7 @@ export default class NickCommand extends Command<true, RawArgs> {
             aliases: ['nickname', 'setnick'],
             group: 'mod',
             description: 'Change the nickname of a user or remove it.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` can be either a user's name, mention or ID.
                 \`nick\` will be the user's new nickname.
                 Setting \`nick\` as \`remove\` will remove the user's current nickname.

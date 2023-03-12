@@ -66,7 +66,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
             aliases: ['massban', 'multiban', 'mass-ban'],
             group: 'mod',
             description: `Ban multiple members at the same time (max. ${usersAmount} at once).`,
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`reason\` **has** to be surrounded by quotes.
                 \`members\` to be all the members' names, mentions or ids, separated by commas (max. ${usersAmount} at once).
             `,

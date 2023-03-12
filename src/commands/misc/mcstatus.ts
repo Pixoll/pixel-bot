@@ -79,7 +79,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             aliases: ['mcstatus'],
             group: 'misc',
             description: 'Displays information of a Java/Bedrock Minecraft server.',
-            details: '`ip` has to be a valid server IP, and `port` a valid server port.',
+            detailedDescription: '`ip` has to be a valid server IP, and `port` a valid server port.',
             format: stripIndent`
                 mc-status <check> - Status of the saved server.
                 mc-status java [ip] <port> - Status of a Java server.

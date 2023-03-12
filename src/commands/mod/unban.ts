@@ -23,7 +23,7 @@ export default class UnbanCommand extends Command<true, RawArgs> {
             name: 'unban',
             group: 'mod',
             description: 'Unban a user.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`user\` has to be a user's ID or mention.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,

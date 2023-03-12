@@ -47,7 +47,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             aliases: ['temprole'],
             group: 'mod',
             description: 'Assign a role that persists for a limited time.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`role\` can be either a role's name, mention or ID.
                 \`user\` can be either a user's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.

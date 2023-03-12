@@ -54,7 +54,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
             name: 'welcome',
             group: 'managing',
             description: 'Setup welcoming messages that can be sent in DMs and in a specific channel of your server.',
-            details: stripIndent`
+            detailedDescription: stripIndent`
                 \`text-channels\` to be all the text channels' names, mentions or ids, separated by spaces (max. 30 at once).
                 You can use the following fields, which will be replaced when the welcome message is sent:
                 **>** **{user}:** Tags the new member with a mention.

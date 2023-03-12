@@ -22,7 +22,7 @@ export default class warnCommand extends Command<true, RawArgs> {
             name: 'warn',
             group: 'mod',
             description: 'Warn a member.',
-            details: '`member` can be a member\'s username, ID or mention. `reason` can be anything you want.',
+            detailedDescription: '`member` can be a member\'s username, ID or mention. `reason` can be anything you want.',
             format: 'warn [user] [reason]',
             examples: ['warn Pixoll Excessive swearing'],
             modPermissions: true,
