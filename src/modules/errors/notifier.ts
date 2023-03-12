@@ -1,11 +1,13 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { EmbedBuilder, TextChannel } from 'discord.js';
 import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
+import EvalCommand from '../../commands/owner/eval';
 import { customEmoji, generateDocId, code, replyAll, limitStringLength, hyperlink } from '../../utils';
 
 const errorLogsChannelId = '906740370304540702';
-const excludeStack = /node:(?:events|internal)/;
+const excludeStack = /node:(?:events|internal)|\(<anonymous>\)/;
 const includeStack = /pixoll-commando/;
+const evalName = EvalCommand.name;
 
 /** A manager for all errors of the process and client */
 export default function (client: CommandoClient<true>): void {
@@ -77,7 +79,7 @@ async function errorHandler(
         return;
     }
 
-    if (command?.name === 'eval') return;
+    if (command?.name === 'eval' || error.stack?.includes(evalName)) return;
     console.error(error);
 
     const length = error.name.length + error.message.length + 3;
@@ -92,6 +94,7 @@ async function errorHandler(
             .replace('at ', '')
             .replace(process.cwd(), '')
             .replace(/([\\]+)/g, '/')
+            .replace('/node_modules/', '@')
         )
         .join('\n');
 
