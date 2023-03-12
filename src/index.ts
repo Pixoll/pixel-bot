@@ -49,10 +49,9 @@ const excludeDebugEvents = new RegExp([
     'Created new',
 ].join('|'));
 
-client.on('debug', (...msgs) => {
-    const msg = msgs.join(' ');
-    if (excludeDebugEvents.test(msg)) return;
-    console.log('debug >', msg);
+client.on('debug', message => {
+    if (excludeDebugEvents.test(message)) return;
+    console.log('debug >', message);
 });
 client.emit('debug', 'Created client');
 
