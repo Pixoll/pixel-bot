@@ -43,7 +43,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Orange')
             .setAuthor({
-                name: 'Deleted message', iconURL: author.displayAvatarURL({ forceStatic: false }),
+                name: 'Deleted message',
+                iconURL: author.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()}`)
             .setFooter({ text: `Author ID: ${author.id}` })
@@ -121,7 +122,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Blue')
             .setAuthor({
-                name: 'Edited message', iconURL: author.displayAvatarURL({ forceStatic: false }),
+                name: 'Edited message',
+                iconURL: author.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(`Sent by ${author.toString()} in ${channel.toString()} ${hyperlink('Jump to message', url)}`)
             .addFields({

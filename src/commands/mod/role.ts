@@ -175,14 +175,6 @@ export default class RoleCommand extends Command<true, RawArgs> {
         });
     }
 
-    /**
-     * Runs the command
-     * @param {CommandContext} instances The instances the command is being run for
-     * @param {object} args The arguments for the command
-     * @param {'toggle'|'remove-all'|'all'|'bots'|'users'} args.subCommand The sub-command
-     * @param {Role|GuildMember} args.memberOrRole The role or member
-     * @param {Role[]} args.roles The array of roles to toggle from the member
-     */
     public async run(context: CommandContext<true>, args: ParsedArgs): Promise<void> {
         const { subCommand, userOrRole, user, role } = args;
 

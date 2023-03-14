@@ -32,13 +32,6 @@ export default class warnCommand extends Command<true, RawArgs> {
         });
     }
 
-    /**
-     * Runs the command
-     * @param {CommandContext} instances The instances the command is being run for
-     * @param {object} args The arguments for the command
-     * @param {GuildMember} args.member The member to warn
-     * @param {string} args.reason The reason of the warn
-     */
     public async run(context: CommandContext<true>, { user, reason }: ParsedArgs): Promise<void> {
         const { guild, guildId, author } = context;
         const member = await guild.members.fetch(user).catch(() => null);

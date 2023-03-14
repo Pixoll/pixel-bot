@@ -282,7 +282,8 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
         const serverInfo = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `Server IP: ${ip}`, iconURL: 'attachment://icon.png',
+                name: `Server IP: ${ip}`,
+                iconURL: 'attachment://icon.png',
             })
             .addFields({
                 name: 'MOTD',

@@ -33,9 +33,6 @@ export default class AfkCommand extends Command<true, RawArgs> {
         });
     }
 
-    /**
-     * Runs the command
-     */
     public async run(context: CommandContext<true>, { status }: ParsedArgs): Promise<void> {
         const { author, guildId, guild } = context;
         const db = guild.database.afk;

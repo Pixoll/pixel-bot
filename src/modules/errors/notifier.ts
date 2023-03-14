@@ -95,6 +95,7 @@ async function errorHandler(
             .replace(process.cwd(), '')
             .replace(/([\\]+)/g, '/')
             .replace('/node_modules/', '@')
+            .replace('(@@', '(@')
         )
         .join('\n');
 
@@ -123,13 +124,13 @@ async function errorHandler(
 
     if (command && context) embed.addFields({
         name: 'Command input',
-        value: limitStringLength(code(context.toString(), 'js'), 1024),
+        value: limitStringLength(code(context.toString(), 'ts'), 1024),
     });
 
     const stackMessage = error.name + whatCommand + ': ' + error.message.split('Require stack:').shift();
     embed.addFields({
         name: stackMessage,
-        value: limitStringLength(code(files || 'No files.', 'js'), 1024),
+        value: limitStringLength(code(files || 'No files.', 'ts'), 1024),
     });
 
     await errorsChannel.send({

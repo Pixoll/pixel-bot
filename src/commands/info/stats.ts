@@ -22,7 +22,6 @@ function formatBytes(bytes: number, decimals = 2): string {
     return float;
 }
 
-/** A command that can be run in a client */
 export default class StatsCommand extends Command {
     public constructor(client: CommandoClient) {
         super(client, {
@@ -50,7 +49,8 @@ export default class StatsCommand extends Command {
         const stats = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${user.username}'s stats`, iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: `${user.username}'s stats`,
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .addFields({
                 name: 'Servers',

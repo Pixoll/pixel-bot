@@ -91,7 +91,8 @@ export default function (client: CommandoClient<true>): void {
             const embed = new EmbedBuilder()
                 .setColor('Blue')
                 .setAuthor({
-                    name: `${author.tag} posted an invite`, iconURL: author.displayAvatarURL({ forceStatic: false }),
+                    name: `${author.tag} posted an invite`,
+                    iconURL: author.displayAvatarURL({ forceStatic: false }),
                 })
                 .setDescription(stripIndent`
                     ${author.toString()} posted an invite in ${channel.toString()} ${hyperlink('Jump to message', url)}

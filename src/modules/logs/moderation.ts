@@ -27,7 +27,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Orange')
             .setAuthor({
-                name: 'Kicked user', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Kicked user',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`
@@ -66,7 +67,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Gold')
             .setAuthor({
-                name: 'Banned user', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Banned user',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`
@@ -106,7 +108,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Gold')
             .setAuthor({
-                name: 'Unbanned user', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Unbanned user',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`
@@ -128,7 +131,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Gold')
             .setAuthor({
-                name: 'Muted member', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Muted member',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`
@@ -151,7 +155,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Gold')
             .setAuthor({
-                name: 'Timed-out member', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Timed-out member',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`
@@ -176,7 +181,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Gold')
             .setAuthor({
-                name: 'Unmuted member', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Unmuted member',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`
@@ -198,7 +204,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Gold')
             .setAuthor({
-                name: 'Warned member', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'Warned member',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(stripIndent`

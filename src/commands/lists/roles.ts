@@ -37,7 +37,7 @@ export default class RolesCommand extends Command<true, RawArgs> {
             : null;
 
         const rolesCache = memberRoles ?? guildRoles?.filter(role => role.id !== guildId);
-        if (!rolesCache) {
+        if (!rolesCache || rolesCache.size === 0) {
             await replyAll(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',

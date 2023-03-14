@@ -16,6 +16,8 @@ import {
     MessageActionRowComponentBuilder,
     ComponentType,
     If,
+    Locale,
+    LocaleString,
 } from 'discord.js';
 import {
     Argument,
@@ -24,6 +26,7 @@ import {
     Command,
     CommandContext,
     CommandContextChannel,
+    CommandoUserContextMenuCommandInteraction,
     CommandoGuild,
     CommandoGuildMember,
     CommandoifiedMessage,
@@ -32,12 +35,13 @@ import {
     GuildAuditLog,
     GuildModule,
     Util,
+    CommandoMessageContextMenuCommandInteraction,
 } from 'pixoll-commando';
 import { transform, isEqual, isObject, capitalize } from 'lodash';
 import { stripIndent } from 'common-tags';
 import { prettyMs } from 'better-ms';
 import { AnyMessage, RawModuleName } from '../types';
-import { defaultGenerateEmbedOptions, moderatorPermissions, validateUrlPattern } from './constants';
+import { defaultGenerateEmbedOptions, GoogleLanguageId, moderatorPermissions, validateUrlPattern } from './constants';
 
 //#region Types
 
@@ -82,6 +86,8 @@ export interface TemplateEmbedResult {
 }
 
 export interface PagedEmbedOptions {
+    /** Whether the paged embed will be ephemeral */
+    ephemeral?: boolean;
     /** The number of chunks of data to be displayed in one page. */
     number: number;
     /** The total chunks of data. */
@@ -109,6 +115,11 @@ export interface PagedEmbedOptions {
 }
 
 export interface GenerateEmbedOptions {
+    /**
+     * Whether the generated embed will be ephemeral
+     * @default false
+     */
+    ephemeral?: boolean;
     /**
      * The number of chunks to display per page
      * @default 6
@@ -218,7 +229,10 @@ export interface AnyPartial {
 export type ReplyAllOptions =
     | EmbedBuilder
     | string
-    | Omit<MessageCreateOptions, 'flags'> & { replyToEdit?: AnyMessage | null };
+    | Omit<MessageCreateOptions, 'flags'> & {
+        ephemeral?: boolean;
+        replyToEdit?: AnyMessage | null;
+    };
 
 //#endregion
 
@@ -396,15 +410,18 @@ export function timestamp<T extends Date | number | null, F extends TimestampTyp
  * @param context The command context to reply
  * @param options The options of the message
  */
-export async function replyAll(context: CommandContext, options: ReplyAllOptions): Promise<Message | null> {
+export async function replyAll(
+    context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction,
+    options: ReplyAllOptions
+): Promise<Message | null> {
     if (options instanceof EmbedBuilder) options = { embeds: [options] };
     if (typeof options === 'string') options = { content: options };
-    if (context.isInteraction()) {
-        if (context.isEditable()) {
-            return await context.editReply(options).catch(() => null);
+    if (!('isInteraction' in context) || context.isInteraction()) {
+        if (context.deferred || context.replied) {
+            return await context.editReply(Util.omit(options, ['ephemeral'])).catch(() => null);
         }
-        await context.reply(options).catch(() => null);
-        return await context.fetchReply().catch(() => null);
+        if (context.isContextMenuCommand()) options.ephemeral = true;
+        return await context.reply({ ...options, fetchReply: true }).catch(() => null);
     }
     const messageOptions = {
         ...options,
@@ -767,9 +784,12 @@ export function generateDocId(): string {
  * @param template The embed template to use.
  */
 export async function pagedEmbed(
-    context: CommandContext, options: PagedEmbedOptions, template: TemplateEmbedFunction
+    context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction,
+    options: PagedEmbedOptions,
+    template: TemplateEmbedFunction
 ): Promise<void> {
-    const { channelId, id, author, client } = context;
+    const { channelId, id, client } = context;
+    const author = 'author' in context ? context.author : context.user;
     const channel = await client.channels.fetch(channelId).catch(() => null) as CommandContextChannel<true>;
     if (!channel) {
         throw new Error(`Unknown channel ${channelId}`);
@@ -818,7 +838,7 @@ export async function pagedEmbed(
         `);
     }
 
-    if (context.isMessage()) {
+    if ('isMessage' in context && context.isMessage()) {
         await targetChannel.sendTyping().catch(() => null);
     }
 
@@ -830,7 +850,10 @@ export async function pagedEmbed(
 
     const msg = options.toUser && !isDMs
         ? await targetChannel.send(msgOptions).catch(() => null)
-        : await replyAll(context, msgOptions);
+        : await replyAll(context, {
+            ...msgOptions,
+            ephemeral: options.ephemeral,
+        });
 
     if (!msg || (options.total <= options.number && !options.components[0])) return;
 
@@ -945,12 +968,14 @@ export async function pagedEmbed(
  * @param options Some extra data for the embed
  */
 export async function generateEmbed<T extends object | string>(
-    context: CommandContext, array: T[], options: GenerateEmbedOptions
+    context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction,
+    array: T[],
+    options: GenerateEmbedOptions
 ): Promise<void> {
     const { channels } = context.client;
     const {
         number, color, authorName, authorIconURL, useDescription, title, inline, toUser, dmMsg, hasObjects, keyTitle,
-        keys, keysExclude, useDocId, components, embedTitle, skipMaxButtons, numbered,
+        keys, keysExclude, useDocId, components, embedTitle, skipMaxButtons, numbered, ephemeral,
     } = applyDefaults(defaultGenerateEmbedOptions, options);
 
     if (array.length === 0) throw new Error('array cannot be empty');
@@ -963,6 +988,7 @@ export async function generateEmbed<T extends object | string>(
     };
 
     await pagedEmbed(context, {
+        ephemeral,
         number,
         total: array.length,
         toUser,
@@ -1278,4 +1304,14 @@ export async function parseArgDate<T extends Date | number>(
         return null;
     }
     return resultDate as T;
+}
+
+export function djsLocaleToGoogle(locale?: Locale): GoogleLanguageId | undefined {
+    if (!locale) return;
+    const lang = locale as LocaleString;
+    if (Util.equals(lang, ['en-GB', 'en-US'])) return 'en';
+    if (lang === 'pt-BR') return 'pt';
+    if (lang === 'es-ES') return 'es';
+    if (lang === 'sv-SE') return 'sv';
+    return lang;
 }

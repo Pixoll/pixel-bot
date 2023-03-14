@@ -154,7 +154,8 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
         const diagnose = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${name}'s disabled commands and groups`, iconURL: avatar,
+                name: `${name}'s disabled commands and groups`,
+                iconURL: avatar,
             })
             .addFields({
                 name: 'Commands',
@@ -183,7 +184,8 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
         const diagnose = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${global} of command: ${command.name}`, iconURL: avatar,
+                name: `${global} of command: ${command.name}`,
+                iconURL: avatar,
             })
             .addFields({
                 name: 'Status',

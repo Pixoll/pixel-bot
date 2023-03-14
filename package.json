@@ -14,21 +14,24 @@
     "tslint:fix": "eslint --fix src"
   },
   "dependencies": {
+    "@vitalets/google-translate-api": "^9.1.0",
     "better-ms": "^1.1.7",
     "common-tags": "^1.8.2",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.1",
     "emoji-regex": "^10.1.0",
+    "http-proxy-agent": "^5.0.0",
     "lodash": "^4.17.21",
     "minecraft-server-util": "^5.4.0",
     "mongoose": "^6.4.4",
-    "pixoll-commando": "^1.0.0-dev.42",
+    "pixoll-commando": "^1.0.0-dev.43",
     "require-all": "^3.0.0"
   },
   "devDependencies": {
     "@types/common-tags": "^1.8.1",
     "@types/lodash": "^4.14.182",
     "@types/node": "16.x",
+    "@types/node-fetch": "^2.6.2",
     "@types/require-all": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",

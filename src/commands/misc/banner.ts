@@ -1,5 +1,19 @@
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { User, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } from 'discord.js';
+import {
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoUserContextMenuCommandInteraction,
+    ParseRawArguments,
+} from 'pixoll-commando';
+import {
+    User,
+    ActionRowBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    ButtonStyle,
+    ApplicationCommandType,
+    MessageCreateOptions,
+} from 'discord.js';
 import { basicEmbed, replyAll } from '../../utils';
 
 const args = [{
@@ -23,46 +37,54 @@ export default class BannerCommand extends Command<boolean, RawArgs> {
             examples: ['banner Pixoll'],
             args,
             autogenerateSlashCommand: true,
+            contextMenuCommandTypes: [ApplicationCommandType.User],
         });
     }
 
-    /**
-     * Runs the command
-     * @param {CommandContext} instances The instances the command is being run for
-     * @param {object} args The arguments for the command
-     * @param {User} args.user The user to get the banner from
-     */
     public async run(context: CommandContext, { user: passedUser }: ParsedArgs): Promise<void> {
-        const user = await (passedUser as User ?? context.author).fetch();
-
-        let bannerUrl = user.bannerURL({ forceStatic: false, size: 2048 }) ?? null;
-        if (!bannerUrl) {
-            await replyAll(context, basicEmbed({
-                color: 'Blue',
-                emoji: 'info',
-                description: 'That user has no banner on their profile.',
-            }));
-            return;
-        }
-        if (/\.webp/.test(bannerUrl)) {
-            bannerUrl = user.bannerURL({ extension: 'png', size: 2048 }) as string;
-        }
-
-        const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
-            .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ forceStatic: false }),
-            })
-            .setImage(bannerUrl)
-            .setTimestamp();
-
-        const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('Download')
-                .setURL(bannerUrl)
-            );
-
-        await replyAll(context, { embeds: [embed], components: [row] });
+        const user = await (passedUser ?? context.author).fetch();
+        await replyAll(context, mapBannerData(user));
     }
+
+    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+        await interaction.targetUser.fetch();
+        await replyAll(interaction, mapBannerData(interaction.targetUser));
+    }
+}
+
+function mapBannerData(user: User): Pick<MessageCreateOptions, 'components' | 'embeds'> {
+    let bannerUrl = user.bannerURL({ forceStatic: false, size: 2048 }) ?? null;
+    if (!bannerUrl) return {
+        embeds: [basicEmbed({
+            color: 'Blue',
+            emoji: 'info',
+            description: 'That user has no banner on their profile.',
+        })],
+    };
+
+    if (/\.webp/.test(bannerUrl)) {
+        bannerUrl = user.bannerURL({ extension: 'png', size: 2048 }) as string;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor('#4c9f4c')
+        .setAuthor({
+            name: user.tag,
+            iconURL: user.displayAvatarURL({ forceStatic: false }),
+        })
+        .setImage(bannerUrl)
+        .setTimestamp();
+
+    const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
+            .setLabel('Download')
+            .setURL(bannerUrl)
+        );
+
+    return {
+        embeds: [embed],
+        components: [row],
+    };
 }

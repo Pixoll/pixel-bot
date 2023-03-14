@@ -1,6 +1,12 @@
 import { oneLine } from 'common-tags';
-import { ActionRowBuilder, StringSelectMenuBuilder } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { ActionRowBuilder, ApplicationCommandType, StringSelectMenuBuilder, User } from 'discord.js';
+import {
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoUserContextMenuCommandInteraction,
+    ParseRawArguments,
+} from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
 
 const args = [{
@@ -27,53 +33,66 @@ export default class ModLogsCommand extends Command<true, RawArgs> {
             guildOnly: true,
             args,
             autogenerateSlashCommand: true,
+            contextMenuCommandTypes: [ApplicationCommandType.User],
         });
     }
 
     public async run(context: CommandContext<true>, { user }: ParsedArgs): Promise<void> {
-        const { guild } = context;
-        const db = guild.database.moderations;
-
-        const modLogs = await db.fetchMany(user ? { modId: user.id } : {});
-        if (modLogs.size === 0) {
-            await replyAll(context, basicEmbed({
-                color: 'Blue',
-                emoji: 'info',
-                description: 'There are no moderation logs.',
-            }));
-            return;
-        }
-
-        const message = context.isMessage() ? context : await context.fetchReply();
-
-        const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
-            .setCustomId(`${message.id}:menu`)
-            .setMaxValues(1).setMinValues(1)
-            .setPlaceholder('Filter...')
-            .setOptions([
-                { label: 'All', value: 'all', emoji: '🎲' },
-                { label: 'Bans', value: 'ban', emoji: '822644311140204554' },
-                { label: 'Soft bans', value: 'soft-ban', emoji: '🔨' },
-                { label: 'Temp bans', value: 'temp-ban', emoji: '⏲' },
-                { label: 'Kicks', value: 'kick', emoji: '🥾' },
-                { label: 'Mutes', value: 'mute', emoji: '🔇' },
-                { label: 'Warns', value: 'warn', emoji: '⚠' },
-            ])
-        );
-
-        const avatarURL = user?.displayAvatarURL({ forceStatic: false }) || guild.iconURL({ forceStatic: false });
-
-        await generateEmbed(context, modLogs.toJSON(), {
-            authorName: oneLine`
-                ${user ? `${user.username} has` : 'There\'s'}
-                ${pluralize('mod log', modLogs.size)}
-            `,
-            authorIconURL: avatarURL,
-            title: ' •  ID:',
-            keyTitle: { prefix: 'type' },
-            keysExclude: ['updatedAt', 'guild', ...(user ? ['modId', 'modTag'] : [null])],
-            useDocId: true,
-            components: [filterMenu],
-        });
+        await runCommand(context, user);
     }
+
+    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+        await runCommand(interaction, interaction.targetUser);
+    }
+}
+
+async function runCommand(
+    context: CommandContext<true> | CommandoUserContextMenuCommandInteraction, user: User | null
+): Promise<void> {
+    const { guild } = context;
+    if (!guild) return;
+    const db = guild.database.moderations;
+
+    const modLogs = await db.fetchMany(user ? { modId: user.id } : {});
+    if (modLogs.size === 0) {
+        await replyAll(context, basicEmbed({
+            color: 'Blue',
+            emoji: 'info',
+            description: 'There are no moderation logs.',
+        }));
+        return;
+    }
+
+    const message = 'isMessage' in context && context.isMessage() ? context : await context.fetchReply();
+
+    const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
+        .setCustomId(`${message.id}:menu`)
+        .setMaxValues(1).setMinValues(1)
+        .setPlaceholder('Filter...')
+        .setOptions([
+            { label: 'All', value: 'all', emoji: '🎲' },
+            { label: 'Bans', value: 'ban', emoji: '822644311140204554' },
+            { label: 'Soft bans', value: 'soft-ban', emoji: '🔨' },
+            { label: 'Temp bans', value: 'temp-ban', emoji: '⏲' },
+            { label: 'Kicks', value: 'kick', emoji: '🥾' },
+            { label: 'Mutes', value: 'mute', emoji: '🔇' },
+            { label: 'Warns', value: 'warn', emoji: '⚠' },
+        ])
+    );
+
+    const avatarURL = user?.displayAvatarURL({ forceStatic: false }) || guild.iconURL({ forceStatic: false });
+
+    await generateEmbed(context, modLogs.toJSON(), {
+        authorName: oneLine`
+            ${user ? `${user.username} has` : 'There\'s'}
+            ${pluralize('mod log', modLogs.size)}
+        `,
+        authorIconURL: avatarURL,
+        title: ' •  ID:',
+        keyTitle: { prefix: 'type' },
+        keysExclude: ['updatedAt', 'guild', ...(user ? ['modId', 'modTag'] : [null])],
+        useDocId: true,
+        components: [filterMenu],
+    });
 }

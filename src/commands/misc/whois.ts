@@ -67,11 +67,9 @@ export default class WhoIsCommand extends Command<boolean, RawArgs> {
     }
 
     public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
         const userInfo = await mapUserInfo(interaction, interaction.targetUser);
-        await interaction.reply({
-            embeds: [userInfo],
-            ephemeral: true,
-        });
+        await replyAll(interaction, userInfo);
     }
 }
 

@@ -88,6 +88,10 @@
         ],
         "no-duplicate-imports": [
             "error"
+        ],
+        "max-depth": [
+            "error",
+            3
         ]
     },
     "overrides": [

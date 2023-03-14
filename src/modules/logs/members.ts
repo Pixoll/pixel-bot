@@ -68,7 +68,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Orange')
             .setAuthor({
-                name: 'User left', iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: 'User left',
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 1024 }))
             .setDescription(`${user.toString()} ${tag}`)
@@ -99,7 +100,8 @@ export default function (client: CommandoClient<true>): void {
         const embed = new EmbedBuilder()
             .setColor('Blue')
             .setAuthor({
-                name: 'Updated member', iconURL: newMember.displayAvatarURL({ forceStatic: false }),
+                name: 'Updated member',
+                iconURL: newMember.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(`${user.toString()} ${user.tag}`)
             .setFooter({ text: `User ID: ${id}` })

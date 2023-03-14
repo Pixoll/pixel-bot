@@ -65,7 +65,8 @@ async function sendReminders(client: CommandoClient<true>, db: DatabaseManager<R
         const embed = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: member?.displayName || user.username, iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: member?.displayName || user.username,
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(reminder.reminder)
             .setFooter({ text: `Set about ${time} ago` })

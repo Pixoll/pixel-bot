@@ -76,7 +76,8 @@ export default class ModStatsCommand extends Command<true, RawArgs> {
         const embed = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `${user.username}'s moderation statistics`, iconURL: user.displayAvatarURL({ forceStatic: false }),
+                name: `${user.username}'s moderation statistics`,
+                iconURL: user.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(table)
             .setFooter({ text: `User ID: ${user.id}` })

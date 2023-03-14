@@ -1,5 +1,19 @@
-import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle, User } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    ButtonStyle,
+    User,
+    ApplicationCommandType,
+    MessageCreateOptions,
+} from 'discord.js';
+import {
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoUserContextMenuCommandInteraction,
+    ParseRawArguments,
+} from 'pixoll-commando';
 import { replyAll } from '../../utils';
 
 const args = [{
@@ -24,32 +38,45 @@ export default class AvatarCommand extends Command<boolean, RawArgs> {
             examples: ['avatar Pixoll'],
             args,
             autogenerateSlashCommand: true,
+            contextMenuCommandTypes: [ApplicationCommandType.User],
         });
     }
 
     public async run(context: CommandContext, { user: passedUser }: ParsedArgs): Promise<void> {
         const user = passedUser as User ?? context.author;
-
-        let avatarUrl = user.displayAvatarURL({ forceStatic: false, size: 2048 });
-        if (/\.webp/.test(avatarUrl)) {
-            avatarUrl = user.displayAvatarURL({ extension: 'png', size: 2048 });
-        }
-
-        const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
-            .setAuthor({
-                name: user.tag, iconURL: user.displayAvatarURL({ forceStatic: false }),
-            })
-            .setImage(avatarUrl)
-            .setTimestamp();
-
-        const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel('Download')
-                .setURL(avatarUrl)
-            );
-
-        await replyAll(context, { embeds: [embed], components: [row] });
+        await replyAll(context, mapAvatarData(user));
     }
+
+    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+        await replyAll(interaction, mapAvatarData(interaction.targetUser));
+    }
+}
+
+function mapAvatarData(user: User): Pick<MessageCreateOptions, 'components' | 'embeds'> {
+    let avatarUrl = user.displayAvatarURL({ forceStatic: false, size: 2048 });
+    if (/\.webp/.test(avatarUrl)) {
+        avatarUrl = user.displayAvatarURL({ extension: 'png', size: 2048 });
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor('#4c9f4c')
+        .setAuthor({
+            name: user.tag,
+            iconURL: user.displayAvatarURL({ forceStatic: false }),
+        })
+        .setImage(avatarUrl)
+        .setTimestamp();
+
+    const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
+            .setLabel('Download')
+            .setURL(avatarUrl)
+        );
+
+    return {
+        embeds: [embed],
+        components: [row],
+    };
 }

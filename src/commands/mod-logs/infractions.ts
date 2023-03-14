@@ -1,5 +1,11 @@
-import { ActionRowBuilder, StringSelectMenuBuilder } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { ActionRowBuilder, ApplicationCommandType, StringSelectMenuBuilder, User } from 'discord.js';
+import {
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoUserContextMenuCommandInteraction,
+    ParseRawArguments,
+} from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
 
 const args = [{
@@ -24,48 +30,61 @@ export default class InfractionsCommand extends Command<true, RawArgs> {
             guildOnly: true,
             args,
             autogenerateSlashCommand: true,
+            contextMenuCommandTypes: [ApplicationCommandType.User],
         });
     }
 
     public async run(context: CommandContext<true>, { user }: ParsedArgs): Promise<void> {
-        const { guild } = context;
-        const db = guild.database.moderations;
-
-        const mods = await db.fetchMany({ userId: user.id });
-        if (mods.size === 0) {
-            await replyAll(context, basicEmbed({
-                color: 'Blue',
-                emoji: 'info',
-                description: 'That user has no infractions.',
-            }));
-            return;
-        }
-
-        const message = context.isMessage() ? context : await context.fetchReply();
-
-        const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
-            .setCustomId(`${message.id}:menu`)
-            .setMaxValues(1).setMinValues(1)
-            .setPlaceholder('Filter...')
-            .setOptions([
-                { label: 'All', value: 'all', emoji: '🎲' },
-                { label: 'Bans', value: 'ban', emoji: '822644311140204554' },
-                { label: 'Soft bans', value: 'soft-ban', emoji: '🔨' },
-                { label: 'Temp bans', value: 'temp-ban', emoji: '⏲' },
-                { label: 'Kicks', value: 'kick', emoji: '🥾' },
-                { label: 'Mutes', value: 'mute', emoji: '🔇' },
-                { label: 'Warns', value: 'warn', emoji: '⚠' },
-            ])
-        );
-
-        await generateEmbed(context, mods.toJSON(), {
-            authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
-            authorIconURL: user.displayAvatarURL({ forceStatic: false }),
-            title: ' •  ID:',
-            keyTitle: { prefix: 'type' },
-            keysExclude: ['updatedAt', 'guild', 'userId', 'userTag'],
-            useDocId: true,
-            components: [filterMenu],
-        });
+        await runCommand(context, user);
     }
+
+    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+        await runCommand(interaction, interaction.targetUser);
+    }
+}
+
+async function runCommand(
+    context: CommandContext<true> | CommandoUserContextMenuCommandInteraction, user: User
+): Promise<void> {
+    const { guild } = context;
+    if (!guild) return;
+    const db = guild.database.moderations;
+
+    const mods = await db.fetchMany({ userId: user.id });
+    if (mods.size === 0) {
+        await replyAll(context, basicEmbed({
+            color: 'Blue',
+            emoji: 'info',
+            description: 'That user has no infractions.',
+        }));
+        return;
+    }
+
+    const message = 'isMessage' in context && context.isMessage() ? context : await context.fetchReply();
+
+    const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
+        .setCustomId(`${message.id}:menu`)
+        .setMaxValues(1).setMinValues(1)
+        .setPlaceholder('Filter...')
+        .setOptions([
+            { label: 'All', value: 'all', emoji: '🎲' },
+            { label: 'Bans', value: 'ban', emoji: '822644311140204554' },
+            { label: 'Soft bans', value: 'soft-ban', emoji: '🔨' },
+            { label: 'Temp bans', value: 'temp-ban', emoji: '⏲' },
+            { label: 'Kicks', value: 'kick', emoji: '🥾' },
+            { label: 'Mutes', value: 'mute', emoji: '🔇' },
+            { label: 'Warns', value: 'warn', emoji: '⚠' },
+        ])
+    );
+
+    await generateEmbed(context, mods.toJSON(), {
+        authorName: `${user.username} has ${pluralize('infraction', mods.size)}`,
+        authorIconURL: user.displayAvatarURL({ forceStatic: false }),
+        title: ' •  ID:',
+        keyTitle: { prefix: 'type' },
+        keysExclude: ['updatedAt', 'guild', 'userId', 'userTag'],
+        useDocId: true,
+        components: [filterMenu],
+    });
 }

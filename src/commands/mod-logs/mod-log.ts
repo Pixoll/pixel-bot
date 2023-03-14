@@ -113,7 +113,8 @@ export default class ModLogCommand extends Command<true, RawArgs> {
         const modLogInfo = new EmbedBuilder()
             .setColor('#4c9f4c')
             .setAuthor({
-                name: `Mod log ${modLog._id}`, iconURL: user?.displayAvatarURL({ forceStatic: false }),
+                name: `Mod log ${modLog._id}`,
+                iconURL: user?.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(stripIndent`
                 **Type:** ${capitalize(modLog.type)}
