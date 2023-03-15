@@ -264,10 +264,10 @@ export function abcOrder(a: string, b: string): number {
 /**
  * Parses a string to have code block style
  * @param text The string to parse
- * @param lang The language to use for this block
+ * @param language The language to use for this block
  */
-export function code(text: string, lang = ''): string {
-    return `\`\`\`${lang}\n${escapeCodeBlock(text)}\n\`\`\``;
+export function code<C extends string, L extends string = ''>(text: C, language?: L): `\`\`\`${L}\n${C}\n\`\`\`` {
+    return `\`\`\`${language ?? ''}\n${escapeCodeBlock(text)}\n\`\`\`` as `\`\`\`${L}\n${C}\n\`\`\``;
 }
 
 /**
@@ -1312,7 +1312,9 @@ export async function parseArgDate<T extends Date | number>(
     return resultDate as T;
 }
 
-export function djsLocaleToGoogle(locale?: Locale): GoogleLanguageId | undefined {
+export function djsLocaleToGoogle(
+    locale?: Locale
+): ('en' | 'es' | 'pt' | 'sv' | GoogleLanguageId & LocaleString) | undefined {
     if (!locale) return;
     const lang = locale as LocaleString;
     if (Util.equals(lang, ['en-GB', 'en-US'])) return 'en';
