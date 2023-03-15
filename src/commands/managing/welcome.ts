@@ -10,7 +10,7 @@ import {
     ParseRawArguments,
     WelcomeSchema,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, replyAll } from '../../utils';
+import { basicEmbed, getSubCommand, pixelColor, replyAll } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -117,7 +117,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
 
         const { guild } = context;
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${guild.name}'s welcome message`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

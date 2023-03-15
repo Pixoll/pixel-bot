@@ -1,6 +1,6 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { deepCopy, replyAll } from '../../utils';
+import { deepCopy, pixelColor, replyAll } from '../../utils';
 
 function sliceEmojis(emojis: string[]): string[][] {
     const dummy: string[] = [];
@@ -41,7 +41,7 @@ export default class EmojisCommand extends Command<true> {
         const maxEmojis = maxEmojiAmountMap[guild.premiumTier];
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${guild.name}'s emojis`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

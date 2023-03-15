@@ -17,7 +17,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, replyAll } from '../../utils';
+import { basicEmbed, getSubCommand, pixelColor, replyAll } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -280,7 +280,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
         const icon = buffer ? new AttachmentBuilder(buffer, { name: 'icon.png' }) : null;
 
         const serverInfo = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `Server IP: ${ip}`,
                 iconURL: 'attachment://icon.png',
@@ -340,7 +340,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
         const { motd, players, version } = status;
 
         const serverInfo = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({ name: `Server IP: ${ip}` })
             .addFields({
                 name: 'MOTD',

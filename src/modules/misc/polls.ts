@@ -1,5 +1,6 @@
 import { EmbedBuilder, ChannelType, GuildTextBasedChannel } from 'discord.js';
 import { CommandoClient, CommandoGuild, JSONIfySchema, PollSchema } from 'pixoll-commando';
+import { pixelColor } from '../../utils';
 
 /** This module manages polls. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -56,7 +57,7 @@ async function handlePoll(
         ? 'It seems like no one voted on this poll...' : null;
 
     const pollEmbed = new EmbedBuilder()
-        .setColor('#4c9f4c')
+        .setColor(pixelColor)
         .setAuthor({
             name: 'The poll has ended!',
             iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

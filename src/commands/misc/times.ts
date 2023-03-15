@@ -14,7 +14,7 @@ import {
     CommandoAutocompleteInteraction,
     Util,
 } from 'pixoll-commando';
-import { abcOrder, pagedEmbed, replyAll, parseArgDate } from '../../utils';
+import { abcOrder, pagedEmbed, replyAll, parseArgDate, pixelColor } from '../../utils';
 
 const timeZones = new Collection([
     ['Pacific/Apia', 'Samoa'],
@@ -130,7 +130,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
             const clock = hour - (hour > 12 ? 12 : 0);
 
             const embed = new EmbedBuilder()
-                .setColor('#4c9f4c')
+                .setColor(pixelColor)
                 .setTitle(`:clock${clock}: Time in ${city}`)
                 .setDescription(stripIndent`
                     **Time:** ${time}
@@ -157,7 +157,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
         const clock = hours - (hours > 12 ? 12 : 0) || 12;
 
         const base = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setTitle(`:clock${clock}: Times around the world`)
             .setTimestamp()
             .toJSON();

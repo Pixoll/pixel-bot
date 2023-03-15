@@ -1,7 +1,7 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { CommandoClient, CommandoTextChannel } from 'pixoll-commando';
-import { customEmoji, hyperlink } from '../../utils';
+import { customEmoji, hyperlink, pixelColor } from '../../utils';
 
 /** Sends a message when the bot joins a guild. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -34,7 +34,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         const topgg = 'https://top.gg/bot/802267523058761759';
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setTitle(`Thanks for adding ${user.username}!`)
             .setDescription('Here\'s some useful information about the bot.')
             .addFields({

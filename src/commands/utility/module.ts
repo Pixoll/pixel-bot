@@ -15,7 +15,7 @@ import {
     JSONIfySchema,
 } from 'pixoll-commando';
 import { ParsedModuleData, RawAuditLogName, RawModuleName } from '../../types';
-import { basicEmbed, addDashes, replyAll, removeDashes, isTrue } from '../../utils';
+import { basicEmbed, addDashes, replyAll, removeDashes, isTrue, pixelColor } from '../../utils';
 
 const modules: GuildModule[] = [];
 const auditLogs: GuildAuditLog[] = [];
@@ -195,7 +195,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
         const moduleStatus = isTopLevelModuleEnabled ? 'Enabled' : 'Disabled';
 
         const diagnose = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `Status of ${type}: ${subModule || moduleName}`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

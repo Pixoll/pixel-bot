@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { replyAll } from '../../utils';
+import { pixelColor, replyAll } from '../../utils';
 
 export default class ServerIconCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -23,7 +23,7 @@ export default class ServerIconCommand extends Command<true> {
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: guild.name,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

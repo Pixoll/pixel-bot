@@ -11,7 +11,7 @@ import {
     RuleSchema,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, replyAll, getSubCommand } from '../../utils';
+import { basicEmbed, replyAll, getSubCommand, pixelColor } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -130,7 +130,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
         const { guild } = context;
 
         const ruleEmbed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${guild.name}'s rules`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

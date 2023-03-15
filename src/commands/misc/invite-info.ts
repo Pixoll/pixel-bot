@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { timestamp, basicEmbed, replyAll } from '../../utils';
+import { timestamp, basicEmbed, replyAll, pixelColor } from '../../utils';
 
 const args = [{
     key: 'invite',
@@ -62,7 +62,7 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
             : `**Members:** ${memberCount}`;
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: (!channel?.isDMBased() ? guild?.name : channel?.name) ?? '',
                 iconURL: (!channel?.isDMBased()

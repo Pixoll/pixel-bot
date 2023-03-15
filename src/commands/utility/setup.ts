@@ -29,6 +29,7 @@ import {
     removeRepeated,
     parseArgInput,
     validateArgInput,
+    pixelColor,
 } from '../../utils';
 
 const args = [{
@@ -408,7 +409,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         const lockdownChannels = data.lockChannels?.map(id => `<#${id}>`).join(' ') || 'None';
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${guild.name}'s setup data`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

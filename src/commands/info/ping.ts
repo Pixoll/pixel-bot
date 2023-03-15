@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, Message } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, pixelColor, replyAll } from '../../utils';
 
 export default class PingCommand extends Command {
     public constructor(client: CommandoClient) {
@@ -31,7 +31,7 @@ export default class PingCommand extends Command {
 
         const type = isMessage ? 'Messages' : 'Interactions';
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setTitle('🏓 Pong!')
             .setDescription(stripIndent`
                 **${type} ping:** ${roundtrip}ms

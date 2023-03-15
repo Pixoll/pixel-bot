@@ -1,7 +1,7 @@
 import { prettyMs } from 'better-ms';
 import { EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { replyAll } from '../../utils';
+import { pixelColor, replyAll } from '../../utils';
 
 /**
  * Formats the bytes to its most divisible point
@@ -47,7 +47,7 @@ export default class StatsCommand extends Command {
         const maxMemory = formatBytes(rss, 2);
 
         const stats = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${user.username}'s stats`,
                 iconURL: user.displayAvatarURL({ forceStatic: false }),

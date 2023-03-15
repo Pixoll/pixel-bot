@@ -41,7 +41,13 @@ import { transform, isEqual, isObject, capitalize } from 'lodash';
 import { stripIndent } from 'common-tags';
 import { prettyMs } from 'better-ms';
 import { AnyMessage, RawModuleName } from '../types';
-import { defaultGenerateEmbedOptions, GoogleLanguageId, moderatorPermissions, validateUrlPattern } from './constants';
+import {
+    defaultGenerateEmbedOptions,
+    GoogleLanguageId,
+    moderatorPermissions,
+    pixelColor,
+    validateUrlPattern,
+} from './constants';
 
 //#region Types
 
@@ -354,7 +360,7 @@ export function customEmoji(emoji?: CustomEmoji, animated = false): string {
  * @param options Options for the embed.
  */
 export function basicEmbed(options: BasicEmbedOptions): EmbedBuilder {
-    const { color = '#4c9f4c', description, emoji, fieldName, fieldValue, footer } = options;
+    const { color = pixelColor, description, emoji, fieldName, fieldValue, footer } = options;
 
     if (!description && !fieldName) throw new Error('The argument description or fieldName must be specified');
 

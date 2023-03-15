@@ -28,6 +28,7 @@ import {
     addOrdinalSuffix,
     parseArgInput,
     hyperlink,
+    pixelColor,
 } from '../../utils';
 
 const rolesAmount = 10;
@@ -118,7 +119,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setDescription(content);
 
         const buttons = [];

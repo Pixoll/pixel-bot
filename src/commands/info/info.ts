@@ -2,7 +2,7 @@ import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, version as djsVersion } from 'discord.js';
 import { Command, CommandContext, CommandoClient, version as pixComVersion } from 'pixoll-commando';
-import { replyAll, hyperlink } from '../../utils';
+import { replyAll, hyperlink, pixelColor } from '../../utils';
 
 declare function require<T>(id: string): T;
 const { version, description } = require<{ version: string; description: string }>('../../../package.json');
@@ -29,7 +29,7 @@ export default class InfoCommand extends Command {
         const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString();
 
         const info = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setTitle(`About ${user.username}`)
             .setDescription(stripIndent`
                 **Serving ${users} users across ${guilds.size} servers!**

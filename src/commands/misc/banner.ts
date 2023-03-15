@@ -14,7 +14,7 @@ import {
     ApplicationCommandType,
     MessageCreateOptions,
 } from 'discord.js';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, pixelColor, replyAll } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -68,7 +68,7 @@ function mapBannerData(user: User): Pick<MessageCreateOptions, 'components' | 'e
     }
 
     const embed = new EmbedBuilder()
-        .setColor('#4c9f4c')
+        .setColor(pixelColor)
         .setAuthor({
             name: user.tag,
             iconURL: user.displayAvatarURL({ forceStatic: false }),

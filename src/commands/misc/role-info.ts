@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { getKeyPerms, hyperlink, replyAll } from '../../utils';
+import { getKeyPerms, hyperlink, pixelColor, replyAll } from '../../utils';
 
 const args = [{
     key: 'role',
@@ -36,7 +36,7 @@ export default class RoleInfoCommand extends Command<true, RawArgs> {
         const permissions = getKeyPerms(role);
 
         const roleInfo = new EmbedBuilder()
-            .setColor(color || '#4c9f4c')
+            .setColor(color || pixelColor)
             .setAuthor({ name: `Information for role: ${name}` })
             .setDescription(stripIndent`
                 **Mention:** \`${role.toString()}\`

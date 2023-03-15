@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
 import { Command, CommandContext, CommandoClient, ModuleSchema, Util, JSONIfySchema } from 'pixoll-commando';
-import { replyAll, customEmoji, basicEmbed, addDashes, abcOrder } from '../../utils';
+import { replyAll, customEmoji, basicEmbed, addDashes, abcOrder, pixelColor } from '../../utils';
 
 function getStatusString(isOn?: boolean): string {
     if (isOn === true) return `Enabled ${customEmoji('online')}`;
@@ -56,7 +56,7 @@ export default class ModulesCommand extends Command<true> {
         const moduleStatsString = mapModuleData(data);
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${guild.name}'s modules and sub-modules`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

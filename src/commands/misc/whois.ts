@@ -8,7 +8,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { getKeyPerms, timestamp, customEmoji, replyAll } from '../../utils';
+import { getKeyPerms, timestamp, customEmoji, replyAll, pixelColor } from '../../utils';
 
 const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
     ActiveDeveloper: null,
@@ -94,7 +94,7 @@ async function mapUserInfo(
     const avatar = user.displayAvatarURL({ forceStatic: false, size: 2048 });
 
     const userInfo = new EmbedBuilder()
-        .setColor('#4c9f4c')
+        .setColor(pixelColor)
         .setAuthor({
             name: user.tag,
             iconURL: user.displayAvatarURL({ forceStatic: false }),

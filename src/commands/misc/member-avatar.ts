@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, pixelColor, replyAll } from '../../utils';
 
 const args = [{
     key: 'member',
@@ -52,7 +52,7 @@ export default class MemberAvatarCommand extends Command<true, RawArgs> {
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${user.tag} • AKA ${displayName}`,
                 iconURL: user.displayAvatarURL({ forceStatic: false }),

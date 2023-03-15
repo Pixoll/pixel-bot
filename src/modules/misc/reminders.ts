@@ -2,7 +2,7 @@ import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, TextBasedChannel, ChannelType, MessageCreateOptions } from 'discord.js';
 import { CommandoClient, DatabaseManager, ReminderSchema, Util } from 'pixoll-commando';
-import { basicEmbed, fetchPartial, hyperlink } from '../../utils';
+import { basicEmbed, fetchPartial, hyperlink, pixelColor } from '../../utils';
 
 /** This module manages reminders. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -63,7 +63,7 @@ async function sendReminders(client: CommandoClient<true>, db: DatabaseManager<R
         const time = prettyMs(Date.now() - reminder.createdAt.valueOf(), { verbose: true, unitCount: 1 });
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: member?.displayName || user.username,
                 iconURL: user.displayAvatarURL({ forceStatic: false }),

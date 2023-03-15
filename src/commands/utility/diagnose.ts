@@ -19,7 +19,7 @@ import {
     Util,
     CommandResolvable,
 } from 'pixoll-commando';
-import { replyAll, getSubCommand } from '../../utils';
+import { replyAll, getSubCommand, pixelColor } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -152,7 +152,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
         const avatar = guild?.iconURL({ forceStatic: false }) || user.displayAvatarURL({ forceStatic: false });
 
         const diagnose = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${name}'s disabled commands and groups`,
                 iconURL: avatar,
@@ -182,7 +182,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
         const avatar = guild?.iconURL({ forceStatic: false }) || client.user.displayAvatarURL({ forceStatic: false });
 
         const diagnose = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${global} of command: ${command.name}`,
                 iconURL: avatar,
@@ -230,7 +230,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             || client.user.displayAvatarURL({ forceStatic: false });
 
         const diagnose = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${global} of group: ${group.name}`,
                 iconURL: avatar,

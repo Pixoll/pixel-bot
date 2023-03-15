@@ -2,6 +2,8 @@ import { PermissionsString } from 'discord.js';
 import { default as importedEmojiRegex } from 'emoji-regex';
 import { GenerateEmbedOptions } from './functions';
 
+export const pixelColor = '#4c9f4c';
+
 export const moderatorPermissions: readonly PermissionsString[] = [
     'BanMembers',
     'DeafenMembers',
@@ -33,7 +35,7 @@ export const defaultGenerateEmbedOptions: Required<Omit<
 > = {
     ephemeral: false,
     number: 6,
-    color: '#4c9f4c',
+    color: pixelColor,
     useDescription: false,
     title: '',
     inline: false,

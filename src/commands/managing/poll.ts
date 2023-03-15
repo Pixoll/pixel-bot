@@ -20,6 +20,7 @@ import {
     parseArgDate,
     emojiRegex,
     hyperlink,
+    pixelColor,
 } from '../../utils';
 
 const args = [{
@@ -290,7 +291,7 @@ export default class PollCommand extends Command<true, RawArgs> {
             ? 'It seems like no one voted on this poll...' : null;
 
         const pollEmbed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: 'The poll has ended!',
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

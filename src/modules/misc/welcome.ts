@@ -1,6 +1,6 @@
 import { ChannelType, EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled } from '../../utils';
+import { isGuildModuleEnabled, pixelColor } from '../../utils';
 
 /** This module manages welcome messages. */
 export default function (client: CommandoClient<true>): void {
@@ -22,7 +22,7 @@ export default function (client: CommandoClient<true>): void {
             .replace(/{member_count}/g, guild.memberCount.toString());
 
         const embed = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `Welcome to ${guild.name}!`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,

@@ -10,7 +10,7 @@ import {
     ModerationSchema,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { basicEmbed, confirmButtons, timestamp, replyAll } from '../../utils';
+import { basicEmbed, confirmButtons, timestamp, replyAll, pixelColor } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -111,7 +111,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
         const moderator = await users.fetch(modLog.modId).catch(() => null);
 
         const modLogInfo = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `Mod log ${modLog._id}`,
                 iconURL: user?.displayAvatarURL({ forceStatic: false }),

@@ -21,7 +21,15 @@ import {
     CommandoGuild,
     CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
-import { moderatorPermissions, pagedEmbed, replyAll, pluralize, TemplateEmbedResult, hyperlink } from '../../utils';
+import {
+    moderatorPermissions,
+    pagedEmbed,
+    replyAll,
+    pluralize,
+    TemplateEmbedResult,
+    hyperlink,
+    pixelColor,
+} from '../../utils';
 
 declare function require<T>(id: string): T;
 const { version } = require<{ version: string }>('../../../package.json');
@@ -192,7 +200,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
         const commandList = getCommandsList(context, groups);
 
         const base = new EmbedBuilder()
-            .setColor('#4c9f4c')
+            .setColor(pixelColor)
             .setAuthor({
                 name: `${user.username}'s help`,
                 iconURL: user.displayAvatarURL({ forceStatic: false }),
@@ -336,7 +344,7 @@ function commandInfo(client: CommandoClient<true>, command: Command, guild: Comm
     const userPermissions = command.userPermissions?.map(perm => Util.permissions[perm]).join(', ');
 
     const embed = new EmbedBuilder()
-        .setColor('#4c9f4c')
+        .setColor(pixelColor)
         .setAuthor({
             name: `Information for command: ${name} ${deprecated ? '(Deprecated)' : ''}`,
             iconURL: user.displayAvatarURL({ forceStatic: false }),
