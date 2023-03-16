@@ -42,8 +42,8 @@ import { stripIndent } from 'common-tags';
 import { prettyMs } from 'better-ms';
 import { AnyMessage, RawModuleName } from '../types';
 import {
+    BingLanguageId,
     defaultGenerateEmbedOptions,
-    GoogleLanguageId,
     moderatorPermissions,
     pixelColor,
     validateUrlPattern,
@@ -1312,12 +1312,14 @@ export async function parseArgDate<T extends Date | number>(
     return resultDate as T;
 }
 
-export function djsLocaleToGoogle(
-    locale?: Locale
-): ('en' | 'es' | 'pt' | 'sv' | GoogleLanguageId & LocaleString) | undefined {
-    if (!locale) return;
+export function djsLocaleToBing(
+    locale: Locale
+): 'en' | 'es' | 'nb' | 'pt' | 'sv' | 'zh-Hans' | 'zh-Hant' | (BingLanguageId & LocaleString) {
     const lang = locale as LocaleString;
     if (Util.equals(lang, ['en-GB', 'en-US'])) return 'en';
+    if (lang === 'zh-CN') return 'zh-Hans';
+    if (lang === 'zh-TW') return 'zh-Hant';
+    if (lang === 'no') return 'nb';
     if (lang === 'pt-BR') return 'pt';
     if (lang === 'es-ES') return 'es';
     if (lang === 'sv-SE') return 'sv';

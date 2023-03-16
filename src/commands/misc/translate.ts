@@ -1,4 +1,4 @@
-import { oneLine, stripIndent } from 'common-tags';
+import { stripIndent } from 'common-tags';
 import {
     ApplicationCommandOptionChoiceData as ChoiceData,
     ApplicationCommandOptionType,
@@ -12,13 +12,12 @@ import {
     CommandoClient,
     CommandoMessageContextMenuCommandInteraction,
     ParseRawArguments,
-    Util,
 } from 'pixoll-commando';
 import {
+    BingLanguageId,
+    bingSupportedLanguages,
     code,
-    djsLocaleToGoogle,
-    GoogleLanguageId,
-    googleSupportedLanguages,
+    djsLocaleToBing,
     hyperlink,
     pixelColor,
     replyAll,
@@ -29,16 +28,17 @@ const args = [{
     key: 'from',
     prompt: 'What language do you want to translate from?',
     type: 'string',
-    oneOf: Object.keys(googleSupportedLanguages),
+    oneOf: Object.keys(bingSupportedLanguages),
 }, {
     key: 'to',
     prompt: 'What language do you want to translate to?',
     type: 'string',
-    oneOf: Object.keys(googleSupportedLanguages),
+    oneOf: Object.keys(bingSupportedLanguages),
 }, {
     key: 'text',
     prompt: 'What do you want to translate?',
     type: 'string',
+    max: 1000,
 }] as const;
 
 type RawArgs = typeof args;
@@ -50,14 +50,15 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
             name: 'translate',
             group: 'misc',
             description: 'Translate text from one language to another.',
+            /* eslint-disable indent */
             detailedDescription: stripIndent`
                 \`from\` and \`to\` have to be a language ID.
-                Available language IDs: ${Object.keys(googleSupportedLanguages).sort().map(k => `\`${k}\``).join(', ')}.
-                ${oneLine`
-                Visit ${hyperlink('this website', 'https://cloud.google.com/translate/docs/languages')} to know
-                which ID corresponds to what language.
-                `}
+                Available language IDs: ${Object.keys(bingSupportedLanguages).sort().map(k => `\`${k}\``).join(', ')}.
+                Visit ${hyperlink(
+                'this page', 'https://github.com/plainheart/bing-translate-api/blob/master/src/lang.json'
+            )} to know which ID corresponds to what language.
             `,
+            /* eslint-enable indent */
             format: 'translate [from] [to] [text]',
             examples: [
                 'translate en es You\'re cool!',
@@ -70,6 +71,7 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
                 type: ApplicationCommandOptionType.String,
                 name: 'text',
                 description: 'What do you want to translate?',
+                maxLength: 1000,
                 required: true,
             }, {
                 type: ApplicationCommandOptionType.String,
@@ -96,7 +98,7 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
 
     public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const query = interaction.options.getFocused().toLowerCase();
-        const choices = Object.entries(Util.omit(googleSupportedLanguages, ['zh', 'iw', 'jw']))
+        const choices = Object.entries(bingSupportedLanguages)
             .filter(([key, value]) => `[${key}] ${value}`.toLowerCase().includes(query))
             .slice(0, 25)
             .map<ChoiceData<string>>(([key, value]) => ({
@@ -111,24 +113,25 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
 async function runCommand(
     context: CommandContext | CommandoMessageContextMenuCommandInteraction,
     text: string,
-    from?: GoogleLanguageId | null,
-    to?: GoogleLanguageId | null
+    from?: BingLanguageId | null,
+    to?: BingLanguageId | null
 ): Promise<void> {
-    from ??= 'auto';
-    to ??= 'locale' in context ? djsLocaleToGoogle(context.locale) : 'en';
+    const outputLang: BingLanguageId = to ?? ('locale' in context ? djsLocaleToBing(context.locale) : 'en');
 
-    const translation = await translate(text, { from, to });
-    console.log(text, translation);
-    const inputLang = translation.raw.ld_result.srclangs[0] as GoogleLanguageId;
+    const result = await translate(text, { from, to: outputLang });
+    const inputLang = !from || from === 'auto-detect' ? result.language.from as BingLanguageId : from;
 
     const translatorEmbed = new EmbedBuilder()
         .setColor(pixelColor)
         .addFields({
-            name: `Input - Language: ${googleSupportedLanguages[inputLang]}`,
+            name: `Input - Language: ${bingSupportedLanguages[inputLang]}`,
             value: code(text),
         }, {
-            name: `Output - Language: ${googleSupportedLanguages[to ?? 'en']}`,
-            value: code(translation.text),
+            name: `Output - Language: ${bingSupportedLanguages[outputLang]}`,
+            value: code(result.translation),
+        })
+        .setFooter({
+            text: 'Translated using Bing Translator',
         })
         .setTimestamp();
 
