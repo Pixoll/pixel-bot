@@ -1,6 +1,6 @@
 import { lang } from 'bing-translate-api';
 import { PermissionsString } from 'discord.js';
-import importedEmojiRegex from 'emoji-regex';
+import defaultEmojiRegex from 'emoji-regex';
 import { GenerateEmbedOptions } from './functions';
 
 export const pixelColor = '#4c9f4c';
@@ -50,7 +50,7 @@ export const defaultGenerateEmbedOptions: Required<Omit<
     skipMaxButtons: false,
 };
 
-export const emojiRegex = new RegExp(`${importedEmojiRegex().source}|\\d{17,20}`, 'g');
+export const emojiRegex = new RegExp(`${defaultEmojiRegex().source}|\\d{17,20}`, 'g');
 
 export const sevenDays = 604_800;
 

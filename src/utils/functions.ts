@@ -1325,3 +1325,9 @@ export function djsLocaleToBing(
     if (lang === 'sv-SE') return 'sv';
     return lang;
 }
+
+export function mergeRegexps(flags: RegExpFlag[], ...regexps: Array<RegExp | string>): RegExp {
+    return new RegExp(regexps.map(regex =>
+        typeof regex === 'string' ? `(?:${regex})` : `(?:${regex.source})`
+    ).join('|'), flags.join(''));
+}
