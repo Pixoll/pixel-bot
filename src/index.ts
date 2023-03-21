@@ -1,5 +1,6 @@
 console.log('Starting bot...');
 
+import './overrides';
 import { ActivityType, GatewayIntentBits, OAuth2Scopes, Partials, PermissionFlagsBits } from 'discord.js';
 import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
