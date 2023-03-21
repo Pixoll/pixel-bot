@@ -1327,7 +1327,9 @@ export function djsLocaleToBing(
 }
 
 export function mergeRegexps(flags: RegExpFlag[], ...regexps: Array<RegExp | string>): RegExp {
-    return new RegExp(regexps.map(regex =>
+    const merged = regexps.map(regex =>
         typeof regex === 'string' ? `(?:${regex})` : `(?:${regex.source})`
-    ).join('|'), flags.join(''));
+    ).join('|');
+    if (flags.length === 0) return new RegExp(merged);
+    return new RegExp(merged, flags.join(''));
 }

@@ -28,10 +28,10 @@ import {
     validateURL,
 } from '../../utils';
 
-const timestampRegex = /^<t:\d+(?::\w)>$/g;
-const mentionableRegex = /^<[@#][!&]?\d+>$/g;
-const guildEmojiRegex = /^<:[^ :]+:\d+>$/g;
-const invalidTextQueryRegex = mergeRegexps(['g'],
+const timestampRegex = /<t:\d+(?::\w)>/;
+const mentionableRegex = /<[@#][!&]?\d+>/;
+const guildEmojiRegex = /<:[^ :]+:\d+>/;
+const invalidTextQueryRegex = mergeRegexps([],
     timestampRegex, mentionableRegex, guildEmojiRegex, defaultEmojiRegex
 );
 
@@ -139,7 +139,7 @@ async function runCommand(
     from?: BingLanguageId | null,
     to?: BingLanguageId | null
 ): Promise<void> {
-    if (!validateTextQuery(text)) {
+    if (!isValidTextQuery(text)) {
         await replyAll(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
@@ -173,7 +173,7 @@ async function runCommand(
     });
 }
 
-function validateTextQuery(text: string): boolean {
+function isValidTextQuery(text: string): boolean {
     return !validateURL(text)
-        && !text.split(/ +/g).every(s => invalidTextQueryRegex.test(s));
+        && text.replace(new RegExp(invalidTextQueryRegex, 'g'), '').trim().length !== 0;
 }
