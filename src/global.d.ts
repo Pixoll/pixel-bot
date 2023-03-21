@@ -410,3 +410,11 @@ type TimestampType =
     | 'R'
     | 'T'
     | 't';
+
+type RegExpFlag =
+    | 'g'
+    | 'i'
+    | 'm'
+    | 's'
+    | 'u'
+    | 'y';

@@ -14,15 +14,26 @@ import {
     ParseRawArguments,
 } from 'pixoll-commando';
 import {
+    basicEmbed,
     BingLanguageId,
     bingSupportedLanguages,
     code,
     djsLocaleToBing,
+    emojiRegex as defaultEmojiRegex,
     hyperlink,
+    mergeRegexps,
     pixelColor,
     replyAll,
     translate,
+    validateURL,
 } from '../../utils';
+
+const timestampRegex = /^<t:\d+(?::\w)>$/g;
+const mentionableRegex = /^<[@#][!&]?\d+>$/g;
+const guildEmojiRegex = /^<:[^ :]+:\d+>$/g;
+const invalidTextQueryRegex = mergeRegexps(['g'],
+    timestampRegex, mentionableRegex, guildEmojiRegex, defaultEmojiRegex
+);
 
 const args = [{
     key: 'from',
@@ -93,7 +104,19 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
 
     public async runMessageContextMenu(interaction: CommandoMessageContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
-        await runCommand(interaction, interaction.targetMessage.content);
+
+        const { content } = interaction.targetMessage;
+        if (!content) {
+            await replyAll(interaction, basicEmbed({
+                color: 'Red',
+                emoji: 'cross',
+                fieldName: 'That message has no plain text content.',
+                fieldValue: 'Make sure to not use this command in a message that has only attachments, embeds or stickers.',
+            }));
+            return;
+        }
+
+        await runCommand(interaction, content);
     }
 
     public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
@@ -116,6 +139,16 @@ async function runCommand(
     from?: BingLanguageId | null,
     to?: BingLanguageId | null
 ): Promise<void> {
+    if (!validateTextQuery(text)) {
+        await replyAll(context, basicEmbed({
+            color: 'Red',
+            emoji: 'cross',
+            fieldName: 'That text query is invalid.',
+            fieldValue: 'Make sure to not an URL, mention, timestamp or emoji.',
+        }));
+        return;
+    }
+
     const outputLang: BingLanguageId = to ?? ('locale' in context ? djsLocaleToBing(context.locale) : 'en');
 
     const result = await translate(text, { from, to: outputLang });
@@ -138,4 +171,9 @@ async function runCommand(
     await replyAll(context, {
         embeds: [translatorEmbed],
     });
+}
+
+function validateTextQuery(text: string): boolean {
+    return !validateURL(text)
+        && !text.split(/ +/g).every(s => invalidTextQueryRegex.test(s));
 }
