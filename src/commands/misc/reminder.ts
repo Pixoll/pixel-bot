@@ -8,7 +8,7 @@ import {
     DatabaseManager,
     CommandoMessage,
 } from 'pixoll-commando';
-import { basicEmbed, customEmoji, timestamp, replyAll } from '../../utils';
+import { basicEmbed, customEmoji, timestamp, reply } from '../../utils';
 
 const args = [{
     key: 'time',
@@ -69,7 +69,7 @@ export default class ReminderCommand extends Command<boolean, RawArgs> {
             const arg = this.argsCollector?.args[0];
             const timeResult = await arg?.parse(time.toString(), message).catch(() => null);
             if (!timeResult) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'The time you specified is invalid.',
@@ -97,7 +97,7 @@ export default class ReminderCommand extends Command<boolean, RawArgs> {
 
         await message.react(customEmoji('cross'));
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `I'll remind you ${stamp} for:`,

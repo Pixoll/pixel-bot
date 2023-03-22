@@ -17,7 +17,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, pixelColor, replyAll } from '../../utils';
+import { basicEmbed, getSubCommand, pixelColor, reply } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -149,7 +149,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
         const savedServer = await context.guild.database.mcIps.fetch();
 
         if (!savedServer) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'Please run the `save:java` or `save:bedrock` sub-commands before using this.',
@@ -163,7 +163,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             ? await this.getJavaStatus(ip, port)
             : await this.getBedrockStatus(ip, port);
 
-        await replyAll(context, response);
+        await reply(context, response);
     }
 
     /**
@@ -172,7 +172,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
     protected async runJava(context: CommandContext, ip: string | null, port: number): Promise<void> {
         if (!ip) return;
         const response = await this.getJavaStatus(ip, port);
-        await replyAll(context, response);
+        await reply(context, response);
     }
 
     /**
@@ -181,7 +181,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
     protected async runBedrock(context: CommandContext, ip: string | null, port: number): Promise<void> {
         if (!ip) return;
         const response = await this.getBedrockStatus(ip, port);
-        await replyAll(context, response);
+        await reply(context, response);
     }
 
     /**
@@ -207,7 +207,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             port: port,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: 'Saved Minecraft server data',
@@ -241,7 +241,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             port: port,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: 'Saved Minecraft server data',

@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { pixelColor, replyAll } from '../../utils';
+import { pixelColor, reply } from '../../utils';
 
 export default class ServerIconCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -38,6 +38,6 @@ export default class ServerIconCommand extends Command<true> {
                 .setURL(iconUrl as string)
             );
 
-        await replyAll(context, { embeds: [embed], components: [row] });
+        await reply(context, { embeds: [embed], components: [row] });
     }
 }

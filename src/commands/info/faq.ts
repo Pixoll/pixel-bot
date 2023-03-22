@@ -16,7 +16,7 @@ import {
     basicEmbed,
     basicCollector,
     confirmButtons,
-    replyAll,
+    reply,
     getSubCommand,
     limitStringLength,
 } from '../../utils';
@@ -127,7 +127,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
      */
     protected async runView(context: CommandContext, faqData: Collection<string, JSONIfySchema<FaqSchema>>): Promise<void> {
         if (faqData.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'The FAQ list is empty.',
@@ -175,7 +175,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
 
         await this.db.add({ question, answer });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'The new entry has been added to the FAQ list.',
@@ -194,7 +194,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
         }
 
         if (faqData.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'The FAQ list is empty.',
@@ -204,7 +204,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
 
         const doc = faqData.first(item).pop();
         if (!doc) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That item is invalid inside the FAQ list.',
@@ -214,7 +214,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
 
         await this.db.delete(doc);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `Removed entry ${item} from the FAQ list.`,
@@ -231,7 +231,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
         }
 
         if (faqData.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'The FAQ list is empty.',
@@ -248,7 +248,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
             await this.db.delete(doc);
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'The FAQ list has been cleared.',

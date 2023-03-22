@@ -8,7 +8,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { getKeyPerms, timestamp, customEmoji, replyAll, pixelColor } from '../../utils';
+import { getKeyPerms, timestamp, customEmoji, reply, pixelColor } from '../../utils';
 
 const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
     ActiveDeveloper: null,
@@ -63,13 +63,13 @@ export default class WhoIsCommand extends Command<boolean, RawArgs> {
     public async run(context: CommandContext, { user: passedUser }: ParsedArgs): Promise<void> {
         const user = await (passedUser ?? context.author).fetch();
         const userInfo = await mapUserInfo(context, user);
-        await replyAll(context, userInfo);
+        await reply(context, userInfo);
     }
 
     public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
         const userInfo = await mapUserInfo(interaction, interaction.targetUser);
-        await replyAll(interaction, userInfo);
+        await reply(interaction, userInfo);
     }
 }
 

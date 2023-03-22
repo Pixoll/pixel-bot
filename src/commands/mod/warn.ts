@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { generateDocId, basicEmbed, userException, confirmButtons, replyAll } from '../../utils';
+import { generateDocId, basicEmbed, userException, confirmButtons, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -36,7 +36,7 @@ export default class warnCommand extends Command<true, RawArgs> {
         const { guild, guildId, author } = context;
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -46,12 +46,12 @@ export default class warnCommand extends Command<true, RawArgs> {
 
         const userError = userException(user, author, this as Command);
         if (userError) {
-            await replyAll(context, basicEmbed(userError));
+            await reply(context, basicEmbed(userError));
             return;
         }
 
         if (user.bot) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'You can\'t warn a bot.',
@@ -89,7 +89,7 @@ export default class warnCommand extends Command<true, RawArgs> {
         });
         this.client.emit('guildMemberWarn', guild, author, user, reason);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.tag} has been warned`,

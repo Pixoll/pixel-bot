@@ -6,7 +6,7 @@ import {
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -53,7 +53,7 @@ async function runCommand(
 
     const mods = await db.fetchMany({ userId: user.id });
     if (mods.size === 0) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Blue',
             emoji: 'info',
             description: 'That user has no infractions.',

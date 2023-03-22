@@ -14,7 +14,7 @@ import {
     CommandoAutocompleteInteraction,
     Util,
 } from 'pixoll-commando';
-import { abcOrder, pagedEmbed, replyAll, parseArgDate, pixelColor } from '../../utils';
+import { abcOrder, pagedEmbed, reply, parseArgDate, pixelColor } from '../../utils';
 
 const timeZones = new Collection([
     ['Pacific/Apia', 'Samoa'],
@@ -138,7 +138,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
                 `)
                 .setTimestamp();
 
-            await replyAll(context, embed);
+            await reply(context, embed);
             return;
         }
 

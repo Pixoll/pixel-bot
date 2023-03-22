@@ -15,7 +15,7 @@ import {
     JSONIfySchema,
 } from 'pixoll-commando';
 import { ParsedModuleData, RawAuditLogName, RawModuleName } from '../../types';
-import { basicEmbed, addDashes, replyAll, removeDashes, isTrue, pixelColor } from '../../utils';
+import { basicEmbed, addDashes, reply, removeDashes, isTrue, pixelColor } from '../../utils';
 
 const modules: GuildModule[] = [];
 const auditLogs: GuildAuditLog[] = [];
@@ -150,7 +150,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
         const { guild } = context;
         const data = await guild.database.modules.fetch();
         if (!data) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
@@ -207,7 +207,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             `)
             .setTimestamp();
 
-        await replyAll(context, diagnose);
+        await reply(context, diagnose);
     }
 
     /**
@@ -245,7 +245,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
 
         this.client.emit('moduleStatusChange', guild, target, status ?? false);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Toggled the ${type} \`${target}\``,

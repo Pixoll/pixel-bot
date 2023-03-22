@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, confirmButtons, replyAll } from '../../utils';
+import { basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -47,7 +47,7 @@ export default class UnbanCommand extends Command<true, RawArgs> {
 
         const isBanned = await bans.fetch(user).catch(() => null);
         if (!isBanned) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not banned.',
@@ -67,7 +67,7 @@ export default class UnbanCommand extends Command<true, RawArgs> {
         const data = await active.fetch({ type: 'temp-ban', userId: user.id });
         if (data) await active.delete(data);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.tag} has been unbanned`,

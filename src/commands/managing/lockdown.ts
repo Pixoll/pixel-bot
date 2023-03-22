@@ -17,7 +17,7 @@ import {
     generateEmbed,
     pluralize,
     confirmButtons,
-    replyAll,
+    reply,
     parseArgInput,
     removeRepeated,
     getSubCommand,
@@ -179,7 +179,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         context: CommandContext<true>, savedChannels: CommandoTextChannel[], reason: string
     ): Promise<void> {
         if (savedChannels.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
@@ -196,7 +196,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         const { guild, guildId } = context;
         const { everyone } = guild.roles;
 
-        const replyToEdit = await replyAll(context, basicEmbed({
+        const replyToEdit = await reply(context, basicEmbed({
             color: 'Gold',
             emoji: 'loading',
             description: 'Locking all lockdown channels, please wait...',
@@ -220,7 +220,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         }
 
         if (changesAmount === 0) {
-            await replyAll(context, {
+            await reply(context, {
                 embeds: [basicEmbed({
                     color: 'Gold',
                     description: 'No changes were made.',
@@ -230,7 +230,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await replyAll(context, {
+        await reply(context, {
             embeds: [basicEmbed({
                 color: 'Green',
                 emoji: 'check',
@@ -247,7 +247,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         context: CommandContext<true>, savedChannels: CommandoTextChannel[], reason: string
     ): Promise<void> {
         if (savedChannels.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
@@ -263,7 +263,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
 
         const { guild, guildId } = context;
         const { everyone } = guild.roles;
-        const replyToEdit = await replyAll(context, basicEmbed({
+        const replyToEdit = await reply(context, basicEmbed({
             color: 'Gold',
             emoji: 'loading',
             description: 'Unlocking all lockdown channels, please wait...',
@@ -287,7 +287,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         }
 
         if (changesAmount === 0) {
-            await replyAll(context, {
+            await reply(context, {
                 embeds: [basicEmbed({
                     color: 'Gold',
                     description: 'No changes were made.',
@@ -297,7 +297,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await replyAll(context, {
+        await reply(context, {
             embeds: [basicEmbed({
                 color: 'Green',
                 emoji: 'check',
@@ -312,7 +312,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
      */
     protected async runChannelsView(context: CommandContext<true>, channels: CommandoTextChannel[]): Promise<void> {
         if (channels.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
@@ -339,7 +339,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
     ): Promise<void> {
         const channelsList = removeRepeated([...savedChannels, ...channels]);
         if (channelsList.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'The channels you specified have already been added.',
@@ -358,7 +358,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             await db.update(data, { lockChannels: channelsList });
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been added:',
@@ -376,7 +376,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
         channels: string[]
     ): Promise<void> {
         if (!data || savedChannels.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no lockdown channels, please use the `add` sub-command to add some.',
@@ -386,7 +386,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
 
         const channelsList = channels.filter(id => savedChannels.includes(id));
         if (channelsList.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'The channels you specified have not been added.',
@@ -398,7 +398,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             $pull: { lockChannels: { $in: channelsList } },
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: 'The following lockdown channels have been removed:',

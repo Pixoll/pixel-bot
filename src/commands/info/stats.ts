@@ -1,7 +1,7 @@
 import { prettyMs } from 'better-ms';
 import { EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { pixelColor, replyAll } from '../../utils';
+import { pixelColor, reply } from '../../utils';
 
 /**
  * Formats the bytes to its most divisible point
@@ -71,6 +71,6 @@ export default class StatsCommand extends Command {
             })
             .setTimestamp();
 
-        await replyAll(context, stats);
+        await reply(context, stats);
     }
 }

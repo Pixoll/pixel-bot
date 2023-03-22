@@ -24,7 +24,7 @@ import {
 import {
     moderatorPermissions,
     pagedEmbed,
-    replyAll,
+    reply,
     pluralize,
     TemplateEmbedResult,
     hyperlink,
@@ -193,7 +193,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
                 return;
             }
 
-            await replyAll(context, commandInfo(client, command, guild));
+            await reply(context, commandInfo(client, command, guild));
             return;
         }
 

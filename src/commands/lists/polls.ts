@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, Util } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
 
 export default class PollsCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -16,7 +16,7 @@ export default class PollsCommand extends Command<true> {
         const { guild } = context;
         const pollsData = await guild.database.polls.fetchMany();
         if (pollsData.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no active polls.',

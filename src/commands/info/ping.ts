@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, Message } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { basicEmbed, pixelColor, replyAll } from '../../utils';
+import { basicEmbed, pixelColor, reply } from '../../utils';
 
 export default class PingCommand extends Command {
     public constructor(client: CommandoClient) {
@@ -38,7 +38,7 @@ export default class PingCommand extends Command {
                 **API ping:** ${heartbeat}ms
             `);
 
-        await replyAll(context, {
+        await reply(context, {
             embeds: [embed],
             replyToEdit,
         });

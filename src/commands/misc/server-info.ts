@@ -1,7 +1,7 @@
 import { Command, CommandContext, CommandoClient, CommandoGuild } from 'pixoll-commando';
 import { ChannelType, EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { replyAll } from '../../utils';
+import { reply } from '../../utils';
 
 const boostLevelMap: Record<GuildPremiumTier, string> = {
     [GuildPremiumTier.None]: '0<:boostLVL0:806554204323184692>',
@@ -24,7 +24,7 @@ export default class ServerInfoCommand extends Command<true> {
 
     public async run(context: CommandContext<true>): Promise<void> {
         const serverInfo = await getServerInfo(context.guild);
-        await replyAll(context, serverInfo);
+        await reply(context, serverInfo);
     }
 }
 

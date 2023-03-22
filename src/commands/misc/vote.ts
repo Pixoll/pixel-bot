@@ -1,6 +1,6 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { replyAll } from '../../utils';
+import { reply } from '../../utils';
 
 export default class VoteCommand extends Command {
     public constructor(client: CommandoClient) {
@@ -21,7 +21,7 @@ export default class VoteCommand extends Command {
                 .setURL('https://top.gg/bot/802267523058761759/vote')
             );
 
-        await replyAll(context, {
+        await reply(context, {
             content: 'Vote for the bot with the button below!',
             components: [row],
         });

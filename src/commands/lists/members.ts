@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, abcOrder, replyAll } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, abcOrder, reply } from '../../utils';
 
 const args = [{
     key: 'role',
@@ -30,7 +30,7 @@ export default class MembersCommand extends Command<true, RawArgs> {
             .map(member => `${member.toString()} ${member.user.tag}`);
 
         if (members.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: `The \`${role.name}\` role has no members.`,

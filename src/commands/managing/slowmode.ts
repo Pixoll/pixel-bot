@@ -2,7 +2,7 @@ import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, ChannelType } from 'discord.js';
 import { Argument, Command, CommandContext, CommandoClient, CommandoMessage, ParseRawArguments } from 'pixoll-commando';
-import { replyAll, basicEmbed } from '../../utils';
+import { reply, basicEmbed } from '../../utils';
 
 const args = [{
     key: 'rateLimit',
@@ -71,7 +71,7 @@ export default class SlowmodeCommand extends Command<true, RawArgs> {
         rateLimit = parseRateLimit(context, rateLimit);
         const targetChannel = channel ?? context.channel;
         if (targetChannel.type === ChannelType.GuildAnnouncement) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'The current/targeted channel is not a text, thread or voice channel.',
@@ -80,7 +80,7 @@ export default class SlowmodeCommand extends Command<true, RawArgs> {
         }
 
         if (targetChannel.rateLimitPerUser === rateLimit) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'The slowmode is already set to that value.',
@@ -91,7 +91,7 @@ export default class SlowmodeCommand extends Command<true, RawArgs> {
         await targetChannel.setRateLimitPerUser(rateLimit, `Rate-limited channel via "${this.name}" command.`);
 
         if (rateLimit === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Green',
                 emoji: 'check',
                 description: `Disabled slowmode in ${targetChannel.toString()}`,
@@ -99,7 +99,7 @@ export default class SlowmodeCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Changed slowmode in ${targetChannel.toString()}`,

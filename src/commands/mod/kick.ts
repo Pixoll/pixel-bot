@@ -7,7 +7,7 @@ import {
     userException,
     inviteButton,
     confirmButtons,
-    replyAll,
+    reply,
     sevenDays,
 } from '../../utils';
 import { stripIndent } from 'common-tags';
@@ -57,13 +57,13 @@ export default class KickCommand extends Command<true, RawArgs> {
 
         const userError = userException(user, author, this as Command);
         if (userError) {
-            await replyAll(context, basicEmbed(userError));
+            await reply(context, basicEmbed(userError));
             return;
         }
 
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -73,7 +73,7 @@ export default class KickCommand extends Command<true, RawArgs> {
 
         const memberError = memberException(member, mod, this as Command);
         if (memberError) {
-            await replyAll(context, basicEmbed(memberError));
+            await reply(context, basicEmbed(memberError));
             return;
         }
 
@@ -118,7 +118,7 @@ export default class KickCommand extends Command<true, RawArgs> {
             reason,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.tag} has been kicked`,

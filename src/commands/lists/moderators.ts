@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { isModerator, generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
+import { isModerator, generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
 
 export default class ModeratorsCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -20,7 +20,7 @@ export default class ModeratorsCommand extends Command<true> {
         const members = guild.members.cache;
         const mods = members.filter(member => isModerator(member, true) && !member.user.bot);
         if (mods.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no moderators, try running the `administrators` command instead.',

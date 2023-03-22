@@ -13,7 +13,7 @@ import {
 import {
     basicCollector,
     validateURL,
-    replyAll,
+    reply,
     basicEmbed,
     timestamp,
     getSubCommand,
@@ -144,7 +144,7 @@ export default class PollCommand extends Command<true, RawArgs> {
 
                 parseEmojis(emojis, emojisArray, context.client);
                 if (emojisArray.length < 2) {
-                    await replyAll(context, basicEmbed({
+                    await reply(context, basicEmbed({
                         color: 'Red',
                         emoji: 'cross',
                         description: 'You need to send at least 2 emojis.',
@@ -152,7 +152,7 @@ export default class PollCommand extends Command<true, RawArgs> {
                     return;
                 }
             } else if (!messageUrl || !validateURL(messageUrl)) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'That message url is invalid.',
@@ -214,7 +214,7 @@ export default class PollCommand extends Command<true, RawArgs> {
             duration: duration,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `The poll was successfully created ${hyperlink('here', sent.url)}.`,
@@ -234,7 +234,7 @@ export default class PollCommand extends Command<true, RawArgs> {
         if (context.isInteraction() && pollURL) {
             const parsedChannel = await channels.fetch(channelId).catch(() => null);
             if (!parsedChannel) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'I couldn\'t get the server channel from the url.',
@@ -246,7 +246,7 @@ export default class PollCommand extends Command<true, RawArgs> {
 
         const parsedMessage = await channel.messages.fetch(msg ?? messageId).catch(() => null);
         if (!parsedMessage) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'I couldn\'t get the message from the url.',
@@ -260,7 +260,7 @@ export default class PollCommand extends Command<true, RawArgs> {
             message: parsedMessage.id,
         });
         if (!pollData) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'I couldn\'t find the poll you were looking for.',
@@ -310,7 +310,7 @@ export default class PollCommand extends Command<true, RawArgs> {
         await channel.send({ embeds: [pollEmbed] });
         await db.delete(pollData);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `[This poll](${parsedMessage.url}) has been ended.`,

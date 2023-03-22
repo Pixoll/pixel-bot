@@ -16,7 +16,7 @@ import {
 import {
     basicEmbed,
     isValidRole,
-    replyAll,
+    reply,
     confirmButtons,
     arrayWithLength,
     addOrdinalSuffix,
@@ -219,7 +219,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
     protected async removeAll(context: CommandContext<true>, user: CommandoUser): Promise<void> {
         const member = await context.guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -229,7 +229,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
 
         const { roles } = member;
         if (roles.cache.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That member has no roles.',
@@ -242,7 +242,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
         });
         if (!confirmed) return;
 
-        const replyToEdit = await replyAll(context, basicEmbed({
+        const replyToEdit = await reply(context, basicEmbed({
             color: 'Gold',
             emoji: 'loading',
             description: 'Removing all roles... Please be patient.',
@@ -251,7 +251,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
         const memberRoles = roles.cache.filter(role => isValidRole(replyToEdit, role)).toJSON();
         await Promise.all(memberRoles.map(role => roles.remove(role)));
 
-        await replyAll(context, {
+        await reply(context, {
             embeds: [basicEmbed({
                 color: 'Green',
                 emoji: 'check',
@@ -267,7 +267,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
     protected async toggle(context: CommandContext<true>, args: ParsedArgs): Promise<void> {
         const member = await context.guild.members.fetch(args.user ?? '').catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -281,7 +281,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
         const alreadyHas = roles.filter(r => memberRoles.cache.has(r.id));
         const doesNotHave = roles.filter(r => !memberRoles.cache.has(r.id));
 
-        const replyToEdit = await replyAll(context, basicEmbed({
+        const replyToEdit = await reply(context, basicEmbed({
             color: 'Gold',
             emoji: 'loading',
             description: 'Toggling the roles... Please be patient.',
@@ -296,7 +296,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
             .filter(s => s)
             .join(', ');
 
-        await replyAll(context, {
+        await reply(context, {
             embeds: [basicEmbed({
                 color: 'Green',
                 emoji: 'check',
@@ -312,7 +312,7 @@ async function toggleRolesFor(
     type: 'all' | 'bots' | 'members', context: CommandContext<true>, role: CommandoRole
 ): Promise<void> {
     if (!isValidRole(context, role)) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
             description: 'That is not a valid manageable role.',
@@ -331,7 +331,7 @@ async function toggleRolesFor(
 
     const members = await context.guild.members.fetch().catch(() => null);
     if (!members) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
             description: 'There was an error while trying to get the server members, please try again later.',
@@ -339,7 +339,7 @@ async function toggleRolesFor(
         return;
     }
 
-    const replyToEdit = await replyAll(context, basicEmbed({
+    const replyToEdit = await reply(context, basicEmbed({
         color: 'Gold',
         emoji: 'loading',
         description: `Toggling role in all ${target}... Please be patient.`,
@@ -350,7 +350,7 @@ async function toggleRolesFor(
         else await roles.add(role);
     }));
 
-    await replyAll(context, {
+    await reply(context, {
         embeds: [basicEmbed({
             color: 'Green',
             emoji: 'check',

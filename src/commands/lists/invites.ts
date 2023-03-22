@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll, timestamp } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, reply, timestamp } from '../../utils';
 
 export default class InvitesCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -18,7 +18,7 @@ export default class InvitesCommand extends Command<true> {
 
         const invites = await guild.invites.fetch().catch(() => null);
         if (!invites || invites.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no invites in this server.',

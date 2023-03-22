@@ -8,7 +8,7 @@ import {
     CommandoClient,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { basicEmbed, confirmButtons, replyAll } from '../../utils';
+import { basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
     key: 'modLogId',
@@ -54,7 +54,7 @@ export default class ReasonCommand extends Command<true, RawArgs> {
 
         const modLog = await moderations.fetch(modLogId);
         if (!modLog) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That ID is either invalid or it does not exist.',
@@ -74,7 +74,7 @@ export default class ReasonCommand extends Command<true, RawArgs> {
         await moderations.update(modLog, { reason });
         if (activeLog) await active.update(activeLog, { reason });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Updated reason for mod log \`${modLogId}\``,

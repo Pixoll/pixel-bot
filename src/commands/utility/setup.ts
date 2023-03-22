@@ -22,7 +22,7 @@ import {
     basicEmbed,
     basicCollector,
     isModerator,
-    replyAll,
+    reply,
     isValidRole,
     getSubCommand,
     BasicEmbedOptions,
@@ -310,7 +310,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             const message = await context.fetchReply() as CommandoMessage<true>;
 
             if (!isValidRole(message, mutedRole)) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'The chosen muted role is invalid. Please check the role hierarchy.',
@@ -318,7 +318,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
                 return;
             }
             if (!isValidRole(message, memberRole)) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'The chosen default member role is invalid. Please check the role hierarchy.',
@@ -326,7 +326,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
                 return;
             }
             if (!isValidRole(message, botRole)) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'The chosen default bot role is invalid. Please check the role hierarchy.',
@@ -337,7 +337,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             lockChannels.push(...await parseLockdownChannels(fullData.lockdownChannels, message, this));
             lockChannels.splice(30, lockChannels.length - 30);
             if (lockChannels.length === 0) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'None of the lockdown channels you specified were valid. Please try again.',
@@ -359,7 +359,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         }, null, true);
         if (!msg) return;
         if (msg.content.toLowerCase() !== 'confirm') {
-            await replyAll(context, {
+            await reply(context, {
                 content: 'Cancelled command.',
                 embeds: [],
             });
@@ -377,7 +377,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         if (data) await db.update(data, doc);
         else await db.add(doc);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'The data for this server has been saved. Use the `view` sub-command if you wish to check it out.',
@@ -391,7 +391,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         const hasNoData = !data
             || Util.filterNullishItems(Object.values(Util.omit(data, ['_id', 'guild']))).length === 0;
         if (hasNoData) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
@@ -434,7 +434,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
                 text: 'Missing or wrong data? Try using the "reload" sub-command.',
             });
 
-        await replyAll(context, embed);
+        await reply(context, embed);
     }
 
     /**
@@ -442,7 +442,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      */
     protected async runReload(context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null): Promise<void> {
         if (!data) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
@@ -451,7 +451,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Gold',
             emoji: 'loading',
             description: 'Reloading setup data...',
@@ -499,7 +499,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             await db.update(data, updateQuery);
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'Reloaded data.',
@@ -518,7 +518,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         if (data) await db.update(data, { logsChannel: channel.id });
         else await db.add(defaultDocument(guildId, 'logsChannel', channel.id));
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: oneLine`
@@ -540,7 +540,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         if (data) await db.update(data, { mutedRole: role.id });
         else await db.add(defaultDocument(guildId, 'mutedRole', role.id));
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: oneLine`
@@ -562,7 +562,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         if (data) await db.update(data, { memberRole: role.id });
         else await db.add(defaultDocument(guildId, 'memberRole', role.id));
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: oneLine`
@@ -584,7 +584,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         if (data) await db.update(data, { botRole: role.id });
         else await db.add(defaultDocument(guildId, 'botRole', role.id));
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: oneLine`
@@ -610,7 +610,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         if (data) await db.update(data, { lockChannels });
         else await db.add(defaultDocument(guildId, 'lockChannels', lockChannels));
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: oneLine`

@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, pixelColor, replyAll } from '../../utils';
+import { basicEmbed, pixelColor, reply } from '../../utils';
 
 const args = [{
     key: 'member',
@@ -37,7 +37,7 @@ export default class MemberAvatarCommand extends Command<true, RawArgs> {
             passedMember?.id ?? context.member?.id ?? ''
         ).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'Invalid member',
@@ -67,6 +67,6 @@ export default class MemberAvatarCommand extends Command<true, RawArgs> {
                 .setURL(avatarUrl)
             );
 
-        await replyAll(context, { embeds: [embed], components: [row] });
+        await reply(context, { embeds: [embed], components: [row] });
     }
 }

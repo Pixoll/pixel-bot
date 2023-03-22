@@ -19,7 +19,7 @@ import {
     Util,
     CommandResolvable,
 } from 'pixoll-commando';
-import { replyAll, getSubCommand, pixelColor } from '../../utils';
+import { reply, getSubCommand, pixelColor } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -166,7 +166,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             })
             .setTimestamp();
 
-        await replyAll(context, diagnose);
+        await reply(context, diagnose);
     }
 
     /**
@@ -213,7 +213,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             });
         }
 
-        await replyAll(context, diagnose);
+        await reply(context, diagnose);
     }
 
     /**
@@ -246,7 +246,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             })
             .setTimestamp();
 
-        await replyAll(context, diagnose);
+        await reply(context, diagnose);
     }
 
     public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {

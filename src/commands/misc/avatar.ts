@@ -14,7 +14,7 @@ import {
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { pixelColor, replyAll } from '../../utils';
+import { pixelColor, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -44,12 +44,12 @@ export default class AvatarCommand extends Command<boolean, RawArgs> {
 
     public async run(context: CommandContext, { user: passedUser }: ParsedArgs): Promise<void> {
         const user = passedUser as User ?? context.author;
-        await replyAll(context, mapAvatarData(user));
+        await reply(context, mapAvatarData(user));
     }
 
     public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
-        await replyAll(interaction, mapAvatarData(interaction.targetUser));
+        await reply(interaction, mapAvatarData(interaction.targetUser));
     }
 }
 

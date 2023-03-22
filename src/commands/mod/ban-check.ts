@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -33,7 +33,7 @@ export default class BanCheckCommand extends Command<true, RawArgs> {
 
         const ban = await guild.bans.fetch(user).catch(() => null);
         if (!ban) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: `${user.toString()} is not banned.`,
@@ -43,7 +43,7 @@ export default class BanCheckCommand extends Command<true, RawArgs> {
 
         const reason = ban.reason?.replace(/%20/g, ' ') || 'No reason given.';
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Blue',
             fieldName: `${user.tag} is banned`,
             fieldValue: `**Reason:** ${reason}`,

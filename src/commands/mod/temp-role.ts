@@ -8,7 +8,7 @@ import {
     CommandoRole,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { timestamp, isValidRole, replyAll, basicEmbed, generateDocId, parseArgDate } from '../../utils';
+import { timestamp, isValidRole, reply, basicEmbed, generateDocId, parseArgDate } from '../../utils';
 
 const args = [{
     key: 'role',
@@ -67,7 +67,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
         const { guild, guildId, author } = context;
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -75,7 +75,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             return;
         }
         if (!isValidRole(context, role)) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That is not a valid manageable role.',
@@ -93,7 +93,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
         if (duration instanceof Date) duration = duration.getTime();
 
         if (roles.cache.has(role.id)) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That member already has that role.',
@@ -125,7 +125,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             duration,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Added role \`${role.name}\` to ${user.tag}`,

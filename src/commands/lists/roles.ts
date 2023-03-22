@@ -1,6 +1,6 @@
 import { Collection, Role } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
 
 const args = [{
     key: 'member',
@@ -38,7 +38,7 @@ export default class RolesCommand extends Command<true, RawArgs> {
 
         const rolesCache = memberRoles ?? guildRoles?.filter(role => role.id !== guildId);
         if (!rolesCache || rolesCache.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'I couldn\'t find any roles.',
@@ -48,7 +48,7 @@ export default class RolesCommand extends Command<true, RawArgs> {
 
         const roles = rolesCache.sort((a, b) => b.position - a.position).map(r => `${r.toString()} ${r.name}`) ?? null;
         if (!roles) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'This member has no roles.',

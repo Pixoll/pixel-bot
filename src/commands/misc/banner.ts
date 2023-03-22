@@ -14,7 +14,7 @@ import {
     ApplicationCommandType,
     MessageCreateOptions,
 } from 'discord.js';
-import { basicEmbed, pixelColor, replyAll } from '../../utils';
+import { basicEmbed, pixelColor, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -43,13 +43,13 @@ export default class BannerCommand extends Command<boolean, RawArgs> {
 
     public async run(context: CommandContext, { user: passedUser }: ParsedArgs): Promise<void> {
         const user = await (passedUser ?? context.author).fetch();
-        await replyAll(context, mapBannerData(user));
+        await reply(context, mapBannerData(user));
     }
 
     public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
         await interaction.targetUser.fetch();
-        await replyAll(interaction, mapBannerData(interaction.targetUser));
+        await reply(interaction, mapBannerData(interaction.targetUser));
     }
 }
 

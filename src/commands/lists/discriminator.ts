@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, generateEmbed, pluralize, abcOrder, replyAll } from '../../utils';
+import { basicEmbed, generateEmbed, pluralize, abcOrder, reply } from '../../utils';
 
 const args = [{
     key: 'number',
@@ -38,7 +38,7 @@ export default class DiscriminatorCommand extends Command<true, RawArgs> {
             .map(m => `${m.toString()} ${m.user.tag}`);
 
         if (!match || match.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'I couldn\'t find any members.',

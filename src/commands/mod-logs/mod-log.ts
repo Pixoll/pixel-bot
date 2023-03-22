@@ -10,7 +10,7 @@ import {
     ModerationSchema,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { basicEmbed, confirmButtons, timestamp, replyAll, pixelColor } from '../../utils';
+import { basicEmbed, confirmButtons, timestamp, reply, pixelColor } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -85,7 +85,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
         const { guild } = context;
         const modLog = await guild.database.moderations.fetch(modLogId);
         if (!modLog) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'I could not find the mod-log you were looking for.',
@@ -126,7 +126,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
             `)
             .setTimestamp();
 
-        await replyAll(context, modLogInfo);
+        await reply(context, modLogInfo);
     }
 
     /**
@@ -152,7 +152,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
         if (activeLog) await activeDB.delete(activeLog);
         await guild.database.moderations.delete(modLog);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `Deleted mod log with ID \`${modLog._id}\``,

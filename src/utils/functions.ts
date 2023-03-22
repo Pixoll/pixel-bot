@@ -266,7 +266,7 @@ export function abcOrder(a: string, b: string): number {
  * @param text The string to parse
  * @param language The language to use for this block
  */
-export function code<C extends string, L extends string = ''>(text: C, language?: L): `\`\`\`${L}\n${C}\n\`\`\`` {
+export function codeBlock<C extends string, L extends string = ''>(text: C, language?: L): `\`\`\`${L}\n${C}\n\`\`\`` {
     return `\`\`\`${language ?? ''}\n${escapeCodeBlock(text)}\n\`\`\`` as `\`\`\`${L}\n${C}\n\`\`\``;
 }
 
@@ -416,7 +416,7 @@ export function timestamp<T extends Date | number | null, F extends TimestampTyp
  * @param context The command context to reply
  * @param options The options of the message
  */
-export async function replyAll(
+export async function reply(
     context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction,
     options: ReplyAllOptions
 ): Promise<Message | null> {
@@ -464,7 +464,7 @@ export async function basicCollector(
         unitCount: 1,
     })}`;
 
-    const toDelete = await replyAll(context, basicEmbed(embedOptions));
+    const toDelete = await reply(context, basicEmbed(embedOptions));
     const channel = await client.channels.fetch(channelId).catch(() => null) as CommandContextChannel<true>;
     if (!channel) {
         throw new Error(`Unknown channel ${channelId}`);
@@ -474,11 +474,11 @@ export async function basicCollector(
     if (context.isMessage() && shouldDelete) await toDelete?.delete().catch(() => null);
 
     if (messages.size === 0) {
-        await replyAll(context, { content: 'You didn\'t answer in time.', embeds: [] });
+        await reply(context, { content: 'You didn\'t answer in time.', embeds: [] });
         return null;
     }
     if (messages.first()?.content.toLowerCase() === 'cancel') {
-        await replyAll(context, { content: 'Cancelled command.', embeds: [] });
+        await reply(context, { content: 'Cancelled command.', embeds: [] });
         return null;
     }
 
@@ -638,7 +638,7 @@ export function limitStringLength(string: string, maxLength: number): string {
     const codeString = string.replace(/\n?```(\w+)?\n?/g, '');
     const extraLength = string.length - codeString.length;
     const with3dots = codeString.substring(0, maxLength - 3 - extraLength) + '...';
-    return code(with3dots, lang);
+    return codeBlock(with3dots, lang);
 }
 
 // /**
@@ -838,7 +838,7 @@ export async function pagedEmbed(
         );
 
     if (options.toUser && !isDMs) {
-        await replyAll(context, stripIndent`
+        await reply(context, stripIndent`
             ${options.dmMsg || ''}
             **Didn\'t get the DM?** Then please allow DMs from server members.
         `);
@@ -856,7 +856,7 @@ export async function pagedEmbed(
 
     const msg = options.toUser && !isDMs
         ? await targetChannel.send(msgOptions).catch(() => null)
-        : await replyAll(context, {
+        : await reply(context, {
             ...msgOptions,
             ephemeral: options.ephemeral,
         });
@@ -960,7 +960,7 @@ export async function pagedEmbed(
     });
 
     collector.on('end', async () => {
-        await replyAll(context, {
+        await reply(context, {
             components: [],
             replyToEdit: msg,
         });
@@ -1161,7 +1161,7 @@ export async function confirmButtons(context: CommandContext, options: ConfirmBu
         .setCustomId(ids.no)
         .setEmoji(customEmoji('cross'));
 
-    const msg = await replyAll(context, {
+    const msg = await reply(context, {
         embeds: [confirmEmbed],
         components: [new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(yesButton, noButton)],
     });
@@ -1183,11 +1183,11 @@ export async function confirmButtons(context: CommandContext, options: ConfirmBu
 
     if (context.isMessage()) await msg?.delete();
 
-    await replyAll(context, { components: [] });
+    await reply(context, { components: [] });
 
     if (!pushed || pushed.customId === ids.no) {
         if (sendCancelled) {
-            await replyAll(context, {
+            await reply(context, {
                 content: 'Cancelled command.', embeds: [],
             });
         }
@@ -1306,7 +1306,7 @@ export async function parseArgDate<T extends Date | number>(
     const type = argument?.type?.id.split('|')[0];
     const resultDate = await argument?.parse(value?.toString() ?? defaultValue ?? '', message).catch(() => null);
     if (Util.isNullish(resultDate)) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
             description: `The ${type} you specified is invalid.`,

@@ -9,7 +9,7 @@ import {
     ParseRawArguments,
     ReminderSchema,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, confirmButtons, replyAll, hyperlink } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, confirmButtons, reply, hyperlink } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -59,7 +59,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
 
         const data = await this.db.fetchMany({ user: author.id });
         if (data.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'You have no active reminders. Use the `reminder` command to add reminders.',
@@ -113,7 +113,7 @@ export default class RemindersCommand extends Command<boolean, RawArgs> {
             await this.db.delete(doc);
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'Your reminders have been deleted.',

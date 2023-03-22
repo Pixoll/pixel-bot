@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ChannelType, OverwriteType } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, reply } from '../../utils';
 
 const args = [{
     key: 'channel',
@@ -42,7 +42,7 @@ export default class UnlockCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext<true>, { channel, reason }: ParsedArgs): Promise<void> {
         const targetChannel = channel ?? context.channel;
         if (targetChannel.type === ChannelType.GuildAnnouncement || targetChannel.isThread()) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'The current/targeted channel is not a text or voice channel.',
@@ -57,7 +57,7 @@ export default class UnlockCommand extends Command<true, RawArgs> {
 
         const perms = permissions.resolve(guildId);
         if (perms && !perms.deny.has('SendMessages')) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: `${targetChannel.toString()} is already unlocked.`,
@@ -77,7 +77,7 @@ export default class UnlockCommand extends Command<true, RawArgs> {
             })],
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `Unlocked ${targetChannel.toString()}.`,

@@ -1,7 +1,7 @@
 import { oneLine } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { CommandoClient } from 'pixoll-commando';
-import { isGuildModuleEnabled, limitStringLength, code, hyperlink } from '../../utils';
+import { isGuildModuleEnabled, limitStringLength, codeBlock, hyperlink } from '../../utils';
 
 /** Handles all of the command logs. */
 export default function (client: CommandoClient<true>): void {
@@ -37,7 +37,7 @@ export default function (client: CommandoClient<true>): void {
             `)
             .addFields({
                 name: 'Message',
-                value: limitStringLength(code(context.toString()), 1024),
+                value: limitStringLength(codeBlock(context.toString()), 1024),
             })
             .setFooter({ text: `Author ID: ${author.id}` })
             .setTimestamp();

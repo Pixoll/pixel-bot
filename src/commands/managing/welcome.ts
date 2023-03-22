@@ -10,7 +10,7 @@ import {
     ParseRawArguments,
     WelcomeSchema,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, pixelColor, replyAll } from '../../utils';
+import { basicEmbed, getSubCommand, pixelColor, reply } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -107,7 +107,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
 
     protected async runView(context: CommandContext<true>, data: JSONIfySchema<WelcomeSchema> | null): Promise<void> {
         if (!data) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There\'s no welcome message saved for this server. Use the `set` sub-command to set one.',
@@ -128,7 +128,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
             })
             .setTimestamp();
 
-        await replyAll(context, embed);
+        await reply(context, embed);
     }
 
     protected async runSet(
@@ -154,7 +154,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
             });
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'The message has been successfully saved.',

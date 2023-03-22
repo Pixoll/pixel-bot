@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, reply } from '../../utils';
 
 const args = [{
     key: 'status',
@@ -42,7 +42,7 @@ export default class AfkCommand extends Command<true, RawArgs> {
         if (afkStatus) {
             if (status.toLowerCase() === 'off') {
                 await db.delete(afkStatus);
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Green',
                     description: `Welcome back ${author.toString()}, I removed your AFK status`,
                 }));
@@ -50,7 +50,7 @@ export default class AfkCommand extends Command<true, RawArgs> {
             }
 
             await db.update(afkStatus, { status });
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Green',
                 emoji: 'check',
                 fieldName: 'I updated your AFK status to:',
@@ -60,7 +60,7 @@ export default class AfkCommand extends Command<true, RawArgs> {
         }
 
         if (status.toLowerCase() === 'off') {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'You can\'t set your status as `off`',
@@ -74,7 +74,7 @@ export default class AfkCommand extends Command<true, RawArgs> {
             status,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: 'I set your AFK status as:',

@@ -6,7 +6,7 @@ import {
     memberException,
     timestamp,
     confirmButtons,
-    replyAll,
+    reply,
     generateDocId,
     basicEmbed,
     parseArgDate,
@@ -62,7 +62,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
         const { moderations, active, setup } = guild.database;
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -74,7 +74,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
 
         const data = await setup.fetch();
         if (!data || !data.mutedRole) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.',
@@ -84,19 +84,19 @@ export default class MuteCommand extends Command<true, RawArgs> {
 
         const userError = userException(user, author, this as Command);
         if (userError) {
-            await replyAll(context, basicEmbed(userError));
+            await reply(context, basicEmbed(userError));
             return;
         }
 
         const memberError = memberException(member, mod, this as Command);
         if (memberError) {
-            await replyAll(context, basicEmbed(memberError));
+            await reply(context, basicEmbed(memberError));
             return;
         }
 
         const role = await guild.roles.fetch(data.mutedRole);
         if (!role) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.',
@@ -105,7 +105,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
         }
 
         if (roles.cache.has(role.id)) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is already muted.',
@@ -161,7 +161,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
             duration,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.tag} has been muted`,

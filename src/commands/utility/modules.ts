@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
 import { Command, CommandContext, CommandoClient, ModuleSchema, Util, JSONIfySchema } from 'pixoll-commando';
-import { replyAll, customEmoji, basicEmbed, addDashes, abcOrder, pixelColor } from '../../utils';
+import { reply, customEmoji, basicEmbed, addDashes, abcOrder, pixelColor } from '../../utils';
 
 function getStatusString(isOn?: boolean): string {
     if (isOn === true) return `Enabled ${customEmoji('online')}`;
@@ -44,7 +44,7 @@ export default class ModulesCommand extends Command<true> {
 
         const data = await guild.database.modules.fetch();
         if (!data) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 fieldName: 'There is no saved data for this server yet.',
@@ -64,6 +64,6 @@ export default class ModulesCommand extends Command<true> {
             .setDescription(moduleStatsString)
             .setTimestamp();
 
-        await replyAll(context, embed);
+        await reply(context, embed);
     }
 }

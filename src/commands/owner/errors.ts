@@ -1,16 +1,23 @@
-import { ActionRowBuilder, StringSelectMenuBuilder, Collection } from 'discord.js';
+import {
+    ActionRowBuilder,
+    StringSelectMenuBuilder,
+    ApplicationCommandOptionType,
+    ApplicationCommandOptionChoiceData as ChoiceData,
+    SelectMenuComponentOptionData,
+} from 'discord.js';
 import {
     Argument,
     Command,
     CommandContext,
+    CommandoAutocompleteInteraction,
     CommandoClient,
     CommandoMessage,
     DatabaseManager,
     ErrorSchema,
-    JSONIfySchema,
     ParseRawArguments,
+    Util,
 } from 'pixoll-commando';
-import { basicEmbed, generateEmbed, getSubCommand } from '../../utils';
+import { basicEmbed, errorTypeMap, generateEmbed, getSubCommand, limitStringLength, reply } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -43,7 +50,7 @@ type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
 type SubCommand = ParsedArgs['subCommand'];
 
-export default class ErrorsCommand extends Command<false, RawArgs> {
+export default class ErrorsCommand extends Command<true, RawArgs> {
     protected readonly db: DatabaseManager<ErrorSchema>;
 
     public constructor(client: CommandoClient) {
@@ -52,30 +59,39 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
             aliases: ['bugs'],
             group: 'owner',
             description: 'Displays all the errors that have happened in the bot.',
+            hidden: true,
+            guarded: true,
             ownerOnly: true,
-            dmOnly: true,
+            guildOnly: true,
+            testAppCommand: true,
+            userPermissions: ['Administrator'],
             args,
+        }, {
+            options: [{
+                type: ApplicationCommandOptionType.Subcommand,
+                name: 'view',
+                description: 'View all error/bug records.',
+            }, {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: 'remove',
+                description: 'Remove a error/bug record.',
+                options: [{
+                    type: ApplicationCommandOptionType.String,
+                    name: 'error-id',
+                    description: 'What specific error do you want to remove?',
+                    required: true,
+                    autocomplete: true,
+                }],
+            }],
         });
 
         this.db = this.client.database.errors;
     }
 
-    public async run(context: CommandContext<false>, { subCommand, errorId }: ParsedArgs): Promise<void> {
-        if (context.isInteraction()) return;
-
-        const errors = await this.db.fetchMany();
-        if (errors.size === 0) {
-            await context.replyEmbed(basicEmbed({
-                color: 'Blue',
-                emoji: 'info',
-                description: 'There have been no errors or bugs lately.',
-            }));
-            return;
-        }
-
+    public async run(context: CommandContext<true>, { subCommand, errorId }: ParsedArgs): Promise<void> {
         switch (subCommand) {
             case 'view':
-                return await this.runView(context, errors);
+                return await this.runView(context);
             case 'remove':
                 return await this.runRemove(context, errorId as string);
         }
@@ -84,34 +100,43 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
     /**
      * The `view` sub-command
      */
-    protected async runView(
-        context: CommandoMessage<false>, errors: Collection<string, JSONIfySchema<ErrorSchema>>
-    ): Promise<void> {
-        const errorsList = errors.map(doc => {
-            const whatCommand = doc.command ? ` at '${doc.command}' command` : '';
+    protected async runView(context: CommandContext<true>): Promise<void> {
+        const errors = await this.db.fetchMany();
+        if (errors.size === 0) {
+            await reply(context, basicEmbed({
+                color: 'Blue',
+                emoji: 'info',
+                description: 'There have been no errors or bugs lately.',
+            }));
+            return;
+        }
+
+        const errorsList = errors.map(error => {
+            const whatCommand = error.command ? ` at '${error.command}' command` : '';
 
             return {
-                _id: doc._id,
-                type: doc.type,
-                message: doc.name + whatCommand + (doc.message ? (': ' + '``' + doc.message + '``') : ''),
-                createdAt: doc.createdAt,
-                files: doc.files,
+                _id: error._id,
+                type: error.type,
+                message: error.name + whatCommand + ': ' + '``' + error.message + '``',
+                createdAt: error.createdAt,
+                files: error.files,
             };
         });
 
         const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>()
             .addComponents(new StringSelectMenuBuilder()
                 .setCustomId(`${context.id}:menu`)
-                .setMaxValues(1).setMinValues(1)
+                .setMinValues(1)
+                .setMaxValues(1)
                 .setPlaceholder('Filter...')
-                .setOptions([
-                    { label: 'All', value: 'all' },
-                    { label: 'Command error', value: 'Command error' },
-                    { label: 'Client error', value: 'Client error' },
-                    { label: 'Unhandled rejection', value: 'Unhandled rejection' },
-                    { label: 'Uncaught exception', value: 'Uncaught exception' },
-                    { label: 'Uncaught exception monitor', value: 'Uncaught exception monitor' },
-                    { label: 'Process warning', value: 'Process warning' },
+                .setOptions([{
+                    label: 'All',
+                    value: 'all',
+                }, ...Object.values(Util.omit(errorTypeMap, ['warn']))
+                    .map<SelectMenuComponentOptionData>(type => ({
+                        label: type,
+                        value: type,
+                    })),
                 ])
             );
 
@@ -130,10 +155,10 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
     /**
      * The `remove` sub-command
      */
-    protected async runRemove(context: CommandoMessage<false>, errorId: string): Promise<void> {
+    protected async runRemove(context: CommandContext<true>, errorId: string): Promise<void> {
         const doc = await this.db.fetch(errorId);
         if (!doc) {
-            await context.replyEmbed(basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'I couldn\'t find the error you were looking for.',
@@ -142,10 +167,28 @@ export default class ErrorsCommand extends Command<false, RawArgs> {
         }
         await this.db.delete(doc);
 
-        await context.replyEmbed(basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `Error with ID \`${doc._id}\` has been successfully removed.`,
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const errors = await this.db.fetchMany();
+        const possibleItems = errors
+            .map(error => ({
+                id: error._id,
+                message: `[${error._id}] ${error.type}: ${error.message}`,
+            }))
+            .filter(error => error.message.toLowerCase().includes(query))
+            .slice(0, 25)
+            .map<ChoiceData<string>>(error => ({
+                name: limitStringLength(error.message, 100),
+                value: error.id,
+            }));
+        await interaction.respond(possibleItems);
     }
 }

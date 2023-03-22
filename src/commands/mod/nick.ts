@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, replyAll } from '../../utils';
+import { basicEmbed, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -46,7 +46,7 @@ export default class NickCommand extends Command<true, RawArgs> {
         const { tag, username } = user;
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -55,7 +55,7 @@ export default class NickCommand extends Command<true, RawArgs> {
         }
 
         if (!member.manageable) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 fieldName: `Unable to change ${user.toString()}'s nickname`,
@@ -71,7 +71,7 @@ export default class NickCommand extends Command<true, RawArgs> {
             toApply, `${author.tag} changed nickname via "${this.name}" command.`
         ).catch(() => false).then(v => !!v);
         if (!wasApplied) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'An error occurred when trying to change that member\'s nickname. Please try again.',
@@ -79,7 +79,7 @@ export default class NickCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: isRemove

@@ -23,7 +23,7 @@ import {
     basicCollector,
     isValidRole,
     basicEmbed,
-    replyAll,
+    reply,
     arrayWithLength,
     addOrdinalSuffix,
     parseArgInput,
@@ -144,7 +144,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
 
         const { url } = await channel.send({ embeds: [embed], components: rows });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `The buttons roles were successfully created ${hyperlink('here', url)}.`,

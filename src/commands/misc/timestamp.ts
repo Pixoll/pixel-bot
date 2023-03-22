@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments, Util } from 'pixoll-commando';
-import { timestamp, replyAll, parseArgDate } from '../../utils';
+import { timestamp, reply, parseArgDate } from '../../utils';
 
 const timestampLetters: TimestampType[] = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
 
@@ -47,6 +47,6 @@ export default class TimestampCommand extends Command<boolean, RawArgs> {
             return `\`${string}\` ${string}`;
         });
 
-        await replyAll(context, timestamps.join('\n'));
+        await reply(context, timestamps.join('\n'));
     }
 }

@@ -12,7 +12,7 @@ import {
     RuleSchema,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, replyAll, getSubCommand, pixelColor, limitStringLength } from '../../utils';
+import { basicEmbed, reply, getSubCommand, pixelColor, limitStringLength } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -120,7 +120,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
         context: CommandContext<true>, rulesData: JSONIfySchema<RuleSchema> | null, rule: number
     ): Promise<void> {
         if (!rulesData || rulesData.rules.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'The are no saved rules for this server. Add one with the `add` sub-command.',
@@ -142,7 +142,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
             })
             .setTimestamp();
 
-        await replyAll(context, ruleEmbed);
+        await reply(context, ruleEmbed);
     }
 
     /**
@@ -164,7 +164,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
 
         const number = rulesData ? rulesData.rules.length + 1 : 1;
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `The rule has been added under \`Rule ${number}\``,
@@ -178,7 +178,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
         context: CommandContext<true>, rulesData: JSONIfySchema<RuleSchema> | null, rule: number
     ): Promise<void> {
         if (!rulesData || rulesData.rules.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'The are no saved rules for this server.',
@@ -196,7 +196,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
         await guild.database.rules.update(rulesData, { $pull: { rules: rulesData.rules[rule] } });
         rule++;
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Removed rule number ${rule--}:`,

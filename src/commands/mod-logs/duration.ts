@@ -9,7 +9,7 @@ import {
     CommandoClient,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { basicEmbed, confirmButtons, parseArgDate, replyAll } from '../../utils';
+import { basicEmbed, confirmButtons, parseArgDate, reply } from '../../utils';
 
 const args = [{
     key: 'modLogId',
@@ -62,7 +62,7 @@ export default class DurationCommand extends Command<true, RawArgs> {
 
         const modLog = await moderations.fetch(modLogId);
         if (!modLog) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'I could not find the mod-log you were looking for.',
@@ -72,7 +72,7 @@ export default class DurationCommand extends Command<true, RawArgs> {
 
         const activeLog = await active.fetch(modLogId);
         if (!activeLog) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That punishment has expired.',
@@ -98,7 +98,7 @@ export default class DurationCommand extends Command<true, RawArgs> {
             duration: duration - now + Date.now(),
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Updated duration for mod log \`${modLogId}\``,

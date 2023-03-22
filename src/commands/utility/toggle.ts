@@ -20,7 +20,7 @@ import {
     JSONIfySchema,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, replyAll } from '../../utils';
+import { basicEmbed, getSubCommand, reply } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -132,7 +132,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
         if (!command) return;
 
         if (command.guarded) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: `The \`${command.name}\` command is guarded, and thus it cannot be disabled.`,
@@ -161,7 +161,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
             });
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Toggled the \`${command.name}\` command${global}`,
@@ -181,7 +181,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
         if (!group) return;
 
         if (group.guarded) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: `The \`${group.name}\` group is guarded, and thus it cannot be disabled.`,
@@ -210,7 +210,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
             });
         }
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Toggled the \`${group.name}\` group${global}`,

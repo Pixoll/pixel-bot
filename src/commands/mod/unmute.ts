@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, confirmButtons, replyAll } from '../../utils';
+import { basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -45,7 +45,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
         const { active, setup } = guild.database;
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -56,7 +56,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
 
         const data = await setup.fetch();
         if (!data || !data.mutedRole) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'No mute role found in this server, please use the `setup` command before using this.',
@@ -68,7 +68,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
         const role = await guild.roles.fetch(data.mutedRole);
 
         if (!role || !roles.cache.has(role.id)) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not muted.',
@@ -89,7 +89,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
         const mute = await active.fetch({ type: 'mute', userId: user.id });
         if (mute) await active.delete(mute);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.toString()} has been unmuted`,

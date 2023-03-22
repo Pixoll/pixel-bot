@@ -8,7 +8,7 @@ import {
     memberException,
     inviteButton,
     confirmButtons,
-    replyAll,
+    reply,
     sevenDays,
 } from '../../utils';
 
@@ -58,13 +58,13 @@ export default class SoftBanCommand extends Command<true, RawArgs> {
 
         const userError = userException(user, author, this as Command);
         if (userError) {
-            await replyAll(context, basicEmbed(userError));
+            await reply(context, basicEmbed(userError));
             return;
         }
 
         const isBanned = await bans.fetch(user).catch(() => null);
         if (isBanned) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is already banned.',
@@ -75,7 +75,7 @@ export default class SoftBanCommand extends Command<true, RawArgs> {
         const member = await members.fetch(user).catch(() => null);
         const memberError = memberException(member, mod, this as Command);
         if (memberError) {
-            await replyAll(context, basicEmbed(memberError));
+            await reply(context, basicEmbed(memberError));
             return;
         }
 
@@ -124,7 +124,7 @@ export default class SoftBanCommand extends Command<true, RawArgs> {
             reason,
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.tag} has been soft-banned`,

@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType } from 'discord.js';
 import { Command, CommandContext, CommandoClient, JSONIfySchema, ParseRawArguments, RuleSchema } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, confirmButtons, replyAll } from '../../utils';
+import { generateEmbed, basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -48,7 +48,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
         const data = await guild.database.rules.fetch();
 
         if (!data || data.rules.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'The are no saved rules for this server. Use the `rule` command to add rules.',
@@ -97,7 +97,7 @@ export default class RulesCommand extends Command<true, RawArgs> {
 
         await guild.database.rules.delete(data);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'All the server rules have been deleted.',

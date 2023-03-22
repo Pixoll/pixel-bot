@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { timestamp, basicEmbed, replyAll, pixelColor } from '../../utils';
+import { timestamp, basicEmbed, reply, pixelColor } from '../../utils';
 
 const args = [{
     key: 'invite',
@@ -42,7 +42,7 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
         if (inviteUrl) {
             const fetchedInvite = await this.client.fetchInvite(inviteUrl).catch(() => null);
             if (!fetchedInvite) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'That invite is invalid.',
@@ -84,6 +84,6 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
                     : `Group DM ID: ${channel?.id}`,
             });
 
-        await replyAll(context, embed);
+        await reply(context, embed);
     }
 }

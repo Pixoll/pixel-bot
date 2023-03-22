@@ -17,13 +17,13 @@ import {
     basicEmbed,
     BingLanguageId,
     bingSupportedLanguages,
-    code,
+    codeBlock,
     djsLocaleToBing,
     emojiRegex as defaultEmojiRegex,
     hyperlink,
     mergeRegexps,
     pixelColor,
-    replyAll,
+    reply,
     translate,
     validateURL,
 } from '../../utils';
@@ -107,7 +107,7 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
 
         const { content } = interaction.targetMessage;
         if (!content) {
-            await replyAll(interaction, basicEmbed({
+            await reply(interaction, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 fieldName: 'That message has no plain text content.',
@@ -140,7 +140,7 @@ async function runCommand(
     to?: BingLanguageId | null
 ): Promise<void> {
     if (!isValidTextQuery(text)) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
             fieldName: 'That text query is invalid.',
@@ -158,23 +158,23 @@ async function runCommand(
         .setColor(pixelColor)
         .addFields({
             name: `Input - Language: ${bingSupportedLanguages[inputLang]}`,
-            value: code(text),
+            value: codeBlock(text),
         }, {
             name: `Output - Language: ${bingSupportedLanguages[outputLang]}`,
-            value: code(result.translation),
+            value: codeBlock(result.translation),
         })
         .setFooter({
             text: 'Translated using Bing Translator',
         })
         .setTimestamp();
 
-    await replyAll(context, {
+    await reply(context, {
         embeds: [translatorEmbed],
     });
 }
 
 function isValidTextQuery(text: string): boolean {
-    return text.length <= 1000 
+    return text.length <= 1000
         && !validateURL(text)
         && text.replace(invalidTextQueryRegex, '').trim().length !== 0;
 }

@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { getKeyPerms, hyperlink, pixelColor, replyAll } from '../../utils';
+import { getKeyPerms, hyperlink, pixelColor, reply } from '../../utils';
 
 const args = [{
     key: 'role',
@@ -57,6 +57,6 @@ export default class RoleInfoCommand extends Command<true, RawArgs> {
             value: permissions,
         });
 
-        await replyAll(context, roleInfo);
+        await reply(context, roleInfo);
     }
 }

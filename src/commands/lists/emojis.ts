@@ -1,6 +1,6 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { deepCopy, pixelColor, replyAll } from '../../utils';
+import { deepCopy, pixelColor, reply } from '../../utils';
 
 function sliceEmojis(emojis: string[]): string[][] {
     const dummy: string[] = [];
@@ -76,6 +76,6 @@ export default class EmojisCommand extends Command<true> {
             });
         }
 
-        await replyAll(context, embed);
+        await reply(context, embed);
     }
 }

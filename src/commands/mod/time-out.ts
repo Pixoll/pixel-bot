@@ -6,7 +6,7 @@ import {
     memberException,
     timestamp,
     confirmButtons,
-    replyAll,
+    reply,
     generateDocId,
     basicEmbed,
     parseArgDate,
@@ -70,7 +70,7 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
         const { moderations } = guild.database;
         const member = await guild.members.fetch(user).catch(() => null);
         if (!member) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
@@ -80,18 +80,18 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
 
         const userError = userException(user, author, this as Command);
         if (userError) {
-            await replyAll(context, basicEmbed(userError));
+            await reply(context, basicEmbed(userError));
             return;
         }
         const memberError = memberException(member, mod, this as Command);
         if (memberError) {
-            await replyAll(context, basicEmbed(memberError));
+            await reply(context, basicEmbed(memberError));
             return;
         }
 
         const isTimedOut = member.isCommunicationDisabled();
         if (isTimedOut && duration !== 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is already timed-out.',
@@ -99,7 +99,7 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             return;
         }
         if (!isTimedOut && duration === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user has not been timed-out.',
@@ -149,7 +149,7 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             duration: ms(duration - now, { long: true }),
         });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `${user.tag} has been timed-out`,

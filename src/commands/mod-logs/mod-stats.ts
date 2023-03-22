@@ -10,7 +10,7 @@ import {
     ModerationType,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { code, pixelColor, replyAll } from '../../utils';
+import { codeBlock, pixelColor, reply } from '../../utils';
 
 /**
  * Get's the difference in days between the specified date and now.
@@ -71,7 +71,7 @@ export default class ModStatsCommand extends Command<true, RawArgs> {
         const warns = getStats(stats, 'warn', 'Warns', pad);
         const total = getStats(stats, ['mute', 'ban', 'temp-ban', 'kick', 'warn'], 'Total', pad);
 
-        const table = code(`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}`);
+        const table = codeBlock(`${header}\n\n${mutes}\n${bans}\n${kicks}\n${warns}\n${total}`);
 
         const embed = new EmbedBuilder()
             .setColor(pixelColor)
@@ -83,7 +83,7 @@ export default class ModStatsCommand extends Command<true, RawArgs> {
             .setFooter({ text: `User ID: ${user.id}` })
             .setTimestamp();
 
-        await replyAll(context, embed);
+        await reply(context, embed);
     }
 }
 

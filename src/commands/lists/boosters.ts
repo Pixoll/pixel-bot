@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { generateEmbed, pluralize, abcOrder, basicEmbed, replyAll } from '../../utils';
+import { generateEmbed, pluralize, abcOrder, basicEmbed, reply } from '../../utils';
 
 export default class BoostersCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -21,7 +21,7 @@ export default class BoostersCommand extends Command<true> {
             .map(m => `${m.toString()} ${m.user.tag}`);
 
         if (boosters.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no boosters in this server.',

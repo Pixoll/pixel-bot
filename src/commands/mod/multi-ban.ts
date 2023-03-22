@@ -16,7 +16,7 @@ import {
     isModerator,
     basicEmbed,
     confirmButtons,
-    replyAll,
+    reply,
     arrayWithLength,
     addOrdinalSuffix,
     parseArgInput,
@@ -104,7 +104,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
             emoji: 'loading',
             description: `Banned ${n}/${users.length} members...`,
         });
-        const replyToEdit = await replyAll(context, embed(0));
+        const replyToEdit = await reply(context, embed(0));
 
         const banned = [];
         for (const user of users) {
@@ -141,7 +141,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
             });
 
             banned.push(user);
-            await replyAll(context, {
+            await reply(context, {
                 embeds: [embed(banned.length)],
                 replyToEdit,
             });
@@ -158,7 +158,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
             description: 'No members were banned.',
         };
 
-        await replyAll(context, {
+        await reply(context, {
             embeds: [basicEmbed(options)],
             components: [],
             replyToEdit,

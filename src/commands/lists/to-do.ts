@@ -14,7 +14,7 @@ import {
     JSONIfySchema,
     CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, confirmButtons, replyAll, getSubCommand, limitStringLength } from '../../utils';
+import { generateEmbed, basicEmbed, confirmButtons, reply, getSubCommand, limitStringLength } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -144,7 +144,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
      */
     protected async runView(context: CommandContext, todoData: JSONIfySchema<TodoSchema> | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'Your to-do list is empty.',
@@ -175,7 +175,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
         if (!todoData) await this.db.add({ user: author.id, list: [item] });
         else await this.db.update(todoData, { $push: { list: item } });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             fieldName: `Added item \`${(todoData?.list.length ?? 0) + 1}\` to your to-do list:`,
@@ -190,7 +190,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
         context: CommandContext, item: number, todoData: JSONIfySchema<TodoSchema> | null
     ): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'Your to-do list is empty.',
@@ -199,7 +199,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
         }
 
         if (!todoData.list[--item]) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That\'s not a valid item number inside your to-do list.',
@@ -208,7 +208,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
         }
         await this.db.update(todoData, { $pull: { list: todoData.list[item++] } });
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: `Removed item \`${item}\` from your to-do list.`,
@@ -220,7 +220,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
      */
     protected async runClear(context: CommandContext, todoData: JSONIfySchema<TodoSchema> | null): Promise<void> {
         if (!todoData || !todoData.list || todoData.list.length === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'Your to-do list is empty.',
@@ -235,7 +235,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
 
         await this.db.delete(todoData);
 
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
             description: 'Your to-do list has been cleared.',

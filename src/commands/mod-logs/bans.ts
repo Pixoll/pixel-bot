@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { basicEmbed, generateEmbed, abcOrder, pluralize, replyAll } from '../../utils';
+import { basicEmbed, generateEmbed, abcOrder, pluralize, reply } from '../../utils';
 
 export default class BansCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -19,7 +19,7 @@ export default class BansCommand extends Command<true> {
 
         const bans = await guild.bans.fetch().catch(() => null);
         if (!bans || bans.size === 0) {
-            await replyAll(context, basicEmbed({
+            await reply(context, basicEmbed({
                 color: 'Blue',
                 emoji: 'info',
                 description: 'There are no bans in this server.',

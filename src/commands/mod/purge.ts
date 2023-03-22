@@ -17,7 +17,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { validateURL, basicEmbed, sleep, replyAll, getSubCommand } from '../../utils';
+import { validateURL, basicEmbed, sleep, reply, getSubCommand } from '../../utils';
 
 const args = [{
     key: 'amount',
@@ -234,7 +234,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
         if (messageId) {
             const message = await context.channel.messages.fetch(messageId).catch(() => null);
             if (!message) {
-                await replyAll(context, basicEmbed({
+                await reply(context, basicEmbed({
                     color: 'Red',
                     emoji: 'cross',
                     description: 'The message ID is invalid.',
@@ -388,7 +388,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
 
 async function bulkDelete(context: CommandContext<true>, messages: Collection<string, Message>): Promise<void> {
     if (messages.size === 0) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
             description: 'I couldn\'t find any messages.',
@@ -405,7 +405,7 @@ async function bulkDelete(context: CommandContext<true>, messages: Collection<st
         description: `Deleted ${bulk.size} messages.`,
     });
 
-    const toDelete = await replyAll(context, embed);
+    const toDelete = await reply(context, embed);
     if (context.isMessage()) await context.delete().catch(() => null);
 
     await sleep(10);

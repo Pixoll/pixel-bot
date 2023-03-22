@@ -7,7 +7,7 @@ import {
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -56,7 +56,7 @@ async function runCommand(
 
     const modLogs = await db.fetchMany(user ? { modId: user.id } : {});
     if (modLogs.size === 0) {
-        await replyAll(context, basicEmbed({
+        await reply(context, basicEmbed({
             color: 'Blue',
             emoji: 'info',
             description: 'There are no moderation logs.',
