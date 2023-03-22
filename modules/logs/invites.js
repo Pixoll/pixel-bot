@@ -26,7 +26,7 @@ module.exports = (client) => {
             .setDescription(stripIndent`
                 **Link:** ${invite.toString()}
                 **Channel:** ${channel.toString()}
-                **Inviter:** ${inviter.toString()} ${inviter.tag}
+                **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
                 **Max. uses:** ${maxUses || 'No limit'}
                 **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
