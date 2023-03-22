@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
 import {
     Command,
     CommandContext,
@@ -12,8 +12,9 @@ import {
     Util,
     ArgumentType,
     JSONIfySchema,
+    CommandoAutocompleteInteraction,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, confirmButtons, replyAll, getSubCommand } from '../../utils';
+import { generateEmbed, basicEmbed, confirmButtons, replyAll, getSubCommand, limitStringLength } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -110,7 +111,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
                     name: 'item',
                     description: 'The item to remove from your to-do list.',
                     required: true,
-                    minValue: 1,
+                    autocomplete: true,
                 }],
             }, {
                 type: ApplicationCommandOptionType.Subcommand,
@@ -239,5 +240,19 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
             emoji: 'check',
             description: 'Your to-do list has been cleared.',
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { user, client, options } = interaction;
+        const query = options.getFocused().toLowerCase();
+        const todoData = await client.database.todo.fetch({ user: user.id });
+        const possibleItems = todoData?.list
+            .filter(todo => todo.toLowerCase().includes(query))
+            .slice(0, 25)
+            .map<ChoiceData<number>>((todo, i) => ({
+                name: limitStringLength(`${i + 1}. ${todo}`, 100),
+                value: i + 1,
+            })) ?? [];
+        await interaction.respond(possibleItems);
     }
 }
