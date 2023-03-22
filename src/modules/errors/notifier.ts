@@ -5,8 +5,8 @@ import EvalCommand from '../../commands/owner/eval';
 import {
     customEmoji,
     generateDocId,
-    code,
-    replyAll,
+    codeBlock,
+    reply,
     limitStringLength,
     hyperlink,
     errorTypeMap,
@@ -20,12 +20,12 @@ const evalName = EvalCommand.name;
 
 /** A manager for all errors of the process and client */
 export default function (client: CommandoClient<true>): void {
-    client.on('commandError', async (command, error, instances) => {
+    client.on('commandError', async (command, error, context) => {
         const owner = client.owners?.[0];
         const { serverInvite } = client.options;
         const id = generateDocId();
 
-        const reply = new EmbedBuilder()
+        const embed = new EmbedBuilder()
             .setColor('Red')
             .setDescription(stripIndent`
 				${customEmoji('cross')} **An unexpected error happened**
@@ -42,8 +42,8 @@ export default function (client: CommandoClient<true>): void {
                 `,
             });
 
-        await replyAll(instances, reply);
-        await errorHandler(client, error, errorTypeMap.command, instances, command, id);
+        await reply(context, embed);
+        await errorHandler(client, error, errorTypeMap.command, context, command, id);
     })
         .on('error', error => errorHandler(client, error, errorTypeMap.error))
         .on('warn', warn => errorHandler(client, warn, errorTypeMap.warn))
@@ -62,7 +62,7 @@ export default function (client: CommandoClient<true>): void {
  * sends the error message to the bot owner
  * @param error the error
  * @param type the type of error
- * @param context the command instances
+ * @param context the command context
  * @param command the command
  * @param errorId the error ID to use
  */
@@ -133,13 +133,13 @@ async function errorHandler(
 
     if (command && context) embed.addFields({
         name: 'Command input',
-        value: limitStringLength(code(context.toString(), 'ts'), 1024),
+        value: limitStringLength(codeBlock(context.toString(), 'ts'), 1024),
     });
 
     const stackMessage = error.name + whatCommand + ': ' + error.message.split('Require stack:').shift();
     embed.addFields({
         name: stackMessage,
-        value: limitStringLength(code(files || 'No files.', 'ts'), 1024),
+        value: limitStringLength(codeBlock(files || 'No files.', 'ts'), 1024),
     });
 
     await errorsChannel.send({
