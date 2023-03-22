@@ -120,7 +120,7 @@ export interface PagedEmbedOptions {
     skipMaxButtons?: boolean;
 }
 
-export interface GenerateEmbedOptions {
+export interface GenerateEmbedOptions<T extends object | string> {
     /**
      * Whether the generated embed will be ephemeral
      * @default false
@@ -193,17 +193,17 @@ export interface GenerateEmbedOptions {
      */
     keyTitle?: {
         /** The name of the key to use as a prefix */
-        prefix?: string;
+        prefix?: T extends string ? string : keyof T;
         /** The name of the key to use as a suffix */
-        suffix?: string;
+        suffix?: T extends string ? string : keyof T;
     };
     /** The properties to display in the embed. If empty I will use every property */
-    keys?: Array<string | null>;
+    keys?: Array<(T extends string ? string : keyof T) | null>;
     /**
      * The properties to exclude on the embed. If empty I will use `data.keys` or every property
      * @default []
      */
-    keysExclude?: Array<string | null>;
+    keysExclude?: Array<(T extends string ? string : keyof T) | null>;
     /**
      * Whether to use the document's ID on each data chunk
      * @default false
@@ -976,7 +976,7 @@ export async function pagedEmbed(
 export async function generateEmbed<T extends object | string>(
     context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction,
     array: T[],
-    options: GenerateEmbedOptions
+    options: GenerateEmbedOptions<T>
 ): Promise<void> {
     const { channels } = context.client;
     const {
@@ -984,13 +984,13 @@ export async function generateEmbed<T extends object | string>(
         keys, keysExclude, useDocId, components, embedTitle, skipMaxButtons, numbered, ephemeral,
     } = applyDefaults(defaultGenerateEmbedOptions, options);
 
-    if (array.length === 0) throw new Error('array cannot be empty');
+    if (array.length === 0) throw new Error('Array cannot be empty');
     keysExclude.push(...Util.filterNullishItems([
         keyTitle.prefix, keyTitle.suffix, '_id', '__v',
     ]));
 
     const objFilter = (key: string): boolean => {
-        return (keys ? keys.includes(key) : !!key) && !keysExclude.includes(key);
+        return (keys ? keys.includes(key as T extends string ? string : keyof T) : !!key) && !keysExclude.includes(key);
     };
 
     await pagedEmbed(context, {

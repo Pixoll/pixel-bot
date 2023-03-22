@@ -32,7 +32,7 @@ export const validateUrlPattern = new RegExp(
 );
 
 export const defaultGenerateEmbedOptions: Required<Omit<
-    GenerateEmbedOptions, 'authorIconURL' | 'authorName' | 'embedTitle' | 'keys' | 'numbered'>
+    GenerateEmbedOptions<object | string>, 'authorIconURL' | 'authorName' | 'embedTitle' | 'keys' | 'numbered'>
 > = {
     ephemeral: false,
     number: 6,
