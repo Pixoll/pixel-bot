@@ -1,4 +1,4 @@
-import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, Util } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, replyAll } from '../../utils';
 
 export default class PollsCommand extends Command<true> {
@@ -24,12 +24,17 @@ export default class PollsCommand extends Command<true> {
             return;
         }
 
-        await generateEmbed(context, pollsData.toJSON(), {
+        const polls = pollsData.map(poll => ({
+            endsAt: poll.duration,
+            ...Util.omit(poll, ['duration']),
+        }));
+
+        await generateEmbed(context, polls, {
             number: 5,
             authorName: `There's ${pluralize('active poll', pollsData.size)}`,
             authorIconURL: guild.iconURL({ forceStatic: false }),
             title: 'Poll',
-            keys: ['channel', 'duration', 'endsAt'],
+            keys: ['channel', 'endsAt'],
         });
     }
 }

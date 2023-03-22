@@ -1071,7 +1071,11 @@ export async function generateEmbed<T extends object | string>(
                     break;
                 }
 
-                const propName = capitalize(key.replace('createdAt', 'date')).replace('id', '');
+                const propName = capitalize(key
+                    .replace(/^createdAt$/, 'date')
+                    .replace(/Id$/, '')
+                    .replace(/[A-Z]/g, ' $&')
+                ).trim();
                 if (propName.endsWith('tag')) continue;
 
                 const userStr = key === 'userId' ? `<@${objectItem.userId}> ${objectItem.userTag}` : null;

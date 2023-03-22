@@ -92,7 +92,7 @@ async function runCommand(
         authorIconURL: avatarURL,
         title: ' •  ID:',
         keyTitle: { prefix: 'type' },
-        keysExclude: ['updatedAt', 'guild', ...(user ? ['modId', 'modTag'] : [null])],
+        keysExclude: ['updatedAt', 'guild', ...(user ? ['modId', 'modTag'] as const : [null])],
         useDocId: true,
         components: [filterMenu],
     });
