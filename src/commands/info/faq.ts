@@ -18,6 +18,7 @@ import {
     confirmButtons,
     replyAll,
     getSubCommand,
+    limitStringLength,
 } from '../../utils';
 
 const args = [{
@@ -153,8 +154,11 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
             return;
         }
 
-        if (!question) {
+        if (!question || question.length > 100) {
             const questionMsg = await basicCollector(context, {
+                description: question && question.length < 100
+                    ? 'Make sure the question is 100 characters or shorter.'
+                    : undefined,
                 fieldName: 'What question do you want to answer?',
             }, { time: 2 * 60_000 });
             if (!questionMsg) return;
@@ -259,7 +263,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
             .filter(faq => faq.question.toLowerCase().includes(query))
             .slice(0, 25)
             .map<ChoiceData<number>>((faq, i) => ({
-                name: `${i}. ${faq.question}`,
+                name: limitStringLength(`${i + 1}. ${faq.question}`, 100),
                 value: i + 1,
             }));
         await interaction.respond(possibleItems);
