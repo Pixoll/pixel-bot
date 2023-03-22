@@ -243,9 +243,9 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
     }
 
     public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
-        const { user, client, options } = interaction;
+        const { user, options } = interaction;
         const query = options.getFocused().toLowerCase();
-        const todoData = await client.database.todo.fetch({ user: user.id });
+        const todoData = await this.db.fetch({ user: user.id });
         const possibleItems = todoData?.list
             .filter(todo => todo.toLowerCase().includes(query))
             .slice(0, 25)
