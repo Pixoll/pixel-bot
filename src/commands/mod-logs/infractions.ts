@@ -65,7 +65,8 @@ async function runCommand(
 
     const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
         .setCustomId(`${message.id}:menu`)
-        .setMaxValues(1).setMinValues(1)
+        .setMinValues(1)
+        .setMaxValues(1)
         .setPlaceholder('Filter...')
         .setOptions([
             { label: 'All', value: 'all', emoji: '🎲' },
