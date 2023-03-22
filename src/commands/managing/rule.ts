@@ -1,9 +1,10 @@
 import { stripIndent } from 'common-tags';
-import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionType, EmbedBuilder, ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
 import {
     Argument,
     Command,
     CommandContext,
+    CommandoAutocompleteInteraction,
     CommandoClient,
     CommandoMessage,
     JSONIfySchema,
@@ -11,7 +12,7 @@ import {
     RuleSchema,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, replyAll, getSubCommand, pixelColor } from '../../utils';
+import { basicEmbed, replyAll, getSubCommand, pixelColor, limitStringLength } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -93,7 +94,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
                     name: 'rule',
                     description: 'The number of the rule to remove.',
                     required: true,
-                    minValue: 1,
+                    autocomplete: true,
                 }],
             }],
         });
@@ -201,5 +202,20 @@ export default class RuleCommand extends Command<true, RawArgs> {
             fieldName: `Removed rule number ${rule--}:`,
             fieldValue: rulesData.rules[rule],
         }));
+    }
+
+    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+        const { guild, options } = interaction;
+        if (!guild) return;
+        const query = options.getFocused().toLowerCase();
+        const rulesData = await guild.database.rules.fetch();
+        const possibleItems = rulesData?.rules
+            .filter(rule => rule.toLowerCase().includes(query))
+            .slice(0, 25)
+            .map<ChoiceData<number>>((rule, i) => ({
+                name: limitStringLength(`${i + 1}. ${rule}`, 100),
+                value: i + 1,
+            })) ?? [];
+        await interaction.respond(possibleItems);
     }
 }
