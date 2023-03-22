@@ -1,5 +1,11 @@
 import { stripIndent } from 'common-tags';
-import { Collection, Message, FetchMessagesOptions, ApplicationCommandOptionType } from 'discord.js';
+import {
+    Collection,
+    Message,
+    FetchMessagesOptions,
+    ApplicationCommandOptionType,
+    ApplicationCommandNumericOption,
+} from 'discord.js';
 import {
     Argument,
     Command,
@@ -82,14 +88,14 @@ type ParsedArgs = ParseRawArguments<RawArgs> & {
 };
 type SubCommand = ParsedArgs['subCommand'];
 
-const amountOption = {
+const amountOption: ApplicationCommandNumericOption = {
     type: ApplicationCommandOptionType.Integer,
     name: 'amount',
     description: 'The amount of messages to delete.',
     required: true,
     minValue: 1,
     maxValue: 100,
-} as const;
+};
 
 export default class PurgeCommand extends Command<true, RawArgs> {
     public constructor(client: CommandoClient) {
