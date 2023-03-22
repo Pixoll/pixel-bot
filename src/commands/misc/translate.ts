@@ -31,7 +31,7 @@ import {
 const timestampRegex = /<t:\d+(?::\w)>/;
 const mentionableRegex = /<[@#][!&]?\d+>/;
 const guildEmojiRegex = /<:[^ :]+:\d+>/;
-const invalidTextQueryRegex = mergeRegexps([],
+const invalidTextQueryRegex = mergeRegexps(['g'],
     timestampRegex, mentionableRegex, guildEmojiRegex, defaultEmojiRegex
 );
 
@@ -144,7 +144,7 @@ async function runCommand(
             color: 'Red',
             emoji: 'cross',
             fieldName: 'That text query is invalid.',
-            fieldValue: 'Make sure to not an URL, mention, timestamp or emoji.',
+            fieldValue: 'Make sure to not over 1k characters long, and is not an URL, mention, timestamp or emoji.',
         }));
         return;
     }
@@ -174,6 +174,7 @@ async function runCommand(
 }
 
 function isValidTextQuery(text: string): boolean {
-    return !validateURL(text)
-        && text.replace(new RegExp(invalidTextQueryRegex, 'g'), '').trim().length !== 0;
+    return text.length <= 1000 
+        && !validateURL(text)
+        && text.replace(invalidTextQueryRegex, '').trim().length !== 0;
 }
