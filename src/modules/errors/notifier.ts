@@ -156,6 +156,6 @@ async function errorHandler(
     //     name: error.name,
     //     message: error.message,
     //     command: command?.name,
-    //     files: code(files),
+    //     files: code(files, 'ts'),
     // });
 }
