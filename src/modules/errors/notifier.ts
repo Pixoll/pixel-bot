@@ -2,7 +2,16 @@ import { oneLine, stripIndent } from 'common-tags';
 import { EmbedBuilder, TextChannel } from 'discord.js';
 import { CommandoClient, CommandContext, Command } from 'pixoll-commando';
 import EvalCommand from '../../commands/owner/eval';
-import { customEmoji, generateDocId, code, replyAll, limitStringLength, hyperlink } from '../../utils';
+import {
+    customEmoji,
+    generateDocId,
+    code,
+    replyAll,
+    limitStringLength,
+    hyperlink,
+    errorTypeMap,
+    ErrorTypeString,
+} from '../../utils';
 
 const errorLogsChannelId = '906740370304540702';
 const excludeStack = /node:(?:events|internal)|\(<anonymous>\)/;
@@ -34,19 +43,19 @@ export default function (client: CommandoClient<true>): void {
             });
 
         await replyAll(instances, reply);
-        await errorHandler(client, error, 'Command error', instances, command, id);
+        await errorHandler(client, error, errorTypeMap.command, instances, command, id);
     })
-        .on('error', error => errorHandler(client, error, 'Client error'))
-        .on('warn', warn => errorHandler(client, warn, 'Client warn'))
+        .on('error', error => errorHandler(client, error, errorTypeMap.error))
+        .on('warn', warn => errorHandler(client, warn, errorTypeMap.warn))
         .on('invalidated', () => {
             client.emit('debug', 'The client\'s session has become invalidated, restarting the bot...');
             process.exit(1);
         });
 
-    process.on('unhandledRejection', error => errorHandler(client, error as Error, 'Unhandled rejection'))
-        .on('uncaughtException', error => errorHandler(client, error, 'Uncaught exception'))
-        .on('uncaughtExceptionMonitor', error => errorHandler(client, error, 'Uncaught exception monitor'))
-        .on('warning', error => errorHandler(client, error, 'Process warning'));
+    process.on('unhandledRejection', error => errorHandler(client, error as Error, errorTypeMap.rejection))
+        .on('uncaughtException', error => errorHandler(client, error, errorTypeMap.exception))
+        .on('uncaughtExceptionMonitor', error => errorHandler(client, error, errorTypeMap.exceptionMonitor))
+        .on('warning', error => errorHandler(client, error, errorTypeMap.processWarning));
 }
 
 /**
@@ -60,7 +69,7 @@ export default function (client: CommandoClient<true>): void {
 async function errorHandler(
     client: CommandoClient<true>,
     error: Error | string,
-    type: string,
+    type: ErrorTypeString,
     context?: CommandContext,
     command?: Command,
     errorId?: string

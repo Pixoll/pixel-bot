@@ -60,3 +60,16 @@ export const bingSupportedLanguages = lang.LANGS as {
 
 export type BingLanguageId = keyof typeof bingSupportedLanguages;
 export type BingLanguage = PropertiesOf<typeof bingSupportedLanguages>;
+
+export const errorTypeMap = {
+    command: 'Command error',
+    error: 'Client error',
+    warn: 'Client warn',
+    rejection: 'Unhandled rejection',
+    exception: 'Uncaught exception',
+    exceptionMonitor: 'Uncaught exception monitor',
+    processWarning: 'Process warning',
+} as const;
+
+export type ErrorType = keyof typeof errorTypeMap;
+export type ErrorTypeString = PropertiesOf<typeof errorTypeMap>;
