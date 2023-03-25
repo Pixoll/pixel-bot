@@ -30,6 +30,7 @@ import {
     parseArgInput,
     validateArgInput,
     pixelColor,
+    getContextMessage,
 } from '../../utils';
 
 const args = [{
@@ -603,7 +604,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
 
-        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const message = await getContextMessage(context) as CommandoMessage;
         const channels = await parseLockdownChannels(channelsString, message, this);
         const lockChannels = removeRepeated(channels.map(c => c.id)).slice(0, 30);
 

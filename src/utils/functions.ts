@@ -1337,3 +1337,11 @@ export function mergeRegexps(flags: RegExpFlag[], ...regexps: Array<RegExp | str
     if (flags.length === 0) return new RegExp(merged);
     return new RegExp(merged, flags.join(''));
 }
+
+export async function getContextMessage(
+    context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction
+): Promise<Message> {
+    return 'isMessage' in context && context.isMessage()
+        ? context as Message
+        : await context.fetchReply();
+}

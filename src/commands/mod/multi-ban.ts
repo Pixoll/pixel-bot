@@ -22,6 +22,7 @@ import {
     parseArgInput,
     sevenDays,
     BasicEmbedOptions,
+    getContextMessage,
 } from '../../utils';
 
 const usersAmount = 10;
@@ -95,7 +96,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
         const { guild, guildId, author } = context;
         const { reason } = args;
 
-        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const message = await getContextMessage(context) as CommandoMessage;
         const users = await parseUsers(context, args, message, this);
         const manager = guild.members;
 

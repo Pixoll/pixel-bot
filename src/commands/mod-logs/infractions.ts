@@ -6,7 +6,7 @@ import {
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
 } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, reply, getContextMessage } from '../../utils';
 
 const args = [{
     key: 'user',
@@ -61,7 +61,7 @@ async function runCommand(
         return;
     }
 
-    const message = 'isMessage' in context && context.isMessage() ? context : await context.fetchReply();
+    const message = await getContextMessage(context);
 
     const filterMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
         .setCustomId(`${message.id}:menu`)

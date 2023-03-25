@@ -17,7 +17,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { validateURL, basicEmbed, sleep, reply, getSubCommand } from '../../utils';
+import { validateURL, basicEmbed, sleep, reply, getSubCommand, getContextMessage } from '../../utils';
 
 const args = [{
     key: 'amount',
@@ -422,6 +422,6 @@ async function fetchMessages(
         const isOver14 = (Date.now() - createdTimestamp) >= 1_209_600_000;
         return !isPinned && !isOver14;
     });
-    const reference = context.isMessage() ? context : await context.fetchReply();
+    const reference = await getContextMessage(context);
     return messages?.filter(msg => msg.id !== reference.id) ?? new Collection();
 }

@@ -29,6 +29,7 @@ import {
     parseArgInput,
     hyperlink,
     pixelColor,
+    getContextMessage,
 } from '../../utils';
 
 const rolesAmount = 10;
@@ -105,7 +106,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext, args: ParsedArgs): Promise<void> {
         const { channel } = args;
         let content = args.message || '';
-        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const message = await getContextMessage(context) as CommandoMessage;
         const roles = await parseRoles(context, args, message, this);
 
         const { id } = message;

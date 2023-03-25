@@ -22,6 +22,7 @@ import {
     removeRepeated,
     getSubCommand,
     validateArgInput,
+    getContextMessage,
 } from '../../utils';
 
 const args = [{
@@ -140,7 +141,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
     public async run(
         context: CommandContext<true>, { subCommand, channels: channelsOrReason, reason }: ParsedArgs
     ): Promise<void> {
-        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const message = await getContextMessage(context) as CommandoMessage;
         const lockChannels = Util.equals(subCommand, ['start', 'end'])
             ? await parseLockdownChannels(channelsOrReason, message, this)
             : [];

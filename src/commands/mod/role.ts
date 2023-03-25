@@ -22,6 +22,7 @@ import {
     addOrdinalSuffix,
     getSubCommand,
     parseArgInput,
+    getContextMessage,
 } from '../../utils';
 
 const rolesAmount = 10;
@@ -274,7 +275,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
             }));
             return;
         }
-        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const message = await getContextMessage(context) as CommandoMessage;
         const roles = await parseRoles(context, args, message, this);
         const memberRoles = member.roles;
 

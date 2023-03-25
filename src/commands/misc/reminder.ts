@@ -8,7 +8,7 @@ import {
     DatabaseManager,
     CommandoMessage,
 } from 'pixoll-commando';
-import { basicEmbed, customEmoji, timestamp, reply } from '../../utils';
+import { basicEmbed, customEmoji, timestamp, reply, getContextMessage } from '../../utils';
 
 const args = [{
     key: 'time',
@@ -64,7 +64,7 @@ export default class ReminderCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { time, reminder }: ParsedArgs): Promise<void> {
-        const message = context.isMessage() ? context : await context.fetchReply() as CommandoMessage;
+        const message = await getContextMessage(context) as CommandoMessage;
         if (context.isInteraction()) {
             const arg = this.argsCollector?.args[0];
             const timeResult = await arg?.parse(time.toString(), message).catch(() => null);
