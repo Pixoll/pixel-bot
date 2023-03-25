@@ -1,5 +1,5 @@
 import { prettyMs } from 'better-ms';
-import { ActivityType, ApplicationCommandType, EmbedBuilder, User, UserFlagsString } from 'discord.js';
+import { ActivityType, ApplicationCommandType, EmbedBuilder, User } from 'discord.js';
 import {
     Command,
     CommandContext,
@@ -8,27 +8,7 @@ import {
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
-import { getKeyPerms, timestamp, customEmoji, reply, pixelColor } from '../../utils';
-
-const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
-    ActiveDeveloper: null,
-    BotHTTPInteractions: null,
-    BugHunterLevel1: '<:bug_hunter:894117053714292746>',
-    BugHunterLevel2: '<:bug_buster:894117053856878592>',
-    CertifiedModerator: null,
-    Hypesquad: '<:hypesquad:894113047763898369>',
-    HypeSquadOnlineHouse1: '<:bravery:894110822786281532>',
-    HypeSquadOnlineHouse2: '<:brilliance:894110822626885663>',
-    HypeSquadOnlineHouse3: '<:balance:894110823553855518>',
-    Partner: '<:partner:894116243785785344>',
-    PremiumEarlySupporter: '<:early_supporter:894117997264896080>',
-    Quarantined: null,
-    Spammer: null,
-    Staff: '<:discord_staff:894115772832546856>',
-    TeamPseudoUser: null,
-    VerifiedBot: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
-    VerifiedDeveloper: '<:verified_developer:894117997378142238>',
-};
+import { getKeyPerms, timestamp, customEmoji, reply, pixelColor, userFlagToEmojiMap } from '../../utils';
 
 const activityTypeMap = Object.fromEntries(Util.getEnumEntries(ActivityType).map(([key, value]) =>
     [value, key] as [ActivityType, keyof typeof ActivityType]
@@ -82,7 +62,7 @@ async function mapUserInfo(
     const member = await guild?.members.fetch(user).catch(() => null);
     const permissions = member ? getKeyPerms(member) : null;
 
-    const description: Array<string | null> = [user.toString()];
+    const description: Array<Nullable<string>> = [user.toString()];
     if (flags) {
         for (const flag of flags) description.push(userFlagToEmojiMap[flag]);
     }

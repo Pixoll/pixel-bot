@@ -1,28 +1,8 @@
 import { stripIndent } from 'common-tags';
-import { EmbedBuilder, UserFlagsString } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { isGuildModuleEnabled, compareArrays, customEmoji, hyperlink } from '../../utils';
-
-const userFlagToEmojiMap: Record<UserFlagsString, string | null> = {
-    ActiveDeveloper: null,
-    BotHTTPInteractions: null,
-    BugHunterLevel1: '<:bug_hunter:894117053714292746>',
-    BugHunterLevel2: '<:bug_buster:894117053856878592>',
-    CertifiedModerator: null,
-    Hypesquad: '<:hypesquad:894113047763898369>',
-    HypeSquadOnlineHouse1: '<:bravery:894110822786281532>',
-    HypeSquadOnlineHouse2: '<:brilliance:894110822626885663>',
-    HypeSquadOnlineHouse3: '<:balance:894110823553855518>',
-    Partner: '<:partner:894116243785785344>',
-    PremiumEarlySupporter: '<:early_supporter:894117997264896080>',
-    Quarantined: null,
-    Spammer: null,
-    Staff: '<:discord_staff:894115772832546856>',
-    TeamPseudoUser: null,
-    VerifiedBot: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
-    VerifiedDeveloper: '<:verified_developer:894117997378142238>',
-};
+import { isGuildModuleEnabled, compareArrays, customEmoji, hyperlink, userFlagToEmojiMap } from '../../utils';
 
 /**
  * Returns a clickable link to the image. `None` if the link is invalid

@@ -1,5 +1,5 @@
 import { lang } from 'bing-translate-api';
-import { PermissionsString } from 'discord.js';
+import { PermissionsString, UserFlagsString } from 'discord.js';
 import defaultEmojiRegex from 'emoji-regex';
 import { GenerateEmbedOptions } from './functions';
 
@@ -73,3 +73,17 @@ export const errorTypeMap = {
 
 export type ErrorType = keyof typeof errorTypeMap;
 export type ErrorTypeString = PropertiesOf<typeof errorTypeMap>;
+
+export const userFlagToEmojiMap: Partial<Record<UserFlagsString, string>> = {
+    BugHunterLevel1: '<:bug_hunter:894117053714292746>',
+    BugHunterLevel2: '<:bug_buster:894117053856878592>',
+    Hypesquad: '<:hypesquad:894113047763898369>',
+    HypeSquadOnlineHouse1: '<:bravery:894110822786281532>',
+    HypeSquadOnlineHouse2: '<:brilliance:894110822626885663>',
+    HypeSquadOnlineHouse3: '<:balance:894110823553855518>',
+    Partner: '<:partner:894116243785785344>',
+    PremiumEarlySupporter: '<:early_supporter:894117997264896080>',
+    Staff: '<:discord_staff:894115772832546856>',
+    VerifiedBot: '<:verified_bot1:894251987087016006><:verified_bot2:894251987661647873>',
+    VerifiedDeveloper: '<:verified_developer:894117997378142238>',
+};
