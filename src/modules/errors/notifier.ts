@@ -88,7 +88,7 @@ async function errorHandler(
         return;
     }
 
-    if (command?.name === 'eval' || error.stack?.includes(evalName)) return;
+    if (command?.name === 'eval' || error.stack?.includes(evalName) || isDjsAbortError(error)) return;
     console.error(error);
 
     const length = error.name.length + error.message.length + 3;
@@ -158,4 +158,8 @@ async function errorHandler(
     //     command: command?.name,
     //     files: code(files, 'ts'),
     // });
+}
+
+function isDjsAbortError(error: Error): boolean {
+    return error.name === 'AbortError' && error.message === 'The user aborted a request.';
 }
