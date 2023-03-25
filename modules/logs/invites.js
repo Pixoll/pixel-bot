@@ -31,8 +31,9 @@ module.exports = (client) => {
                 **Expires at:** ${timestamp(expiresAt, 'R') || 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
-            .setFooter({ text: `Inviter ID: ${inviter.id}` })
             .setTimestamp();
+
+        if (inviter) embed.setFooter({ text: `Inviter ID: ${inviter.id}` });
 
         guild.queuedLogs.push(embed);
     });
