@@ -25,11 +25,12 @@ export default function (client: CommandoClient<true>): void {
                 **Channel:** ${channel?.toString()}
                 **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
                 **Max. uses:** ${maxUses || 'No limit'}
-                **Expires at:** ${timestamp(expiresAt ?? 0, 'R') || 'Never'}
+                **Expires at:** ${expiresAt ? timestamp(expiresAt, 'R') : 'Never'}
                 **Temp. membership:** ${temporary ? 'Yes' : 'No'}
             `)
-            .setFooter({ text: `Inviter ID: ${inviter?.id}` })
             .setTimestamp();
+
+        if (inviter) embed.setFooter({ text: `Inviter ID: ${inviter.id}` });
 
         guild.queuedLogs.push(embed);
     });
@@ -104,7 +105,7 @@ export default function (client: CommandoClient<true>): void {
                     **Inviter:** ${inviter ? `${inviter.toString()} ${inviter.tag}` : 'Inviter is unavailable.'}
                     ${info}
                     **Max uses:** ${maxUses || 'No limit'}
-                    **Expires at:** ${timestamp(expiresAt ?? 0, 'R') || 'Never'}
+                    **Expires at:** ${expiresAt ? timestamp(expiresAt, 'R') : 'Never'}
                     **Temporary membership:** ${temporary ? 'Yes' : 'No'}
                     `,
                 })
