@@ -1298,14 +1298,17 @@ export async function parseArgDate<T extends Date | number>(
     command: Command,
     argumentIndex: number,
     value: Nullable<T> | string,
-    defaultValue?: string
+    defaultValue?: string,
+    fallbackValue?: T
 ): Promise<Nullable<T>> {
     if (context.isMessage() || Util.isNullish(value)) return value as Nullable<T>;
     const message = await context.fetchReply() as CommandoMessage;
     const argument = command.argsCollector?.args[argumentIndex];
     const type = argument?.type?.id.split('|')[0];
-    const resultDate = await argument?.parse(value?.toString() ?? defaultValue ?? '', message).catch(() => null);
-    if (Util.isNullish(resultDate)) {
+    const resultDate = await argument?.parse(
+        value?.toString() ?? defaultValue ?? '', message
+    ).catch(() => null) as Nullable<T>;
+    if (Util.isNullish(resultDate) && Util.isNullish(fallbackValue)) {
         await reply(context, basicEmbed({
             color: 'Red',
             emoji: 'cross',
@@ -1313,7 +1316,7 @@ export async function parseArgDate<T extends Date | number>(
         }));
         return null;
     }
-    return resultDate as T;
+    return resultDate ?? fallbackValue;
 }
 
 export function djsLocaleToBing(
