@@ -1,6 +1,14 @@
 import { ms } from 'better-ms';
 import { oneLine, stripIndent } from 'common-tags';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import {
+    Argument,
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoMessage,
+    ParseRawArguments,
+    Util,
+} from 'pixoll-commando';
 import {
     userException,
     memberException,
@@ -13,13 +21,22 @@ import {
 } from '../../utils';
 
 const args = [{
-    key: 'user',
-    prompt: 'What user do you want to time-out?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to time-out?',
+    type: 'member',
 }, {
     key: 'duration',
     prompt: 'How long should the time-out last? (max. of 28 days). Set to 0 to remove a timeout.',
     type: ['date', 'duration'],
+    async validate(value: string | undefined, message: CommandoMessage, argument: Argument): Promise<boolean | string> {
+        if (typeof value === 'undefined') return false;
+        if (parseInt(value) === 0) return true;
+        return await argument.type?.validate(value, message, argument) ?? true;
+    },
+    async parse(value: string, message: CommandoMessage, argument: Argument): Promise<Date | number> {
+        if (parseInt(value) === 0) return 0;
+        return await argument.type?.parse(value, message, argument) as Date | number;
+    },
 }, {
     key: 'reason',
     prompt: 'What is the reason of the time-out?',
@@ -34,19 +51,18 @@ type ParsedArgs = ParseRawArguments<RawArgs>;
 export default class TimeOutCommand extends Command<true, RawArgs> {
     public constructor(client: CommandoClient) {
         super(client, {
-            name: 'time-out',
-            aliases: ['timeout'],
+            name: 'timeout',
             group: 'mod',
-            description: 'Set or remove time-out for user so they cannot send messages or join VCs.',
+            description: 'Set or remove a timeout for a member so they cannot send messages or join VCs.',
             detailedDescription: stripIndent`
-                \`user\` can be either a user's name, mention or ID.
+                \`member\` can be either a member's name, mention or ID.
                 ${oneLine`
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command (max. of 28 days).
                 Set to \`0\` to remove a timeout.
                 `}
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
-            format: 'timeout [user] [duration] <reason>',
+            format: 'timeout [member] [duration] <reason>',
             examples: [
                 'timeout Pixoll 2h Excessive swearing',
                 'timeout Pixoll 0',
@@ -55,20 +71,19 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             userPermissions: ['ModerateMembers'],
             guildOnly: true,
             args,
-            testAppCommand: true,
             autogenerateSlashCommand: true,
         });
     }
 
-    public async run(context: CommandContext<true>, { user, duration, reason }: ParsedArgs): Promise<void> {
-        const parsedDuration = await parseArgDate(context, this as Command, 1, duration);
-        if (!parsedDuration) return;
+    public async run(context: CommandContext<true>, { member: passedMember, duration, reason }: ParsedArgs): Promise<void> {
+        const parsedDuration = await parseArgDate(context, this as Command, 1, duration, undefined, 0);
+        if (Util.isNullish(parsedDuration)) return;
         duration = parsedDuration;
         reason ??= 'No reason given.';
 
         const { guild, guildId, member: mod, author } = context;
         const { moderations } = guild.database;
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -78,6 +93,7 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
             return;
         }
 
+        const { user } = member;
         const userError = userException(user, author, this as Command);
         if (userError) {
             await reply(context, basicEmbed(userError));
@@ -152,9 +168,11 @@ export default class TimeOutCommand extends Command<true, RawArgs> {
         await reply(context, basicEmbed({
             color: 'Green',
             emoji: 'check',
-            fieldName: `${user.tag} has been timed-out`,
+            fieldName: isTimedOut
+                ? `${user.tag}'s timed-out has been removed`
+                : `${user.tag} has been timed-out`,
             fieldValue: stripIndent`
-            **Expires:** ${timestamp(duration, 'R', true)}
+            ${!isTimedOut ? `**Expires:** ${timestamp(duration, 'R', true)}` : ''}
             **Reason:** ${reason}
             `,
         }));
