@@ -521,7 +521,7 @@ export function memberException(
         emoji: 'cross',
         description: '',
     };
-    if (!member.bannable || !member.kickable) {
+    if (!member.bannable || !member.kickable || !member.moderatable) {
         options.fieldName = `Unable to ${name} ${member.user.tag}`;
         options.fieldValue = 'Please check the role hierarchy or server ownership.';
         return options;
