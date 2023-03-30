@@ -3,9 +3,9 @@ import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixo
 import { generateDocId, basicEmbed, userException, confirmButtons, reply } from '../../utils';
 
 const args = [{
-    key: 'user',
-    prompt: 'What user do you want to warn?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to warn?',
+    type: 'member',
 }, {
     key: 'reason',
     prompt: 'What is the reason of the warn?',
@@ -23,7 +23,7 @@ export default class warnCommand extends Command<true, RawArgs> {
             group: 'mod',
             description: 'Warn a member.',
             detailedDescription: '`member` can be a member\'s username, ID or mention. `reason` can be anything you want.',
-            format: 'warn [user] [reason]',
+            format: 'warn [member] [reason]',
             examples: ['warn Pixoll Excessive swearing'],
             modPermissions: true,
             guildOnly: true,
@@ -32,9 +32,9 @@ export default class warnCommand extends Command<true, RawArgs> {
         });
     }
 
-    public async run(context: CommandContext<true>, { user, reason }: ParsedArgs): Promise<void> {
+    public async run(context: CommandContext<true>, { member: passedMember, reason }: ParsedArgs): Promise<void> {
         const { guild, guildId, author } = context;
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -44,6 +44,7 @@ export default class warnCommand extends Command<true, RawArgs> {
             return;
         }
 
+        const { user } = member;
         const userError = userException(user, author, this as Command);
         if (userError) {
             await reply(context, basicEmbed(userError));

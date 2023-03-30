@@ -22,9 +22,9 @@ const args = [{
         return isValidRole(message, role);
     },
 }, {
-    key: 'user',
-    prompt: 'What user do you want to give the role?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to give the role?',
+    type: 'member',
 }, {
     key: 'duration',
     prompt: 'How long should this role last?',
@@ -49,11 +49,11 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             description: 'Assign a role that persists for a limited time.',
             detailedDescription: stripIndent`
                 \`role\` can be either a role's name, mention or ID.
-                \`user\` can be either a user's name, mention or ID.
+                \`member\` can be either a member's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
-            format: 'temp-role [role] [user] [duration] <reason>',
+            format: 'temp-role [role] [member] [duration] <reason>',
             examples: ['temp-role Moderator Pixoll 1d'],
             clientPermissions: ['ManageRoles'],
             userPermissions: ['ManageRoles'],
@@ -63,9 +63,11 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
         });
     }
 
-    public async run(context: CommandContext<true>, { user, duration, role, reason }: ParsedArgs): Promise<void> {
+    public async run(
+        context: CommandContext<true>, { member: passedMember, duration, role, reason }: ParsedArgs
+    ): Promise<void> {
         const { guild, guildId, author } = context;
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -83,7 +85,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const { roles } = member;
+        const { roles, user } = member;
         const parsedDuration = await parseArgDate(context, this as Command, 2, duration);
         if (!parsedDuration) return;
 

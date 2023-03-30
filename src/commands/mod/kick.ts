@@ -13,9 +13,9 @@ import {
 import { stripIndent } from 'common-tags';
 
 const args = [{
-    key: 'user',
-    prompt: 'What user do you want to kick?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to kick?',
+    type: 'member',
 }, {
     key: 'reason',
     prompt: 'What is the reason of the kick?',
@@ -32,12 +32,12 @@ export default class KickCommand extends Command<true, RawArgs> {
         super(client, {
             name: 'kick',
             group: 'mod',
-            description: 'Kick a user.',
+            description: 'Kick a member.',
             detailedDescription: stripIndent`
-                \`user\` can be either a user's name, mention or ID.
+                \`member\` can be either a member's name, mention or ID.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
-            format: 'kick [user] <reason>',
+            format: 'kick [member] <reason>',
             examples: [
                 'kick Pixoll',
                 'kick Pixoll Get out!',
@@ -50,24 +50,24 @@ export default class KickCommand extends Command<true, RawArgs> {
         });
     }
 
-    public async run(context: CommandContext<true>, { user, reason }: ParsedArgs): Promise<void> {
+    public async run(context: CommandContext<true>, { member: passedMember, reason }: ParsedArgs): Promise<void> {
         reason ??= 'No reason given.';
-
         const { guild, guildId, member: mod, author } = context;
 
-        const userError = userException(user, author, this as Command);
-        if (userError) {
-            await reply(context, basicEmbed(userError));
-            return;
-        }
-
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
                 description: 'That user is not part of this server',
             }));
+            return;
+        }
+
+        const { user } = member;
+        const userError = userException(user, author, this as Command);
+        if (userError) {
+            await reply(context, basicEmbed(userError));
             return;
         }
 

@@ -13,9 +13,9 @@ import {
 } from '../../utils';
 
 const args = [{
-    key: 'user',
-    prompt: 'What user do you want to mute?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to mute?',
+    type: 'member',
 }, {
     key: 'duration',
     prompt: 'How long should the mute last?',
@@ -36,13 +36,13 @@ export default class MuteCommand extends Command<true, RawArgs> {
         super(client, {
             name: 'mute',
             group: 'mod',
-            description: 'Mute a user so they cannot send messages or speak.',
+            description: 'Mute a member so they cannot send messages or speak.',
             detailedDescription: stripIndent`
-                \`user\` can be either a user's name, mention or ID.
+                \`member\` can be either a member's name, mention or ID.
                 \`duration\` uses the bot's time formatting, for more information use the \`help\` command.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
-            format: 'mute [user] [duration] <reason>',
+            format: 'mute [member] [duration] <reason>',
             examples: ['mute Pixoll 2h', 'mute Pixoll 6h Excessive swearing'],
             clientPermissions: ['ManageRoles'],
             userPermissions: ['ManageRoles'],
@@ -52,7 +52,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
         });
     }
 
-    public async run(context: CommandContext<true>, { user, duration, reason }: ParsedArgs): Promise<void> {
+    public async run(context: CommandContext<true>, { member: passedMember, duration, reason }: ParsedArgs): Promise<void> {
         const parsedDuration = await parseArgDate(context, this as Command, 1, duration);
         if (!parsedDuration) return;
         duration = parsedDuration;
@@ -60,7 +60,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
 
         const { guild, guildId, member: mod, author } = context;
         const { moderations, active, setup } = guild.database;
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -70,7 +70,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const { roles } = member;
+        const { roles, user } = member;
 
         const data = await setup.fetch();
         if (!data || !data.mutedRole) {

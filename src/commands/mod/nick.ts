@@ -3,9 +3,9 @@ import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixo
 import { basicEmbed, reply } from '../../utils';
 
 const args = [{
-    key: 'user',
-    prompt: 'What user do you want to change/remove the nick?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to change/remove the nick?',
+    type: 'member',
 }, {
     key: 'nickname',
     prompt: 'What will be their new nickname? Type `remove` to remove their current nickname.',
@@ -22,13 +22,13 @@ export default class NickCommand extends Command<true, RawArgs> {
             name: 'nick',
             aliases: ['nickname', 'setnick'],
             group: 'mod',
-            description: 'Change the nickname of a user or remove it.',
+            description: 'Change the nickname of a member or remove it.',
             detailedDescription: stripIndent`
-                \`user\` can be either a user's name, mention or ID.
-                \`nick\` will be the user's new nickname.
-                Setting \`nick\` as \`remove\` will remove the user's current nickname.
+                \`member\` can be either a member's name, mention or ID.
+                \`nick\` will be the member's new nickname.
+                Setting \`nick\` as \`remove\` will remove the member's current nickname.
             `,
-            format: 'nick [user] [nick]',
+            format: 'nick [member] [nick]',
             examples: [
                 'nick Pixoll Cool coder',
                 'nick Pixoll remove',
@@ -41,10 +41,9 @@ export default class NickCommand extends Command<true, RawArgs> {
         });
     }
 
-    public async run(context: CommandContext<true>, { user, nickname }: ParsedArgs): Promise<void> {
+    public async run(context: CommandContext<true>, { member: passedMember, nickname }: ParsedArgs): Promise<void> {
         const { author, guild } = context;
-        const { tag, username } = user;
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -54,11 +53,12 @@ export default class NickCommand extends Command<true, RawArgs> {
             return;
         }
 
+        const { tag, username } = member.user;
         if (!member.manageable) {
             await reply(context, basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
-                fieldName: `Unable to change ${user.toString()}'s nickname`,
+                fieldName: `Unable to change ${member.toString()}'s nickname`,
                 fieldValue: 'Please check the role hierarchy or server ownership.',
             }));
             return;

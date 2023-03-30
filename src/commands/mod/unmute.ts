@@ -3,9 +3,9 @@ import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixo
 import { basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
-    key: 'user',
-    prompt: 'What user do you want to unmute?',
-    type: 'user',
+    key: 'member',
+    prompt: 'What member do you want to unmute?',
+    type: 'member',
 }, {
     key: 'reason',
     prompt: 'What is the reason of the unmute?',
@@ -22,12 +22,12 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
         super(client, {
             name: 'unmute',
             group: 'mod',
-            description: 'Unmute a user.',
+            description: 'Unmute a member.',
             detailedDescription: stripIndent`
-                \`user\` can be either a user's name, mention or ID.
+                \`member\` can be either a member's name, mention or ID.
                 If \`reason\` is not specified, it will default as "No reason given".
             `,
-            format: 'unmute [user] <reason>',
+            format: 'unmute [member] <reason>',
             examples: [
                 'unmute Pixoll',
                 'unmute Pixoll Appealed',
@@ -40,10 +40,10 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
         });
     }
 
-    public async run(context: CommandContext<true>, { user, reason }: ParsedArgs): Promise<void> {
+    public async run(context: CommandContext<true>, { member: passedMember, reason }: ParsedArgs): Promise<void> {
         const { guild, author } = context;
         const { active, setup } = guild.database;
-        const member = await guild.members.fetch(user).catch(() => null);
+        const member = await guild.members.fetch(passedMember.id).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -64,7 +64,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const { roles } = member;
+        const { roles, user } = member;
         const role = await guild.roles.fetch(data.mutedRole);
 
         if (!role || !roles.cache.has(role.id)) {
