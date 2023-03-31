@@ -1238,7 +1238,7 @@ export function parseMessageToCommando<InGuild extends boolean = boolean>(
     return parsedMessage as CommandoMessage<InGuild> | null;
 }
 
-export function getSubCommand<T>(message: CommandoMessage, defaultSubCommand?: T): T {
+export function getSubCommand<T extends string>(message: CommandoMessage, defaultSubCommand?: T): T {
     return (
         CommandoMessage.parseArgs(message.content).map(s => s.toLowerCase())[1]
         ?? defaultSubCommand

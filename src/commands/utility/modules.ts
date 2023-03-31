@@ -53,7 +53,7 @@ export default class ModulesCommand extends Command<true> {
             return;
         }
 
-        const moduleStatsString = mapModuleData(data);
+        const modulesStatsString = mapModuleData(data);
 
         const embed = new EmbedBuilder()
             .setColor(pixelColor)
@@ -61,7 +61,7 @@ export default class ModulesCommand extends Command<true> {
                 name: `${guild.name}'s modules and sub-modules`,
                 iconURL: guild.iconURL({ forceStatic: false }) ?? undefined,
             })
-            .setDescription(moduleStatsString)
+            .setDescription(modulesStatsString)
             .setTimestamp();
 
         await reply(context, embed);

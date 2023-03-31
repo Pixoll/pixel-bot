@@ -390,6 +390,14 @@ type AnyFunction = () => unknown;
 
 type Nullable<T> = T | null | undefined;
 
+type MapValues<T, V, TopLevel extends boolean = false> = {
+    [P in keyof T]: TopLevel extends true ? V : T[P] extends object ? MapValues<T[P], V> : V;
+};
+
+type MapKeys<T, Mapper> = {
+    [P in keyof T as Mapper[P] extends string ? Mapper[P] : P]: T[P] extends object ? MapKeys<T[P], Mapper> : T[P];
+};
+
 interface TypeOfValuesMap {
     bigint: bigint;
     boolean: boolean;
