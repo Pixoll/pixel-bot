@@ -209,17 +209,17 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
 
         const hasDeprecated = commandList.some(val => val.value.includes('~~'));
         const hasDash = commandList.some(val => val.value.includes('—'));
-        const page1 = [];
-        if (hasDeprecated) page1.push(hasDeprecatedMessage);
-        if (hasDash) page1.push(hasDisabledMessage);
-        const page1String = page1.join('; those with ');
+        const commandsDisclaimers: string[] = [];
+        if (hasDeprecated) commandsDisclaimers.push(hasDeprecatedMessage);
+        if (hasDash) commandsDisclaimers.push(hasDisabledMessage);
+        const commandsDisclaimer = commandsDisclaimers.join('; those with ');
 
         const pages = [
             new EmbedBuilder(base).setTitle('Commands list').setDescription(stripIndent`
                 To use a command type \`${prefix}<command>\`, \`/<command>\` or \`@${user.tag} <command>\`.
                 Type \`/help <command>\` for detailed information of a command.
 
-                ${page1String ? `Commands ${page1String}.` : ''}
+                ${commandsDisclaimer ? `Commands ${commandsDisclaimer}.` : ''}
                 `).addFields(...commandList, {
                 name: '🔗 Useful links',
                 value: oneLine`

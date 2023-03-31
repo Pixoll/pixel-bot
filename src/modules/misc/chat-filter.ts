@@ -21,7 +21,7 @@ export default function (client: CommandoClient<true>): void {
         const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as GuildModule);
         if (!isEnabled) return;
 
-        const reasons = [];
+        const reasons: string[] = [];
 
         if (mentions.everyone && !permissions?.MentionEveryone) {
             reasons.push('Tired to ping everyone.');

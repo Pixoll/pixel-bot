@@ -86,7 +86,7 @@ export default function (client: CommandoClient<true>): void {
             .setFooter({ text: `Channel ID: ${id}` })
             .setTimestamp();
 
-        const perms = [];
+        const perms: string[] = [];
         for (const perm of permissionOverwrites.cache.toJSON()) {
             const targetManager = overwriteTypeMap[perm.type] + 's' as ManagerKey;
             const target = await guild[targetManager].fetch(perm.id).catch(() => null);

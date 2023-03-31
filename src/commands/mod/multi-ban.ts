@@ -107,7 +107,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
         });
         const replyToEdit = await reply(context, embed(0));
 
-        const banned = [];
+        const banned: CommandoUser[] = [];
         for (const user of users) {
             const confirmed = await confirmButtons(context, {
                 action: 'ban',

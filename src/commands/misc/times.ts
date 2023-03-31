@@ -56,7 +56,17 @@ const timeZones = new Collection([
     ['Pacific/Guadalcanal', 'Solomon Islands'],
     ['Pacific/Auckland', 'New Zealand'],
     ['Pacific/Fiji', 'Fiji'],
-]);
+] as const);
+
+type TimeZoneEntry = typeof timeZones extends Collection<infer K, infer V> ? [K, V] : never;
+type TimeZone = TimeZoneEntry[0];
+type City = TimeZoneEntry[1];
+
+interface TimeZoneData {
+    offset: string | undefined;
+    time: string;
+    city: City;
+}
 
 const cities = timeZones.toJSON();
 
@@ -120,11 +130,9 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
             : context.options.getString('hour');
         const is12Hour = !!toMatch?.match(/[ap]\.?m\.?/i)?.map(m => m)[0];
 
-        const times = [];
-
         if (place) {
-            const timeZone = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase()) as string;
-            const city = timeZones.get(timeZone) as string;
+            const timeZone = timeZones.findKey(city => city.toLowerCase() === place.toLowerCase()) as TimeZone;
+            const city = timeZones.get(timeZone) as City;
             const { offset, time } = mapDateToTimeZone(date, timeZone, city, is12Hour);
             const hour = parseInt(time.split(':')[0]);
             const clock = hour - (hour > 12 ? 12 : 0);
@@ -142,10 +150,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
             return;
         }
 
-        for (const timeZoneData of timeZones) {
-            times.push(mapDateToTimeZone(date, ...timeZoneData, is12Hour));
-        }
-
+        const times = timeZones.map((city, tz) => mapDateToTimeZone(date, tz, city, is12Hour));
         const sorted = times.sort((a, b) => abcOrder(a.city, b.city));
         const divisor = Math.round((sorted.length / 3) + 0.1);
 
@@ -204,7 +209,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
     }
 }
 
-function mapDateToTimeZone(date: Date, timeZone: string, city: string, hour12: boolean): TimeZoneData {
+function mapDateToTimeZone(date: Date, timeZone: TimeZone, city: City, hour12: boolean): TimeZoneData {
     const format = new Intl.DateTimeFormat('en-GB', {
         hour: 'numeric', minute: 'numeric', timeZoneName: 'short', hour12, timeZone,
     }).format(date);
@@ -212,10 +217,4 @@ function mapDateToTimeZone(date: Date, timeZone: string, city: string, hour12: b
     const offset = sliced.pop();
     const time = sliced.join(' ');
     return { offset, time, city };
-}
-
-interface TimeZoneData {
-    offset: string | undefined;
-    time: string;
-    city: string;
 }

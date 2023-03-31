@@ -38,14 +38,14 @@ async function handlePoll(
         return query && poll.emojis.includes(query);
     }).toJSON();
 
-    const results = [];
+    const results: PollResult[] = [];
     for (const reaction of reactions) {
         const votes = reaction.count - 1;
         const emoji = reaction.emoji.toString();
         results.push({ votes, emoji });
     }
 
-    const winners = results.sort((a, b) => b.votes - a.votes).filter((d, i, arr) => arr[0].votes === d.votes);
+    const winners = results.sort((a, b) => b.votes - a.votes).filter((d, _, arr) => arr[0].votes === d.votes);
 
     const winner = winners.length === 1
         ? `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null;
@@ -74,4 +74,9 @@ async function handlePoll(
     }
 
     await message.reply({ embeds: [pollEmbed] });
+}
+
+interface PollResult {
+    votes: number;
+    emoji: string;
 }

@@ -32,7 +32,7 @@ export default function (client: CommandoClient<true>): void {
         if (!guild || author.bot || everyone) return;
 
         const db = guild.database.afk;
-        const embeds = [];
+        const embeds: EmbedBuilder[] = [];
         for (const user of users.toJSON()) {
             const data = await db.fetch({ user: user.id });
             if (!data) continue;

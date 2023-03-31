@@ -1,6 +1,12 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
 import { basicEmbed, generateEmbed, abcOrder, pluralize, reply } from '../../utils';
 
+interface Ban {
+    tag: string;
+    id: string;
+    reason: string;
+}
+
 export default class BansCommand extends Command<true> {
     public constructor(client: CommandoClient) {
         super(client, {
@@ -27,7 +33,7 @@ export default class BansCommand extends Command<true> {
             return;
         }
 
-        const bansList = [];
+        const bansList: Ban[] = [];
         for (const { user, reason } of bans.toJSON()) {
             bansList.push({
                 tag: user.tag,

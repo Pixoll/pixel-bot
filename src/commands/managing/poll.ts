@@ -272,14 +272,16 @@ export default class PollCommand extends Command<true, RawArgs> {
             pollData.emojis.includes(r.emoji.id ?? r.emoji.name ?? '')
         ).toJSON();
 
-        const results = [];
+        const results: PollResult[] = [];
         for (const reaction of reactions) {
             const votes = reaction.count - 1;
             const emoji = reaction.emoji.toString();
             results.push({ votes, emoji });
         }
 
-        const winners = results.sort((a, b) => b.votes - a.votes).filter((d, _, results) => results[0].votes === d.votes);
+        const winners = results
+            .sort((a, b) => b.votes - a.votes)
+            .filter((d, _, results) => results[0].votes === d.votes);
 
         const winner = winners.length === 1
             ? `The winner was the choice ${winners[0].emoji} with a total of \`${winners[0].votes}\` votes!` : null;
@@ -327,4 +329,9 @@ function parseEmojis(query: string | undefined, array: string[], client: Command
         if (!parseInt(emoji)) array.push(emoji);
         if (allEmojis.get(emoji)) array.push(emoji);
     }
+}
+
+interface PollResult {
+    votes: number;
+    emoji: string;
 }

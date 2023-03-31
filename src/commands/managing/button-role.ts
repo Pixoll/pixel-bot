@@ -123,7 +123,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
             .setColor(pixelColor)
             .setDescription(content);
 
-        const buttons = [];
+        const buttons: ButtonBuilder[] = [];
         for (const role of roles) {
             const style = buttons.length >= 5 ? ButtonStyle.Primary : ButtonStyle.Secondary;
             const button = new ButtonBuilder()
@@ -133,7 +133,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
             buttons.push(button);
         }
 
-        const rows = [];
+        const rows: Array<ActionRowBuilder<ButtonBuilder>> = [];
         while (buttons.length > 0) {
             const toAdd = rows.length === 1 ? buttons.splice(0, buttons.length).map(b => b.setStyle(ButtonStyle.Secondary))
                 : buttons.splice(0, buttons.length <= 4 ? 4 : Math.round(buttons.length / 2 + 0.1))

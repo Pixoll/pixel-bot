@@ -314,7 +314,7 @@ export async function isGuildModuleEnabled<
         : data[moduleName];
 
     if (typeof toCheck === 'object') {
-        const status = [];
+        const status: boolean[] = [];
         for (const prop of Object.keys(toCheck)) {
             if (typeof toCheck[prop] === 'function') continue;
             status.push(!!toCheck[prop]);
@@ -1063,11 +1063,11 @@ export async function generateEmbed<T extends object | string>(
                 ) || item[keyTitle?.suffix]
                 ));
 
-            const value = [];
+            const values: string[] = [];
             for (const key of objKeys) {
                 const objectItem = item as Record<string, unknown>;
                 if (objKeys.length === 1) {
-                    value.push(objectItem[key]);
+                    values.push(objectItem[key] as string);
                     break;
                 }
 
@@ -1095,12 +1095,12 @@ export async function generateEmbed<T extends object | string>(
 
                 const docData = userStr || modStr || channel?.toString() || created || duration || endsAt || objectItem[key];
 
-                value.push(`**${propName}:** ${docData}`);
+                values.push(`**${propName}:** ${docData}`);
             }
 
             embed.addFields({
                 name: `${numberPrefix} ${prefix} ${title} ${suffix}`.replace(/ +/g, ' '),
-                value: `${value.length !== 0 ? value.join('\n') : item}`,
+                value: `${values.length !== 0 ? values.join('\n') : item}`,
                 inline: inline,
             });
             index++;
