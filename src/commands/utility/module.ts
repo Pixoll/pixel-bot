@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
+import { APIEmbedField, ApplicationCommandOptionType, ApplicationCommandStringOptionData, EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
 import {
     Command,
@@ -13,9 +13,16 @@ import {
     QuerySchema,
     CommandoMessage,
     JSONIfySchema,
+    BaseSchema,
 } from 'pixoll-commando';
 import { ParsedModuleData, RawAuditLogName, RawModuleName } from '../../types';
-import { basicEmbed, addDashes, reply, removeDashes, isTrue, pixelColor } from '../../utils';
+import { basicEmbed, addDashes, reply, removeDashes, isTrue, pixelColor, getSubCommand } from '../../utils';
+
+declare function require<T>(id: string): T;
+
+type ModulesInfo = MapValues<Omit<ModuleSchema, keyof BaseSchema | 'guild'>, APIEmbedField[], true>;
+
+const modulesInfo = require<ModulesInfo>('../../../documents/modules.json');
 
 const modules: GuildModule[] = [];
 const auditLogs: GuildAuditLog[] = [];
@@ -25,7 +32,7 @@ const args = [{
     label: 'sub-command',
     prompt: 'What sub-command do you want to use?',
     type: 'string',
-    oneOf: ['diagnose', 'toggle'],
+    oneOf: ['diagnose', 'toggle', 'info'],
     parse(value: string): string {
         return value.toLowerCase();
     },
@@ -42,6 +49,8 @@ const args = [{
     oneOf: auditLogs,
     required: false,
     isEmpty(_: unknown, message: CommandoMessage): boolean {
+        const subCommand = getSubCommand<SubCommand>(message);
+        if (subCommand === 'info') return true;
         const moduleName = getModuleName(message);
         return moduleName !== 'audit-logs';
     },
@@ -49,6 +58,7 @@ const args = [{
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
+type SubCommand = ParsedArgs['subCommand'];
 
 function getModuleName(message: CommandoMessage): GuildModule {
     return CommandoMessage.parseArgs(message.content)[2] as GuildModule;
@@ -78,6 +88,28 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             addDashes<GuildAuditLog>(id)
         ));
 
+        const moduleChoices = modules.map(m => ({
+            name: capitalize(m.replace('-', ' ')),
+            value: m,
+        }));
+        const submoduleChoices = auditLogs.map(m => ({
+            name: capitalize(m.replace('-', ' ')),
+            value: m,
+        }));
+
+        const generateSubcommandOptions = (action: string): ApplicationCommandStringOptionData[] => [{
+            type: ApplicationCommandOptionType.String,
+            name: 'module',
+            description: `The module to ${action}.`,
+            required: true,
+            choices: moduleChoices,
+        }, {
+            type: ApplicationCommandOptionType.String,
+            name: 'sub-module',
+            description: `The sub-module to ${action}. Only usable if "module" is "Audit Logs".`,
+            choices: submoduleChoices,
+        }];
+
         super(client, {
             name: 'module',
             group: 'utility',
@@ -87,10 +119,12 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             \`sub-module\` can be either: ${auditLogs.map(sm => `\`${sm}\``).join(', ').replace(/,(?=[^,]*$)/, ' or')}.
             `,
             format: stripIndent`
+            module info [module] - Get detailed information about a module.
             module diagnose [module] <sub-module> - Diagnose a module or sub-module.
             module toggle [module] <sub-module> - Toggle a module or sub-module on/off.
             `,
             examples: [
+                'module info sticky-roles',
                 'module diagnose welcome',
                 'module toggle audit-logs channels',
             ],
@@ -103,40 +137,17 @@ export default class ModuleCommand extends Command<true, RawArgs> {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'diagnose',
                 description: 'Diagnose a module or sub-module.',
-                options: [{
-                    type: ApplicationCommandOptionType.String,
-                    name: 'module',
-                    description: 'The module to diagnose.',
-                    required: true,
-                    choices: modules.map(m => ({ name: capitalize(m.replace('-', ' ')), value: m })),
-                }, {
-                    type: ApplicationCommandOptionType.String,
-                    name: 'sub-module',
-                    description: 'The sub-module to diagnose. Only usable if "module" is "Audit Logs".',
-                    choices: auditLogs.map(m => ({ name: capitalize(m), value: m })),
-                }],
+                options: generateSubcommandOptions('diagnose'),
             }, {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: 'toggle',
                 description: 'Toggle a module or sub-module on/off.',
-                options: [{
-                    type: ApplicationCommandOptionType.String,
-                    name: 'module',
-                    description: 'The module to toggle.',
-                    required: true,
-                    choices: modules.map(m => ({
-                        name: capitalize(m.replace('-', ' ')),
-                        value: m,
-                    })),
-                }, {
-                    type: ApplicationCommandOptionType.String,
-                    name: 'sub-module',
-                    description: 'The sub-module to toggle. Only usable if "module" is "Audit Logs".',
-                    choices: auditLogs.map(m => ({
-                        name: capitalize(m.replace('-', ' ')),
-                        value: m,
-                    })),
-                }],
+                options: generateSubcommandOptions('toggle'),
+            }, {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: 'info',
+                description: 'Get detailed information from a module.',
+                options: generateSubcommandOptions('get information from').slice(0, 1),
             }],
         });
     }
@@ -147,6 +158,42 @@ export default class ModuleCommand extends Command<true, RawArgs> {
         const lcModule = moduleName.toLowerCase();
         const lcSubModule = moduleName === 'audit-logs' ? subModule?.toLowerCase() ?? null : null;
 
+        switch (subCommand) {
+            case 'info':
+                return await this.runInfo(context, lcModule);
+            case 'diagnose':
+                return await this.runDiagnose(context, lcModule, lcSubModule);
+            case 'toggle':
+                return await this.runToggle(context, lcModule, lcSubModule);
+        }
+    }
+
+    protected async runInfo(context: CommandContext<true>, moduleName: GuildModule): Promise<void> {
+        const { client } = context;
+        const rawModuleName = removeDashes<RawModuleName>(moduleName);
+        const moduleInfo = modulesInfo[rawModuleName];
+
+        const embed = new EmbedBuilder()
+            .setColor(pixelColor)
+            .setAuthor({
+                name: `${client.user.username}'s modules`,
+                iconURL: client.user.displayAvatarURL(),
+            })
+            .setTitle(`Module: ${capitalize(moduleName.replace(/-/g, ' '))}`)
+            .setFields(moduleInfo)
+            .setTimestamp();
+
+        await reply(context, embed);
+    }
+
+    /**
+     * The `diagnose` sub-command
+     */
+    protected async runDiagnose(
+        context: CommandContext<true>,
+        moduleName: GuildModule,
+        subModule: GuildAuditLog | null
+    ): Promise<void> {
         const { guild } = context;
         const data = await guild.database.modules.fetch();
         if (!data) {
@@ -159,23 +206,6 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             return;
         }
 
-        switch (subCommand) {
-            case 'diagnose':
-                return await this.runDiagnose(context, data, lcModule, lcSubModule);
-            case 'toggle':
-                return await this.runToggle(context, data, lcModule, lcSubModule);
-        }
-    }
-
-    /**
-     * The `diagnose` sub-command
-     */
-    protected async runDiagnose(
-        context: CommandContext<true>,
-        data: JSONIfySchema<ModuleSchema>,
-        moduleName: GuildModule,
-        subModule: GuildAuditLog | null
-    ): Promise<void> {
         const parsedData = parseModuleData(data);
 
         const rawModuleName = removeDashes<RawModuleName>(moduleName);
@@ -190,7 +220,6 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             ? parsedData[rawModuleName][rawSubModuleName]
             : isTopLevelModuleEnabled;
 
-        const { guild } = context;
         const type = subModule ? 'sub-module' : 'module';
         const moduleStatus = isTopLevelModuleEnabled ? 'Enabled' : 'Disabled';
 
@@ -215,13 +244,22 @@ export default class ModuleCommand extends Command<true, RawArgs> {
      */
     protected async runToggle(
         context: CommandContext<true>,
-        data: JSONIfySchema<ModuleSchema>,
         moduleName: GuildModule,
         subModule: GuildAuditLog | null
     ): Promise<void> {
         const { guildId, guild } = context;
-
         const db = guild.database.modules;
+        const data = await db.fetch();
+        if (!data) {
+            await reply(context, basicEmbed({
+                color: 'Red',
+                emoji: 'cross',
+                fieldName: 'There is no saved data for this server yet.',
+                fieldValue: 'Please run the `setup` command first.',
+            }));
+            return;
+        }
+
         const rawModuleName = removeDashes<RawModuleName>(moduleName);
         const rawSubModuleName = subModule ? removeDashes<RawAuditLogName>(subModule) : null;
         const newDocument: QuerySchema<ModuleSchema> = {
@@ -234,8 +272,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             newDocument[rawModuleName][rawSubModuleName] = !newDocument[rawModuleName][rawSubModuleName];
         }
 
-        if (data) await db.update(data, newDocument);
-        else await db.add(newDocument);
+        await db.update(data, newDocument);
 
         const type = subModule ? 'sub-module' : 'module';
         const target = subModule ? `${moduleName}/${subModule}` : moduleName;
