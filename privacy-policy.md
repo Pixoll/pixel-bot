@@ -13,6 +13,10 @@ Pixel runs on a fork of Commando, a now discontinued Discord.js bot framework, t
 
 You can find the full structure of Pixel's Database in its [framework's repository](https://github.com/Pixoll/pixoll-commando/tree/main/src/database/Schemas]).
 
+## Agreement
+
+By using Pixel, you agree to the terms of this Privacy Policy. If you do not agree to these terms you must not use our service.
+
 ## The information we collect
 
 We do not store any personally identifiable data.
