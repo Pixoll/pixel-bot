@@ -6,6 +6,17 @@
 
 These terms of service ("Agreement") set forth the general terms of service of your use of the "Pixel Bot" ("Bot" or "Service") and any of its related products and services (collectively, "Services"). This Agreement is legally binding between you ("User", "you" or "your") and this Bot developer ("Operator", "we", "us" or "our"). If you are entering into this agreement on behalf of a business or other legal entity, you represent that you have the authority to bind such entity to this agreement, in which case the terms "User", "you" or "your" shall refer to such entity. If you do not have such authority, or if you do not agree with the terms of this agreement, you must not accept this agreement and may not access and use the Bot and Services. By accessing and using the Bot and Services, you acknowledge that you have read, understood, and agree to be bound by the terms of this Agreement. You acknowledge that this Agreement is a contract between you and the Operator, even though it is electronic and is not physically signed by you, and it governs your use of the Bot and Services.
 
+## Table of contents
+
+1. [Age requirement](#age-requirement)
+2. [Links to other resources](#links-to-other-resources)
+3. [Prohibited uses](#prohibited-uses)
+4. [Intellectual property rights](#intellectual-property-rights)
+5. [Limitation of liability](#limitation-of-liability)
+6. [Changes and amendments](#changes-and-amendments)
+7. [Acceptance of these terms](#acceptance-of-these-terms)
+8. [Contacting us](#contacting-us)
+
 ## Age requirement
 
 You must be at least 13 years of age to use the Bot and Services. By using the Bot and Services and by agreeing to this Agreement you warrant and represent that you are at least 13 years of age.
