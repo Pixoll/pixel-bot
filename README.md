@@ -12,9 +12,11 @@ This bot provides a handful amount of moderation, management, information and so
 
 ### Key features that this bot has:
 
+🔹 **Slash commands:** type / to get access to the commands list.
+
 🔹 **Moderation:** warning, kicking, soft-banning, temp-banning, banning, muting, etc.
 
-🔹 **Welcome messages:** in DMs and in a server channel.
+🔹 **Welcome messages:** in a server channel.
 
 🔹 **Audit logs:** new joins, permissions update, channels/roles update, etc. Specific channel logging soon!
 
@@ -22,7 +24,7 @@ This bot provides a handful amount of moderation, management, information and so
 
 🔹 **Reminders system:** with both relative time and a specific date.
 
-🔹 **Button roles**
+🔹 **Button roles:** up to 10 roles per message.
 
 > For more information, run the `help` command.
 
