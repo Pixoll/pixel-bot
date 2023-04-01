@@ -2,7 +2,7 @@ import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder, version as djsVersion } from 'discord.js';
 import { Command, CommandContext, CommandoClient, version as pixComVersion } from 'pixoll-commando';
-import { reply, hyperlink, pixelColor } from '../../utils';
+import { reply, hyperlink, pixelColor, topggUrl, privacyPolicyUrl, termsOfServiceUrl, githubUrl } from '../../utils';
 
 declare function require<T>(id: string): T;
 const { version, description } = require<{ version: string; description: string }>('../../../package.json');
@@ -25,7 +25,6 @@ export default class InfoCommand extends Command {
         const guilds = client.guilds.cache;
 
         const uptimeStr = prettyMs(uptime, { verbose: true, unitCount: 2 });
-        const topgg = 'https://top.gg/bot/802267523058761759';
         const users = guilds.reduce((a, g) => a + g.memberCount, 0).toLocaleString();
 
         const info = new EmbedBuilder()
@@ -39,6 +38,7 @@ export default class InfoCommand extends Command {
                 name: 'Information',
                 value: stripIndent`
                 **Version:** ${version}
+                **GitHub Repository:** ${githubUrl}
                 **Library:** ${hyperlink('discord.js v' + djsVersion, 'https://discord.js.org/#/')}
                 **Framework:** ${hyperlink('pixoll-commando v' + pixComVersion, 'https://github.com/Pixoll/pixoll-commando')}
                 **Developer:** ${owners?.[0].toString()} (${owners?.[0].tag})
@@ -47,10 +47,12 @@ export default class InfoCommand extends Command {
             }, {
                 name: 'Links',
                 value: stripIndent`
-                • ${hyperlink('Top.gg page', topgg)}
+                • ${hyperlink('Privacy Policy', privacyPolicyUrl)}
+                • ${hyperlink('Terms of Service', termsOfServiceUrl)}
+                • ${hyperlink('Top.gg page', topggUrl)}
                 • ${hyperlink('Support server', options.serverInvite ?? '')}
-                • ${hyperlink('Invite the bot', topgg + '/invite')}
-                • ${hyperlink('Vote here', topgg + '/vote')}
+                • ${hyperlink('Invite the bot', topggUrl + '/invite')}
+                • ${hyperlink('Vote here', topggUrl + '/vote')}
                 `,
                 inline: true,
             })

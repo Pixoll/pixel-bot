@@ -29,12 +29,14 @@ import {
     TemplateEmbedResult,
     hyperlink,
     pixelColor,
+    topggUrl,
+    privacyPolicyUrl,
+    termsOfServiceUrl,
 } from '../../utils';
 
 declare function require<T>(id: string): T;
 const { version } = require<{ version: string }>('../../../package.json');
 
-const topgg = 'https://top.gg/bot/802267523058761759';
 const hasDeprecatedMessage = 'with a strikethrough (~~`like this`~~), mean they\'ve been marked as deprecated';
 const hasDisabledMessage = oneLine`
     with a dash before their name (\`—like this\`), mean they've been disabled,
@@ -223,10 +225,12 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
                 `).addFields(...commandList, {
                 name: '🔗 Useful links',
                 value: oneLine`
-                ${hyperlink('Top.gg page', topgg)} -
+                ${hyperlink('Privacy Policy', privacyPolicyUrl)} -
+                ${hyperlink('Terms of Service', termsOfServiceUrl)} -
+                ${hyperlink('Top.gg page', topggUrl)} -
                 ${hyperlink('Support server', options.serverInvite ?? '')} -
-                ${hyperlink('Invite the bot', topgg + '/invite')} -
-                ${hyperlink('Vote here', topgg + '/vote')} -
+                ${hyperlink('Invite the bot', topggUrl + '/invite')} -
+                ${hyperlink('Vote here', topggUrl + '/vote')}
                 `,
             }),
             new EmbedBuilder({ ...base, ...staticEmbedPages[0] }).setTitle(`About ${user.username}`),

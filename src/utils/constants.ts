@@ -4,6 +4,12 @@ import defaultEmojiRegex from 'emoji-regex';
 import { GenerateEmbedOptions } from './functions';
 
 export const pixelColor = '#4c9f4c';
+export const topggUrl = 'https://top.gg/bot/802267523058761759';
+export const githubUrl = 'https://github.com/Pixoll/pixel-bot';
+export const privacyPolicyUrl = `${githubUrl}/blob/main/privacy-policy.md` as
+    `${typeof githubUrl}/blob/main/privacy-policy.md`;
+export const termsOfServiceUrl = `${githubUrl}/blob/main/terms-of-service.md` as
+    `${typeof githubUrl}/blob/main/terms-of-service.md`;
 
 export const moderatorPermissions: readonly PermissionsString[] = [
     'BanMembers',

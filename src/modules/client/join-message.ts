@@ -1,7 +1,7 @@
 import { oneLine, stripIndent } from 'common-tags';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { CommandoClient, CommandoTextChannel } from 'pixoll-commando';
-import { customEmoji, hyperlink, pixelColor } from '../../utils';
+import { customEmoji, hyperlink, pixelColor, privacyPolicyUrl, termsOfServiceUrl, topggUrl } from '../../utils';
 
 /** Sends a message when the bot joins a guild. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -30,8 +30,6 @@ export default async function (client: CommandoClient<true>): Promise<void> {
             );
 
         if (!channel) return;
-
-        const topgg = 'https://top.gg/bot/802267523058761759';
 
         const embed = new EmbedBuilder()
             .setColor(pixelColor)
@@ -76,11 +74,13 @@ export default async function (client: CommandoClient<true>): Promise<void> {
                 `,
             }, {
                 name: '🔗 Useful links',
-                value: oneLine`
-                ${hyperlink('Top.gg page', topgg)} -
-                ${hyperlink('Support server', options.serverInvite)} -
-                ${hyperlink('Invite the bot', topgg + '/invite')} -
-                ${hyperlink('Vote here', topgg + '/vote')} -
+                value: stripIndent`
+                ${hyperlink('Privacy Policy', privacyPolicyUrl)} -
+                ${hyperlink('Terms of Service', termsOfServiceUrl)} -
+                ${hyperlink('Top.gg page', topggUrl)} -
+                ${hyperlink('Support server', options.serverInvite ?? '')} -
+                ${hyperlink('Invite the bot', topggUrl + '/invite')} -
+                ${hyperlink('Vote here', topggUrl + '/vote')}
                 `,
             })
             .setFooter({
