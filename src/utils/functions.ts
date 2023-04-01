@@ -232,6 +232,26 @@ export interface AnyPartial {
     fetch(): Promise<AnyPartial>;
 }
 
+export type AlphabeticalSorterOptions<T extends object | string> = T extends string ? {
+    /**
+     * Whether to use `String.toLowerCase()` for the comparison.
+     * @default true
+     */
+    forceCase?: boolean;
+} : {
+    /**
+     * Whether to use `String.toLowerCase()` for the comparison.
+     * @default true
+     */
+    forceCase?: boolean;
+    /**
+     * Runs the sorter on the selected key.
+     */
+    sortKey: keyof {
+        [P in keyof T as T[P] extends string ? P : never]: T[P];
+    };
+};
+
 export type ReplyAllOptions =
     | EmbedBuilder
     | string
@@ -255,10 +275,26 @@ export function sleep(s: number): Promise<void> {
  * @param a The first string
  * @param b The seconds string
  */
-export function abcOrder(a: string, b: string): number {
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
+export function alphabeticalOrder<T extends object | string>(
+    options?: AlphabeticalSorterOptions<T>
+): (a: T, b: T) => number {
+    const { forceCase, sortKey } = Object.assign({}, {
+        forceCase: true,
+    }, options ?? {}) as AlphabeticalSorterOptions<object>;
+    return (first, second) => {
+        if (typeof first === 'object' && !sortKey) {
+            throw new Error('Detected object type in sorter. You must specify a sorting key.');
+        }
+        const a = typeof first === 'object' && sortKey
+            ? first[sortKey]
+            : forceCase ? first.toString().toLowerCase() : first;
+        const b = typeof second === 'object' && sortKey
+            ? second[sortKey]
+            : forceCase ? second.toString().toLowerCase() : second;
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+    };
 }
 
 /**

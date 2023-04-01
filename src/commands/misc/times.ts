@@ -14,7 +14,7 @@ import {
     CommandoAutocompleteInteraction,
     Util,
 } from 'pixoll-commando';
-import { abcOrder, pagedEmbed, reply, parseArgDate, pixelColor } from '../../utils';
+import { alphabeticalOrder, pagedEmbed, reply, parseArgDate, pixelColor } from '../../utils';
 
 const timeZones = new Collection([
     ['Pacific/Apia', 'Samoa'],
@@ -151,7 +151,9 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
         }
 
         const times = timeZones.map((city, tz) => mapDateToTimeZone(date, tz, city, is12Hour));
-        const sorted = times.sort((a, b) => abcOrder(a.city, b.city));
+        const sorted = times.sort(alphabeticalOrder({
+            sortKey: 'city',
+        }));
         const divisor = Math.round((sorted.length / 3) + 0.1);
 
         const firstPart = sorted.splice(0, divisor);

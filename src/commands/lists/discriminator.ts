@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { basicEmbed, generateEmbed, pluralize, abcOrder, reply } from '../../utils';
+import { basicEmbed, generateEmbed, pluralize, alphabeticalOrder, reply } from '../../utils';
 
 const args = [{
     key: 'number',
@@ -34,8 +34,11 @@ export default class DiscriminatorCommand extends Command<true, RawArgs> {
         const discriminator = number.toString().padStart(4, '0').slice(-4);
 
         const match = members.filter(member => member.user.discriminator === discriminator)
-            .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
-            .map(m => `${m.toString()} ${m.user.tag}`);
+            .map(member => member.user)
+            .sort(alphabeticalOrder({
+                sortKey: 'tag',
+            }))
+            .map(user => `${user.toString()} ${user.tag}`);
 
         if (!match || match.length === 0) {
             await reply(context, basicEmbed({

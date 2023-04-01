@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
-import { generateEmbed, basicEmbed, pluralize, abcOrder, reply } from '../../utils';
+import { generateEmbed, basicEmbed, pluralize, alphabeticalOrder, reply } from '../../utils';
 
 const args = [{
     key: 'role',
@@ -26,8 +26,13 @@ export default class MembersCommand extends Command<true, RawArgs> {
     }
 
     public async run(context: CommandContext<true>, { role }: ParsedArgs): Promise<void> {
-        const members = role.members.sort((a, b) => abcOrder(a.user.tag, b.user.tag))
-            .map(member => `${member.toString()} ${member.user.tag}`);
+        const members = role.members
+            .map(m => m.user)
+            .sort(alphabeticalOrder({
+                sortKey: 'tag',
+                forceCase: false,
+            }))
+            .map(user => `${user.toString()} ${user.tag}`);
 
         if (members.length === 0) {
             await reply(context, basicEmbed({

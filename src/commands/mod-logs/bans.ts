@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { basicEmbed, generateEmbed, abcOrder, pluralize, reply } from '../../utils';
+import { basicEmbed, generateEmbed, alphabeticalOrder, pluralize, reply } from '../../utils';
 
 interface Ban {
     tag: string;
@@ -37,9 +37,9 @@ export default class BansCommand extends Command<true> {
             tag: user.tag,
             id: user.id,
             reason: reason?.replace(/%20/g, ' ') || 'No reason given.',
-        })).sort((a, b) =>
-            abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
-        );
+        })).sort(alphabeticalOrder({
+            sortKey: 'tag',
+        }));
 
         await generateEmbed(context, bansList, {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,

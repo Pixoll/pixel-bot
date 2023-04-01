@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
 import { Command, CommandContext, CommandoClient, ModuleSchema, Util, JSONIfySchema } from 'pixoll-commando';
-import { reply, customEmoji, basicEmbed, addDashes, abcOrder, pixelColor } from '../../utils';
+import { reply, customEmoji, basicEmbed, addDashes, alphabeticalOrder, pixelColor } from '../../utils';
 
 function getStatusString(isOn?: boolean): string {
     if (isOn === true) return `Enabled ${customEmoji('online')}`;
@@ -12,7 +12,7 @@ function mapModuleData(data: Partial<JSONIfySchema<ModuleSchema>>): string {
     return Object.entries(Util.omit(data, [
         '_id', 'guild',
     ])).sort(([key1], [key2, value]) =>
-        typeof value === 'boolean' ? abcOrder(key1, key2) : -1
+        typeof value === 'boolean' ? alphabeticalOrder<string>()(key1, key2) : -1
     ).map(([key, value]) => {
         if (typeof value === 'boolean') {
             return `**${capitalize(addDashes(key).replace(/-/g, ' '))}:** ${getStatusString(value)}`;

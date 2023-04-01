@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient, Util } from 'pixoll-commando';
-import { generateEmbed, abcOrder, timestamp } from '../../utils';
+import { generateEmbed, alphabeticalOrder, timestamp } from '../../utils';
 
 declare function require<T>(id: string): T;
 
@@ -12,7 +12,9 @@ interface ChangeLog {
 const { version } = require<{ version: string }>('../../../package.json');
 
 const changelog = Util.filterNullishItems(require<ChangeLog[]>('../../../documents/changelog.json')
-    .sort((a, b) => abcOrder(b.version, a.version))
+    .sort(alphabeticalOrder({
+        sortKey: 'version',
+    }))
     .map(log => {
         if (version < log.version) return null;
         const changes = log.changes.length === 1

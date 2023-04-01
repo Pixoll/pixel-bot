@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandoClient } from 'pixoll-commando';
-import { generateEmbed, pluralize, abcOrder, basicEmbed, reply } from '../../utils';
+import { generateEmbed, pluralize, alphabeticalOrder, basicEmbed, reply } from '../../utils';
 
 export default class BoostersCommand extends Command<true> {
     public constructor(client: CommandoClient) {
@@ -17,8 +17,11 @@ export default class BoostersCommand extends Command<true> {
         const { guild } = context;
         const members = guild.members.cache;
         const boosters = members.filter(member => member.roles.premiumSubscriberRole)
-            .sort((a, b) => abcOrder(a.user.tag, b.user.tag))
-            .map(m => `${m.toString()} ${m.user.tag}`);
+            .map(member => member.user)
+            .sort(alphabeticalOrder({
+                sortKey: 'tag',
+            }))
+            .map(user => `${user.toString()} ${user.tag}`);
 
         if (boosters.length === 0) {
             await reply(context, basicEmbed({
