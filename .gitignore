@@ -1,7 +1,6 @@
 /.env
 /.vscode
 /node_modules
-/terms-of-service.md
 /.tsbuildinfo
 /src/commands/owner/test.ts
 /build/commands/owner/test.js
