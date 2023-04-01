@@ -7,7 +7,7 @@
 
 Pixel is an entirely open-source project, available in [GitHub](https://github.com/Pixoll/pixel-bot). Any changes made to the bot will be available to the public in said repository. For the development branch (Pixel Beta) you may check the `dev` branch.
 
-Pixel runs on a fork of Commando, a now discontinued Discord.js bot framework, that we have adapted for Pixel. This framework is also open-source and availabe on [GitHub](https://github.com/Pixoll/pixoll-commando).
+Pixel runs on a fork of Commando, a now discontinued Discord.js bot framework, that we have adapted for Pixel. This framework is also open-source and available on [GitHub](https://github.com/Pixoll/pixoll-commando).
 
 ### Database structure
 
