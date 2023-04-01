@@ -1,9 +1,8 @@
 # Privacy Policy
 
-- Effective: April 1, 2023
-- Last Updated: April 1, 2023
+> Effective: April 1, 2023
 
-## Foreword
+> Last Updated: April 1, 2023
 
 Pixel is an entirely open-source project, available in [GitHub](https://github.com/Pixoll/pixel-bot). Any changes made to the bot will be available to the public in said repository. For the development branch (Pixel Beta) you may check the `dev` branch.
 
