@@ -553,14 +553,13 @@ export function memberException(
  */
 export function inviteButton(
     invite: Invite | string, label = 'Join back'
-): ActionRowBuilder<MessageActionRowComponentBuilder> {
-    return new ActionRowBuilder<MessageActionRowComponentBuilder>()
-        .addComponents(
-            new ButtonBuilder()
-                .setLabel(label)
-                .setStyle(ButtonStyle.Link)
-                .setURL(invite.toString())
-        );
+): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setLabel(label)
+            .setStyle(ButtonStyle.Link)
+            .setURL(invite.toString())
+    );
 }
 
 /**
