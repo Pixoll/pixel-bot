@@ -572,22 +572,13 @@ export function isModerator(roleOrMember?: GuildMember | Role | null, noAdmin?: 
     if (!roleOrMember) return false;
     const { permissions } = roleOrMember;
 
-    const values: boolean[] = [];
-    if (noAdmin) {
-        for (const condition of moderatorPermissions) {
-            values.push(permissions.has(condition));
-        }
-        const isTrue = values.filter(b => b === true)[0] ?? false;
-        return !permissions.has('Administrator') && isTrue;
-    }
+    if (!noAdmin && permissions.has('Administrator')) return true;
 
-    if (permissions.has('Administrator')) return true;
+    const metConditions = moderatorPermissions.map(condition => permissions.has(condition));
+    const hasTrue = metConditions.some(b => b === true);
 
-    for (const condition of moderatorPermissions) {
-        values.push(permissions.has(condition));
-    }
-    const isTrue = values.filter(b => b === true)[0] ?? false;
-    return isTrue;
+    if (!noAdmin) return hasTrue;
+    return !permissions.has('Administrator') && hasTrue;
 }
 
 /**

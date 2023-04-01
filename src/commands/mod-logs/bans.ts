@@ -33,14 +33,11 @@ export default class BansCommand extends Command<true> {
             return;
         }
 
-        const bansList: Ban[] = [];
-        for (const { user, reason } of bans.toJSON()) {
-            bansList.push({
-                tag: user.tag,
-                id: user.id,
-                reason: reason?.replace(/%20/g, ' ') || 'No reason given.',
-            });
-        }
+        const bansList = bans.map<Ban>(({ user, reason }) => ({
+            tag: user.tag,
+            id: user.id,
+            reason: reason?.replace(/%20/g, ' ') || 'No reason given.',
+        }));
 
         const sorted = bansList.sort((a, b) => abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase()));
 
