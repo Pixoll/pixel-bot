@@ -551,9 +551,7 @@ export function memberException(
  * @param invite The invite to user for the button
  * @param label The label of the button
  */
-export function inviteButton(
-    invite: Invite | string, label = 'Join back'
-): ActionRowBuilder<ButtonBuilder> {
+export function inviteButton(invite: Invite | string, label = 'Join back'): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setLabel(label)

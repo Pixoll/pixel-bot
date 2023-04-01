@@ -37,11 +37,11 @@ export default class BansCommand extends Command<true> {
             tag: user.tag,
             id: user.id,
             reason: reason?.replace(/%20/g, ' ') || 'No reason given.',
-        }));
+        })).sort((a, b) =>
+            abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase())
+        );
 
-        const sorted = bansList.sort((a, b) => abcOrder(a.tag.toUpperCase(), b.tag.toUpperCase()));
-
-        await generateEmbed(context, sorted, {
+        await generateEmbed(context, bansList, {
             authorName: `${guild.name} has  ${pluralize('ban', bansList.length)}`,
             authorIconURL: guild.iconURL({ forceStatic: false }),
             keyTitle: { suffix: 'tag' },
