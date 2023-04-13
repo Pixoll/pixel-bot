@@ -96,7 +96,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
         const { guild, guildId, author } = context;
         const { reason } = args;
 
-        const message = await getContextMessage(context) as CommandoMessage;
+        const message = await getContextMessage<CommandoMessage>(context);
         const users = await parseUsers(context, args, message, this);
         const manager = guild.members;
 
@@ -167,7 +167,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
     }
 }
 
-async function isValidMember(message: CommandoMessage, user: User | null): Promise<boolean> {
+async function isValidMember(message: CommandoMessage, user: CommandoUser | User | null): Promise<boolean> {
     if (!user || !message.inGuild()) return false;
 
     const { author, guild, client } = message;

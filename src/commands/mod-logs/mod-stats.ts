@@ -58,7 +58,7 @@ export default class ModStatsCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext<true>, { user }: ParsedArgs): Promise<void> {
         const { author, guild } = context;
         const db = guild.database.moderations;
-        user ??= author as CommandoUser;
+        user ??= author as unknown as CommandoUser;
 
         const stats = await db.fetchMany({ modId: user.id });
 

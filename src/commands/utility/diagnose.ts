@@ -203,7 +203,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             const { me } = guild.members;
 
             const permissions = me && command.clientPermissions
-                ? me.permissionsIn(channel).missing(command.clientPermissions)
+                ? me.permissionsIn(channel.id).missing(command.clientPermissions)
                 : null;
             const missing = permissions?.map(str => `\`${Util.permissions[str]}\``).join(', ') || 'None';
 

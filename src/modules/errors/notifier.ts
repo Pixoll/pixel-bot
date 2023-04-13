@@ -74,7 +74,7 @@ async function errorHandler(
     command?: Command,
     errorId?: string
 ): Promise<void> {
-    const errorsChannel = await client.channels.fetch(errorLogsChannelId) as TextChannel;
+    const errorsChannel = await client.channels.fetch(errorLogsChannelId) as unknown as TextChannel;
 
     if (!(error instanceof Error)) {
         console.warn(error);

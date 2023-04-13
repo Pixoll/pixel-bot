@@ -64,7 +64,7 @@ export default class ReminderCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { time, reminder }: ParsedArgs): Promise<void> {
-        const message = await getContextMessage(context) as CommandoMessage;
+        const message = await getContextMessage<CommandoMessage>(context);
         if (context.isInteraction()) {
             const arg = this.argsCollector?.args[0];
             const timeResult = await arg?.parse(time.toString(), message).catch(() => null);

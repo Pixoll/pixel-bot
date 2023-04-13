@@ -114,7 +114,7 @@ export default function (client: CommandoClient<true>): void {
         if (filtered.size < 5) return;
 
         if (member.roles.cache.has(mutedRole.id)) return;
-        await member.roles.add(mutedRole);
+        await member.roles.add(mutedRole.id);
 
         const reason = 'Spam detection';
         const mod = client.user;

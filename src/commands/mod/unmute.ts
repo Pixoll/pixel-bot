@@ -83,7 +83,7 @@ export default class UnmuteCommand extends Command<true, RawArgs> {
         });
         if (!confirmed) return;
 
-        await roles.remove(role);
+        await roles.remove(role.id);
         this.client.emit('guildMemberUnmute', guild, author, user, reason);
 
         const mute = await active.fetch({ type: 'mute', userId: user.id });

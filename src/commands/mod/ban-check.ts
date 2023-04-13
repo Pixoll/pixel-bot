@@ -31,7 +31,7 @@ export default class BanCheckCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext<true>, { user }: ParsedArgs): Promise<void> {
         const { guild } = context;
 
-        const ban = await guild.bans.fetch(user).catch(() => null);
+        const ban = await guild.bans.fetch(user.id).catch(() => null);
         if (!ban) {
             await reply(context, basicEmbed({
                 color: 'Blue',

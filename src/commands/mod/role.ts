@@ -275,7 +275,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
             }));
             return;
         }
-        const message = await getContextMessage(context) as CommandoMessage;
+        const message = await getContextMessage<CommandoMessage>(context);
         const roles = await parseRoles(context, args, message, this);
         const memberRoles = member.roles;
 
@@ -289,8 +289,8 @@ export default class RoleCommand extends Command<true, RawArgs> {
         }));
 
         await Promise.all([
-            ...alreadyHas.map(role => memberRoles.remove(role)),
-            ...doesNotHave.map(role => memberRoles.add(role)),
+            ...alreadyHas.map(role => memberRoles.remove(role.id)),
+            ...doesNotHave.map(role => memberRoles.add(role.id)),
         ]);
 
         const rolesStr = [...alreadyHas.map(r => '-' + r.name), ...doesNotHave.map(r => '+' + r.name)]
@@ -347,8 +347,8 @@ async function toggleRolesFor(
     }));
 
     await Promise.all(members.filter(filter).map(async ({ roles }) => {
-        if (roles.cache.has(role.id)) await roles.remove(role);
-        else await roles.add(role);
+        if (roles.cache.has(role.id)) await roles.remove(role.id);
+        else await roles.add(role.id);
     }));
 
     await reply(context, {

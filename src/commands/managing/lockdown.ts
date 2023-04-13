@@ -141,7 +141,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
     public async run(
         context: CommandContext<true>, { subCommand, channels: channelsOrReason, reason }: ParsedArgs
     ): Promise<void> {
-        const message = await getContextMessage(context) as CommandoMessage;
+        const message = await getContextMessage<CommandoMessage>(context);
         const lockChannels = Util.equals(subCommand, ['start', 'end'])
             ? await parseLockdownChannels(channelsOrReason, message, this)
             : [];
@@ -209,7 +209,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             const perms = permsManager.cache.get(guildId);
             if (perms?.deny.has('SendMessages')) continue;
 
-            await permsManager.edit(everyone, { SendMessages: false }, { reason, type: 0 });
+            await permsManager.edit(everyone.id, { SendMessages: false }, { reason, type: 0 });
             await channel.send({
                 embeds: [basicEmbed({
                     emoji: '\\🔒',
@@ -276,7 +276,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
             const perms = permsManager.cache.get(guildId);
             if (!perms?.deny.has('SendMessages')) continue;
 
-            await permsManager.edit(everyone, { SendMessages: null }, { reason, type: 0 });
+            await permsManager.edit(everyone.id, { SendMessages: null }, { reason, type: 0 });
             await channel.send({
                 embeds: [basicEmbed({
                     emoji: '\\🔓',

@@ -62,7 +62,7 @@ export default class SoftBanCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const isBanned = await bans.fetch(user).catch(() => null);
+        const isBanned = await bans.fetch(user.id).catch(() => null);
         if (isBanned) {
             await reply(context, basicEmbed({
                 color: 'Red',
@@ -98,7 +98,7 @@ export default class SoftBanCommand extends Command<true, RawArgs> {
                 `,
             });
 
-            const channel = guild.channels.cache.find(c => c.type === ChannelType.GuildText) as TextChannel;
+            const channel = guild.channels.cache.find(c => c.type === ChannelType.GuildText) as unknown as TextChannel;
             const button = inviteButton(await channel.createInvite({
                 maxAge: sevenDays,
                 maxUses: 1,

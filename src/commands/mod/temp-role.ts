@@ -103,7 +103,7 @@ export default class TempRoleCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await roles.add(role, reason);
+        await roles.add(role.id, reason);
 
         if (!user.bot) await user.send({
             embeds: [basicEmbed({

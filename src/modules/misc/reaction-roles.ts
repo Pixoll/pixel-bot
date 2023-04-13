@@ -17,7 +17,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         client.emit('debug', 'Running event "modules/reaction-roles#messageReactionAdd".');
 
         const { emoji } = reaction;
-        const { roles, members, database } = message.guild as CommandoGuild;
+        const { roles, members, database } = message.guild as unknown as CommandoGuild;
         const react = emoji.id || emoji.name;
         if (!react) return;
 
@@ -30,7 +30,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         const member = await members.fetch(user).catch(() => null);
         if (!member || !role) return;
 
-        await member.roles.add(role).catch(() => null);
+        await member.roles.add(role.id).catch(() => null);
     });
 
     client.on('messageReactionRemove', async (partialReaction, partialUser) => {
@@ -44,7 +44,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         client.emit('debug', 'Running event "modules/reaction-roles#messageReactionRemove".');
 
         const { emoji } = reaction;
-        const { roles, members, database } = message.guild as CommandoGuild;
+        const { roles, members, database } = message.guild as unknown as CommandoGuild;
         const react = emoji.id || emoji.name;
         if (!react) return;
 
@@ -57,7 +57,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         const member = await members.fetch(user).catch(() => null);
         if (!member || !role) return;
 
-        await member.roles.remove(role).catch(() => null);
+        await member.roles.remove(role.id).catch(() => null);
     });
 }
 

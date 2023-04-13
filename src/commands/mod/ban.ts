@@ -52,7 +52,7 @@ export default class BanCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const isBanned = await bans.fetch(user).catch(() => null);
+        const isBanned = await bans.fetch(user.id).catch(() => null);
         if (isBanned) {
             await reply(context, basicEmbed({
                 color: 'Red',

@@ -65,7 +65,7 @@ export default class UnlockCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await permissions.edit(everyone, { SendMessages: null }, {
+        await permissions.edit(everyone.id, { SendMessages: null }, {
             reason: `Unlocked channel via "${this.name}" command.`,
             type: OverwriteType.Role,
         });

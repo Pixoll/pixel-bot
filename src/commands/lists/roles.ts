@@ -33,7 +33,7 @@ export default class RolesCommand extends Command<true, RawArgs> {
         const guildMember = member ? await guild.members.fetch(member.id).catch(() => null) : null;
         const memberRoles = guildMember?.roles.cache.filter(role => role.id !== guildId);
         const guildRoles = !memberRoles
-            ? await guild.roles.fetch().catch(() => null) as Collection<string, Role>
+            ? await guild.roles.fetch().catch(() => null) as unknown as Collection<string, Role>
             : null;
 
         const rolesCache = memberRoles ?? guildRoles?.filter(role => role.id !== guildId);

@@ -1,8 +1,10 @@
 import { User } from 'discord.js';
 import 'lodash';
-import 'pixoll-commando';
+import { CommandoUser } from 'pixoll-commando';
 
-type BaseModerationActionData = [guild: CommandoGuild, moderator: User, user: User, reason: string];
+type BaseModerationActionData = [
+    guild: CommandoGuild, moderator: CommandoUser | User, user: CommandoUser | User, reason: string
+];
 
 declare module 'pixoll-commando' {
     interface CommandoClientEvents {

@@ -96,7 +96,7 @@ export default class KickCommand extends Command<true, RawArgs> {
                 `,
             });
 
-            const channel = guild.channels.cache.find(c => c.type === ChannelType.GuildText) as TextChannel;
+            const channel = guild.channels.cache.find(c => c.type === ChannelType.GuildText) as unknown as TextChannel;
             const button = inviteButton(await channel.createInvite({
                 maxAge: sevenDays,
                 maxUses: 1,

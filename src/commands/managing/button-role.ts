@@ -106,7 +106,7 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
     public async run(context: CommandContext, args: ParsedArgs): Promise<void> {
         const { channel } = args;
         let content = args.message || '';
-        const message = await getContextMessage(context) as CommandoMessage;
+        const message = await getContextMessage<CommandoMessage>(context);
         const roles = await parseRoles(context, args, message, this);
 
         const { id } = message;

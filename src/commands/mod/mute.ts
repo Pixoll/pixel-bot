@@ -124,7 +124,7 @@ export default class MuteCommand extends Command<true, RawArgs> {
         if (typeof duration === 'number') duration = duration + now;
         if (duration instanceof Date) duration = duration.getTime();
 
-        await roles.add(role);
+        await roles.add(role.id);
         this.client.emit('guildMemberMute', guild, author, user, reason, duration);
 
         if (!user.bot) await user.send({

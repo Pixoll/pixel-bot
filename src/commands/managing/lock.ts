@@ -65,7 +65,7 @@ export default class LockCommand extends Command<true, RawArgs> {
             return;
         }
 
-        await permissions.edit(everyone, { SendMessages: false }, {
+        await permissions.edit(everyone.id, { SendMessages: false }, {
             reason: `Locked channel via "${this.name}" command.`,
             type: OverwriteType.Role,
         });

@@ -308,7 +308,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
             }
             await toDelete?.delete();
         } else if (fullData) {
-            const message = await context.fetchReply() as CommandoMessage<true>;
+            const message = await context.fetchReply() as unknown as CommandoMessage<true>;
 
             if (!isValidRole(message, mutedRole)) {
                 await reply(context, basicEmbed({
@@ -604,7 +604,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
 
-        const message = await getContextMessage(context) as CommandoMessage;
+        const message = await getContextMessage<CommandoMessage>(context);
         const channels = await parseLockdownChannels(channelsString, message, this);
         const lockChannels = removeRepeated(channels.map(c => c.id)).slice(0, 30);
 

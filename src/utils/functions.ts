@@ -31,11 +31,12 @@ import {
     CommandoGuildMember,
     CommandoifiedMessage,
     CommandoMessage,
+    CommandoMessageContextMenuCommandInteraction,
     CommandoRole,
+    CommandoUser,
     GuildAuditLog,
     GuildModule,
     Util,
-    CommandoMessageContextMenuCommandInteraction,
 } from 'pixoll-commando';
 import { transform, isEqual, isObject, capitalize } from 'lodash';
 import { stripIndent } from 'common-tags';
@@ -215,7 +216,7 @@ export interface ConfirmButtonsOptions {
     /** The action to confirm */
     action: string;
     /** The target on which this action is being executed */
-    target?: CommandoGuild | User | string;
+    target?: CommandoGuild | CommandoUser | User | string;
     /** The reason of this action */
     reason?: string;
     /** The duration of this action */
@@ -527,7 +528,9 @@ export async function basicCollector(
  * @param author The user who ran the command
  * @param command The command that's being ran
  */
-export function userException(user: User, author: User, command: Command): BasicEmbedOptions | null {
+export function userException(
+    user: CommandoUser | User, author: CommandoUser | User, command: Command
+): BasicEmbedOptions | null {
     const { client, name } = command;
     if (user.id !== client.user?.id && user.id !== author.id) return null;
 
@@ -547,7 +550,9 @@ export function userException(user: User, author: User, command: Command): Basic
  * @param command The command that's being ran
  */
 export function memberException(
-    member: Nullable<GuildMember>, moderator: Nullable<GuildMember>, command: Command
+    member: Nullable<CommandoGuildMember | GuildMember>,
+    moderator: Nullable<CommandoGuildMember | GuildMember>,
+    command: Command
 ): BasicEmbedOptions | null {
     if (!member || !moderator) return null;
     const { client, name } = command;
@@ -563,12 +568,12 @@ export function memberException(
         return options;
     }
 
-    if (client.isOwner(moderator)) return null;
+    if (client.isOwner(moderator.id)) return null;
 
     const highestTarget = member.roles.highest;
     const highestMod = moderator.roles.highest;
     const bannable = highestMod.comparePositionTo(highestTarget) > 0;
-    if (!bannable || client.isOwner(member)) {
+    if (!bannable || client.isOwner(member.id)) {
         options.fieldName = `You can't ${name} ${member.user.tag}`;
         options.fieldValue = 'Please check the role hierarchy or server ownership.';
         return options;
@@ -601,7 +606,9 @@ export function inviteButton(invite: Invite | string, label = 'Join back'): Acti
  * @param roleOrMember A role or member.
  * @param noAdmin Whether to skip the `ADMINISTRATOR` permission or not.
  */
-export function isModerator(roleOrMember?: GuildMember | Role | null, noAdmin?: boolean): boolean {
+export function isModerator(
+    roleOrMember?: CommandoGuildMember | CommandoRole | GuildMember | Role | null, noAdmin?: boolean
+): boolean {
     if (!roleOrMember) return false;
     const { permissions } = roleOrMember;
 
@@ -775,19 +782,19 @@ export function validateURL(str: string): boolean {
  * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(message: AnyMessage | CommandContext | null, role?: Role | null): boolean {
+export function isValidRole(message: AnyMessage | CommandContext | null, role?: CommandoRole | Role | null): boolean {
     if (!message || !message.inGuild() || !(role instanceof Role) || !role || role.managed) return false;
 
     const { member, client, author, guild } = message;
     const botId = client.user.id;
 
-    const botManageable = guild.members.me?.roles.highest.comparePositionTo(role);
+    const botManageable = guild.members.me?.roles.highest.comparePositionTo(role.id);
     if (Util.isNullish(botManageable) || botManageable < 1) return false;
 
     const isOwner = author.id === botId;
     if (isOwner) return true;
 
-    const memberManageable = member?.roles.highest.comparePositionTo(role);
+    const memberManageable = member?.roles.highest.comparePositionTo(role.id);
     if (Util.isNullish(memberManageable) || memberManageable < 1) return false;
     if (isModerator(role)) return false;
 
@@ -1326,7 +1333,7 @@ export async function parseArgDate<T extends Date | number>(
     fallbackValue?: T
 ): Promise<Nullable<T>> {
     if (context.isMessage() || Util.isNullish(value)) return value as Nullable<T>;
-    const message = await context.fetchReply() as CommandoMessage;
+    const message = await context.fetchReply() as unknown as CommandoMessage;
     const argument = command.argsCollector?.args[argumentIndex];
     const type = argument?.type?.id.split('|')[0];
     const resultDate = await argument?.parse(
@@ -1365,10 +1372,10 @@ export function mergeRegexps(flags: RegExpFlag[], ...regexps: Array<RegExp | str
     return new RegExp(merged, flags.join(''));
 }
 
-export async function getContextMessage(
+export async function getContextMessage<M extends CommandoMessage | Message = Message>(
     context: CommandContext | CommandoMessageContextMenuCommandInteraction | CommandoUserContextMenuCommandInteraction
-): Promise<Message> {
+): Promise<M> {
     return 'isMessage' in context && context.isMessage()
-        ? context as Message
-        : await context.fetchReply();
+        ? context as M
+        : await context.fetchReply() as M;
 }

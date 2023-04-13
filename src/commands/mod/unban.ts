@@ -45,7 +45,7 @@ export default class UnbanCommand extends Command<true, RawArgs> {
         const { members, bans, database } = context.guild;
         const { active } = database;
 
-        const isBanned = await bans.fetch(user).catch(() => null);
+        const isBanned = await bans.fetch(user.id).catch(() => null);
         if (!isBanned) {
             await reply(context, basicEmbed({
                 color: 'Red',

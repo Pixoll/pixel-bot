@@ -241,7 +241,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
                 }));
                 return;
             }
-            filter = message as CommandoifiedMessage;
+            filter = message as unknown as CommandoifiedMessage;
         }
 
         if (amount < 100) amount++;

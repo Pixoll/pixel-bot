@@ -43,7 +43,7 @@ export default class AvatarCommand extends Command<boolean, RawArgs> {
     }
 
     public async run(context: CommandContext, { user: passedUser }: ParsedArgs): Promise<void> {
-        const user = passedUser as User ?? context.author;
+        const user = passedUser as unknown as User ?? context.author;
         await reply(context, mapAvatarData(user));
     }
 

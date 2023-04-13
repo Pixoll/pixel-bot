@@ -191,7 +191,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
                     await command.onBlock(context, hasPermission);
                     return;
                 }
-                await command.onBlock(context, 'userPermissions', { missing: hasPermission });
+                await command.onBlock(context, 'userPermissions', { missing: hasPermission || undefined });
                 return;
             }
 

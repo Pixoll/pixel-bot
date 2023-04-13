@@ -43,7 +43,7 @@ async function rateLimitHandler(client: CommandoClient<true>, data: Partial<Rate
 
     console.log('rateLimit >', data);
 
-    const errorsChannel = await client.channels.fetch(errorLogsChannelId) as TextChannel;
+    const errorsChannel = await client.channels.fetch(errorLogsChannelId) as unknown as TextChannel;
 
     const embed = new EmbedBuilder()
         .setColor('Gold')
