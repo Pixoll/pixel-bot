@@ -1,5 +1,5 @@
 import { TextChannel } from 'discord.js';
-import { CommandoClient, CommandoGuild } from 'pixoll-commando';
+import { CommandoClient, CommandoGuild, CommandoGuildManager } from 'pixoll-commando';
 
 /** Re-sends audit-logs when deleted. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -17,7 +17,7 @@ export async function getLogsChannel(guild: CommandoGuild): Promise<TextChannel 
 }
 
 async function sendLogs(client: CommandoClient<true>): Promise<void> {
-    const guilds = client.guilds.cache.toJSON();
+    const guilds = (client.guilds as unknown as CommandoGuildManager).cache.toJSON();
 
     for (const guild of guilds) {
         const logsChannel = await getLogsChannel(guild);

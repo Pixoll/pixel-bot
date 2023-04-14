@@ -1,9 +1,9 @@
-import { CommandoClient } from 'pixoll-commando';
+import { CommandoClient, CommandoGuildManager } from 'pixoll-commando';
 
 /** Disables all saved modules in all servers. */
 export default async function (client: CommandoClient<true>): Promise<void> {
     const { database, registry } = client;
-    const guilds = client.guilds.cache.toJSON();
+    const guilds = (client.guilds as unknown as CommandoGuildManager).cache.toJSON();
 
     const globalData = await database.disabled.fetch();
     if (globalData) {

@@ -1,7 +1,7 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
 import { capitalize } from 'lodash';
-import { CommandoClient, Util } from 'pixoll-commando';
+import { CommandoClient, CommandoGuildManager, Util } from 'pixoll-commando';
 import { isGuildModuleEnabled, compareArrays, customEmoji, hyperlink, userFlagToEmojiMap } from '../../utils';
 
 /**
@@ -65,7 +65,7 @@ export default function (client: CommandoClient<true>): void {
 
         if (embed.data.fields?.length === 0) return;
 
-        const guilds = client.guilds.cache.toJSON();
+        const guilds = (client.guilds as unknown as CommandoGuildManager).cache.toJSON();
         for (const guild of guilds) {
             const member = guild.members.cache.get(id);
             if (!member) continue;

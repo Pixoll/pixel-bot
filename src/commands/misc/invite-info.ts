@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, CommandoInvite, ParseRawArguments } from 'pixoll-commando';
 import { timestamp, basicEmbed, reply, pixelColor } from '../../utils';
 
 const args = [{
@@ -49,7 +49,7 @@ export default class InviteInfoCommand extends Command<boolean, RawArgs> {
                 }));
                 return;
             }
-            invite = fetchedInvite;
+            invite = fetchedInvite as CommandoInvite;
         }
 
         const { guild, channel, url, inviter, presenceCount, memberCount, maxUses, expiresAt, temporary } = invite;

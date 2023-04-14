@@ -1,9 +1,9 @@
-import { CommandoClient } from 'pixoll-commando';
+import { CommandoClient, CommandoGuildManager } from 'pixoll-commando';
 
 /** Applies all saved prefixes in all servers. */
 export default async function (client: CommandoClient<true>): Promise<void> {
     const { database } = client;
-    const guilds = client.guilds.cache.toJSON();
+    const guilds = (client.guilds as unknown as CommandoGuildManager).cache.toJSON();
 
     const global = await database.prefixes.fetch();
     if (global) client.prefix = global.prefix;

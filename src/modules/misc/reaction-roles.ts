@@ -1,5 +1,5 @@
 import { GuildTextBasedChannel, ChannelType } from 'discord.js';
-import { CommandoClient, CommandoGuild, JSONIfySchema, ReactionRoleSchema } from 'pixoll-commando';
+import { CommandoClient, CommandoGuild, CommandoGuildManager, JSONIfySchema, ReactionRoleSchema } from 'pixoll-commando';
 import { fetchPartial } from '../../utils';
 
 /** This module manages reaction roles. */
@@ -78,7 +78,7 @@ function findCommonElement<T>(first: T[] = [], second: T[] = []): boolean {
 async function removeMissingData(client: CommandoClient<true>): Promise<void> {
     client.emit('debug', 'Running "modules/reaction-roles#missingData".');
 
-    const guilds = client.guilds.cache.toJSON();
+    const guilds = (client.guilds as unknown as CommandoGuildManager).cache.toJSON();
     for (const guild of guilds) {
         const db = guild.database.reactionRoles;
 
