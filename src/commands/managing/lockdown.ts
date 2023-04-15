@@ -1,5 +1,5 @@
 import { stripIndent, oneLine } from 'common-tags';
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, TextChannel } from 'discord.js';
 import {
     Argument,
     Command,
@@ -410,7 +410,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
 
 async function parseLockdownChannels(
     value: Nullable<string>, message: CommandoMessage, command: LockdownCommand
-): Promise<CommandoTextChannel[]> {
+): Promise<TextChannel[]> {
     if (!value) return [];
     const results = await Promise.all(value.split(/ +/).map(query =>
         parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'text-channel')

@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { ApplicationCommandOptionType, ApplicationCommandOptionData } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandOptionData, Role, User, GuildMember } from 'discord.js';
 import {
     Argument,
     ArgumentType,
@@ -11,7 +11,6 @@ import {
     Util,
     CommandoRole,
     CommandoUser,
-    CommandoGuildMember,
 } from 'pixoll-commando';
 import {
     basicEmbed,
@@ -51,7 +50,7 @@ const args = [{
         const role = await type.parse(value, message, argument) as CommandoRole;
         return isValidRole(message, role);
     },
-    async parse(value: string, message: CommandoMessage, argument: Argument): Promise<CommandoRole | CommandoUser | null> {
+    async parse(value: string, message: CommandoMessage, argument: Argument): Promise<Role | User | null> {
         const subCommand = getSubCommand<SubCommand>(message);
         const choseType = Util.equals(subCommand, ['toggle', 'remove-all']) ? 'user' : 'role';
         const type = message.client.registry.types.get(choseType) as ArgumentType<'role' | 'user'>;
@@ -86,7 +85,7 @@ const args = [{
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
-    [K in SlashRoleKey]?: CommandoRole;
+    [K in SlashRoleKey]?: Role;
 } & {
     user?: CommandoUser;
     role?: CommandoRole;
@@ -322,7 +321,7 @@ async function toggleRolesFor(
     }
 
     const target = type === 'all' ? 'members and bots' : type;
-    const filter = (member: CommandoGuildMember): boolean => type === 'all'
+    const filter = (member: GuildMember): boolean => type === 'all'
         ? true
         : member.user.bot && type === 'bots';
     const confirmed = await confirmButtons(context, {
@@ -363,10 +362,10 @@ async function toggleRolesFor(
 
 async function parseRoles(
     context: CommandContext, args: ParsedArgs, message: CommandoMessage, command: RoleCommand
-): Promise<CommandoRole[]> {
+): Promise<Role[]> {
     const results = context.isInteraction()
         ? Object.entries(args)
-            .filter((entry): entry is [SlashRoleKey, CommandoRole] => /^role\d+$/.test(entry[0]))
+            .filter((entry): entry is [SlashRoleKey, Role] => /^role\d+$/.test(entry[0]))
             .map(([, role]) => role)
         : await Promise.all((args.roles ?? '').split(/ +/).map(query =>
             parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'role')

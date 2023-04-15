@@ -53,7 +53,7 @@ const args = [{
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
-    [K in SlashUserKey]?: CommandoUser;
+    [K in SlashUserKey]?: User;
 } & {
     message?: string;
 };
@@ -107,7 +107,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
         });
         const replyToEdit = await reply(context, embed(0));
 
-        const banned: CommandoUser[] = [];
+        const banned: User[] = [];
         for (const user of users) {
             const confirmed = await confirmButtons(context, {
                 action: 'ban',
@@ -186,10 +186,10 @@ async function isValidMember(message: CommandoMessage, user: CommandoUser | User
 
 async function parseUsers(
     context: CommandContext, args: ParsedArgs, message: CommandoMessage, command: MultiBanCommand
-): Promise<CommandoUser[]> {
+): Promise<User[]> {
     const results = context.isInteraction()
         ? Object.entries(args)
-            .filter((entry): entry is [SlashUserKey, CommandoUser] => /^user\d+$/.test(entry[0]))
+            .filter((entry): entry is [SlashUserKey, User] => /^user\d+$/.test(entry[0]))
             .map(([, role]) => role)
         : await Promise.all(args.users.split(/ +/).map(query =>
             parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'user')

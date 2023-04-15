@@ -1,5 +1,5 @@
 import { oneLine, stripIndent } from 'common-tags';
-import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, Message } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, Message, Role, TextChannel } from 'discord.js';
 import { UpdateAggregationStage, UpdateQuery } from 'mongoose';
 import {
     Argument,
@@ -77,7 +77,7 @@ const args = [{
     },
     async parse(
         value: string, message: CommandoMessage, argument: Argument
-    ): Promise<CommandoRole | CommandoTextChannel | string | null> {
+    ): Promise<Role | TextChannel | string | null> {
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         if (Util.equals(subCommand, ['full', 'reload', 'view'])) return null;
         if (subCommand === 'lockdown-channels') return value;
@@ -95,10 +95,10 @@ type ParsedArgs = ParseRawArguments<RawArgs> & Partial<FullSetupData> & {
 type SubCommand = ParsedArgs['subCommand'];
 
 interface FullSetupData {
-    auditLogsChannel: CommandoTextChannel;
-    mutedRole: CommandoRole;
-    memberRole: CommandoRole;
-    botRole: CommandoRole;
+    auditLogsChannel: TextChannel;
+    mutedRole: Role;
+    memberRole: Role;
+    botRole: Role;
     lockdownChannels: string;
 }
 
@@ -274,7 +274,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
         let mutedRole = fullData?.mutedRole ?? null;
         let memberRole = fullData?.memberRole ?? null;
         let botRole = fullData?.botRole ?? null;
-        const lockChannels: CommandoTextChannel[] = [];
+        const lockChannels: TextChannel[] = [];
 
         if (context.isMessage()) {
             logsChannel = await getInputFromCollector(context, this, 'text-channel', null, {
@@ -643,7 +643,7 @@ async function parseCollectorInput<T extends ArgumentTypeString = ArgumentTypeSt
 
 async function parseLockdownChannels(
     value: string, message: CommandoMessage, command: SetupCommand
-): Promise<CommandoTextChannel[]> {
+): Promise<TextChannel[]> {
     const results = await Promise.all(value.split(/ +/).map(query =>
         parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'text-channel')
     ));

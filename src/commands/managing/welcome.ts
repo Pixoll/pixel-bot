@@ -1,11 +1,10 @@
 import { stripIndent } from 'common-tags';
-import { EmbedBuilder, ApplicationCommandOptionType, ChannelType } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, TextChannel } from 'discord.js';
 import {
     Command,
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoTextChannel,
     JSONIfySchema,
     ParseRawArguments,
     WelcomeSchema,
@@ -134,7 +133,7 @@ export default class WelcomeCommand extends Command<true, RawArgs> {
     protected async runSet(
         context: CommandContext<true>,
         data: JSONIfySchema<WelcomeSchema> | null,
-        channel: CommandoTextChannel | null,
+        channel: TextChannel | null,
         message: string | null
     ): Promise<void> {
         if (!channel || !message) return;

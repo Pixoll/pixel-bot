@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { EmbedBuilder, ApplicationCommandOptionType, ChannelType } from 'discord.js';
+import { EmbedBuilder, ApplicationCommandOptionType, ChannelType, TextChannel } from 'discord.js';
 import {
     Argument,
     Command,
@@ -174,7 +174,7 @@ export default class PollCommand extends Command<true, RawArgs> {
      */
     protected async create(
         context: CommandContext<true>,
-        channel: CommandoTextChannel,
+        channel: TextChannel,
         duration: Date | number,
         pollMessage: string | undefined,
         emojis: string[]
@@ -225,7 +225,7 @@ export default class PollCommand extends Command<true, RawArgs> {
      * The `end` sub-command
      */
     protected async end(
-        context: CommandContext<true>, channel: CommandoTextChannel, msg: string, pollURL?: string
+        context: CommandContext<true>, channel: TextChannel, msg: string, pollURL?: string
     ): Promise<void> {
         const { guild } = context;
         const { channels } = guild;
@@ -241,7 +241,7 @@ export default class PollCommand extends Command<true, RawArgs> {
                 }));
                 return;
             }
-            channel = parsedChannel as CommandoTextChannel;
+            channel = parsedChannel as TextChannel;
         }
 
         const parsedMessage = await channel.messages.fetch(msg ?? messageId).catch(() => null);

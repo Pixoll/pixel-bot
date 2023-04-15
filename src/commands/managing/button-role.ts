@@ -7,6 +7,7 @@ import {
     ChannelType,
     ButtonStyle,
     ApplicationCommandOptionData,
+    Role,
 } from 'discord.js';
 import {
     Argument,
@@ -15,7 +16,6 @@ import {
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoRole,
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
@@ -59,7 +59,7 @@ const args = [{
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
-    [K in SlashRoleKey]?: CommandoRole;
+    [K in SlashRoleKey]?: Role;
 } & {
     message?: string;
 };
@@ -155,10 +155,10 @@ export default class ButtonRoleCommand extends Command<true, RawArgs> {
 
 async function parseRoles(
     context: CommandContext, args: ParsedArgs, message: CommandoMessage, command: ButtonRoleCommand
-): Promise<CommandoRole[]> {
+): Promise<Role[]> {
     const results = context.isInteraction()
         ? Object.entries(args)
-            .filter((entry): entry is [SlashRoleKey, CommandoRole] => /^role\d+$/.test(entry[0]))
+            .filter((entry): entry is [SlashRoleKey, Role] => /^role\d+$/.test(entry[0]))
             .map(([, role]) => role)
         : await Promise.all(args.roles.split(/ +/).map(query =>
             parseArgInput(query, message, command.argsCollector?.args[1] as Argument, 'role')
