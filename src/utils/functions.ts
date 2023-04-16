@@ -1242,7 +1242,7 @@ export function deepCopy<T>(value: T): T {
 export function enumToObject<T extends Record<string, unknown>>(o: T): Readonly<T> {
     return Object.keys(o)
         .filter((k) => typeof k !== 'number')
-        .reduce((r, k) => (r[k] = o[k], r), emptyObject<T>());
+        .reduce((r, k: keyof T) => (r[k] = o[k], r), emptyObject<T>());
 }
 
 export function emptyObject<T extends object>(): T {

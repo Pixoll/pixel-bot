@@ -176,10 +176,16 @@ declare module 'better-ms' {
 }
 
 interface ObjectConstructor {
-    keys<T extends object>(o: T): keyof T extends never ? string[] : Array<keyof T>;
-    entries<T extends object>(o: T): Array<[keyof T, PropertiesOf<T>]>;
+    keys<T extends object>(o: T): keyof T extends never ? string[] : ParseObjectKeys<Array<keyof T>>;
+    entries<T extends object>(o: T): keyof T extends never
+        ? Array<[string, unknown]>
+        : Array<[keyof T, PropertiesOf<T>]>;
     fromEntries<A extends PropertyKey, B>(entries: Iterable<readonly [A, B]>): Record<A, B>;
 }
+
+type ParseObjectKeys<Keys extends PropertyKey[]> = Array<keyof {
+    [K in Keys[number] as K extends number ? `${number}` : K extends symbol ? never : K]: null;
+}>;
 
 interface Date {
     /**
