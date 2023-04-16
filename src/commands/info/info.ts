@@ -6,6 +6,7 @@ import { reply, hyperlink, pixelColor, topggUrl, privacyPolicyUrl, termsOfServic
 
 declare function require<T>(id: string): T;
 const { version, description } = require<{ version: string; description: string }>('../../../package.json');
+const djsDocsUrl = `https://discord.js.org/#/docs/discord.js/${djsVersion}/general/welcome`;
 
 export default class InfoCommand extends Command {
     public constructor(client: CommandoClient) {
@@ -39,7 +40,7 @@ export default class InfoCommand extends Command {
                 value: stripIndent`
                 **Version:** ${version}
                 **GitHub Repository:** ${githubUrl}
-                **Library:** ${hyperlink('discord.js v' + djsVersion, 'https://discord.js.org/#/')}
+                **Library:** ${hyperlink('discord.js v' + djsVersion, djsDocsUrl)}
                 **Framework:** ${hyperlink('pixoll-commando v' + pixComVersion, 'https://github.com/Pixoll/pixoll-commando')}
                 **Developer:** ${owners?.[0].toString()} (${owners?.[0].tag})
                 `,
