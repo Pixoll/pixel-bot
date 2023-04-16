@@ -1,11 +1,11 @@
 import { stripIndent } from 'common-tags';
+import { Role } from 'discord.js';
 import {
     Argument,
     Command,
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoRole,
     ParseRawArguments,
 } from 'pixoll-commando';
 import { timestamp, isValidRole, reply, basicEmbed, generateDocId, parseArgDate } from '../../utils';
@@ -18,7 +18,7 @@ const args = [{
         if (typeof value === 'undefined') return false;
         const isValid = await argument.type?.validate(value, message, argument) ?? true;
         if (isValid !== true) return isValid;
-        const role = await argument.type?.parse(value, message, argument) as CommandoRole | undefined;
+        const role = await argument.type?.parse(value, message, argument) as Role | undefined;
         return isValidRole(message, role);
     },
 }, {

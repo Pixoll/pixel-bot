@@ -6,7 +6,6 @@ import {
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoTextChannel,
     JSONIfySchema,
     ParseRawArguments,
     SetupSchema,
@@ -152,7 +151,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
 
         const data = await db.fetch();
         const savedChannels = Util.filterNullishItems(await Promise.all(data?.lockChannels?.map(id =>
-            allChannels.fetch(id).catch(() => null) as Promise<CommandoTextChannel | null>
+            allChannels.fetch(id).catch(() => null) as Promise<TextChannel | null>
         ) ?? []));
 
         switch (subCommand) {
@@ -177,7 +176,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
      * The `start` sub-command
      */
     protected async runStart(
-        context: CommandContext<true>, savedChannels: CommandoTextChannel[], reason: string
+        context: CommandContext<true>, savedChannels: TextChannel[], reason: string
     ): Promise<void> {
         if (savedChannels.length === 0) {
             await reply(context, basicEmbed({
@@ -245,7 +244,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
      * The `end` sub-command
      */
     protected async runEnd(
-        context: CommandContext<true>, savedChannels: CommandoTextChannel[], reason: string
+        context: CommandContext<true>, savedChannels: TextChannel[], reason: string
     ): Promise<void> {
         if (savedChannels.length === 0) {
             await reply(context, basicEmbed({
@@ -311,7 +310,7 @@ export default class LockdownCommand extends Command<true, RawArgs> {
     /**
      * The `channels` sub-command
      */
-    protected async runChannelsView(context: CommandContext<true>, channels: CommandoTextChannel[]): Promise<void> {
+    protected async runChannelsView(context: CommandContext<true>, channels: TextChannel[]): Promise<void> {
         if (channels.length === 0) {
             await reply(context, basicEmbed({
                 color: 'Blue',

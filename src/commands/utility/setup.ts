@@ -10,8 +10,6 @@ import {
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoRole,
-    CommandoTextChannel,
     JSONIfySchema,
     ParseRawArguments,
     QuerySchema,
@@ -88,8 +86,8 @@ const args = [{
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & Partial<FullSetupData> & {
-    channel?: CommandoTextChannel;
-    role?: CommandoRole;
+    channel?: TextChannel;
+    role?: Role;
     channels?: string;
 };
 type SubCommand = ParsedArgs['subCommand'];
@@ -249,13 +247,13 @@ export default class SetupCommand extends Command<true, RawArgs> {
             case 'reload':
                 return await this.runReload(context, data);
             case 'audit-logs':
-                return await this.runAuditLogs(context, data, (value ?? channel) as CommandoTextChannel);
+                return await this.runAuditLogs(context, data, (value ?? channel) as TextChannel);
             case 'muted-role':
-                return await this.runMutedRole(context, data, (value ?? role) as CommandoRole);
+                return await this.runMutedRole(context, data, (value ?? role) as Role);
             case 'member-role':
-                return await this.runMemberRole(context, data, (value ?? role) as CommandoRole);
+                return await this.runMemberRole(context, data, (value ?? role) as Role);
             case 'bot-role':
-                return await this.runBotRole(context, data, (value ?? role) as CommandoRole);
+                return await this.runBotRole(context, data, (value ?? role) as Role);
             case 'lockdown-channels':
                 return await this.lockdownChannels(context, data, (value ?? channels) as string);
         }
@@ -511,7 +509,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `audit-logs` sub-command
      */
     protected async runAuditLogs(
-        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, channel: CommandoTextChannel
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, channel: TextChannel
     ): Promise<void> {
         const { guildId, guild } = context;
         const db = guild.database.setup;
@@ -533,7 +531,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `muted-role` sub-command
      */
     protected async runMutedRole(
-        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: CommandoRole
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: Role
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
@@ -555,7 +553,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `member-role` sub-command
      */
     protected async runMemberRole(
-        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: CommandoRole
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: Role
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;
@@ -577,7 +575,7 @@ export default class SetupCommand extends Command<true, RawArgs> {
      * The `bot-role` sub-command
      */
     protected async runBotRole(
-        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: CommandoRole
+        context: CommandContext<true>, data: JSONIfySchema<SetupSchema> | null, role: Role
     ): Promise<void> {
         const { guild, guildId } = context;
         const db = guild.database.setup;

@@ -28,12 +28,9 @@ import {
     CommandContextChannel,
     CommandoUserContextMenuCommandInteraction,
     CommandoGuild,
-    CommandoGuildMember,
     CommandoifiedMessage,
     CommandoMessage,
     CommandoMessageContextMenuCommandInteraction,
-    CommandoRole,
-    CommandoUser,
     GuildAuditLog,
     GuildModule,
     Util,
@@ -218,7 +215,7 @@ export interface ConfirmButtonsOptions {
     /** The action to confirm */
     action: string;
     /** The target on which this action is being executed */
-    target?: CommandoGuild | CommandoUser | User | string;
+    target?: CommandoGuild | User | string;
     /** The reason of this action */
     reason?: string;
     /** The duration of this action */
@@ -535,9 +532,7 @@ export async function basicCollector(
  * @param author The user who ran the command
  * @param command The command that's being ran
  */
-export function userException(
-    user: CommandoUser | User, author: CommandoUser | User, command: Command
-): BasicEmbedOptions | null {
+export function userException(user: User, author: User, command: Command): BasicEmbedOptions | null {
     const { client, name } = command;
     if (user.id !== client.user?.id && user.id !== author.id) return null;
 
@@ -557,8 +552,8 @@ export function userException(
  * @param command The command that's being ran
  */
 export function memberException(
-    member: Nullable<CommandoGuildMember | GuildMember>,
-    moderator: Nullable<CommandoGuildMember | GuildMember>,
+    member: Nullable<GuildMember>,
+    moderator: Nullable<GuildMember>,
     command: Command
 ): BasicEmbedOptions | null {
     if (!member || !moderator) return null;
@@ -613,9 +608,7 @@ export function inviteButton(invite: Invite | string, label = 'Join back'): Acti
  * @param roleOrMember A role or member.
  * @param noAdmin Whether to skip the `ADMINISTRATOR` permission or not.
  */
-export function isModerator(
-    roleOrMember?: CommandoGuildMember | CommandoRole | GuildMember | Role | null, noAdmin?: boolean
-): boolean {
+export function isModerator(roleOrMember?: GuildMember | Role | null, noAdmin?: boolean): boolean {
     if (!roleOrMember) return false;
     const { permissions } = roleOrMember;
 
@@ -632,7 +625,7 @@ export function isModerator(
  * Gets the mod permissions from a role or member.
  * @param roleOrMember A role or member.
  */
-export function getKeyPerms(roleOrMember: CommandoGuildMember | CommandoRole | GuildMember | Role): string {
+export function getKeyPerms(roleOrMember: GuildMember | Role): string {
     const perms = roleOrMember.permissions;
 
     if (perms.has('Administrator')) return 'Administrator';
@@ -789,7 +782,7 @@ export function validateURL(str: string): boolean {
  * @param message The message instance
  * @param role The role to validate
  */
-export function isValidRole(message: AnyMessage | CommandContext | null, role?: CommandoRole | Role | null): boolean {
+export function isValidRole(message: AnyMessage | CommandContext | null, role?: Role | null): boolean {
     if (!message || !message.inGuild() || !(role instanceof Role) || !role || role.managed) return false;
 
     const { member, client, author, guild } = message;

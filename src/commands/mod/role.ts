@@ -9,8 +9,6 @@ import {
     CommandoMessage,
     ParseRawArguments,
     Util,
-    CommandoRole,
-    CommandoUser,
 } from 'pixoll-commando';
 import {
     basicEmbed,
@@ -47,7 +45,7 @@ const args = [{
         if (!type) return true;
         const isValid = await type.validate(value, message, argument);
         if (choseType === 'member' || isValid !== true) return isValid;
-        const role = await type.parse(value, message, argument) as CommandoRole;
+        const role = await type.parse(value, message, argument) as Role;
         return isValidRole(message, role);
     },
     async parse(value: string, message: CommandoMessage, argument: Argument): Promise<Role | User | null> {
@@ -87,8 +85,8 @@ type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
     [K in SlashRoleKey]?: Role;
 } & {
-    user?: CommandoUser;
-    role?: CommandoRole;
+    user?: User;
+    role?: Role;
 };
 type SubCommand = ParsedArgs['subCommand'];
 
@@ -182,41 +180,41 @@ export default class RoleCommand extends Command<true, RawArgs> {
             case 'toggle':
                 return await this.toggle(context, args);
             case 'remove-all':
-                return await this.removeAll(context, user ?? userOrRole as CommandoUser);
+                return await this.removeAll(context, user ?? userOrRole as User);
             case 'all':
-                return await this.runAll(context, role ?? userOrRole as CommandoRole);
+                return await this.runAll(context, role ?? userOrRole as Role);
             case 'bots':
-                return await this.bots(context, role ?? userOrRole as CommandoRole);
+                return await this.bots(context, role ?? userOrRole as Role);
             case 'users':
-                return await this.users(context, role ?? userOrRole as CommandoRole);
+                return await this.users(context, role ?? userOrRole as Role);
         }
     }
 
     /**
      * The `all` sub-command
      */
-    protected async runAll(context: CommandContext<true>, role: CommandoRole): Promise<void> {
+    protected async runAll(context: CommandContext<true>, role: Role): Promise<void> {
         await toggleRolesFor('all', context, role);
     }
 
     /**
      * The `bots` sub-command
      */
-    protected async bots(context: CommandContext<true>, role: CommandoRole): Promise<void> {
+    protected async bots(context: CommandContext<true>, role: Role): Promise<void> {
         await toggleRolesFor('bots', context, role);
     }
 
     /**
      * The `members` sub-command
      */
-    protected async users(context: CommandContext<true>, role: CommandoRole): Promise<void> {
+    protected async users(context: CommandContext<true>, role: Role): Promise<void> {
         await toggleRolesFor('members', context, role);
     }
 
     /**
      * The `remove-all` sub-command
      */
-    protected async removeAll(context: CommandContext<true>, user: CommandoUser): Promise<void> {
+    protected async removeAll(context: CommandContext<true>, user: User): Promise<void> {
         const member = await context.guild.members.fetch(user).catch(() => null);
         if (!member) {
             await reply(context, basicEmbed({
@@ -309,7 +307,7 @@ export default class RoleCommand extends Command<true, RawArgs> {
 }
 
 async function toggleRolesFor(
-    type: 'all' | 'bots' | 'members', context: CommandContext<true>, role: CommandoRole
+    type: 'all' | 'bots' | 'members', context: CommandContext<true>, role: Role
 ): Promise<void> {
     if (!isValidRole(context, role)) {
         await reply(context, basicEmbed({

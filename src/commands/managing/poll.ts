@@ -6,7 +6,6 @@ import {
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoTextChannel,
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
@@ -52,7 +51,7 @@ const args = [{
             return await durationType.validate(value, message, argument);
         }
         const channelQuery = CommandoMessage.parseArgs(message.content)[1];
-        const channel = await message.command?.argsCollector?.args[1].parse(channelQuery, message) as CommandoTextChannel;
+        const channel = await message.command?.argsCollector?.args[1].parse(channelQuery, message) as TextChannel;
         const fetchedMessage = await channel.messages.fetch(value ?? '').catch(() => null);
         return !!fetchedMessage;
     },

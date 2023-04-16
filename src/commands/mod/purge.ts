@@ -5,15 +5,14 @@ import {
     FetchMessagesOptions,
     ApplicationCommandOptionType,
     ApplicationCommandNumericOption,
+    User,
 } from 'discord.js';
 import {
     Argument,
     Command,
     CommandContext,
     CommandoClient,
-    CommandoifiedMessage,
     CommandoMessage,
-    CommandoUser,
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
@@ -70,19 +69,19 @@ const args = [{
     },
     async parse(
         value: string, message: CommandoMessage, argument: Argument
-    ): Promise<CommandoifiedMessage | CommandoUser | string | null> {
+    ): Promise<Message | User | string | null> {
         const subCommand = getSubCommand<SubCommand>(message);
         if (!Util.equals(subCommand, ['after', 'before', 'ends-with', 'match', 'starts-with', 'user'])) return null;
         const chosenType = subCommand === 'user' ? 'user'
             : Util.equals(subCommand, ['after', 'before']) ? 'message' : 'string';
         const type = message.client.registry.types.get(chosenType);
-        return await type?.parse(value, message, argument) as CommandoifiedMessage | CommandoUser | string | null ?? null;
+        return await type?.parse(value, message, argument) as Message | User | string | undefined ?? null;
     },
 }] as const;
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
-    user?: CommandoUser;
+    user?: User;
     messageId?: string;
     text?: string;
 };
@@ -241,7 +240,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
                 }));
                 return;
             }
-            filter = message as unknown as CommandoifiedMessage;
+            filter = message;
         }
 
         if (amount < 100) amount++;
@@ -260,11 +259,11 @@ export default class PurgeCommand extends Command<true, RawArgs> {
             case 'bots':
                 return await this.runBots(context, amount);
             case 'user':
-                return await this.runUser(context, amount, user ?? filter as CommandoUser);
+                return await this.runUser(context, amount, user ?? filter as User);
             case 'before':
-                return await this.runBefore(context, amount, filter as CommandoifiedMessage);
+                return await this.runBefore(context, amount, filter as Message);
             case 'after':
-                return await this.runAfter(context, amount, filter as CommandoifiedMessage);
+                return await this.runAfter(context, amount, filter as Message);
             case 'match':
                 return await this.runMatch(context, amount, text ?? filter as string);
             case 'starts-with':
@@ -277,7 +276,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
     /**
      * The `after` sub-command
      */
-    protected async runAfter(context: CommandContext<true>, amount: number, filter: CommandoifiedMessage): Promise<void> {
+    protected async runAfter(context: CommandContext<true>, amount: number, filter: Message): Promise<void> {
         const messages = await fetchMessages(context, { limit: amount, after: filter.id });
         await bulkDelete(context, messages);
     }
@@ -293,7 +292,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
     /**
      * The `before` sub-command
      */
-    protected async runBefore(context: CommandContext<true>, amount: number, filter: CommandoifiedMessage): Promise<void> {
+    protected async runBefore(context: CommandContext<true>, amount: number, filter: Message): Promise<void> {
         const messages = await fetchMessages(context, { limit: amount, before: filter.id });
         await bulkDelete(context, messages);
     }
@@ -370,7 +369,7 @@ export default class PurgeCommand extends Command<true, RawArgs> {
     /**
      * The `user` sub-command
      */
-    protected async runUser(context: CommandContext<true>, amount: number, filter: CommandoUser): Promise<void> {
+    protected async runUser(context: CommandContext<true>, amount: number, filter: User): Promise<void> {
         const messages = await fetchMessages(context, { limit: amount });
         const filtered = messages.filter(msg => msg.author.id === filter.id);
         await bulkDelete(context, filtered);

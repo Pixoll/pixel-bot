@@ -7,7 +7,6 @@ import {
     CommandContext,
     CommandoClient,
     CommandoMessage,
-    CommandoUser,
     ParseRawArguments,
     Util,
 } from 'pixoll-commando';
@@ -167,7 +166,7 @@ export default class MultiBanCommand extends Command<true, RawArgs> {
     }
 }
 
-async function isValidMember(message: CommandoMessage, user: CommandoUser | User | null): Promise<boolean> {
+async function isValidMember(message: CommandoMessage, user: User | null): Promise<boolean> {
     if (!user || !message.inGuild()) return false;
 
     const { author, guild, client } = message;

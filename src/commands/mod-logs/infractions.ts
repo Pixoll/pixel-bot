@@ -3,7 +3,6 @@ import {
     Command,
     CommandContext,
     CommandoClient,
-    CommandoUser,
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
 } from 'pixoll-commando';
@@ -46,7 +45,7 @@ export default class InfractionsCommand extends Command<true, RawArgs> {
 }
 
 async function runCommand(
-    context: CommandContext<true> | CommandoUserContextMenuCommandInteraction, user: CommandoUser | User
+    context: CommandContext<true> | CommandoUserContextMenuCommandInteraction, user: User
 ): Promise<void> {
     const { guild } = context;
     if (!guild) return;

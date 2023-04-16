@@ -1,6 +1,6 @@
 import { oneLine, stripIndent } from 'common-tags';
-import { ChannelType, EmbedBuilder } from 'discord.js';
-import { CommandoClient, CommandoTextChannel } from 'pixoll-commando';
+import { ChannelType, EmbedBuilder, TextChannel } from 'discord.js';
+import { CommandoClient } from 'pixoll-commando';
 import { customEmoji, hyperlink, pixelColor, privacyPolicyUrl, termsOfServiceUrl, topggUrl } from '../../utils';
 
 /** Sends a message when the bot joins a guild. */
@@ -15,7 +15,7 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         if (!owner) return;
 
         const channel = channels.cache
-            .filter((channel): channel is CommandoTextChannel => {
+            .filter((channel): channel is TextChannel => {
                 if (channel.type !== ChannelType.GuildText) return false;
                 const everyonePerms = channel.permissionOverwrites.resolve(id)?.allow;
                 if (!everyonePerms) return false;
