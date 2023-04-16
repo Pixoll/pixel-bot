@@ -4,8 +4,10 @@ import { ActivityType, GatewayIntentBits, OAuth2Scopes, Partials, PermissionFlag
 import { config as dotenvConfig } from 'dotenv';
 import path from 'path';
 import { CommandoClient, Util } from 'pixoll-commando';
-import { enumToObject } from './utils';
+import { enumToObject, log } from './utils';
 dotenvConfig();
+
+const isDevEnv = process.env.DEV_ENV === 'true';
 
 const client = new CommandoClient({
     prefix: '!!',
@@ -42,19 +44,20 @@ const client = new CommandoClient({
 });
 
 const excludeDebugEvents = new RegExp([
-    'Heartbeat',
     'Registered',
-    'WS',
+    'WS =>',
     'Loaded module',
-    'finished for guild',
-    'Garbage collection',
-    'executing a request',
+    // 'Garbage collection',
+    // 'executing a request',
     'Created new',
 ].join('|'));
 
 client.on('debug', message => {
     if (excludeDebugEvents.test(message)) return;
-    console.log('debug >', message);
+    log([{
+        message: '[DEBUG]',
+        styles: ['Gold'],
+    }, message], isDevEnv);
 });
 client.emit('debug', 'Created client');
 

@@ -44,6 +44,8 @@ import { prettyMs } from 'better-ms';
 import { AnyMessage, RawModuleName } from '../types';
 import {
     BingLanguageId,
+    LogStyleResolvable,
+    LogStyles,
     defaultGenerateEmbedOptions,
     moderatorPermissions,
     pixelColor,
@@ -260,6 +262,11 @@ export type ReplyAllOptions =
         ephemeral?: boolean;
         replyToEdit?: AnyMessage | null;
     };
+
+export type LogMessage = string | {
+    message: string;
+    styles?: LogStyleResolvable[];
+};
 
 //#endregion
 
@@ -1378,4 +1385,52 @@ export async function getContextMessage<M extends CommandoMessage | Message = Me
     return 'isMessage' in context && context.isMessage()
         ? context as M
         : await context.fetchReply() as M;
+}
+
+export function rgb<R extends number, G extends number, B extends number>(
+    r: R, g: G, b: B
+): `\x1b[38;2;${R};${G};${B}m` {
+    return `\x1b[38;2;${r ?? 0};${g ?? 0};${b ?? 0}m`;
+}
+
+export function log(messages: LogMessage | LogMessage[], timestamp = true): void {
+    if (!timestamp) return console.log(...resolveLogMessages(messages));
+    const now = new Date();
+    const time = now.toLocaleTimeString();
+    const ms = now.getTime().toString().slice(-3);
+    console.log(resolveLogMessages({
+        message: `[${time}.${ms}]:`,
+        styles: ['Aqua'],
+    }), resolveLogMessages(messages));
+}
+
+export function isInteger(n: unknown): n is number {
+    return Number(n) === n && n % 1 === 0;
+}
+
+function resolveLogMessages<Single extends boolean = true>(
+    messages: LogMessage | LogMessage[], single?: Single
+): Single extends false ? string[] : string {
+    if (!Array.isArray(messages)) messages = [messages];
+    const parsedMessages = messages.map(message => {
+        if (typeof message === 'string') return message;
+        const { styles } = message;
+        if (!styles || styles.length === 0) return message.message;
+        const parsedStyles = parseLogStyles(styles);
+        return parsedStyles + message.message + LogStyles.Reset;
+    });
+    return (single === false
+        ? parsedMessages
+        : parsedMessages.join(' ')) as Single extends false ? string[] : string;
+}
+
+function parseLogStyles(styles: LogStyleResolvable[]): string {
+    return styles.map(style => {
+        if (typeof style === 'string') return LogStyles[style];
+        const [r, g, b] = style.slice(0, 3);
+        if (!isInteger(r) || !isInteger(g) || !isInteger(b)) {
+            throw new RangeError('RGB parameters must be integers.');
+        }
+        return rgb(r, g, b);
+    }).join('');
 }
