@@ -1,38 +1,40 @@
 {
   "private": true,
   "name": "pixel",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "Manage your server with ease using this multi-purpose and easy-to-use Discord bot.",
   "author": "Pixoll",
   "license": "AGPL-3.0-only",
-  "main": "index.js",
+  "main": "./build/index.js",
   "scripts": {
+    "build:force": "echo Forcing full build... & rmdir build /s /q & del /f .tsbuildinfo & npm run build",
     "build": "tsc",
-    "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix",
-    "tslint": "eslint src",
-    "tslint:fix": "eslint --fix src"
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src"
   },
   "dependencies": {
+    "better-ms": "^1.1.7",
+    "bing-translate-api": "^2.9.0",
     "common-tags": "^1.8.2",
-    "discord.js": "^13.8.1",
-    "dotenv": "^16.0.1",
-    "emoji-regex": "^10.1.0",
+    "discord.js": "^14.9.0",
+    "dotenv": "^16.0.3",
+    "emoji-regex": "^10.2.1",
     "lodash": "^4.17.21",
-    "minecraft-server-util": "^5.2.10",
-    "mongoose": "^6.4.4",
-    "pixoll-commando": "^0.14.3",
+    "minecraft-server-util": "^5.4.2",
+    "mongoose": "^6.10.5",
+    "pixoll-commando": "github:Pixoll/pixoll-commando",
     "require-all": "^3.0.0"
   },
   "devDependencies": {
     "@types/common-tags": "^1.8.1",
-    "@types/lodash": "^4.14.182",
+    "@types/lodash": "^4.14.192",
     "@types/node": "16.x",
+    "@types/node-fetch": "^2.6.3",
     "@types/require-all": "^3.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.30.5",
-    "@typescript-eslint/parser": "^5.30.5",
-    "eslint": "^8.17.0",
-    "typescript": "^4.9.3"
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "latest",
+    "typescript": "^4.9.5"
   },
   "repository": {
     "type": "git",

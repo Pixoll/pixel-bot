@@ -1,11 +1,6 @@
 /.env
 /.vscode
 /node_modules
-/commands/owner/test.js
-/commands/info/legal.js
-/documents/privacy-policy.json
-/documents/terms-of-service.json
-/debug.js
-/src
-/build
-/test
+/.tsbuildinfo
+/src/commands/owner/test.ts
+/build/commands/owner/test.js
