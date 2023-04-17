@@ -102,7 +102,7 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
         await runCommand(context, text, from, to);
     }
 
-    public async runMessageContextMenu(interaction: CommandoMessageContextMenuCommandInteraction): Promise<void> {
+    public override async runMessageContextMenu(interaction: CommandoMessageContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
 
         const { content } = interaction.targetMessage;
@@ -119,7 +119,7 @@ export default class TranslateCommand extends Command<boolean, RawArgs> {
         await runCommand(interaction, content);
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const query = interaction.options.getFocused().toLowerCase();
         const choices = Object.entries(bingSupportedLanguages)
             .filter(([key, value]) => `[${key}] ${value}`.toLowerCase().includes(query))

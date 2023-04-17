@@ -242,7 +242,7 @@ export default class ToDoCommand extends Command<boolean, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { user, options } = interaction;
         const query = options.getFocused().toLowerCase();
         const todoData = await this.db.fetch({ user: user.id });

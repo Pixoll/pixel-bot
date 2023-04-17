@@ -218,7 +218,7 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { client, options } = interaction;
         const { commands, groups } = client.registry;
 

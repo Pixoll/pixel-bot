@@ -47,7 +47,7 @@ export default class AvatarCommand extends Command<boolean, RawArgs> {
         await reply(context, mapAvatarData(user));
     }
 
-    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+    public override async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
         await reply(interaction, mapAvatarData(interaction.targetUser));
     }

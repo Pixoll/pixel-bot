@@ -82,7 +82,7 @@ export default class ReasonCommand extends Command<true, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { guild, options } = interaction;
         const query = options.getFocused().toLowerCase();
         const documents = await guild?.database.moderations.fetchMany();

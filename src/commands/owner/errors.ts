@@ -174,7 +174,7 @@ export default class ErrorsCommand extends Command<true, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { options } = interaction;
         const query = options.getFocused().toLowerCase();
         const errors = await this.db.fetchMany();

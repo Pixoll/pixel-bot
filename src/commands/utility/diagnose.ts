@@ -249,7 +249,7 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
         await reply(context, diagnose);
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { client, options } = interaction;
         const { commands, groups } = client.registry;
 

@@ -255,7 +255,7 @@ export default class FaqCommand extends Command<boolean, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { client, options } = interaction;
         const query = options.getFocused().toLowerCase();
         const faqData = await client.database.faq.fetchMany();

@@ -267,7 +267,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { client, options } = interaction;
         const query = options.getFocused().toLowerCase();
         const matches = client.registry.commands

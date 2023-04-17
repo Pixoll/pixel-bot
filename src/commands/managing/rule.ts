@@ -204,7 +204,7 @@ export default class RuleCommand extends Command<true, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { guild, options } = interaction;
         if (!guild) return;
         const query = options.getFocused().toLowerCase();

@@ -46,7 +46,7 @@ export default class BannerCommand extends Command<boolean, RawArgs> {
         await reply(context, mapBannerData(user));
     }
 
-    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+    public override async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
         await interaction.targetUser.fetch();
         await reply(interaction, mapBannerData(interaction.targetUser));

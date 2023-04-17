@@ -41,7 +41,7 @@ export default class ModLogsCommand extends Command<true, RawArgs> {
         await runCommand(context, user);
     }
 
-    public async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
+    public override async runUserContextMenu(interaction: CommandoUserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply({ ephemeral: true });
         await runCommand(interaction, interaction.targetUser);
     }

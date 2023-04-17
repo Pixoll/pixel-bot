@@ -195,7 +195,7 @@ export default class TimesCommand extends Command<boolean, RawArgs> {
         }));
     }
 
-    public async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
+    public override async runAutocomplete(interaction: CommandoAutocompleteInteraction): Promise<void> {
         const { options } = interaction;
         const query = options.getFocused().toLowerCase();
         const matches = cities
