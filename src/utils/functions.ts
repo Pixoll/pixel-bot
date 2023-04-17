@@ -763,9 +763,10 @@ export function difference<T extends unknown[] | object>(first: T, second: T): P
     let arrayIndexCounter = 0;
     return transform(second, (result, value, key) => {
         if (isEqual(value, first[key])) return;
-        const resultKey = Array.isArray(first) ? arrayIndexCounter++ : key;
-        // @ts-expect-error: from Stack Overflow, works
-        result[resultKey] = isObject(value) && isObject(first[key]) ? difference(value, first[key]) : value;
+        const resultKey = Array.isArray(first) ? arrayIndexCounter++ as keyof T : key;
+        result[resultKey] = isObject(value) && isObject(first[key])
+            ? difference(value, first[key] as object) as T[keyof T]
+            : value;
     });
 }
 
@@ -1264,8 +1265,7 @@ export function parseMessageToCommando<InGuild extends boolean = boolean>(
     message: CommandoifiedMessage<InGuild>
 ): CommandoMessage<InGuild> | null {
     const commandoMessage = new CommandoMessage(message.client, message);
-    // @ts-expect-error: parseMessage is protected in CommandoDispatcher
-    const parsedMessage = message.client.dispatcher.parseMessage(commandoMessage);
+    const parsedMessage = message.client.dispatcher['parseMessage'](commandoMessage);
     return parsedMessage as CommandoMessage<InGuild> | null;
 }
 
