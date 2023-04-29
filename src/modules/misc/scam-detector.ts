@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { CommandoClient, GuildModule } from 'pixoll-commando';
+import { CommandoClient } from 'pixoll-commando';
 import { isGuildModuleEnabled, basicEmbed, generateDocId } from '../../utils';
 
 const antiScamRegex = new RegExp(
@@ -51,7 +51,7 @@ export default function (client: CommandoClient<true>): void {
         const { guild, author, content, guildId, embeds, member } = message;
         if (!guild || !member?.bannable) return;
 
-        const isEnabled = await isGuildModuleEnabled(guild, 'scam-detector' as GuildModule);
+        const isEnabled = await isGuildModuleEnabled(guild, 'scam-detector' as 'welcome');
         if (!isEnabled) return;
 
         client.emit('debug', 'Running event "modules/scam-detector".');

@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { ChannelType } from 'discord.js';
-import { CommandoClient, GuildModule } from 'pixoll-commando';
+import { CommandoClient } from 'pixoll-commando';
 import { isGuildModuleEnabled, basicEmbed, generateDocId, timestamp, parseMessageToCommando } from '../../utils';
 
 function percentage(number: number, total: number): number {
@@ -18,7 +18,7 @@ export default function (client: CommandoClient<true>): void {
         const permissions = member?.permissionsIn(channel).serialize() ?? null;
         if (author.bot || !content || permissions?.Administrator) return;
 
-        const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as GuildModule);
+        const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as 'welcome');
         if (!isEnabled) return;
 
         const reasons: string[] = [];
@@ -95,7 +95,7 @@ export default function (client: CommandoClient<true>): void {
             || permissions?.Administrator || channel.type === ChannelType.GuildStageVoice
         ) return;
 
-        const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as GuildModule);
+        const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as 'welcome');
         if (!isEnabled) return;
 
         const { setup, moderations, active } = guild.database;
@@ -165,7 +165,7 @@ export default function (client: CommandoClient<true>): void {
             || permissions?.Administrator || channel.type === ChannelType.GuildStageVoice
         ) return;
 
-        const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as GuildModule);
+        const isEnabled = await isGuildModuleEnabled(guild, 'chat-filter' as 'welcome');
         if (!isEnabled) return;
 
         const invites = await guild.invites.fetch().catch(() => null);

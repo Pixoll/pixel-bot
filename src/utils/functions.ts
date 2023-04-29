@@ -331,15 +331,19 @@ export function camelToKebabCase<S extends string>(string: S): CamelToKebabCase<
  * @param module The module to check
  * @param subModule The sub-module to check
  */
-export async function isGuildModuleEnabled<
-    M extends GuildModule, S extends (M extends 'audit-logs' ? GuildAuditLog : never)
->(
-    guild: CommandoGuild, module: M, subModule?: S
+export async function isGuildModuleEnabled(
+    guild: CommandoGuild, module: Exclude<GuildModule, 'audit-logs'>
+): Promise<boolean>;
+export async function isGuildModuleEnabled(
+    guild: CommandoGuild, module: 'audit-logs', subModule: GuildAuditLog
+): Promise<boolean>;
+export async function isGuildModuleEnabled(
+    guild: CommandoGuild, module: GuildModule, subModule?: GuildAuditLog
 ): Promise<boolean> {
     const data = await guild.database.modules.fetch();
     if (!data) return false;
-    const moduleName = Util.kebabToCamelCase<GuildModule>(module);
-    const subModuleName = subModule ? Util.kebabToCamelCase<GuildAuditLog>(subModule) : null;
+    const moduleName = Util.kebabToCamelCase(module);
+    const subModuleName = subModule ? Util.kebabToCamelCase(subModule) : null;
 
     const toCheck = moduleName === 'auditLogs' && subModuleName
         ? data[moduleName]?.[subModuleName]
