@@ -8,7 +8,6 @@ import {
     Collection,
     EmbedBuilder,
 } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Argument,
     Command,
@@ -280,7 +279,7 @@ export default class HelpCommand extends Command<boolean, RawArgs> {
             .slice(0, 25)
             .sort()
             .map<ChoiceData<string>>(command => ({
-                name: capitalize(command),
+                name: Util.capitalize(command),
                 value: command,
             }));
 

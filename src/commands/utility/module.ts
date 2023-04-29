@@ -1,6 +1,5 @@
 import { stripIndent } from 'common-tags';
 import { APIEmbedField, ApplicationCommandOptionType, ApplicationCommandStringOptionData, EmbedBuilder } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Command,
     CommandContext,
@@ -15,8 +14,8 @@ import {
     JSONIfySchema,
     BaseSchema,
 } from 'pixoll-commando';
-import { ParsedModuleData, RawAuditLogName, RawModuleName } from '../../types';
-import { basicEmbed, addDashes, reply, removeDashes, isTrue, pixelColor, getSubCommand } from '../../utils';
+import { ParsedModuleData } from '../../types';
+import { basicEmbed, camelToKebabCase, reply, isTrue, pixelColor, getSubCommand } from '../../utils';
 
 declare function require<T>(id: string): T;
 
@@ -81,19 +80,15 @@ export default class ModuleCommand extends Command<true, RawArgs> {
         const modulesObj = Util.omit(client.databaseSchemas.ModulesModel.schema.obj as ModuleSchema, [
             '__v', '_id', 'guild',
         ]);
-        modules.push(...Object.keys(modulesObj).map(id =>
-            addDashes<GuildModule>(id)
-        ));
-        auditLogs.push(...Object.keys(modulesObj.auditLogs).map(id =>
-            addDashes<GuildAuditLog>(id)
-        ));
+        modules.push(...Object.keys(modulesObj).map(camelToKebabCase));
+        auditLogs.push(...Object.keys(modulesObj.auditLogs).map(camelToKebabCase));
 
         const moduleChoices = modules.map(m => ({
-            name: capitalize(m.replace('-', ' ')),
+            name: Util.capitalize(m.replace('-', ' ')),
             value: m,
         }));
         const submoduleChoices = auditLogs.map(m => ({
-            name: capitalize(m.replace('-', ' ')),
+            name: Util.capitalize(m.replace('-', ' ')),
             value: m,
         }));
 
@@ -170,7 +165,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
 
     protected async runInfo(context: CommandContext<true>, moduleName: GuildModule): Promise<void> {
         const { client } = context;
-        const rawModuleName = removeDashes<RawModuleName>(moduleName);
+        const rawModuleName = Util.kebabToCamelCase(moduleName);
         const moduleInfo = modulesInfo[rawModuleName];
 
         const embed = new EmbedBuilder()
@@ -179,7 +174,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
                 name: `${client.user.username}'s modules`,
                 iconURL: client.user.displayAvatarURL(),
             })
-            .setTitle(`Module: ${capitalize(moduleName.replace(/-/g, ' '))}`)
+            .setTitle(`Module: ${Util.capitalize(moduleName.replace(/-/g, ' '))}`)
             .setFields(moduleInfo)
             .setTimestamp();
 
@@ -208,8 +203,8 @@ export default class ModuleCommand extends Command<true, RawArgs> {
 
         const parsedData = parseModuleData(data);
 
-        const rawModuleName = removeDashes<RawModuleName>(moduleName);
-        const rawSubModuleName = subModule ? removeDashes<RawAuditLogName>(subModule) : null;
+        const rawModuleName = Util.kebabToCamelCase(moduleName);
+        const rawSubModuleName = subModule ? Util.kebabToCamelCase(subModule) : null;
         let isTopLevelModuleEnabled = parsedData[rawModuleName];
         if (typeof isTopLevelModuleEnabled === 'object') {
             const full = Object.values(isTopLevelModuleEnabled);
@@ -231,7 +226,7 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             })
             .setDescription(stripIndent`
                 **Status:** ${isEnabled ? 'Enabled' : 'Disabled'}
-                ${subModule ? `**Parent module:** ${capitalize(moduleName)}` : ''}
+                ${subModule ? `**Parent module:** ${Util.capitalize(moduleName)}` : ''}
                 ${subModule ? `**Parent module status:** ${moduleStatus}` : ''}
             `)
             .setTimestamp();
@@ -260,8 +255,8 @@ export default class ModuleCommand extends Command<true, RawArgs> {
             return;
         }
 
-        const rawModuleName = removeDashes<RawModuleName>(moduleName);
-        const rawSubModuleName = subModule ? removeDashes<RawAuditLogName>(subModule) : null;
+        const rawModuleName = Util.kebabToCamelCase(moduleName);
+        const rawSubModuleName = subModule ? Util.kebabToCamelCase(subModule) : null;
         const newDocument: QuerySchema<ModuleSchema> = {
             guild: guildId,
             ...parseModuleData(data),

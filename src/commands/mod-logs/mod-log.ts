@@ -1,6 +1,5 @@
 import { stripIndent, oneLine } from 'common-tags';
 import { ApplicationCommandOptionType, EmbedBuilder, ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Command,
     CommandContext,
@@ -9,6 +8,7 @@ import {
     JSONIfySchema,
     ModerationSchema,
     ParseRawArguments,
+    Util,
 } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, timestamp, reply, pixelColor } from '../../utils';
 
@@ -117,7 +117,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
                 iconURL: user?.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(stripIndent`
-                **Type:** ${capitalize(modLog.type)}
+                **Type:** ${Util.capitalize(modLog.type)}
                 **User:** ${`${user?.toString()} ${user?.tag}` || 'Unable to fetch user.'}
                 **Moderator:** ${`${moderator?.toString()} ${moderator?.tag}` || 'Unable to fetch user.'}
                 **Reason:** ${modLog.reason}
@@ -165,7 +165,7 @@ export default class ModLogCommand extends Command<true, RawArgs> {
         const documents = await guild?.database.moderations.fetchMany();
         const choices = documents
             ?.map<ChoiceData<string>>(doc => ({
-                name: `[${capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
+                name: `[${Util.capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
                 value: doc._id,
             }))
             .filter(doc => doc.name.toLowerCase().includes(query))

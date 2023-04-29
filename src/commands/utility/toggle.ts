@@ -3,7 +3,6 @@ import {
     ApplicationCommandOptionChoiceData as ChoiceData,
     ApplicationCommandOptionType,
 } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Argument,
     ArgumentType,
@@ -19,6 +18,7 @@ import {
     DisabledSchema,
     JSONIfySchema,
     ParseRawArguments,
+    Util,
 } from 'pixoll-commando';
 import { basicEmbed, getSubCommand, reply } from '../../utils';
 
@@ -234,8 +234,8 @@ export default class ToggleCommand extends Command<boolean, RawArgs> {
             .sort()
             .map<ChoiceData<string>>(identifier => ({
                 name: isCommand
-                    ? capitalize(identifier)
-                    : groups.get(identifier)?.name ?? capitalize(identifier),
+                    ? Util.capitalize(identifier)
+                    : groups.get(identifier)?.name ?? Util.capitalize(identifier),
                 value: identifier,
             }));
 

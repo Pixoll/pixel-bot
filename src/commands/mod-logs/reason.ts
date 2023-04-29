@@ -1,12 +1,12 @@
 import { stripIndent, oneLine } from 'common-tags';
 import { ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Command,
     CommandContext,
     CommandoAutocompleteInteraction,
     CommandoClient,
     ParseRawArguments,
+    Util,
 } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, reply } from '../../utils';
 
@@ -88,7 +88,7 @@ export default class ReasonCommand extends Command<true, RawArgs> {
         const documents = await guild?.database.moderations.fetchMany();
         const choices = documents
             ?.map<ChoiceData<string>>(doc => ({
-                name: `[${capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
+                name: `[${Util.capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
                 value: doc._id,
             }))
             .filter(doc => doc.name.toLowerCase().includes(query))

@@ -1,13 +1,13 @@
 import { ms } from 'better-ms';
 import { stripIndent, oneLine } from 'common-tags';
 import { ApplicationCommandOptionChoiceData as ChoiceData } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Command,
     CommandContext,
     CommandoAutocompleteInteraction,
     CommandoClient,
     ParseRawArguments,
+    Util,
 } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, parseArgDate, reply } from '../../utils';
 
@@ -112,7 +112,7 @@ export default class DurationCommand extends Command<true, RawArgs> {
         const documents = await guild?.database.active.fetchMany();
         const choices = documents?.toJSON()
             ?.map<ChoiceData<string>>(doc => ({
-                name: `[${capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
+                name: `[${Util.capitalize(doc.type)}] ${doc._id} (${doc.userTag})`,
                 value: doc._id,
             }))
             .filter(doc => doc.name.toLowerCase().includes(query))

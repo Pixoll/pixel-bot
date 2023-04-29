@@ -1,7 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
-import { capitalize } from 'lodash';
 import { Command, CommandContext, CommandoClient, ModuleSchema, Util, JSONIfySchema } from 'pixoll-commando';
-import { reply, customEmoji, basicEmbed, addDashes, alphabeticalOrder, pixelColor } from '../../utils';
+import { reply, customEmoji, basicEmbed, camelToKebabCase, alphabeticalOrder, pixelColor } from '../../utils';
 
 function getStatusString(isOn?: boolean): string {
     if (isOn === true) return `Enabled ${customEmoji('online')}`;
@@ -15,13 +14,13 @@ function mapModuleData(data: Partial<JSONIfySchema<ModuleSchema>>): string {
         typeof value === 'boolean' ? alphabeticalOrder<string>()(key1, key2) : -1
     ).map(([key, value]) => {
         if (typeof value === 'boolean') {
-            return `**${capitalize(addDashes(key).replace(/-/g, ' '))}:** ${getStatusString(value)}`;
+            return `**${Util.capitalize(camelToKebabCase(key).replace(/-/g, ' '))}:** ${getStatusString(value)}`;
         }
-        return [`**${capitalize(addDashes(key).replace(/-/g, ' '))}:**`, Object.entries(
+        return [`**${Util.capitalize(camelToKebabCase(key).replace(/-/g, ' '))}:**`, Object.entries(
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             value ?? {} as NonNullable<typeof value>
         ).map(([nestedKey, nestedValue]) =>
-            `\u2800⤷ **${capitalize(addDashes(nestedKey))}:** ${getStatusString(nestedValue)}`
+            `\u2800⤷ **${Util.capitalize(camelToKebabCase(nestedKey))}:** ${getStatusString(nestedValue)}`
         ).join('\n')].join('\n');
     }).join('\n');
 }

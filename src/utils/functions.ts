@@ -35,10 +35,10 @@ import {
     GuildModule,
     Util,
 } from 'pixoll-commando';
-import { transform, isEqual, isObject, capitalize } from 'lodash';
+import { transform, isEqual, isObject } from 'lodash';
 import { stripIndent } from 'common-tags';
 import { prettyMs } from 'better-ms';
-import { AnyMessage, RawModuleName } from '../types';
+import { AnyMessage } from '../types';
 import {
     BingLanguageId,
     LogStyleResolvable,
@@ -265,6 +265,11 @@ export type LogMessage = string | {
     styles?: LogStyleResolvable[];
 };
 
+export type CamelToKebabCase<S extends string>
+    = S extends `${infer Before}${infer After}`
+    ? `${Before extends Uppercase<Before> ? '-' : ''}${Lowercase<Before>}${CamelToKebabCase<After>}`
+    : S;
+
 //#endregion
 
 /**
@@ -312,26 +317,12 @@ export function codeBlock<C extends string, L extends string = ''>(text: C, lang
 }
 
 /**
- * Adds dashes to the string on every upper case letter
- * @param str The string to parse
- * @param under Wether to use underscores instead or not
+ * Turns camelCase to kebab-case
+ * @param string The string to parse
  */
-export function addDashes<T extends string = string>(str: string, under = false): T {
-    if (str.length === 0) return str as T;
-    if (typeof under !== 'boolean') under = false;
-    return str.replace(/[A-Z]/g, under ? '_$&' : '-$&').toLowerCase() as T;
-}
-
-/**
- * Removes dashes from the string and capitalizes the remaining strings
- * @param str The string to parse
- */
-export function removeDashes<T extends string = string>(str: string): T {
-    if (str.length === 0) return str as T;
-    const arr = str.split('-');
-    const first = arr.shift();
-    const rest = arr.map(capitalize).join('');
-    return first + rest as T;
+export function camelToKebabCase<S extends string>(string: S): CamelToKebabCase<S> {
+    if (string.length === 0) return string as unknown as CamelToKebabCase<S>;
+    return string.replace(/[A-Z]/g, '-$&').toLowerCase() as CamelToKebabCase<S>;
 }
 
 /**
@@ -347,8 +338,8 @@ export async function isGuildModuleEnabled<
 ): Promise<boolean> {
     const data = await guild.database.modules.fetch();
     if (!data) return false;
-    const moduleName = removeDashes<RawModuleName>(module);
-    const subModuleName = subModule ? removeDashes<GuildAuditLog>(subModule) : null;
+    const moduleName = Util.kebabToCamelCase<GuildModule>(module);
+    const subModuleName = subModule ? Util.kebabToCamelCase<GuildAuditLog>(subModule) : null;
 
     const toCheck = moduleName === 'auditLogs' && subModuleName
         ? data[moduleName]?.[subModuleName]
@@ -1086,7 +1077,7 @@ export async function generateEmbed<T extends object | string>(
                 : null;
             const numberPrefix = numbered ? `${start + index + 1}.` : '';
             const prefix = isObject && keyTitle?.prefix
-                ? capitalize(item[keyTitle?.prefix] as string)
+                ? Util.capitalize(item[keyTitle?.prefix] as string)
                 : '';
             const suffix = docId || (!keyTitle?.suffix || !isObject ? start + index + 1
                 : ((item[keyTitle?.suffix] && typeof item[keyTitle?.suffix] !== 'string'
@@ -1103,7 +1094,7 @@ export async function generateEmbed<T extends object | string>(
                     break;
                 }
 
-                const propName = capitalize(key
+                const propName = Util.capitalize(key
                     .replace(/^createdAt$/, 'date')
                     .replace(/Id$/, '')
                     .replace(/[A-Z]/g, ' $&')

@@ -4,7 +4,6 @@ import {
     ApplicationCommandOptionType,
     EmbedBuilder,
 } from 'discord.js';
-import { capitalize } from 'lodash';
 import {
     Argument,
     ArgumentType,
@@ -265,8 +264,8 @@ export default class DiagnoseCommand extends Command<boolean, RawArgs> {
             .sort()
             .map<ChoiceData<string>>(identifier => ({
                 name: isCommand
-                    ? capitalize(identifier)
-                    : groups.get(identifier)?.name ?? capitalize(identifier),
+                    ? Util.capitalize(identifier)
+                    : groups.get(identifier)?.name ?? Util.capitalize(identifier),
                 value: identifier,
             }));
 

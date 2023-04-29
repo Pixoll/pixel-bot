@@ -1,6 +1,5 @@
 import { stripIndent } from 'common-tags';
 import { EmbedBuilder } from 'discord.js';
-import { capitalize } from 'lodash';
 import { CommandoClient, CommandoGuildManager, Util } from 'pixoll-commando';
 import { isGuildModuleEnabled, compareArrays, customEmoji, hyperlink, userFlagToEmojiMap } from '../../utils';
 
@@ -27,7 +26,7 @@ export default function (client: CommandoClient<true>): void {
                 iconURL: newUser.displayAvatarURL({ forceStatic: false }),
             })
             .setDescription(`${newUser.toString()} ${tag}`)
-            .setFooter({ text: `${capitalize(userType)} ID: ${id}` })
+            .setFooter({ text: `${Util.capitalize(userType)} ID: ${id}` })
             .setTimestamp();
 
         if (name1 !== name2) embed.addFields({

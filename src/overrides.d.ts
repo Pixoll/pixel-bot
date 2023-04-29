@@ -1,5 +1,4 @@
 import { User } from 'discord.js';
-import 'lodash';
 import { CommandoUser } from 'pixoll-commando';
 
 type BaseModerationActionData = [
@@ -13,17 +12,5 @@ declare module 'pixoll-commando' {
         guildMemberUnmute: BaseModerationActionData;
         guildMemberWarn: BaseModerationActionData;
         moduleStatusChange: [guild: CommandoGuild, moduleName: string, enabled: boolean];
-    }
-}
-
-declare module 'lodash' {
-    interface LoDashStatic {
-        /**
-         * Converts the first character of string to upper case and the remaining to lower case.
-         *
-         * @param string The string to capitalize.
-         * @return Returns the capitalized string.
-         */
-        capitalize<T extends string>(string?: T): Capitalize<Lowercase<T>>;
     }
 }

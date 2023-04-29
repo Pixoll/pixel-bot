@@ -10,7 +10,6 @@ import {
 } from 'discord.js';
 import { CommandoClient, Util } from 'pixoll-commando';
 import { compareArrays, limitStringLength, customEmoji, isGuildModuleEnabled, yesOrNo } from '../../utils';
-import { capitalize } from 'lodash';
 import { ms } from 'better-ms';
 
 const channelTypeMap: Record<NonThreadGuildBasedChannel['type'], string> = {
@@ -94,7 +93,7 @@ export default function (client: CommandoClient<true>): void {
             if (deny.length === 0 && allow.length === 0) continue;
 
             let base = oneLine`
-                **${capitalize(overwriteTypeMap[perm.type])}:** ${target?.toString()}
+                **${Util.capitalize(overwriteTypeMap[perm.type])}:** ${target?.toString()}
                 ${target instanceof GuildMember ? target.user.tag : ''}
             `;
 
@@ -221,7 +220,7 @@ export default function (client: CommandoClient<true>): void {
 
                 embed.addFields({
                     name: `${emoji} ${action} permissions`,
-                    value: `**${capitalize(overwriteTypeMap[diff.type])}:** ${mention} ${name}`,
+                    value: `**${Util.capitalize(overwriteTypeMap[diff.type])}:** ${mention} ${name}`,
                 });
             }
 
@@ -253,7 +252,7 @@ export default function (client: CommandoClient<true>): void {
 
             embed.addFields({
                 name: 'Updated permissions',
-                value: `**${capitalize(overwriteTypeMap[perms1.type])}:** ${mention} ${name}`,
+                value: `**${Util.capitalize(overwriteTypeMap[perms1.type])}:** ${mention} ${name}`,
             });
             const field = embed.data.fields?.find(f => f.name === 'Updated permissions');
 
@@ -300,10 +299,10 @@ export default function (client: CommandoClient<true>): void {
             if (autoArchive1 !== autoArchive2) {
                 const str1 = typeof autoArchive1 === 'number'
                     ? ms(autoArchive1 * 60_000, { long: true })
-                    : capitalize(autoArchive1);
+                    : Util.capitalize(autoArchive1 ?? '');
                 const str2 = typeof autoArchive2 === 'number'
                     ? ms(autoArchive2 * 60_000, { long: true })
-                    : capitalize(autoArchive2);
+                    : Util.capitalize(autoArchive2 ?? '');
                 embed.addFields({
                     name: 'Archive after inactivity',
                     value: `${str1} ➜ ${str2}`,
