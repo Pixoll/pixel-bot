@@ -7,6 +7,7 @@ import {
     DatabaseManager,
     JSONIfySchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     ReminderSchema,
 } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, confirmButtons, reply, hyperlink } from '../../utils';
@@ -21,7 +22,7 @@ const args = [{
     parse(value: string): string {
         return value.toLowerCase();
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

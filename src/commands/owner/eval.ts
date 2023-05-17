@@ -1,6 +1,6 @@
 import { stripIndents } from 'common-tags';
 import { Message } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments, Util } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo, Util } from 'pixoll-commando';
 import util from 'util';
 
 function escapeRegex(str: string): string {
@@ -11,7 +11,7 @@ const args = [{
     key: 'script',
     prompt: 'What code would you like to evaluate?',
     type: 'string',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -10,6 +10,7 @@ import {
     ParseRawArguments,
     CommandoMessage,
     CommandoAutocompleteInteraction,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import {
     generateEmbed,
@@ -41,7 +42,7 @@ const args = [{
         const subCommand = getSubCommand<SubCommand>(message, args[0].default);
         return subCommand !== 'remove';
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

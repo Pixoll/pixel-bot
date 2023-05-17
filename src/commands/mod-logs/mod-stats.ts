@@ -8,6 +8,7 @@ import {
     ModerationSchema,
     ModerationType,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { codeBlock, pixelColor, reply } from '../../utils';
 
@@ -29,7 +30,7 @@ const args = [{
     prompt: 'What moderator do you want to get the statistics from?',
     type: 'user',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -18,6 +18,7 @@ import {
     DisabledSchema,
     JSONIfySchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { basicEmbed, getSubCommand, reply } from '../../utils';
@@ -50,7 +51,7 @@ const args = [{
         const group = await groupType.parse(value, message, argument as Argument<'group'>);
         return group?.id !== 'owner';
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

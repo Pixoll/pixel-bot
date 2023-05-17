@@ -15,6 +15,7 @@ import {
     CommandoClient,
     CommandoMessage,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { basicEmbed, getSubCommand, pixelColor, reply } from '../../utils';
@@ -51,7 +52,7 @@ const args = [{
     min: 1,
     max: 65535,
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

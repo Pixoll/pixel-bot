@@ -7,6 +7,7 @@ import {
     ReminderSchema,
     DatabaseManager,
     CommandoMessage,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { basicEmbed, customEmoji, timestamp, reply, getContextMessage } from '../../utils';
 
@@ -20,7 +21,7 @@ const args = [{
     type: 'string',
     max: 512,
     default: '`Not specified`',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -6,6 +6,7 @@ import {
     CommandoClient,
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, reply, getContextMessage } from '../../utils';
 
@@ -14,7 +15,7 @@ const args = [{
     prompt: 'What moderator do you want to get the mod logs from?',
     type: 'user',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
@@ -92,7 +93,9 @@ async function runCommand(
         authorIconURL: avatarURL,
         title: ' •  ID:',
         keyTitle: { prefix: 'type' },
-        keysExclude: ['updatedAt', 'guild', ...(user ? ['modId', 'modTag'] as const : [null])],
+        keysExclude: user
+            ? ['updatedAt', 'guild', 'modId', 'modTag']
+            : ['updatedAt', 'guild'],
         useDocId: true,
         components: [filterMenu],
     });

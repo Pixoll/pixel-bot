@@ -1,7 +1,15 @@
 import { prettyMs } from 'better-ms';
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, ChannelType } from 'discord.js';
-import { Argument, Command, CommandContext, CommandoClient, CommandoMessage, ParseRawArguments } from 'pixoll-commando';
+import {
+    Argument,
+    Command,
+    CommandContext,
+    CommandoClient,
+    CommandoMessage,
+    ParseRawArguments,
+    ReadonlyArgumentInfo,
+} from 'pixoll-commando';
 import { reply, basicEmbed } from '../../utils';
 
 const args = [{
@@ -19,7 +27,7 @@ const args = [{
     prompt: 'In what channel do you want to change the rate limit?',
     type: ['text-channel', 'thread-channel', 'voice-channel'],
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

@@ -1,4 +1,4 @@
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { basicEmbed, generateEmbed, pluralize, alphabeticalOrder, reply } from '../../utils';
 
 const args = [{
@@ -7,7 +7,7 @@ const args = [{
     type: 'integer',
     min: 1,
     max: 9999,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -14,6 +14,7 @@ import {
     CommandoClient,
     CommandoMessage,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { validateURL, basicEmbed, sleep, reply, getSubCommand, getContextMessage } from '../../utils';
@@ -77,7 +78,7 @@ const args = [{
         const type = message.client.registry.types.get(chosenType);
         return await type?.parse(value, message, argument) as Message | User | string | undefined ?? null;
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

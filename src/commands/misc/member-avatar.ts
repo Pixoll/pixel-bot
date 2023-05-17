@@ -1,6 +1,6 @@
 import { stripIndent } from 'common-tags';
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { basicEmbed, pixelColor, reply } from '../../utils';
 
 const args = [{
@@ -8,7 +8,7 @@ const args = [{
     prompt: 'What member do you want to get their server avatar from?',
     type: 'member',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

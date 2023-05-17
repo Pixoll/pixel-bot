@@ -17,6 +17,7 @@ import {
     ParseRawArguments,
     Util,
     CommandResolvable,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { reply, getSubCommand, pixelColor } from '../../utils';
 
@@ -55,7 +56,7 @@ const args = [{
         const group = await groupType.parse(value, message, argument as Argument<'group'>);
         return group?.id !== 'owner';
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

@@ -7,6 +7,7 @@ import {
     CommandoClient,
     CommandoMessage,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import {
@@ -43,7 +44,7 @@ const args = [{
     type: 'string',
     max: 512,
     default: 'No reason given.',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

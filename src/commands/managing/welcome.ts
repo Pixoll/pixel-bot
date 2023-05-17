@@ -7,6 +7,7 @@ import {
     CommandoMessage,
     JSONIfySchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     WelcomeSchema,
 } from 'pixoll-commando';
 import { basicEmbed, getSubCommand, pixelColor, reply } from '../../utils';
@@ -41,7 +42,7 @@ const args = [{
         const subCommand = getSubCommand<SubCommand>(message);
         return subCommand !== 'set';
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

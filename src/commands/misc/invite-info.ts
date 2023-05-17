@@ -1,13 +1,13 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { timestamp, basicEmbed, reply, pixelColor } from '../../utils';
 
 const args = [{
     key: 'invite',
     prompt: 'What invite do you want to get information from?',
     type: 'invite',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

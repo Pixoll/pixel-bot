@@ -19,6 +19,7 @@ import {
     CommandoMessage,
     CommandoGuild,
     CommandoAutocompleteInteraction,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import {
     moderatorPermissions,
@@ -148,7 +149,7 @@ const args = [{
         if (!command || command.hidden || command.ownerOnly) return false;
         return true;
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

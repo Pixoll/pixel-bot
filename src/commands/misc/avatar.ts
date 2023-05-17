@@ -13,6 +13,7 @@ import {
     CommandoClient,
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { pixelColor, reply } from '../../utils';
 
@@ -21,7 +22,7 @@ const args = [{
     prompt: 'What user do you want to get their avatar from?',
     type: 'user',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -7,6 +7,7 @@ import {
     CommandoAutocompleteInteraction,
     CommandoClient,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, parseArgDate, reply } from '../../utils';
@@ -22,7 +23,7 @@ const args = [{
     key: 'duration',
     prompt: 'What will be the new duration of the mod log?',
     type: ['date', 'duration'],
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

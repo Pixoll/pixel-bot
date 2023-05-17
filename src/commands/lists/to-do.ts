@@ -13,6 +13,7 @@ import {
     ArgumentType,
     JSONIfySchema,
     CommandoAutocompleteInteraction,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, confirmButtons, reply, getSubCommand, limitStringLength } from '../../utils';
 
@@ -59,7 +60,7 @@ const args = [{
         const integerType = argument.client.registry.types.get('integer') as ArgumentType<'integer'>;
         return await integerType.parse(value, message, Util.omit(argument, ['max']) as Argument<'integer'>);
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

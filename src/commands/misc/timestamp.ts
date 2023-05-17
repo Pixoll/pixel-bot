@@ -1,4 +1,4 @@
-import { Command, CommandContext, CommandoClient, ParseRawArguments, Util } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo, Util } from 'pixoll-commando';
 import { timestamp, reply, parseArgDate } from '../../utils';
 
 const timestampLetters: TimestampType[] = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
@@ -9,7 +9,7 @@ const args = [{
     type: ['date', 'duration'],
     skipExtraDateValidation: true,
     default: 0,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

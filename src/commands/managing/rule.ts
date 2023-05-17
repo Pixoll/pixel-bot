@@ -9,6 +9,7 @@ import {
     CommandoMessage,
     JSONIfySchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     RuleSchema,
     Util,
 } from 'pixoll-commando';
@@ -43,7 +44,7 @@ const args = [{
         if (!rule) return `That rule doesn't exist. There are only ${rulesData?.rules.length} rules in this server`;
         return true;
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

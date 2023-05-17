@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
@@ -12,7 +12,7 @@ const args = [{
     type: 'string',
     max: 512,
     default: 'No reason given.',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

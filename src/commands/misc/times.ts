@@ -13,6 +13,7 @@ import {
     CommandoMessage,
     CommandoAutocompleteInteraction,
     Util,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { alphabeticalOrder, pagedEmbed, reply, parseArgDate, pixelColor } from '../../utils';
 
@@ -82,7 +83,7 @@ const args = [{
     type: 'string',
     oneOf: cities,
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

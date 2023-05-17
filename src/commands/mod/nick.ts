@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { basicEmbed, reply } from '../../utils';
 
 const args = [{
@@ -11,7 +11,7 @@ const args = [{
     prompt: 'What will be their new nickname? Type `remove` to remove their current nickname.',
     type: 'string',
     max: 32,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -12,6 +12,7 @@ import {
     CommandoClient,
     CommandoMessageContextMenuCommandInteraction,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import {
     basicEmbed,
@@ -50,7 +51,7 @@ const args = [{
     prompt: 'What do you want to translate?',
     type: 'string',
     max: 1000,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

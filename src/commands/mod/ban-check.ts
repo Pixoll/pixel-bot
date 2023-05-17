@@ -1,11 +1,11 @@
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { basicEmbed, reply } from '../../utils';
 
 const args = [{
     key: 'user',
     prompt: 'What user do you want to check their ban?',
     type: 'user',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

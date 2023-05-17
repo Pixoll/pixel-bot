@@ -1,5 +1,13 @@
 import { stripIndent } from 'common-tags';
-import { ApplicationCommandOptionType, ApplicationCommandOptionData, Role, User, GuildMember } from 'discord.js';
+import {
+    ApplicationCommandOptionType,
+    ApplicationCommandOptionData,
+    ApplicationCommandRoleOptionData,
+    ApplicationCommandUserOptionData,
+    Role,
+    User,
+    GuildMember,
+} from 'discord.js';
 import {
     Argument,
     ArgumentType,
@@ -8,6 +16,7 @@ import {
     CommandoClient,
     CommandoMessage,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import {
@@ -79,7 +88,7 @@ const args = [{
     },
     required: false,
     error: 'None of the roles you specified were valid. Please try again.',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {
@@ -98,13 +107,13 @@ const defaultOptions = {
         name: 'user',
         description: 'The targeted member.',
         required: true,
-    },
+    } as const satisfies ApplicationCommandUserOptionData,
     role: {
         type: ApplicationCommandOptionType.Role,
         name: 'role',
         description: 'The role to toggle.',
         required: true,
-    },
+    } as const satisfies ApplicationCommandRoleOptionData,
 } as const;
 
 export default class RoleCommand extends Command<true, RawArgs> {

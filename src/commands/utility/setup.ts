@@ -13,6 +13,7 @@ import {
     JSONIfySchema,
     ParseRawArguments,
     QuerySchema,
+    ReadonlyArgumentInfo,
     SetupSchema,
     Util,
 } from 'pixoll-commando';
@@ -82,7 +83,7 @@ const args = [{
         const argType = subCommand === 'audit-logs' ? 'text-channel' : 'role';
         return await parseArgInput(value, message, argument, argType);
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & Partial<FullSetupData> & {

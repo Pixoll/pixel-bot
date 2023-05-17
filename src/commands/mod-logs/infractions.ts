@@ -5,6 +5,7 @@ import {
     CommandoClient,
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, reply, getContextMessage } from '../../utils';
 
@@ -12,7 +13,7 @@ const args = [{
     key: 'user',
     prompt: 'What user do you want to get the infractions from?',
     type: 'user',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

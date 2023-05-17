@@ -8,6 +8,7 @@ import {
     CommandoMessage,
     JSONIfySchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     SetupSchema,
     Util,
 } from 'pixoll-commando';
@@ -50,7 +51,7 @@ const args = [{
     },
     required: false,
     error: 'None of the channels you specified were valid. Please try again.',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

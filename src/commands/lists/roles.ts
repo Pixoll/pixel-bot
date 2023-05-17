@@ -1,5 +1,5 @@
 import { Collection, Role } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, reply } from '../../utils';
 
 const args = [{
@@ -7,7 +7,7 @@ const args = [{
     prompt: 'What member do you want to get the roles from?',
     type: 'member',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

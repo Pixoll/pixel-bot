@@ -15,6 +15,7 @@ import {
     DatabaseManager,
     ErrorSchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { basicEmbed, errorTypeMap, generateEmbed, getSubCommand, limitStringLength, reply } from '../../utils';
@@ -44,7 +45,7 @@ const args = [{
         const isValid = await argument.type?.validate(value, message, argument) ?? true;
         return isValid;
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

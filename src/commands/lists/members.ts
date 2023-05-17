@@ -1,11 +1,11 @@
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { generateEmbed, basicEmbed, pluralize, alphabeticalOrder, reply } from '../../utils';
 
 const args = [{
     key: 'role',
     prompt: 'What role do you want to get the members from?',
     type: 'role',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

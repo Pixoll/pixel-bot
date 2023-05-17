@@ -8,6 +8,7 @@ import {
     JSONIfySchema,
     ModerationSchema,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, timestamp, reply, pixelColor } from '../../utils';
@@ -27,7 +28,7 @@ const args = [{
     prompt: 'What is the ID of the mod log you want to view?',
     type: 'string',
     max: 16,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

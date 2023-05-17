@@ -17,6 +17,7 @@ import {
     CommandoClient,
     CommandoMessage,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import {
@@ -55,7 +56,7 @@ const args = [{
         return valid.filter(b => b === true).length === 0;
     },
     error: 'None of the roles you specified were valid. Please try again.',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

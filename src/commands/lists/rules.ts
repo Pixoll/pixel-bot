@@ -1,6 +1,14 @@
 import { stripIndent } from 'common-tags';
 import { ApplicationCommandOptionType } from 'discord.js';
-import { Command, CommandContext, CommandoClient, JSONIfySchema, ParseRawArguments, RuleSchema } from 'pixoll-commando';
+import {
+    Command,
+    CommandContext,
+    CommandoClient,
+    JSONIfySchema,
+    ParseRawArguments,
+    ReadonlyArgumentInfo,
+    RuleSchema,
+} from 'pixoll-commando';
 import { generateEmbed, basicEmbed, confirmButtons, reply } from '../../utils';
 
 const args = [{
@@ -13,7 +21,7 @@ const args = [{
     parse(value: string): string {
         return value.toLowerCase();
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

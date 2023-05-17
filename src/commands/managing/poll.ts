@@ -7,6 +7,7 @@ import {
     CommandoClient,
     CommandoMessage,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import {
@@ -55,7 +56,7 @@ const args = [{
         const fetchedMessage = await channel.messages.fetch(value ?? '').catch(() => null);
         return !!fetchedMessage;
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs> & {

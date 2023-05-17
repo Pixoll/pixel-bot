@@ -1,6 +1,14 @@
 import { stripIndent } from 'common-tags';
 import { ActivityType } from 'discord.js';
-import { Command, CommandContext, CommandoClient, DatabaseManager, ParseRawArguments, PrefixSchema } from 'pixoll-commando';
+import {
+    Command,
+    CommandContext,
+    CommandoClient,
+    DatabaseManager,
+    ParseRawArguments,
+    PrefixSchema,
+    ReadonlyArgumentInfo,
+} from 'pixoll-commando';
 import { basicEmbed } from '../../utils';
 
 const args = [{
@@ -9,7 +17,7 @@ const args = [{
     prompt: 'What is the new prefix you want to set for the bot?',
     type: 'string',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

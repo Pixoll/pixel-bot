@@ -1,5 +1,5 @@
 import { stripIndent } from 'common-tags';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import { basicEmbed, reply } from '../../utils';
 
 const args = [{
@@ -7,7 +7,7 @@ const args = [{
     prompt: 'What is the status you want to set? Respond with `off` to remove it (if existent).',
     type: 'string',
     max: 512,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

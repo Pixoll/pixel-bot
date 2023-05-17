@@ -6,6 +6,7 @@ import {
     CommandoClient,
     CommandoUserContextMenuCommandInteraction,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { getKeyPerms, timestamp, customEmoji, reply, pixelColor, userFlagToEmojiMap } from '../../utils';
@@ -19,7 +20,7 @@ const args = [{
     prompt: 'What user do you want to get information from?',
     type: 'user',
     required: false,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

@@ -6,6 +6,7 @@ import {
     CommandoAutocompleteInteraction,
     CommandoClient,
     ParseRawArguments,
+    ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
 import { basicEmbed, confirmButtons, reply } from '../../utils';
@@ -21,7 +22,7 @@ const args = [{
     prompt: 'What will be the new reason of the mod log?',
     type: 'string',
     max: 512,
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

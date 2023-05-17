@@ -13,6 +13,7 @@ import {
     CommandoMessage,
     JSONIfySchema,
     BaseSchema,
+    ReadonlyArgumentInfo,
 } from 'pixoll-commando';
 import { ParsedModuleData } from '../../types';
 import { basicEmbed, camelToKebabCase, reply, isTrue, pixelColor, getSubCommand } from '../../utils';
@@ -53,7 +54,7 @@ const args = [{
         const moduleName = getModuleName(message);
         return moduleName !== 'audit-logs';
     },
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;

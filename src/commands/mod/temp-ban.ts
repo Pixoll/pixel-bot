@@ -1,7 +1,7 @@
 import { ms } from 'better-ms';
 import { stripIndent } from 'common-tags';
 import { TextChannel, ChannelType } from 'discord.js';
-import { Command, CommandContext, CommandoClient, ParseRawArguments } from 'pixoll-commando';
+import { Command, CommandContext, CommandoClient, ParseRawArguments, ReadonlyArgumentInfo } from 'pixoll-commando';
 import {
     generateDocId,
     basicEmbed,
@@ -29,7 +29,7 @@ const args = [{
     type: 'string',
     max: 512,
     default: 'No reason given.',
-}] as const;
+}] as const satisfies readonly ReadonlyArgumentInfo[];
 
 type RawArgs = typeof args;
 type ParsedArgs = ParseRawArguments<RawArgs>;
