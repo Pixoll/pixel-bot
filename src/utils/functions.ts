@@ -1381,8 +1381,11 @@ export function rgb<R extends number, G extends number, B extends number>(
     return `\x1b[38;2;${r ?? 0};${g ?? 0};${b ?? 0}m`;
 }
 
-export function log(messages: LogMessage | LogMessage[], timestamp = true): void {
-    if (!timestamp) return console.log(...resolveLogMessages(messages));
+export function log(messages: LogMessage | LogMessage[], devEnv = true): void {
+    if (!devEnv) {
+        console.log(...(Array.isArray(messages) ? messages : [messages]));
+        return;
+    }
     const now = new Date();
     const time = now.toLocaleTimeString();
     const ms = now.getTime().toString().slice(-3);
