@@ -1383,7 +1383,10 @@ export function rgb<R extends number, G extends number, B extends number>(
 
 export function log(messages: LogMessage | LogMessage[], devEnv = true): void {
     if (!devEnv) {
-        console.log(...(Array.isArray(messages) ? messages : [messages]));
+        const plainMessages = Array.isArray(messages) ? messages.map(message =>
+            typeof message === 'string' ? message : message.message
+        ) : [typeof messages === 'string' ? messages : messages.message];
+        console.log(...plainMessages);
         return;
     }
     const now = new Date();
