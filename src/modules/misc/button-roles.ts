@@ -1,4 +1,4 @@
-import { CommandoClient, Util } from 'pixoll-commando';
+import { CommandoClient } from 'pixoll-commando';
 
 /** This module manages button roles. */
 export default async function (client: CommandoClient<true>): Promise<void> {
@@ -10,7 +10,8 @@ export default async function (client: CommandoClient<true>): Promise<void> {
         client.emit('debug', 'Running event "modules/button-roles".');
 
         const memberRoles = member.roles;
-        const roleId = Util.lastFromArray(customId.split(/:/g));
+        const roleId = customId.split(/:/g).at(-1);
+        if (!roleId) return;
         const role = await guild.roles.fetch(roleId);
         const hasRole = memberRoles.cache.has(roleId);
         const action = hasRole ? 'removed from' : 'added to';
