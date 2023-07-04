@@ -54,6 +54,7 @@ const featureMap: Record<`${GuildFeature}`, string> = {
     PARTNERED: 'Partnered',
     PREVIEW_ENABLED: 'Preview enabled',
     PRIVATE_THREADS: 'Private threads',
+    RAID_ALERTS_DISABLED: 'Raid alerts disabled',
     RELAY_ENABLED: 'Relay enabled',
     ROLE_ICONS: 'Role icons',
     ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE: 'Role subscriptions available for purchase',

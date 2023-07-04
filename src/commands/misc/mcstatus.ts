@@ -7,7 +7,6 @@ import {
     ApplicationCommandSubCommandData,
     escapeMarkdown,
 } from 'discord.js';
-import { status as statusJava, statusBedrock } from 'minecraft-server-util';
 import {
     Argument,
     Command,
@@ -18,7 +17,7 @@ import {
     ReadonlyArgumentInfo,
     Util,
 } from 'pixoll-commando';
-import { basicEmbed, getSubCommand, pixelColor, reply } from '../../utils';
+import { basicEmbed, getSubCommand, pixelColor, reply, statusJava, statusBedrock } from '../../utils';
 
 const args = [{
     key: 'subCommand',
@@ -259,10 +258,8 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
      * @param port the port of the server to look for
      */
     protected async getJavaStatus(ip: string, port: number): Promise<EmbedBuilder | MessageCreateOptions> {
-        let status;
-        try {
-            status = await statusJava(ip, port);
-        } catch {
+        const status = await statusJava(ip, port);
+        if (!status || !status.online) {
             return basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
@@ -274,11 +271,11 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             });
         }
 
-        const { motd, version, favicon, players, roundTripLatency } = status;
+        const { motd, version, icon, players, ping } = status;
 
         // Server favicon
-        const buffer = favicon ? Buffer.from(favicon.split(',')[1], 'base64') : null;
-        const icon = buffer ? new AttachmentBuilder(buffer, { name: 'icon.png' }) : null;
+        const buffer = icon ? Buffer.from(icon.split(',')[1], 'base64') : null;
+        const iconPng = buffer ? new AttachmentBuilder(buffer, { name: 'icon.png' }) : null;
 
         const serverInfo = new EmbedBuilder()
             .setColor(pixelColor)
@@ -293,10 +290,10 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             .setThumbnail('attachment://icon.png')
             .setTimestamp();
 
-        if (players.sample && players.sample.length > 0) {
+        if (players.list && players.list.length > 0) {
             serverInfo.addFields({
                 name: 'Player list',
-                value: players.sample.map(p => `\`${p.name}\``).join(', '),
+                value: players.list.map(p => `\`${p.name_clean}\``).join(', '),
             });
         }
 
@@ -304,14 +301,14 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             name: 'Information',
             value: stripIndent`
             **Online players:** ${players.online}/${players.max}
-            **Version:** ${version.name}
-            **Ping:** ${roundTripLatency}ms
+            **Version:** ${version?.name_clean ?? 'Not specified'}
+            **Ping:** ${ping}ms
             `,
         });
 
         return {
             embeds: [serverInfo],
-            files: Util.filterNullishItems([icon]),
+            files: Util.filterNullishItems([iconPng]),
         };
     }
 
@@ -321,11 +318,8 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
      * @param port the port of the server to look for
      */
     protected async getBedrockStatus(ip: string, port: number): Promise<EmbedBuilder | MessageCreateOptions> {
-        const reqStart = Date.now();
-        let status;
-        try {
-            status = await statusBedrock(ip, port);
-        } catch {
+        const status = await statusBedrock(ip, port);
+        if (!status || !status.online) {
             return basicEmbed({
                 color: 'Red',
                 emoji: 'cross',
@@ -337,8 +331,7 @@ export default class McStatusCommand extends Command<boolean, RawArgs> {
             });
         }
 
-        const ping = Date.now() - reqStart;
-        const { motd, players, version } = status;
+        const { motd, players, version, ping } = status;
 
         const serverInfo = new EmbedBuilder()
             .setColor(pixelColor)
