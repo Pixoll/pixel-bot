@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "better-ms": "^1.1.7",
-    "bing-translate-api": "^2.9.1",
+    "bing-translate-api": "^2.9.2",
     "common-tags": "^1.8.2",
     "discord.js": "^14.9.0",
-    "dotenv": "^16.0.3",
-    "emoji-regex": "^10.2.1",
+    "dotenv": "^16.3.1",
+    "emoji-regex": "^10.3.0",
     "lodash": "^4.17.21",
     "mongoose": "^6.10.5",
     "node-fetch": "^2.6.12",
@@ -26,15 +26,15 @@
     "require-all": "^3.0.0"
   },
   "devDependencies": {
-    "@types/common-tags": "^1.8.1",
-    "@types/lodash": "^4.14.194",
+    "@types/common-tags": "^1.8.3",
+    "@types/lodash": "^4.14.200",
     "@types/node": "16.x",
-    "@types/node-fetch": "^2.6.4",
-    "@types/require-all": "^3.0.3",
+    "@types/node-fetch": "^2.6.7",
+    "@types/require-all": "^3.0.5",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "eslint": "latest",
-    "typescript": "^5.0.4"
+    "typescript": "^5.2.2"
   },
   "repository": {
     "type": "git",
