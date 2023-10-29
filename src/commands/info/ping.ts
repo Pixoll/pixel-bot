@@ -25,10 +25,13 @@ export default class PingCommand extends Command {
         const heartbeat = Math.round(this.client.ws.ping || 0);
 
         const type = isMessage ? 'Messages' : 'Interactions';
-        await reply(context, stripIndent`
-            🏓 **Pong!**
-            **${type} ping:** ${roundtrip}ms
-            **API ping:** ${heartbeat}ms
-        `);
+        await reply(context, {
+            replyToEdit,
+            content: stripIndent`
+                🏓 **Pong!**
+                **${type} ping:** ${roundtrip}ms
+                **API ping:** ${heartbeat}ms
+            `
+        });
     }
 }
