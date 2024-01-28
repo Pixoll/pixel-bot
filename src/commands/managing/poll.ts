@@ -203,7 +203,18 @@ export default class PollCommand extends Command<true, RawArgs> {
         const sent = await channel.send(stripIndent`
             ${pollMessage}\n
             This poll ends at ${timestamp(duration, 'f', true)} (${timestamp(duration, 'R', true)}.)
-        `);
+        `).catch(() => null);
+
+        if (!sent) {
+            await reply(context, basicEmbed({
+                color: 'Red',
+                emoji: 'cross',
+                fieldName: 'Either I can\'t access that channel, or I can\'t send messages in it.',
+                fieldValue: `Please change my role permissions in ${channel.toString()} to fix this.`,
+            }));
+            return;
+        }
+
         for (const emoji of emojis) await sent.react(emoji);
 
         await guild.database.polls.add({
