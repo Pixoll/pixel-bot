@@ -20,7 +20,7 @@
     "dotenv": "16.3.1",
     "emoji-regex": "10.3.0",
     "lodash": "4.17.21",
-    "mongoose": "6.10.5",
+    "mongoose": "6.13.8",
     "node-fetch": "2.6.12",
     "pixoll-commando": "github:Pixoll/pixoll-commando",
     "require-all": "3.0.0"
