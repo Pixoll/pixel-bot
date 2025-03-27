@@ -8,7 +8,8 @@
   "main": "./build/index.js",
   "scripts": {
     "build:force": "echo Forcing full build... & rmdir build /s /q & del /f .tsbuildinfo & npm run build",
-    "build": "tsc",
+    "prestart": "tsc",
+    "start": "node .",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src"
   },
