@@ -1,6 +1,7 @@
-/.env
-/.vscode
-/node_modules
-/.tsbuildinfo
-/src/commands/owner/test.ts
-/build/commands/owner/test.js
+.idea/
+.vscode/
+build/
+node_modules/
+.tsbuildinfo
+.env
+src/commands/owner/test.ts
